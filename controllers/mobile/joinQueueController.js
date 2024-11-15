@@ -10,12 +10,8 @@ import { addQueueHistoryWhenCanceled, findSalonQueueListHistory, statusCancelQ }
 //DESC:SINGLE JOIN QUEUE ================
 export const singleJoinQueue = async (req, res, next) => {
     try {
-        let { salonId, name, customerEmail, joinedQType, mobileNumber, methodUsed, barberName, barberId, services } = req.body;
+        const { salonId, name, customerEmail, joinedQType, mobileNumber,mobileCountryCode, methodUsed, barberName, barberId, services } = req.body;
 
-
-            // Convert email to lowercase
-            customerEmail = customerEmail.toLowerCase();
-            
         const salon = await getSalonBySalonId(salonId);
 
         if (salon.isOnline === false) {
@@ -92,6 +88,7 @@ export const singleJoinQueue = async (req, res, next) => {
                 dateJoinedQ: new Date(),
                 timeJoinedQ: adjustedTime,
                 methodUsed,
+                mobileCountryCode,
                 mobileNumber: parsedMobileNumber,
                 barberName: availableBarber.name,
                 barberId: availableBarber.barberId,
@@ -225,6 +222,7 @@ export const singleJoinQueue = async (req, res, next) => {
                 timeJoinedQ: adjustedTime,
                 methodUsed,
                 barberName,
+                mobileCountryCode,
                 mobileNumber: parsedMobileNumber,
                 barberId,
                 services: services.map(service => ({
@@ -340,7 +338,7 @@ export const groupJoinQueue = async (req, res, next) => {
         const salon = await getSalonBySalonId(salonId);
 
         if (salon.isOnline === false) {
-            return res.status(201).json({ success: false, message: "Please make the salon online to join queue" });
+            return res.status(201).json({ success: false, message: "The salon is offline." });
         }
 
         if (!salon.mobileBookingAvailability && groupInfo.some(group => group.methodUsed === "App")) {
@@ -413,6 +411,7 @@ export const groupJoinQueue = async (req, res, next) => {
                 joinedQType: "Group-Join",
                 qPosition: updatedBarber.queueCount,
                 barberName: member.barberName,
+                mobileCountryCode: member.mobileCountryCode,
                 mobileNumber: member.mobileNumber,
                 barberId: member.barberId,
                 services: member.services.map(service => ({
@@ -913,6 +912,5 @@ export const getQlistbyBarberId = async (req, res, next) => {
         next(error);
     }
 };
-
 
 

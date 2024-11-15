@@ -3,11 +3,7 @@ import { fetchedBarbers, totalBarberCount } from "../../services/mobile/barberSe
 //DESC:GET ALL BARBERS BY SALONID =================
 export const getAllBarberbySalonId = async (req, res, next) => {
     try {
-        let { salonId, name, email, page = 1, limit = 10, sortField, sortOrder } = req.query;
-
-        // Convert email to lowercase
-        email = email.toLowerCase();
-
+        const { salonId, name, email, page = 1, limit = 10, sortField, sortOrder } = req.query;
         let query = {}; // Filter for isDeleted set to false
 
         const searchRegExpName = new RegExp('.*' + name + ".*", 'i');
@@ -35,18 +31,25 @@ export const getAllBarberbySalonId = async (req, res, next) => {
 
         const totalBarbers = await totalBarberCount(query);
 
-        res.status(200).json({
+        if(getAllBarbers.length === 0){
+           return res.status(201).json({
+                success: true,
+                message: "No Barbers found for the particular salon.",
+            })
+        }
+
+        return res.status(200).json({
             success: true,
             message: "All barbers fetched successfully",
-            response: {
+            response:{
                 allbarbers: getAllBarbers,
                 totalPages: Math.ceil(totalBarbers / Number(limit)),
                 currentPage: Number(page),
                 totalBarbers,
             }
-
+            
         });
-    } catch (error) {
+    }catch (error) {
         console.log(error);
         next(error);
     }

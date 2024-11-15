@@ -31,12 +31,17 @@ const salonsSchema = new mongoose.Schema({
           },
           url: {
             type: String,
+            default: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720532593/depositphotos_247872612-stock-illustration-no-image-available-icon-vector_fhytrg.jpg"
           }
         }],
         default: []
       },
     salonType: {
         type: String
+    },
+    salonDesc: {
+        type:String,
+        default: ""
     },
     address: {
         type: String,
@@ -63,6 +68,10 @@ const salonsSchema = new mongoose.Schema({
     contactTel: {
         type: Number,
         // required: true
+    },
+
+    mobileCountryCode:{
+        type: Number
     },
 
     webLink: {

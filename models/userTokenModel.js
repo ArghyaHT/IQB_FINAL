@@ -15,9 +15,7 @@ const userTokenSchema = new mongoose.Schema({
     },
     iosFcmToken:{
         type: String
-    }
-    
-    
+    }   
 })
 
 const UserTokenTable = mongoose.model('UserTokenTable', userTokenSchema);

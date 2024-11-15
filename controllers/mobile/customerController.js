@@ -15,6 +15,7 @@ import { validateEmail } from "../../middlewares/validator.js";
 import { getCustomerAppointments } from "../../services/mobile/appointmentService.js";
 import { findBarbersBySalonIdforCustomerDashboard } from "../../services/mobile/barberService.js";
 import { getSalonQlist } from "../../services/mobile/joinQueueService.js";
+import { sendMobileVerificationCode } from "../../utils/mobileMessageSender/mobileMessageSender.js";
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -25,9 +26,7 @@ cloudinary.config({
 //DESC:CHECK WEATHER THE EMAIL ALREADY EXISTS IN THE DATABASE =======
 export const checkEmail = async (req, res, next) => {
     try {
-        let { email } = req.body;
-
-        email = email.toLowerCase();
+        const { email } = req.body;
 
         if (!email || !validateEmail(email)) {
             return res.status(201).json({
@@ -63,17 +62,15 @@ export const checkEmail = async (req, res, next) => {
 // DESC: SIGNUP A NEW CUSTOMER WHEN THE NEW EMAIL  =================
 export const signUp = async (req, res, next) => {
     try {
-        let {
+        const {
             email,
             name,
             gender,
             dateOfBirth,
             mobileNumber,
+            mobileCountryCode,
             password,
         } = req.body;
-
-        // Convert email to lowercase
-        email = email.toLowerCase();
 
         if (!email || !validateEmail(email)) {
             return res.status(201).json({
@@ -90,7 +87,7 @@ export const signUp = async (req, res, next) => {
             });
         }
         if (name.length < 1 || name.length > 20) {
-            return res.status(400).json({ success: false, message: "Please enter a name that is between 1 and 20 characters in length." });
+            return res.status(201).json({ success: false, message: "Please enter a name that is between 1 and 20 characters in length." });
         }
         // Validate mobile number format if parsed successfully
         if (mobileNumber == null || mobileNumber == undefined || mobileNumber.length !== 10) {
@@ -117,6 +114,7 @@ export const signUp = async (req, res, next) => {
             gender,
             dateOfBirth,
             mobileNumber,
+            mobileCountryCode,
             hashedPassword,
             verificationCode,
         })
@@ -147,10 +145,7 @@ export const signUp = async (req, res, next) => {
 //DESC:MATCH VERIFICATION CODE FOR NEW CUSTOMER =============
 export const matchVerificationCode = async (req, res, next) => {
     try {
-        let { email, verificationCode, webFcmToken, androidFcmToken, iosFcmToken } = req.body;
-
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        const { email, verificationCode, webFcmToken, androidFcmToken, iosFcmToken } = req.body;
 
         // FIND THE CUSTOMER 
         const customer = await findCustomerByEmail(email)
@@ -215,10 +210,7 @@ export const matchVerificationCode = async (req, res, next) => {
 //DESC:SIGN IN CUSTOMER =============
 export const signIn = async (req, res, next) => {
     try {
-        let { email, password, webFcmToken, androidFcmToken, iosFcmToken } = req.body
-
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        const { email, password, webFcmToken, androidFcmToken, iosFcmToken } = req.body
 
         if (!email || !validateEmail(email)) {
             return res.status(201).json({
@@ -318,157 +310,143 @@ export const signIn = async (req, res, next) => {
     }
 };
 
-// //GOOGLE SIGNIN ===================================
-// const googleAdminSignup = async (req, res, next) => {
-//     try {
-//         const CLIENT_ID = '508224318018-quta6u0n38vml0up7snscdrtl64555l1.apps.googleusercontent.com'
+//DESC:GOOGLE SIGNUP ===================================
+export const googleCustomerSignup = async (req, res, next) => {
+    try {
+        const CLIENT_ID = '714894109777-dmc2ap4eubn5i6lrnv388roruvfoqdja.apps.googleusercontent.com';
 
-//         const token = req.query.token;
+        const token = req.body.token;
 
-//         console.log(token)
+        console.log(token);
 
-//         if (!token) {
-//             return res.status(201).json({
-//                 success: false,
-//                 message: "UnAuthorized Admin or Token not present"
-//             })
-//         }
+        if (!token) {
+            return res.status(201).json({
+                success: false,
+                message: "UnAuthorized Customer or Token not present"
+            });
+        }
 
-//         const client = new OAuth2Client(CLIENT_ID);
+        const client = new OAuth2Client(CLIENT_ID);
 
-//         // Call the verifyIdToken to
-//         // varify and decode it
-//         const ticket = await client.verifyIdToken({
-//             idToken: token,
-//             audience: CLIENT_ID,
-//         });
+        // Call the verifyIdToken to verify and decode it
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: CLIENT_ID,
+        });
 
-//         // Get the JSON with all the user info
-//         const payload = ticket.getPayload();
+        // Get the JSON with all the user info
+        const payload = ticket.getPayload();
 
-//         console.log("Google payload ", payload)
+        console.log("Google payload ", payload);
 
-//         // Check if the email is already registered
-//         const existingUser = await findCustomerByEmail(payload.email);
+        // Check if the email is already registered
+        const existingUser = await findCustomerByEmail(payload.email);
 
-//         if (existingUser) {
-//             return res.status(201).json({ success: false, message: 'Customer Email already exists' })
-//         }
+        if (existingUser) {
+            return res.status(201).json({
+                success: false,
+                message: 'Customer Email already exists'
+            });
+        }
 
-//         // Create a new user
-//         const newUser = new Admin({
-//             email: payload.email,
-//             role: "Admin",
-//             AuthType: "google"
-//         })
+        const newUser = ({
+            email: payload.email,
+            name: payload.name
+        })
 
-//         await newUser.save()
+        const newCustomer = await saveGoogleCustomer(newUser)
 
-//         res.status(200).json({ success: true, message: 'Customer registered successfully', newUser })
+        return res.status(200).json({ success: true, message: 'Customer registered successfully', response: newCustomer });
 
-//     }
-//     catch (error) {
-//         console.log(error);
-//         next(error);
-//     }
-// }
-
-
-// const googleAdminLogin = async (req, res, next) => {
-//     try {
-//         const CLIENT_ID = '508224318018-quta6u0n38vml0up7snscdrtl64555l1.apps.googleusercontent.com'
-
-//         const token = req.query.token;
-
-//         if (!token) {
-//             return res.status(201).json({ success: false, message: "UnAuthorized Customer or Token not present" })
-//         }
-
-//         const client = new OAuth2Client(CLIENT_ID);
-
-//         // Call the verifyIdToken to
-//         // varify and decode it
-//         const ticket = await client.verifyIdToken({
-//             idToken: token,
-//             audience: CLIENT_ID,
-//         });
-
-//         // Get the JSON with all the user info
-//         const payload = ticket.getPayload();
-
-//         console.log("Google Login payload ", payload)
-
-//         const foundUser = await Customer.findOne({ email: payload.email}).exec()
-
-//         if (!foundUser) {
-//             return res.status(401).json({ success: false, message: 'Unauthorized Admin' })
-//         }
-
-//         const accessToken = jwt.sign(
-//             {
-
-//                 "email": foundUser.email,
-//                 "role": foundUser.role,
-//             },
-//             JWT_ACCESS_SECRET,
-//             { expiresIn: '1d' }
-//         )
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+};
 
 
-//         // Create secure cookie with refresh token 
-//         res.cookie('AdminToken', accessToken, {
-//             httpOnly: true, //accessible only by web server 
-//             secure: true, //https
-//             sameSite: 'None', //cross-site cookie 
-//             maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
-//         })
-//         res.status(201).json({
-//             success: true,
-//             message: "Admin Logged In Successfully",
-//             accessToken,
-//             foundUser
-//         })
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }
+//DESC:GOOGLE SIGNIN ===================================
+export const googleCustomerLogin = async (req, res, next) => {
+    try {
+        const CLIENT_ID = '714894109777-dmc2ap4eubn5i6lrnv388roruvfoqdja.apps.googleusercontent.com';
+
+        const token = req.body.token;
+
+        console.log(token);
+
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: "UnAuthorized Customer or Token not present"
+            });
+        }
+
+        const client = new OAuth2Client(CLIENT_ID);
+
+        // Call the verifyIdToken to verify and decode it
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: CLIENT_ID,
+        });
+
+        // Get the JSON with all the user info
+        const payload = ticket.getPayload();
+
+        console.log("Google payload ", payload);
+
+        // Check if the email is already registered
+        const existingUser = await findCustomerByGoogleEmail(payload.email);
+
+        if (!existingUser) {
+            return res.status(201).json({ success: false, message: 'Customer Email not found' });
+        }
+
+        // Respond with the customer data
+        return res.status(200).json({
+            success: true,
+            message: 'Customer logged in successfully',
+            user: existingUser
+        });
+
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+};
 
 //DESC:LOGOUT A USER ========================
-// export const handleLogout = async (req, res, next) => {
-//     try {
-//         //cookie parse na use korle ata kaj korbe na
-//         const cookies = req.cookies
+export const handleLogout = async (req, res, next) => {
+    try {
+        //cookie parse na use korle ata kaj korbe na
+        const cookies = req.cookies
 
-//         // Ai line ta lagia ami logout error check korbo
-//         // if(cookies) { return res.status(401).json({ message:"Unauthorize Admin" }) }
+        // Ai line ta lagia ami logout error check korbo
+        // if(cookies) { return res.status(401).json({ message:"Unauthorize Admin" }) }
 
-//         if (!cookies?.CustomerToken) return res.status(201).json({
-//             success: false,
-//             message: "Unauthorize User"
-//         }) //No content
-//         res.clearCookie('CustomerToken', {
-//             httpOnly: true,
-//             sameSite: 'None',
-//             secure: true
-//         })
-//         res.status(200).json({
-//             success: true,
-//             message: 'Customer Cookie cleared'
-//         })
-//     } catch (error) {
-//         console.log(error);
-//         next(error);
-//     }
-// }
+        if (!cookies?.CustomerToken) return res.status(201).json({
+            success: false,
+            message: "Unauthorize User"
+        }) //No content
+        res.clearCookie('CustomerToken', {
+            httpOnly: true,
+            sameSite: 'None',
+            secure: true
+        })
+        res.status(200).json({
+            success: true,
+            message: 'Customer Cookie cleared'
+        })
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+}
 
 //DESC:FORGET PASSWORD CUSTOMER =============
 
 export const forgetPassword = async (req, res, next) => {
     try {
-        let { email } = req.body;
-
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        const { email } = req.body;
 
         const user = await findCustomerByEmail(email)
         if (!user) {
@@ -503,10 +481,7 @@ export const forgetPassword = async (req, res, next) => {
 //DESC:VERIFY PASSWORD RESET CODE CUSTOMER =============
 export const verifyPasswordResetCode = async (req, res, next) => {
     try {
-        let { email, verificationCode, } = req.body;
-
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        const { email, verificationCode, } = req.body;
 
         const user = await findCustomerByEmail(email);
 
@@ -543,10 +518,7 @@ export const verifyPasswordResetCode = async (req, res, next) => {
 //DESC:RESET PASSWORD CUSTOMER =============
 export const resetPassword = async (req, res, next) => {
     try {
-        let { email, newPassword } = req.body;
-
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        const { email, newPassword } = req.body;
 
         // Find the user by email (assuming Customer is your Mongoose model for users)
         const user = await findCustomerByEmail(email)
@@ -581,10 +553,7 @@ export const resetPassword = async (req, res, next) => {
 //DESC: CUSTOMER CONNECT SALON AFTER LOGIN =================
 export const customerConnectSalon = async (req, res, next) => {
     try {
-        let { email, salonId } = req.body;
-
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        const { email, salonId } = req.body;
 
         // Find the Customer by emailId
         const customer = await findCustomerByEmail(email)
@@ -625,10 +594,7 @@ export const customerConnectSalon = async (req, res, next) => {
 //DESC: CUSTOMER DISCONNECT SALON AFTER LOGIN =================
 export const customerDisconnectSalon = async (req, res, next) => {
     try {
-        let { email } = req.body;
-
-        // Convert email to lowercase
-        email = email.toLowerCase();
+        const { email } = req.body;
 
         // Find the Customer by emailId
         const customer = await findCustomerByEmail(email)
@@ -661,10 +627,7 @@ export const customerDisconnectSalon = async (req, res, next) => {
 //DESC: GET ALL CUSTOMER CONNECTED SALONS =================
 export const getAllSalonsByCustomer = async (req, res, next) => {
     try {
-        let { customerEmail } = req.body; // Assuming customer's email is provided in the request body
-
-                // Convert email to lowercase
-                customerEmail = customerEmail.toLowerCase();
+        const { customerEmail } = req.body; // Assuming customer's email is provided in the request body
 
         // const email = customerEmail
 
@@ -695,10 +658,9 @@ export const getAllSalonsByCustomer = async (req, res, next) => {
 //DESC: CHANGE DEFAULT SALON ID OF CUSTOMER =================
 export const changeDefaultSalonIdOfCustomer = async (req, res, next) => {
     try {
-        let { customerEmail, salonId } = req.body; // Assuming admin's email and new salonId are provided in the request body
+        const { customerEmail, salonId } = req.body; // Assuming admin's email and new salonId are provided in the request body
 
-             // Convert email to lowercase
-                customerEmail = customerEmail.toLowerCase();
+        // const email = customerEmail;
 
         // Find the admin based on the provided email
         const customer = await findCustomerByEmail(customerEmail);
@@ -729,12 +691,7 @@ export const changeDefaultSalonIdOfCustomer = async (req, res, next) => {
 export const getAllCustomers = async (req, res, next) => {
     try {
 
-        let { salonId, name, email, page = 1, limit = 3, sortField, sortOrder } = req.query
-
-
-              // Convert email to lowercase
-              email = email.toLowerCase();
-
+        const { salonId, name, email, page = 1, limit = 3, sortField, sortOrder } = req.query
         let query = {}
 
         const searchRegExpName = new RegExp('.*' + name + ".*", 'i')
@@ -784,17 +741,15 @@ export const getAllCustomers = async (req, res, next) => {
 //DESC: UPDATE CUSTOMER PROFILE ================
 export const updateCustomer = async (req, res, next) => {
     try {
-        let {
+        const {
             email,
             name,
             gender,
             dateOfBirth,
             password,
             mobileNumber,
+            mobileCountryCode,
         } = req.body;
-
-            // Convert email to lowercase
-            email = email.toLowerCase();
 
         if (!email || !validateEmail(email)) {
             return res.status(201).json({
@@ -821,6 +776,7 @@ export const updateCustomer = async (req, res, next) => {
             dateOfBirth,
             hashedPassword,
             mobileNumber,
+            mobileCountryCode,
         }
 
         const customer = await updateCustomerDetails(customerData)
@@ -837,13 +793,8 @@ export const updateCustomer = async (req, res, next) => {
 }
 //DESC: DELETE CUSTOMER PROFILE ================
 export const deleteSingleCustomer = async (req, res, next) => {
-    let { email } = req.body;
-    
+    const { email } = req.body;
     try {
-
-
-            // Convert email to lowercase
-            email = email.toLowerCase();
         const customer = await findCustomerByEmail(email)
         // Check if customer exists
         if (!customer) {
@@ -872,70 +823,86 @@ export const deleteSingleCustomer = async (req, res, next) => {
 export const uploadCustomerprofilePic = async (req, res, next) => {
     try {
         let profiles = req.files.profile;
-        let email = req.body.email;
+        const { email } = req.body;
 
-
-            // Convert email to lowercase
-            email = email.toLowerCase();
+        if (profiles === null || profiles === undefined) {
+            return res.status(400).json({ success: false, message: "Admin profile image empty." });
+        }
 
         // Ensure that profiles is an array, even for single uploads
         if (!Array.isArray(profiles)) {
             profiles = [profiles];
         }
 
-        const uploadPromises = [];
 
-        for (const profile of profiles) {
-            uploadPromises.push(
-                new Promise((resolve, reject) => {
-                    const public_id = `${profile.name.split(".")[0]}`;
+        // Allowed file extensions
+        const allowedExtensions = ["jpg", "png", "jfif", "svg", "jpeg", "webp"];
+        // Maximum file size in bytes (e.g., 5MB)
+        const maxFileSize = 2 * 1024 * 1024;
 
-                    cloudinary.uploader.upload(profile.tempFilePath, {
-                        public_id: public_id,
-                        folder: "customers",
-                    })
-                        .then((image) => {
-                            resolve({
-                                public_id: image.public_id,
-                                url: image.secure_url, // Store the URL
-                            });
-                        })
-                        .catch((err) => {
-                            reject(err);
-                        })
-                        .finally(() => {
-                            // Delete the temporary file after uploading
-                            fs.unlink(profile.tempFilePath, (unlinkError) => {
-                                if (unlinkError) {
-                                    console.error('Failed to delete temporary file:', unlinkError);
-                                }
-                            });
-                        });
-                })
-            );
+        // Find the existing admin by email and role
+        const existingCustomer = await findCustomerByEmail(email);
+
+       // Check and delete the existing profile image if it exists
+if (existingCustomer && existingCustomer.profile && Array.isArray(existingCustomer.profile) && existingCustomer.profile.length > 0) {
+    const oldProfile = existingCustomer.profile[0];
+    if (oldProfile && oldProfile.public_id) {
+        try {
+            const result = await cloudinary.uploader.destroy(oldProfile.public_id);
+            if (result.result !== 'ok') {
+                return res.status(400).json({ success: false, message: 'Failed to delete old image.' });
+            }
+        } catch (err) {
+            return res.status(400).json({ success: false, message: 'Failed to delete old image.', error: err.message });
         }
+    } else {
+        console.log('No profile found for deletion or missing public_id');
+    }
+} else {
+    console.log('No existing customer profile or profile array is empty');
+}
 
-        Promise.all(uploadPromises)
-            .then(async (profileimg) => {
-                console.log(profileimg);
+        // Upload new profile image(s) to Cloudinary
+        const uploadPromises = profiles.map(profile => {
 
-                const customerImage = await uploadCustomerProPic(email, profileimg)
+            // Get file extension and check if it's allowed
+            const extension = path.extname(profile.name).toLowerCase().slice(1);
+            if (!allowedExtensions.includes(extension)) {
+                return res.status(400).json({ success: false, message: "File extension must be jpg, png, jfif, svg, jpeg, webp" });
+            }
 
-                res.status(200).json({
-                    success: true,
-                    message: "Files Uploaded successfully",
-                    response: customerImage
+            // Check file size
+            if (profile.size > maxFileSize) {
+                return res.status(400).json({ success: false, message: "File size must be lower than 2mb" });
+            }
+
+            const public_id = `${profile.name.split('.')[0]}_${uuidv4()}`;
+            const folderPath = `customers`;
+
+            return cloudinary.uploader.upload(profile.tempFilePath, {
+                public_id,
+                folder: folderPath,
+            }).then(image => {
+                // Delete the temporary file after uploading
+                fs.unlink(profile.tempFilePath, err => {
+                    if (err) console.error('Failed to delete temporary file:', err);
                 });
-            })
-            .catch((err) => {
-                console.error(err);
-                res.status(201).json({
-                    success: false,
-                    message: "Image upload failed",
-                });
+                return { public_id: image.public_id, url: image.secure_url };
             });
+        });
+
+        const profileimg = await Promise.all(uploadPromises);
+
+        // Update the admin profile picture
+        const customerImage = await uploadCustomerprofilePic(email, profileimg);
+
+        res.status(200).json({
+            success: true,
+            message: "Files Uploaded successfully",
+            response: customerImage
+        });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         next(error);
     }
 }
@@ -1051,12 +1018,8 @@ export const deleteCustomerProfilePicture = async (req, res, next) => {
 
 //DESC: SEND MAIL TO CUSTOMER  ================
 export const sendMailToCustomer = async (req, res, next) => {
-    let { email, subject, text } = req.body;
+    const { email, subject, text } = req.body;
     try {
-
-            // Convert email to lowercase
-            email = email.toLowerCase();
-
         const customer = await findCustomerByEmail(email);
         if (!customer) {
             res.status(201).json({
@@ -1082,10 +1045,7 @@ export const sendMailToCustomer = async (req, res, next) => {
 //DESC: GET CUSTOMER DETAILS ================
 export const getCustomerDetails = async (req, res, next) => {
     try {
-        let { email } = req.body;
-
-            // Convert email to lowercase
-            email = email.toLowerCase();
+        const { email } = req.body;
         const customer = await findCustomerByEmail(email);
         if (!customer) {
             return res.status(201).json({
@@ -1349,4 +1309,6 @@ export const deleteCustomerFavoriteSalon = async (req, res, next) => {
         next(error);
     }
 };
+
+
 

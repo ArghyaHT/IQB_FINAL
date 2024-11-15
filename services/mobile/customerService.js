@@ -13,6 +13,7 @@ export const saveCustomer = async(newCustomer) => {
         gender,
         dateOfBirth,
         mobileNumber,
+        mobileCountryCode,
         hashedPassword,
         verificationCode,
         } = newCustomer
@@ -23,6 +24,7 @@ export const saveCustomer = async(newCustomer) => {
         gender,
         dateOfBirth,
         mobileNumber,
+        mobileCountryCode,
         password: hashedPassword,
         verificationCode,
         customer: true,
@@ -55,12 +57,13 @@ export const fetchedCustomers = async (query, sortOptions, skip, limit) => {
         name,
         gender,
         dateOfBirth,
+        mobileCountryCode,
         hashedPassword,
         mobileNumber,
       } = customerData;
 
       const customer = await Customer.findOneAndUpdate({ email },
-        { name, gender, password:hashedPassword, dateOfBirth, mobileNumber },
+        { name, gender, password:hashedPassword, dateOfBirth, mobileNumber, mobileCountryCode },
         { new: true })
         return customer;
  }

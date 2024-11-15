@@ -17,8 +17,11 @@ const salonQueueListSchema = new mongoose.Schema({
             type: String
         },
         mobileNumber:{
-            type: String
+            type: Number
         },
+        mobileCountryCode:{
+            type: Number
+        },    
         joinedQ: {
             type: Boolean
         },

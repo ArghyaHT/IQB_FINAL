@@ -37,16 +37,18 @@ const adminSchema = new mongoose.Schema({
         type:String,
     },
 
-    profile: [
-        {
+    profile: {
+        type: [{
             public_id: {
                 type: String
             },
             url: {
                 type: String,
+                default: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg"
             }
-        }
-    ],
+        }],
+        default: [{}]  // Ensure default value is an array with an object
+    },
 
     dateOfBirth:{
         type: Date,
@@ -54,6 +56,10 @@ const adminSchema = new mongoose.Schema({
     mobileNumber:{
         type: Number,
     },
+    mobileCountryCode:{
+        type: Number
+    },
+
     mobileVerified:{
         type: Boolean,
         default: false

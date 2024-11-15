@@ -19,12 +19,12 @@ const customerSchema = new mongoose.Schema({
     email: {
         type: String,
     },
+    emailVerified:{
+        type: Boolean,
+        default: false
+    },
     password: {
         type: String
-    },
-    customer: {
-        type: String,
-        default: false
     },
     AuthType: {
         type: String,
@@ -32,7 +32,6 @@ const customerSchema = new mongoose.Schema({
     },
     name: {
         type: String,
-        required: true
     },
     userName: {
         type: String,
@@ -40,31 +39,38 @@ const customerSchema = new mongoose.Schema({
     },
     gender: {
         type: String,
-        required: true
     },
 
     dateOfBirth: {
         type: Date,
-        required: true
+    },
+    mobileCountryCode:{
+        type: Number,
     },
     mobileNumber: {
         type: Number,
-        required: true,
+        // required: true,
+    },
+    mobileVerified:{
+        type: Boolean,
+        default: false
     },
     verificationCode: {
         type: String,
         // required:true
     },
-    profile: [
-        {
+    profile: {
+        type: [{
             public_id: {
                 type: String
             },
             url: {
                 type: String,
+                default: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg"
             }
-        }
-    ],
+        }],
+        default: [{}]  // Ensure default value is an array with an object
+    },
     fcmToken: {
         type: String
     },

@@ -9,66 +9,63 @@ import moment from "moment";
 //Creating Appointment
 export const createAppointment = async (req, res, next) => {
   try {
-    let { salonId, barberId, serviceId, appointmentDate, appointmentNotes, startTime, customerEmail, customerName, customerType, methodUsed } = req.body;
+    const { salonId, barberId, serviceId, appointmentDate, appointmentNotes, startTime, customerEmail, customerName, customerType, methodUsed } = req.body;
 
-    // Convert email to lowercase
-    customerEmail = customerEmail.toLowerCase();
+// Check if salonId is missing
+if (!salonId) {
+  return res.status(201).json({
+    success: false,
+    message: 'Please provide the salon ID.',
+  });
+}
 
-    // Check if salonId is missing
-    if (!salonId) {
-      return res.status(201).json({
-        success: false,
-        message: 'Please provide the salon ID.',
-      });
-    }
+// Check if barberId is missing
+if (!barberId) {
+  return res.status(201).json({
+    success: false,
+    message: 'Please provide the barber ID.',
+  });
+}
 
-    // Check if barberId is missing
-    if (!barberId) {
-      return res.status(201).json({
-        success: false,
-        message: 'Please provide the barber ID.',
-      });
-    }
+// Check if serviceId is missing
+if (!serviceId) {
+  return res.status(201).json({
+    success: false,
+    message: 'Please provide the service ID.',
+  });
+}
 
-    // Check if serviceId is missing
-    if (!serviceId) {
-      return res.status(201).json({
-        success: false,
-        message: 'Please provide the service ID.',
-      });
-    }
+// Check if appointmentDate is missing
+if (!appointmentDate) {
+  return res.status(201).json({
+    success: false,
+    message: 'Please provide the appointment date.',
+  });
+}
 
-    // Check if appointmentDate is missing
-    if (!appointmentDate) {
-      return res.status(201).json({
-        success: false,
-        message: 'Please provide the appointment date.',
-      });
-    }
+// Check if startTime is missing
+if (!startTime) {
+  return res.status(201).json({
+    success: false,
+    message: 'Please provide the start time.',
+  });
+}
 
-    // Check if startTime is missing
-    if (!startTime) {
-      return res.status(201).json({
-        success: false,
-        message: 'Please provide the start time.',
-      });
-    }
+// Check if customerName is missing
+if (!customerName || customerName.length < 1 || customerName.length > 20) {
+  return res.status(201).json({
+    success: false,
+    message: 'Please provide the customer name.',
+  });
+}
 
-    // Check if customerName is missing
-    if (!customerName || customerName.length < 1 || customerName.length > 20) {
-      return res.status(201).json({
-        success: false,
-        message: 'Please provide the customer name.',
-      });
-    }
-
-    // Check if customerName length less than 1 or more than 20
-    if (customerName.length < 1 || customerName.length > 20) {
-      return res.status(201).json({
-        success: false,
-        message: 'Please enter a name that is between 1 and 20 characters in length.',
-      });
-    }
+// Check if customerName length less than 1 or more than 20
+if (customerName.length < 1 || customerName.length > 20) {
+  return res.status(201).json({
+    success: false,
+    message: 'Please enter a name that is between 1 and 20 characters in length.',
+  });
+}
 
     const email = customerEmail;
 

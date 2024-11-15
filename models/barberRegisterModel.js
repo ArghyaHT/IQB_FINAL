@@ -40,6 +40,10 @@ const barberSchema = new mongoose.Schema({
         type: Number,
         // required: true,
     },
+    mobileCountryCode:{
+        type: Number
+    },
+
     mobileVerified: {
         type: Boolean,
         default: false
@@ -69,19 +73,17 @@ const barberSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'BarberRating'
     }],
-    profile: [
-        {
+    profile: {
+        type: [{
             public_id: {
                 type: String
             },
             url: {
                 type: String,
+                default: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg"
             }
-        }
-    ],
-    isOnline: {
-        type: Boolean,
-        default: false
+        }],
+        default: [{}]  // Ensure default value is an array with an object
     },
     barberServices: [{
         serviceId: {
@@ -127,12 +129,20 @@ const barberSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isClockedIn: {
+        type: Boolean,
+        default: false
+    },
     isDeleted: {
         type: Boolean,
         default: false
     },
     barberExp: {
         type: Number,
+    },
+    approvePendingMessage:{
+        type: String,
+        default: ""
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date

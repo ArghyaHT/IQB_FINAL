@@ -17,8 +17,11 @@ const joinqueueHistorySchema = new mongoose.Schema({
             type: String
         },
         mobileNumber:{
-            type: String
+            type: Number
         },
+        mobileCountryCode:{
+            type: Number
+        },    
         joinedQ: {
             type: Boolean
         },
@@ -87,11 +90,17 @@ const joinqueueHistorySchema = new mongoose.Schema({
         customerEWT: {
             type: Number
         },
-        updatedByBarberId: {
-            type: Number
+        updatedByBarberEmail: {
+            type: String,
+            default: ""
         },
         updatedByBarberName: {
-            type: String
+            type: String,
+            default: ""
+        },
+        isAdmin: {
+            type: Boolean,
+            default: false
         },
         status:{
             type: String
