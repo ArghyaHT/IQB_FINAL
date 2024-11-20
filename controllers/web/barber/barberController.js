@@ -99,7 +99,7 @@ export const loginController = async (req, res, next) => {
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Email required"
+                message: "Please enter your email."
             });
         }
 
@@ -111,12 +111,21 @@ export const loginController = async (req, res, next) => {
         }
 
         // Validate password length
-        if (!password || password.length < 8) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters long"
-            });
-        }
+      if (!password) {
+        return res.status(400).json({
+            success: false,
+            message: "Please enter your password."
+        });
+    }
+
+      // Validate password length
+      if (password.length < 8) {
+        return res.status(400).json({
+            success: false,
+            message: "Password must be at least 8 characters."
+        });
+    }
+
 
         // Find user by email in the MongoDB database
         const foundUser = await findBarberByEmailAndRole(email);
@@ -156,7 +165,7 @@ export const loginController = async (req, res, next) => {
                 "email": foundUser.email,
                 "role": foundUser.role
             },
-            process.env.JWT_BARBER_ACCESS_SECRET,
+            process.env.JWT_ACCESS_SECRET_BARBER,
             { expiresIn: '1d' }
         )
 
@@ -297,7 +306,7 @@ export const googleBarberLogin = async (req, res, next) => {
                 "email": foundUser.email,
                 "role": foundUser.role,
             },
-            process.env.JWT_BARBER_ACCESS_SECRET,
+            process.env.JWT_ACCESS_SECRET_BARBER,
             { expiresIn: '1d' }
         )
 
@@ -376,7 +385,7 @@ export const updateBarberInfo = async (req, res, next) => {
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Please enter proper email."
+                message: "Please enter your email."
             });
         }
 
@@ -386,6 +395,7 @@ export const updateBarberInfo = async (req, res, next) => {
                 message: "Invalid Email Format"
             });
         }
+
 
         if (name && (name.length < 1 || name.length > 20)) {
             return res.status(400).json({
@@ -449,7 +459,7 @@ export const updateBarberInfo = async (req, res, next) => {
                 "email": email,
                 "role": foundUser.role,
             },
-            process.env.JWT_BARBER_ACCESS_SECRET,
+            process.env.JWT_ACCESS_SECRET_BARBER,
             { expiresIn: '1d' }
         )
 
@@ -488,7 +498,7 @@ export const handleForgetPassword = async (req, res, next) => {
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Please enter proper email."
+                message: "Please enter your email."
             });
         }
 
@@ -499,6 +509,7 @@ export const handleForgetPassword = async (req, res, next) => {
             });
         }
 
+     
 
         const user = await findBarberByEmailAndRole(email)
 
@@ -607,7 +618,7 @@ export const createBarberByAdmin = async (req, res, next) => {
         if (!email && email === undefined) {
             return res.status(400).json({
                 success: false,
-                message: "Please enter proper email."
+                message: "Please enter your email."
             });
         }
 
@@ -866,7 +877,7 @@ export const updateBarberByAdmin = async (req, res, next) => {
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Please enter proper email."
+                message: "Please enter your email."
             });
         }
 
@@ -1302,14 +1313,14 @@ export const updateBarberAccountDetails = async (req, res, next) => {
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Please ensure the email field is filled correctly."
+                message: "Please Enter your email."
             });
         }
 
         if (!validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email Format."
             });
         }
 
@@ -1718,7 +1729,7 @@ export const sendVerificationCodeForBarberMobile = async (req, res, next) => {
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Email is required."
+                message: "Please Enter your email."
             });
         }
 
@@ -1769,7 +1780,7 @@ export const changeBarberMobileVerifiedStatus = async (req, res, next) => {
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Email is required."
+                message: "Please Enter your email."
             });
         }
 
@@ -1815,7 +1826,7 @@ export const barberchangepassword = async (req, res, next) => {
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Email is required."
+                message: "Please enter your email."
             });
         }
 
@@ -1825,7 +1836,7 @@ export const barberchangepassword = async (req, res, next) => {
         if (!password || password === "" || password === null || password === undefined) {
             return res.status(400).json({
                 success: false,
-                message: "New password is required."
+                message: "Please enter your new password."
             });
         }
 
@@ -1834,7 +1845,7 @@ export const barberchangepassword = async (req, res, next) => {
         if (!getBarber) {
             return res.status(404).json({
                 success: false,
-                message: "Admin not found."
+                message: "Barber not found."
             });
         }
 
@@ -1843,7 +1854,7 @@ export const barberchangepassword = async (req, res, next) => {
             if (!oldPassword || oldPassword === "" || oldPassword === null || oldPassword === undefined) {
                 return res.status(400).json({
                     success: false,
-                    message: "Old Password required."
+                    message: "Please enter your old password."
                 });
             }
 
@@ -1869,7 +1880,7 @@ export const barberchangepassword = async (req, res, next) => {
                 if (password.length < 8) {
                     return res.status(400).json({
                         success: false,
-                        message: "Password must be at least 8 characters long",
+                        message: "Password must be at least 8 characters.",
                     });
                 }
             }
@@ -1896,7 +1907,7 @@ export const barberchangepassword = async (req, res, next) => {
                 if (password.length < 8) {
                     return res.status(400).json({
                         success: false,
-                        message: "Password must be at least 8 characters long",
+                        message: "Password must be at least 8 characters.",
                     });
                 }
             }
@@ -1910,7 +1921,7 @@ export const barberchangepassword = async (req, res, next) => {
 
             res.status(200).json({
                 success: true,
-                message: "Barber password updated successfully",
+                message: "Barber password updated successfully.",
                 response: getBarber
             })
         }
@@ -1921,5 +1932,3 @@ export const barberchangepassword = async (req, res, next) => {
         next(error);
     }
 }
-
-

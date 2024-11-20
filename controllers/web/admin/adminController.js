@@ -38,10 +38,17 @@ export const registerAdmin = async (req, res, next) => {
         // Convert email to lowercase
         email = email.toLowerCase();
 
+        if (!email && !password ) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter email and password."
+            });
+        }
+
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Please ensure the email field is filled correctly."
+                message: "Please enter your email."
             });
         }
 
@@ -53,20 +60,20 @@ export const registerAdmin = async (req, res, next) => {
         }
 
         // Validate password length
-        if (!password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter a valid password with the required length."
-            });
-        }
+      if (!password) {
+        return res.status(400).json({
+            success: false,
+            message: "Please enter your password."
+        });
+    }
 
-        // Validate password length
-        if (password.length < 8) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters long"
-            });
-        }
+      // Validate password length
+      if (password.length < 8) {
+        return res.status(400).json({
+            success: false,
+            message: "Password must be at least 8 characters."
+        });
+    }
 
         // Check if the email is already registered
         const existingUser = await findAdminByEmailandRole(email)
@@ -114,7 +121,7 @@ export const loginAdmin = async (req, res, next) => {
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Email required"
+                message: "Please enter your email."
             });
         }
 
@@ -125,11 +132,19 @@ export const loginAdmin = async (req, res, next) => {
             });
         }
 
-      // Validate password length
-      if (!password || password.length < 8) {
+        // Validate password length
+      if (!password) {
         return res.status(400).json({
             success: false,
-            message: "Password must be at least 8 characters long"
+            message: "Please enter your password."
+        });
+    }
+
+      // Validate password length
+      if (password.length < 8) {
+        return res.status(400).json({
+            success: false,
+            message: "Password must be at least 8 characters."
         });
     }
 
@@ -226,7 +241,7 @@ export const handleForgetPasswordAdmin = async (req, res, next) => {
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Please ensure the email field is filled correctly."
+                message: "Please enter your email."
             });
         }
 
@@ -236,6 +251,7 @@ export const handleForgetPasswordAdmin = async (req, res, next) => {
                 message: "Invalid Email Format"
             });
         }
+
 
         const user = await findAdminByEmailandRole(email)
 
@@ -444,7 +460,7 @@ export const updateAdminInfo = async (req, res, next) => {
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Please ensure the email field is filled correctly."
+                message: "Please enter your email."
             });
         }
 
@@ -588,7 +604,7 @@ export const deleteSingleAdmin = async (req, res, next) => {
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Please ensure the email field is filled correctly."
+                message: "Please enter your email."
             });
         }
 
@@ -622,6 +638,20 @@ export const updateAdminAccountDetails = async (req, res, next) => {
 
         // Convert email to lowercase
         email = email.toLowerCase();
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter your email."
+            });
+        }
+
+        if (!validateEmail(email)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Email Format"
+            });
+        }
 
 
         if (name && (name.length < 1 || name.length > 20)) {
@@ -1300,11 +1330,17 @@ export const adminchangepassword = async (req, res, next) => {
     try {
         let { email, oldPassword, password } = req.body;
 
-        // Validate input fields
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Email is required."
+                message: "Please enter your email."
+            });
+        }
+
+        if (!validateEmail(email)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Email Format"
             });
         }
 
@@ -1314,7 +1350,7 @@ export const adminchangepassword = async (req, res, next) => {
         if (!password || password === "" || password === null || password === undefined) {
             return res.status(400).json({
                 success: false,
-                message: "New password is required."
+                message: "Please enter your new password."
             });
         }
 
@@ -1332,7 +1368,7 @@ export const adminchangepassword = async (req, res, next) => {
             if (!oldPassword || oldPassword === "" || oldPassword === null || oldPassword === undefined) {
                 return res.status(400).json({
                     success: false,
-                    message: "Old Password required."
+                    message: "Please enter your old password."
                 });
             }
 
@@ -1358,7 +1394,7 @@ export const adminchangepassword = async (req, res, next) => {
                 if (password.length < 8) {
                     return res.status(400).json({
                         success: false,
-                        message: "Password must be at least 8 characters long",
+                        message: "Password must be at least 8 characters.",
                     });
                 }
             }
@@ -1385,7 +1421,7 @@ export const adminchangepassword = async (req, res, next) => {
                 if (password.length < 8) {
                     return res.status(400).json({
                         success: false,
-                        message: "Password must be at least 8 characters long",
+                        message: "Password must be at least 8 characters.",
                     });
                 }
             }

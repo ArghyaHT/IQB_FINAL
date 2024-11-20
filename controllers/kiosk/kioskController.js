@@ -25,10 +25,17 @@ export const loginKiosk = async (req, res, next) => {
         // Convert email to lowercase
         email = email.toLowerCase();
 
+       if (!email && !password ) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter email and password."
+            });
+        }
+
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Please ensure the email field is filled correctly."
+                message: "Please enter your email."
             });
         }
 
@@ -40,20 +47,21 @@ export const loginKiosk = async (req, res, next) => {
         }
 
         // Validate password length
-        if (!password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter a valid password with the required length."
-            });
-        }
+      if (!password) {
+        return res.status(400).json({
+            success: false,
+            message: "Please enter your password."
+        });
+    }
 
-        // Validate password length
-        if (password.length < 8) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters long"
-            });
-        }
+      // Validate password length
+      if (password.length < 8) {
+        return res.status(400).json({
+            success: false,
+            message: "Password must be at least 8 characters."
+        });
+    }
+
         if( role === "Admin"){
 
             const foundUser = await findAdminByEmailandRole(email)
@@ -61,7 +69,7 @@ export const loginKiosk = async (req, res, next) => {
             if (!foundUser) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Unauthorized. Incorrect admin email'
+                    message: 'Email or password didnot match'
                 });
             }
     
@@ -70,7 +78,7 @@ export const loginKiosk = async (req, res, next) => {
             if (!match) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Unauthorized. Incorrect password'
+                    message: 'Email or password didnot match'
                 });
             }
     
@@ -96,7 +104,7 @@ export const loginKiosk = async (req, res, next) => {
             if (!foundUser) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Unauthorized. Incorrect barber email'
+                    message: 'Email or password didnot match.'
                 })
             }
     
@@ -104,7 +112,7 @@ export const loginKiosk = async (req, res, next) => {
     
             if (!match) return res.status(400).json({
                 success: false,
-                message: 'Unauthorized. Incorrect password'
+                message: 'Email or password didnot match'
             })
     
             const barberKioskToken = jwt.sign(
@@ -348,10 +356,17 @@ export const barberLoginKiosk = async (req, res, next) => {
         // Convert email to lowercase
         email = email.toLowerCase();
 
+        if (!email && !password ) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter email and password."
+            });
+        }
+
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Please enter proper email"
+                message: "Please enter your email."
             });
         }
 
@@ -363,27 +378,27 @@ export const barberLoginKiosk = async (req, res, next) => {
         }
 
         // Validate password length
-        if (!password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter a valid password."
-            });
-        }
+      if (!password) {
+        return res.status(400).json({
+            success: false,
+            message: "Please enter your password."
+        });
+    }
 
-        // Validate password length
-        if (password.length < 8) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters long"
-            });
-        }
+      // Validate password length
+      if (password.length < 8) {
+        return res.status(400).json({
+            success: false,
+            message: "Password must be at least 8 characters."
+        });
+    }
 
         const foundUser = await findBarberByEmailAndRole(email)
 
         if (!foundUser) {
             return res.status(400).json({
                 success: false,
-                message: 'No barber exits with this email id'
+                message: 'Email or password didnot match'
             })
         }
 
@@ -399,7 +414,7 @@ export const barberLoginKiosk = async (req, res, next) => {
 
         if (!match) return res.status(400).json({
             success: false,
-            message: 'Unauthorized. Incorrect password'
+            message: 'Email or password didnot match'
         })
 
         const barberToken = jwt.sign(
@@ -1201,10 +1216,17 @@ export const barberServedQueueKiosk = async (req, res, next) => {
         // Convert email to lowercase
         barberEmail = barberEmail.toLowerCase();
 
+        if (!barberEmail && !password ) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter email and password."
+            });
+        }
+
         if (!barberEmail) {
             return res.status(400).json({
                 success: false,
-                message: "Please ensure the email field is filled correctly."
+                message: "Please enter your email."
             });
         }
 
@@ -1216,20 +1238,20 @@ export const barberServedQueueKiosk = async (req, res, next) => {
         }
 
         // Validate password length
-        if (!password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter a valid password with the required length."
-            });
-        }
+      if (!password) {
+        return res.status(400).json({
+            success: false,
+            message: "Please enter your password."
+        });
+    }
 
-        // Validate password length
-        if (password.length < 8) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters long"
-            });
-        }
+      // Validate password length
+      if (password.length < 8) {
+        return res.status(400).json({
+            success: false,
+            message: "Password must be at least 8 characters."
+        });
+    }
 
 
         const foundUser = await findBarberByBarberEmailAndSalonId(barberEmail, salonId);
@@ -1237,7 +1259,7 @@ export const barberServedQueueKiosk = async (req, res, next) => {
         if (!foundUser) {
             return res.status(400).json({
                 success: false,
-                message: 'Unauthorized. Barber not found.'
+                message: 'Email or password didnot match.'
             })
         }
 
@@ -1245,7 +1267,7 @@ export const barberServedQueueKiosk = async (req, res, next) => {
 
         if (!match) return res.status(400).json({
             message: false,
-            message: 'Unauthorized. Incorrect Password.'
+            message: 'Email or password didnot match.'
         })
 
         const updatedByBarberEmail = foundUser.email;
@@ -1520,10 +1542,17 @@ export const cancelQueueKiosk = async (req, res, next) => {
         // Convert email to lowercase
         barberEmail = barberEmail.toLowerCase();
 
+        if (!barberEmail && !password ) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter email and password."
+            });
+        }
+
         if (!barberEmail) {
             return res.status(400).json({
                 success: false,
-                message: "Please ensure the email field is filled correctly."
+                message: "Please enter your email."
             });
         }
 
@@ -1535,27 +1564,26 @@ export const cancelQueueKiosk = async (req, res, next) => {
         }
 
         // Validate password length
-        if (!password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter a valid password with the required length."
-            });
-        }
+      if (!password) {
+        return res.status(400).json({
+            success: false,
+            message: "Please enter your password."
+        });
+    }
 
-        // Validate password length
-        if (password.length < 8) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters long"
-            });
-        }
-
+      // Validate password length
+      if (password.length < 8) {
+        return res.status(400).json({
+            success: false,
+            message: "Password must be at least 8 characters."
+        });
+    }
         const foundUser = await findBarberByBarberEmailAndSalonId(barberEmail, salonId);
 
         if (!foundUser) {
             return res.status(400).json({
                 success: false,
-                message: 'Unauthorized. Barber not found'
+                message: 'Email or password didnot match.'
             });
         }
 
@@ -1564,7 +1592,7 @@ export const cancelQueueKiosk = async (req, res, next) => {
         if (!match) {
             return res.status(400).json({
                 success: false,
-                message: 'Unauthorized. Incorrect password.'
+                message: 'Email or password didnot match.'
             });
         }
 
@@ -2009,7 +2037,6 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
 };
 
 
-
 export const salonAccountLogin = async (req, res, next) => {
     try {
         let { email, password, role, salonId } = req.body
@@ -2017,10 +2044,18 @@ export const salonAccountLogin = async (req, res, next) => {
         // Convert email to lowercase
         email = email.toLowerCase();
 
+        
+        if (!email && !password ) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter email and password."
+            });
+        }
+
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Please ensure the email field is filled correctly."
+                message: "Please enter your email."
             });
         }
 
@@ -2032,20 +2067,20 @@ export const salonAccountLogin = async (req, res, next) => {
         }
 
         // Validate password length
-        if (!password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter a valid password with the required length."
-            });
-        }
+      if (!password) {
+        return res.status(400).json({
+            success: false,
+            message: "Please enter your password."
+        });
+    }
 
-        // Validate password length
-        if (password.length < 8) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters long"
-            });
-        }
+      // Validate password length
+      if (password.length < 8) {
+        return res.status(400).json({
+            success: false,
+            message: "Password must be at least 8 characters."
+        });
+    }
 
         if (role === "Admin") {
 
@@ -2054,7 +2089,7 @@ export const salonAccountLogin = async (req, res, next) => {
             if (!foundUser) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Unauthorized. Incorrect admin email'
+                    message: 'Email or password didnot match'
                 })
             }
 
@@ -2062,7 +2097,7 @@ export const salonAccountLogin = async (req, res, next) => {
 
             if (!match) return res.status(400).json({
                 message: false,
-                message: 'Unauthorized. Incorrect password.'
+                message: 'Email or password didnot match'
             })
 
             res.status(201).json({
@@ -2077,7 +2112,7 @@ export const salonAccountLogin = async (req, res, next) => {
             if (!foundUser) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Unauthorized. Incorrect barber email'
+                    message: 'Email or password didnot match.'
                 })
             }
 
@@ -2085,7 +2120,7 @@ export const salonAccountLogin = async (req, res, next) => {
 
             if (!match) return res.status(400).json({
                 message: false,
-                message: 'Unauthorized. Incorrect password.'
+                message: 'Email or password didnot match.'
             })
 
             res.status(201).json({
@@ -2101,7 +2136,6 @@ export const salonAccountLogin = async (req, res, next) => {
         next(error);
     }
 }
-
 
 // DESC: GET ALL BARBERS BY SALONID =================
 export const getAllBarberbySalonId = async (req, res, next) => {
@@ -2470,7 +2504,7 @@ export const cancelQueueTvApp= async (req, res, next) => {
         if (!foundUser) {
             return res.status(400).json({
                 success: false,
-                message: 'Unauthorized. Admin not found'
+                message: 'Email or password didnot match.'
             });
         }
 
