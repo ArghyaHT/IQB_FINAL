@@ -72,28 +72,27 @@ connectDB()
 // Writing the cors for for both dev and prod
 const app = express()
 
-// const allowedOrigins = [
-//   "https://iqb-react-frontend.netlify.app",
-//   "http://localhost:5173",
-//   "https://kiosk123.netlify.app",
-//   "https://iqb-web.netlify.app",
-//   "http://127.0.0.1:5173",
-//   "http://localhost:4173",
-//   "http://127.0.0.1:4173"
-// ];
+app.use(cookieParser())
+const allowedOrigins = [
+  "https://iqb-react-frontend.netlify.app",
+  "http://localhost:5173",
+  "https://kiosk123.netlify.app",
+  "https://iqb-kiyosk-final.netlify.app",
+  "http://127.0.0.1:5173"  
+];
 
-// // //Use Multiple Cors
-// app.use(cors({
-//   origin: function (origin, callback) {
-//     // Check if the origin is in the allowed origins list or if it's undefined (like in case of same-origin requests)
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true); // Allow the request
-//     } else {
-//       callback(new Error("Not allowed by CORS")); // Deny the request
-//     }
-//   },
-//   credentials: true
-// }));
+// //Use Multiple Cors
+app.use(cors({
+  origin: function (origin, callback) {
+    // Check if the origin is in the allowed origins list or if it's undefined (like in case of same-origin requests)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true); // Allow the request
+    } else {
+      callback(new Error("Not allowed by CORS")); // Deny the request
+    }
+  },
+  credentials: true
+}));
 
 // // Initialize Firebase Admin SDK
 const serviceAccount = jsonFile.readFileSync('./notification_push_service_key.json');
