@@ -6,7 +6,7 @@ export const sendBulkTextMessages = async (req, res, next) => {
       const { numbers, smsBody } = req.body;
   
       if (!smsBody) {
-        return res.status(400).json({ success: false, message: "Need to provide a proper sms body" });
+        return res.status(400).json({ success: false, message: "Plese enter message" });
       }
   
          // Check if numbers is an array
@@ -18,7 +18,7 @@ export const sendBulkTextMessages = async (req, res, next) => {
   
       // Check if numbers is an array
       if (!Array.isArray(numbers)) {
-        return res.status(400).json({ success: false, message: "Numbers must be an array" });
+        return res.status(400).json({ success: false, message: "RecipientNumbers must be an array" });
       }
   
       // Convert each number to string and add a + sign before each number
@@ -34,12 +34,11 @@ export const sendBulkTextMessages = async (req, res, next) => {
       }
       return res.status(200).json({
         success: true,
-        message: 'Sms Sent Successfully',
+        message: 'Sms sent successfully',
     });
   
     }
     catch (error) {
-      console.log(error);
       next(error);
     }
   }
@@ -52,14 +51,14 @@ export const sendBulkTextMessages = async (req, res, next) => {
         if (!subject) {
           return res.status(400).json({
               success: false,
-              message: 'Please provide a subject.',
+              message: 'Please enter subject.',
           });
       }
       
       if (!message) {
           return res.status(400).json({
               success: false,
-              message: 'Please provide a message body.',
+              message: 'Please enter message.',
           });
       }
          
@@ -73,7 +72,7 @@ export const sendBulkTextMessages = async (req, res, next) => {
       if (recipientEmails.length === 0) {
           return res.status(400).json({
               success: false,
-              message: 'The recipientEmails array should not be empty.',
+              message: 'RecipientEmails should not be empty.',
           });
       }
   
@@ -83,19 +82,19 @@ export const sendBulkTextMessages = async (req, res, next) => {
         if(role === "Barber"){
           return res.status(200).json({
             success: true,
-            message: 'Emails have been sent successfully to barbers.',
+            message: 'Mail sent successfully.',
         });
         }
         else{  return res.status(200).json({
           success: true,
-          message: 'Emails have been sent successfully to customers.',
+          message: 'Mail sent successfully.',
       });
   
   
         }
      
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
   };

@@ -248,7 +248,7 @@ export const handleForgetPasswordAdmin = async (req, res, next) => {
         if (!validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email"
             });
         }
 
@@ -258,7 +258,7 @@ export const handleForgetPasswordAdmin = async (req, res, next) => {
         if (!user) {
             res.status(404).json({
                 success: false,
-                message: "Admin with this email does not exist.Please register first"
+                message: "Email does not exist"
             })
         }
 
@@ -289,13 +289,13 @@ export const handleForgetPasswordAdmin = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: `Please go to your ${email} for reseting the password`,
+            message: `Please go to your email for reseting password`,
             payload: {
                 resetToken
             }
         })
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 }
