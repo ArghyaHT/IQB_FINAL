@@ -533,7 +533,7 @@ export const handleForgetPassword = async (req, res, next) => {
 
         await user.save({ validatebeforeSave: false })
 
-        const CLIENT_URL = "https://iqb-web-backend.onrender.com"
+        const CLIENT_URL = "https://iqb-final.onrender.com"
 
         //  const CLIENT_URL = "http://localhost:5173"
 

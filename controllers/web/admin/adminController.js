@@ -274,7 +274,7 @@ export const handleForgetPasswordAdmin = async (req, res, next) => {
 
         await user.save({ validatebeforeSave: false })
 
-        const CLIENT_URL = "https://iqb-web-backend.onrender.com"
+        const CLIENT_URL = "https://iqb-final.onrender.com"
 
         // const CLIENT_URL = "http://localhost:5173"
 
@@ -657,7 +657,7 @@ export const updateAdminAccountDetails = async (req, res, next) => {
         if (name && (name.length < 1 || name.length > 20)) {
             return res.status(400).json({
                 success: false,
-                message: "Please enter a name that is between 1 and 20 characters in length."
+                message: "Please enter name between 1 to 20 characters."
             });
         }
 
@@ -1347,6 +1347,13 @@ export const adminchangepassword = async (req, res, next) => {
         // Convert email to lowercase
         email = email.toLowerCase();
 
+        if (!oldPassword || oldPassword === "" || oldPassword === null || oldPassword === undefined) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter your old password."
+            });
+        }
+
         if (!password || password === "" || password === null || password === undefined) {
             return res.status(400).json({
                 success: false,
@@ -1364,13 +1371,6 @@ export const adminchangepassword = async (req, res, next) => {
         }
 
         if (getAdmin.AuthType === "local") {
-
-            if (!oldPassword || oldPassword === "" || oldPassword === null || oldPassword === undefined) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Please enter your old password."
-                });
-            }
 
             if (oldPassword === password) {
                 return res.status(400).json({
