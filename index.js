@@ -175,7 +175,7 @@ app.use("/api/salon", salonRoutes)
 app.use("/api/barber", barberRoutes)
 
 //Customer Base Route
-app.use("/api/customer", customerRoutesWeb)
+app.use("/api/customers", customerRoutesWeb)
 
 //Queue Base Routes
 app.use("/api/queue", queueRoutes)
