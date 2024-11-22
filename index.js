@@ -75,12 +75,10 @@ const app = express()
 
 app.use(cookieParser())
 const allowedOrigins = [
-  "https://iqb-react-frontend.netlify.app",
   "http://localhost:5173",
-  "https://kiosk123.netlify.app",
-  "https://iqb-kiyosk-final.netlify.app",
   "http://127.0.0.1:5173",
-  "https://iqb-final.onrender.com"
+  "https://iqb-kiosk.netlify.app",
+  "https://iqb-final.onrender.com",
 ];
 
 // //Use Multiple Cors
