@@ -192,7 +192,7 @@ export const loginController = async (req, res, next) => {
 //GOOGLE SIGNIN ===================================
 export const googleBarberSignup = async (req, res, next) => {
     try {
-        const CLIENT_ID = '508224318018-quta6u0n38vml0up7snscdrtl64555l1.apps.googleusercontent.com'
+        const CLIENT_ID = process.env.CLIENT_ID
 
         const token = req.query.token;
         const { webFcmToken, androidFcmToken, iosFcmToken } = req.query;
@@ -271,7 +271,7 @@ export const googleBarberSignup = async (req, res, next) => {
 
 export const googleBarberLogin = async (req, res, next) => {
     try {
-        const CLIENT_ID = '508224318018-quta6u0n38vml0up7snscdrtl64555l1.apps.googleusercontent.com'
+        const CLIENT_ID = process.env.CLIENT_ID
 
         const token = req.query.token;
         const { webFcmToken, androidFcmToken, iosFcmToken } = req.query;
