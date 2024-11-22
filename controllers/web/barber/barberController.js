@@ -165,7 +165,7 @@ export const loginController = async (req, res, next) => {
                 "email": foundUser.email,
                 "role": foundUser.role
             },
-            process.env.JWT_ACCESS_SECRET_BARBER,
+            process.env.JWT_BARBER_ACCESS_SECRET,
             { expiresIn: '1d' }
         )
 
@@ -306,7 +306,7 @@ export const googleBarberLogin = async (req, res, next) => {
                 "email": foundUser.email,
                 "role": foundUser.role,
             },
-            process.env.JWT_ACCESS_SECRET_BARBER,
+            process.env.JWT_BARBER_ACCESS_SECRET,
             { expiresIn: '1d' }
         )
 
@@ -459,7 +459,7 @@ export const updateBarberInfo = async (req, res, next) => {
                 "email": email,
                 "role": foundUser.role,
             },
-            process.env.JWT_ACCESS_SECRET_BARBER,
+            process.env.JWT_BARBER_ACCESS_SECRET,
             { expiresIn: '1d' }
         )
 
