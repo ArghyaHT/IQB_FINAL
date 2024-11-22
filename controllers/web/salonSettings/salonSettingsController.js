@@ -41,7 +41,7 @@ export const updateSalonSettings = async (req, res, next) => {
         if(startTime > endTime){
            return res.status(400).json({
                 success: true,
-                message: "The start time cannot be later than the end time.",
+                message: "Start time cannot be later than end time.",
             });
         }
 
@@ -69,7 +69,7 @@ export const updateSalonSettings = async (req, res, next) => {
 
                 res.status(200).json({
                     success: true,
-                    message: "Salon Settings Updated",
+                    message: "Salon settings updated successfully",
                     response: existingSalonSettings
                 });
             }
@@ -85,7 +85,7 @@ export const updateSalonSettings = async (req, res, next) => {
         }
 
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 };

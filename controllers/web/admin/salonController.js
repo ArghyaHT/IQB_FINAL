@@ -8,7 +8,7 @@ import libphonenumber from 'google-libphonenumber';
 import path from "path"
 import fs from "fs"
 import { v2 as cloudinary } from "cloudinary";
-import { getbarbersBySalonId } from "../../../services/web/barber/barberService.js";
+import { changeBarberStatusAtSalonOffline, getbarbersBySalonId } from "../../../services/web/barber/barberService.js";
 import { getAverageSalonRating } from "../../../services/web/ratings/ratingsService.js";
 import { validateEmail } from "../../../middlewares/validator.js";
 
@@ -47,35 +47,43 @@ export const createSalonByAdmin = async (req, res, next) => {
 
   try {
 
-    //  // Check if required fields are missing
-    //  if (!salonName || !salonEmail || !city || !country || !salonType || !contactTel || !services || !timeZone || !location || !appointmentSettings) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: 'Please fill all the fields',
-    //   });
-    // }
+
+    if (!adminEmail) {
+      return res.status(400).json({
+          success: false,
+          message: "Email not found"
+      });
+  }
 
 
     // Validate email format
     if (!validateEmail(adminEmail)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid email format"
+        message: "Invalid email"
       });
     }
+
+
+    if (!salonEmail) {
+      return res.status(400).json({
+          success: false,
+          message: "Please enter salon email"
+      });
+  }
 
     // Validate email format
     if (!validateEmail(salonEmail)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid salon email format"
+        message: "Invalid salon email"
       });
     }
 
     if (!salonName) {
       return res.status(400).json({
         success: false,
-        message: "Please provide a salon name"
+        message: "Please enter salon name"
       });
     }
 
@@ -83,28 +91,28 @@ export const createSalonByAdmin = async (req, res, next) => {
     if (salonName && (salonName.length < 1 || salonName.length > 40)) {
       return res.status(400).json({
         success: false,
-        message: "Please enter a name that is between 1 and 20 characters in length."
+        message: "Please enter name between 1 to 20 characters"
       });
     }
 
     if (!country) {
       return res.status(400).json({
         success: false,
-        message: "Please provide proper country name"
+        message: "Please enter country"
       });
     }
 
     if (!city) {
       return res.status(400).json({
         success: false,
-        message: "Please provide proper city name"
+        message: "Please enter city"
       });
     }
 
     if (!timeZone) {
       return res.status(400).json({
         success: false,
-        message: "Please provide timezone value"
+        message: "Please enter timezone"
       });
     }
 
@@ -115,27 +123,21 @@ export const createSalonByAdmin = async (req, res, next) => {
       });
     }
 
-    if (!address && address.length > 150) {
+    if (!address && address.length > 100) {
       return res.status(400).json({
         success: false,
-        message: "Address can't be above 150 characters."
+        message: "Please enter address 1 to 100 characters"
       });
     }
 
     if (!location || !location.coordinates || location.coordinates.latitude === null || location.coordinates.longitude === null) {
       return res.status(400).json({
         success: false,
-        message: "Location coordinates (latitude and longitude) cannot be null."
+        message: "Coordinates cannot be null."
       });
     }
 
 
-    // if(!appointmentSettings){
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "Appointment settings is mandatory"
-    //   });
-    // }
 
    
           // Convert mobile number to string only if it's a number
@@ -169,7 +171,7 @@ export const createSalonByAdmin = async (req, res, next) => {
     // Validate the format and length of the contactTel
     if (postCode && !/^\d{1,8}$/.test(postCode)) {
       return res.status(400).json({
-        message: 'Post code should be a maximum of 8 digits',
+        message: 'Please enter post code between 1 to 8 digits',
       });
     }
 
@@ -184,7 +186,7 @@ export const createSalonByAdmin = async (req, res, next) => {
     if (salonDesc && salonDesc.length > 150) {
       return res.status(400).json({
           success: false,
-          message: "Description cannot exceed 150 characters."
+          message: "Please enter description between 1 to 150 characters"
       });
   } 
 
@@ -195,7 +197,7 @@ export const createSalonByAdmin = async (req, res, next) => {
     if (existingSalon) {
       return res.status(400).json({
         success: false,
-        message: 'A Salon with the provided salon name or salon email already exists',
+        message: 'Salon already exists',
       });
     }
 
@@ -269,13 +271,13 @@ export const createSalonByAdmin = async (req, res, next) => {
 
     return res.status(200).json({
       success: true,
-      message: 'New salon created',
+      message: 'Salon created successfully',
       response: savedSalon
     });
 
   }
   catch (error) {
-    console.log(error);
+    // console.log(error);
     next(error);
   }
 }
@@ -305,11 +307,33 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
 
     // Check if required fields are missing or empty
     if (!salonId) {
-      return res.status(400).json({ success: false, message: "Missing salonid" });
+      return res.status(400).json({ success: false, message: "SalonId empty" });
     }
 
     if (!services) {
-      return res.status(400).json({ success: false, message: "Missing services" });
+      return res.status(400).json({ success: false, message: "Services is empty" });
+    }
+    if (!adminEmail) {
+      return res.status(400).json({
+          success: false,
+          message: "Email not found"
+      });
+  }
+
+
+    // Validate email format
+    if (!validateEmail(adminEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email"
+      });
+    }
+
+    if (!address && address.length > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter address 1 to 100 characters"
+      });
     }
 
     // Validate email format for adminEmail
@@ -330,7 +354,7 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
     if (salonDesc && salonDesc.length > 150) {
       return res.status(400).json({
           success: false,
-          message: "Description cannot exceed 150 characters."
+          message: "Please enter description between 1 to 150 characters"
       });
   } 
 
@@ -476,7 +500,7 @@ export const uploadSalonGalleryImages = async (req, res, next) => {
     let salonId = req.body.salonId;
 
     if (galleries === null || galleries === undefined) {
-      return res.status(400).json({ success: false, message: "Salon Logo needed." });
+      return res.status(400).json({ success: false, message: "Salon gallery not found." });
     }
 
 
@@ -489,19 +513,31 @@ export const uploadSalonGalleryImages = async (req, res, next) => {
       galleries = [galleries];
     }
 
+    galleries.map(gallery =>{
+      const extension = path.extname(gallery.name).toLowerCase().slice(1);
+      if (!allowedExtensions.includes(extension)) {
+        return res.status(400).json({ success: false, message: "File extension must be jpg, png, jfif, svg, jpeg, webp" });
+      }
+
+      // Check file size
+      if (gallery.size > maxFileSize) {
+        return res.status(400).json({ success: false, message: "File size must be lower than 2mb" });
+      }
+    })
+
     const uploadPromises = galleries.map(gallery => {
       return new Promise((resolve, reject) => {
 
-        // Get file extension and check if it's allowed
-        const extension = path.extname(gallery.name).toLowerCase().slice(1);
-        if (!allowedExtensions.includes(extension)) {
-          return res.status(400).json({ success: false, message: "File extension must be jpg, png, jfif, svg, jpeg, webp" });
-        }
+        // // Get file extension and check if it's allowed
+        // const extension = path.extname(gallery.name).toLowerCase().slice(1);
+        // if (!allowedExtensions.includes(extension)) {
+        //   return res.status(400).json({ success: false, message: "File extension must be jpg, png, jfif, svg, jpeg, webp" });
+        // }
 
-        // Check file size
-        if (gallery.size > maxFileSize) {
-          return res.status(400).json({ success: false, message: "File size must be lower than 2mb" });
-        }
+        // // Check file size
+        // if (gallery.size > maxFileSize) {
+        //   return res.status(400).json({ success: false, message: "File size must be lower than 2mb" });
+        // }
 
 
 
@@ -551,7 +587,7 @@ export const uploadSalonGalleryImages = async (req, res, next) => {
       response: newImages,
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     next(error);
   }
 }
@@ -619,12 +655,12 @@ export const uploadMoreSalonGalleryImages = async (req, res, next) => {
     const updatedSalon = await addMoreSalonImages(salonId, uploadedImages)
 
     if (!updatedSalon) {
-      return res.status(404).json({ success: false, message: "Images cant be uploaded" });
+      return res.status(404).json({ success: false, message: "Salon image cant be uploaded" });
     }
 
     res.status(200).json({
       success: true,
-      message: "Files Uploaded successfully",
+      message: "Salon Images uploaded successfully",
       response: updatedSalon,
     });
   } catch (error) {
@@ -690,7 +726,7 @@ export const updateSalonImages = async (req, res, next) => {
 
         res.status(200).json({
           success: true,
-          message: "Files Updated successfully",
+          message: "Salon images updated successfully",
           response: updatedSalonImage
         });
 
@@ -716,11 +752,11 @@ export const deleteSalonImages = async (req, res, next) => {
     if (result.result !== 'ok') {
       return res.status(404).json({
         success: false,
-        message: 'Failed to delete image from Cloudinary'
+        message: 'Failed to delete salon image'
       });
     }
 
-    console.log("Cloudinary image deleted");
+    // console.log("Cloudinary image deleted");
 
     //  // Find the newly added advertisement
     //  const deletedSalonImage = updatedSalon.gallery.find(si => si.public_id === image.public_id);
@@ -728,7 +764,7 @@ export const deleteSalonImages = async (req, res, next) => {
     if (updatedSalon) {
       res.status(200).json({
         success: true,
-        message: "Image successfully deleted",
+        message: "Salon image deleted successfully",
         response: deletedImage
       })
     } else {
@@ -750,7 +786,7 @@ export const getSalonImages = async (req, res, next) => {
 
     // Check if salonId is provided in the request body
     if (!salonId) {
-      return res.status(400).json({ success: false, message: "Please provide salonId" });
+      return res.status(400).json({ success: false, message: "SalonId not found" });
     }
     // Check if salonId exists in the database
     const salonExists = await getSalonBySalonId(salonId)
@@ -933,7 +969,7 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
       return res.status(200).json({ success: true, message: "The salon is currently offline.", response: updatedSalon });
   }
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     next(error);
   }
 }
@@ -979,7 +1015,7 @@ export const uploadSalonLogo = async (req, res, next) => {
     const salonId = req.body.salonId;
 
     if (!salonLogo) {
-      return res.status(400).json({ success: false, message: "Salon Logo needed." });
+      return res.status(400).json({ success: false, message: "Salon Logo not found." });
     }
 
     // Allowed file extensions
@@ -1018,15 +1054,15 @@ export const uploadSalonLogo = async (req, res, next) => {
       const oldLogo = existingSalon.salonLogo[0]; // Ensure we are getting the correct logo object
       if (oldLogo && oldLogo.public_id) { // Check if oldLogo is not null and has public_id
         try {
-          console.log('Deleting old logo with public_id:', oldLogo.public_id);
+          // console.log('Deleting old logo with public_id:', oldLogo.public_id);
           const result = await cloudinary.uploader.destroy(oldLogo.public_id);
-          console.log('Deletion result:', result);
+          // console.log('Deletion result:', result);
 
           if (result.result !== 'ok') {
             return res.status(400).json({ success: false, message: 'Failed to delete old image.' });
           }
         } catch (err) {
-          console.error('Error during deletion:', err);
+          // console.error('Error during deletion:', err);
           return res.status(500).json({ success: false, message: 'Failed to delete old image.', error: err.message });
         }
       } else {
@@ -1062,11 +1098,11 @@ export const uploadSalonLogo = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "Salon Logo Uploaded successfully",
+      message: "Salon logo uploaded successfully",
       response: updatedSalon
     });
   } catch (error) {
-    console.error('Error in uploadSalonLogo:', error);
+    // console.error('Error in uploadSalonLogo:', error);
     next(error);
   }
 };

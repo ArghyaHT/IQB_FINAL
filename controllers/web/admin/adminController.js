@@ -38,7 +38,7 @@ export const registerAdmin = async (req, res, next) => {
         // Convert email to lowercase
         email = email.toLowerCase();
 
-        if (!email && !password ) {
+        if (!email && !password) {
             return res.status(400).json({
                 success: false,
                 message: "Please enter email and password."
@@ -60,20 +60,20 @@ export const registerAdmin = async (req, res, next) => {
         }
 
         // Validate password length
-      if (!password) {
-        return res.status(400).json({
-            success: false,
-            message: "Please enter your password."
-        });
-    }
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter your password."
+            });
+        }
 
-      // Validate password length
-      if (password.length < 8) {
-        return res.status(400).json({
-            success: false,
-            message: "Password must be at least 8 characters."
-        });
-    }
+        // Validate password length
+        if (password.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters."
+            });
+        }
 
         // Check if the email is already registered
         const existingUser = await findAdminByEmailandRole(email)
@@ -111,7 +111,7 @@ export const loginAdmin = async (req, res, next) => {
         // Convert email to lowercase
         email = email.toLowerCase();
 
-        if (!email && !password ) {
+        if (!email && !password) {
             return res.status(400).json({
                 success: false,
                 message: "Please enter email and password."
@@ -133,20 +133,20 @@ export const loginAdmin = async (req, res, next) => {
         }
 
         // Validate password length
-      if (!password) {
-        return res.status(400).json({
-            success: false,
-            message: "Please enter your password."
-        });
-    }
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter your password."
+            });
+        }
 
-      // Validate password length
-      if (password.length < 8) {
-        return res.status(400).json({
-            success: false,
-            message: "Password must be at least 8 characters."
-        });
-    }
+        // Validate password length
+        if (password.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters."
+            });
+        }
 
         const foundUser = await findAdminByEmailandRole(email)
 
@@ -673,15 +673,15 @@ export const updateAdminAccountDetails = async (req, res, next) => {
         // Parse the mobile number, specifying the region code
         const phoneNumberProto = phoneUtil.parse(mobileNumberStr, regionCode);
 
-           // Check if the parsed phone number is valid
-           const isValid = phoneUtil.isValidNumber(phoneNumberProto);
+        // Check if the parsed phone number is valid
+        const isValid = phoneUtil.isValidNumber(phoneNumberProto);
 
-           if (!isValid) {
-               return res.status(400).json({
-                   success: false,
-                   message: "Invalid Mobile Number"
-               });
-           }
+        if (!isValid) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Mobile Number"
+            });
+        }
 
         // Get the national significant number (i.e., without the country code)
         const nationalNumber = phoneNumberProto.getNationalNumber();
@@ -715,15 +715,23 @@ export const updateAdminAccountDetails = async (req, res, next) => {
 //DESC:UPLOAD ADMIN PROFILE PICTURE ============================
 export const uploadAdminprofilePic = async (req, res, next) => {
     try {
-        if (!req.files || !req.files.profile) {
-            console.log('No profile picture uploaded');
-            return res.status(400).json({ success: false, message: "Admin profile image empty." });
-        }
+     
 
         let profiles = req.files.profile;
         const { email } = req.body;
 
-        console.log('Received profiles:', profiles); // Log the profile files to inspect
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Email does not exist"
+            });
+        }
+
+        if (!req.files || !req.files.profile) {
+            return res.status(400).json({ success: false, message: "Admin profile image empty." });
+        }
+
+        // console.log('Received profiles:', profiles); 
 
         if (!Array.isArray(profiles)) {
             profiles = [profiles]; // Ensure profiles is always an array
@@ -738,7 +746,7 @@ export const uploadAdminprofilePic = async (req, res, next) => {
         const existingAdmin = await findAdminByEmailandRole(email);
 
         if (!existingAdmin) {
-            console.log('Admin not found');
+            // console.log('Admin not found');
             return res.status(404).json({ success: false, message: 'Admin not found' });
         }
 
@@ -777,12 +785,12 @@ export const uploadAdminprofilePic = async (req, res, next) => {
 
         return res.status(200).json({
             success: true,
-            message: "Files Uploaded successfully",
+            message: "File Uploaded successfully",
             adminImage,
         });
 
     } catch (error) {
-        console.log('Error uploading profile picture:', error);
+        // console.log('Error uploading profile picture:', error);
         next(error);
     }
 };
@@ -899,6 +907,14 @@ export const sendVerificationCodeForAdminEmail = async (req, res, next) => {
     try {
         let { email } = req.body;
 
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Email not found"
+            });
+        }
+
+
         // Convert email to lowercase
         email = email.toLowerCase();
 
@@ -906,7 +922,7 @@ export const sendVerificationCodeForAdminEmail = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                response: "User with this email does not exist. Please register first",
+                response: "Email does not exist",
             });
         }
 
@@ -918,7 +934,7 @@ export const sendVerificationCodeForAdminEmail = async (req, res, next) => {
         try {
             await sendVerificationCode(email, user.name, verificationCode);
         } catch (error) {
-            return res.status(500).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Failed to send verification code',
                 error: error.message
@@ -930,7 +946,7 @@ export const sendVerificationCodeForAdminEmail = async (req, res, next) => {
             message: `Please check your email (${email}) for verification code.`,
         });
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 }
@@ -1250,7 +1266,7 @@ export const sendVerificationCodeForAdminMobile = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({
                 success: false,
-                response: "User with this email does not exist. Please register first",
+                response: "Email does not exist.",
             });
         }
 
@@ -1265,7 +1281,7 @@ export const sendVerificationCodeForAdminMobile = async (req, res, next) => {
         try {
             await sendMobileVerificationCode(formattedNumber, verificationCode);
         } catch (error) {
-            console.log(error);
+            // console.log(error);
             next(error);
         }
 
@@ -1274,7 +1290,7 @@ export const sendVerificationCodeForAdminMobile = async (req, res, next) => {
             message: `Please check your mobile inbox for verification code.`,
         });
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 }
@@ -1333,7 +1349,7 @@ export const adminchangepassword = async (req, res, next) => {
         if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Please enter your email."
+                message: "Email not found"
             });
         }
 
@@ -1344,22 +1360,29 @@ export const adminchangepassword = async (req, res, next) => {
             });
         }
 
-        // Convert email to lowercase
-        email = email.toLowerCase();
+        if(!oldPassword && !password){
+            return res.status(400).json({
+                success: false,
+                message: "Please enter all the fields."
+            });
+        }
 
-        if (!oldPassword || oldPassword === "" || oldPassword === null || oldPassword === undefined) {
+        if (!oldPassword) {
             return res.status(400).json({
                 success: false,
                 message: "Please enter your old password."
             });
         }
 
-        if (!password || password === "" || password === null || password === undefined) {
+        if (!password) {
             return res.status(400).json({
                 success: false,
                 message: "Please enter your new password."
             });
         }
+
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         const getAdmin = await findAdminByEmailandRole(email)
 

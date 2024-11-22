@@ -606,7 +606,7 @@ export const createBarberByAdmin = async (req, res, next) => {
             dateOfBirth,
             webFcmToken,
             barberExp,
-            barberServices // Array of service objects containing serviceId, serviceCode, servicePrice, serviceName, serviceEWT
+            barberServices
         } = req.body;
 
         // Convert email to lowercase
@@ -615,63 +615,38 @@ export const createBarberByAdmin = async (req, res, next) => {
         // Convert email to lowercase
         // console.log(email)
         
-        if (!email && email === undefined) {
+        if (!email) {
             return res.status(400).json({
                 success: false,
                 message: "Please enter your email."
             });
         }
 
-        if (email) {
-            email = email.toLowerCase();
-        }
-
-
         if (!validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email"
             });
         }
+
+
+        email = email.toLowerCase();
 
         if (name && (name.length < 1 || name.length > 20)) {
             return res.status(400).json({
                 success: false,
-                message: "Please enter a name that is between 1 and 20 characters in length."
+                message: "Please enter a name between 1 to 20 characters."
             });
         }
 
         if (barberServices.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: "Please provide barber services."
+                message: "Please provide services."
             });
         }
 
 
-        // // Remove the country code if it exists
-        // if (mobileNumber && typeof mobileNumber === 'number' && typeof countryCode === 'number') {
-        //     // Convert mobileNumber to string to manipulate it
-        //     let mobileStr = mobileNumber.toString();
-        //     let countryCodeStr = countryCode.toString();
-
-        //     // Check if mobileNumber starts with countryCode
-        //     if (mobileStr.startsWith(countryCodeStr)) {
-        //         // Remove countryCode from the beginning of mobileStr
-        //         mobileStr = mobileStr.slice(countryCodeStr.length);
-        //     }
-
-        //     // Convert back to number if valid
-        //     mobileNumber = parseInt(mobileStr, 10);
-
-        //     // Validate mobile number format (must be exactly 10 digits)
-        //     if (isNaN(mobileNumber) || mobileStr.length !== 10) {
-        //         return res.status(400).json({
-        //             success: false,
-        //             message: "Invalid mobile number format. Mobile number must be exactly 10 digits."
-        //         });
-        //     }
-        // }
 
         // Convert mobile number to string only if it's a number
         let mobileNumberStr = typeof mobileNumber === 'number' ? mobileNumber.toString() : mobileNumber;
@@ -708,7 +683,7 @@ export const createBarberByAdmin = async (req, res, next) => {
         if (barber) {
             return res.status(400).json({
                 success: false,
-                message: "Barber with the EmailId already exists. Please enter another Email"
+                message: "Email already exists"
             });
         }
 
@@ -847,7 +822,7 @@ export const createBarberByAdmin = async (req, res, next) => {
         // Send email to the customer who is getting served
         try {
             await barberLogin(email, barberLoginSubject, servedEmailBody);
-            console.log('Email sent to the served customer successfully.');
+            // console.log('Email sent to barber successfully.');
         } catch (error) {
             console.error('Error sending email to the served customer:', error);
             // Handle error if email sending fails
@@ -855,11 +830,11 @@ export const createBarberByAdmin = async (req, res, next) => {
 
         res.status(201).json({
             success: true,
-            message: "Barber Successfully Created",
+            message: "Barber created successfully",
             response: savedBarber
         });
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 };

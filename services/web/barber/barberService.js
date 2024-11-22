@@ -400,3 +400,13 @@ export const barberClockInStatus = async (barberId, salonId, isClockedIn) => {
    );
    return barber;
 }
+
+//CHANGE BARER ONLINE STATUS
+export const changeBarberStatusAtSalonOffline = async (salonId) => {
+   const barbers = await Barber.updateMany(
+       { salonId: salonId },
+       { $set: { isOnline: false, isClockedIn: false } },
+       { new: true }
+   );
+   return barbers;
+};
