@@ -1,0 +1,7 @@
+export const EMAIL_AND_PASSWORD_NOT_FOUND =  "Please enter email and password"
+export const EMAIL_NOT_PRESENT = "Please enter your email"
+export const INVALID_EMAIL = "Invalid Email"
+export const PASSWORD_NOT_PRESENT = "Please enter your password"
+export const PASSWORD_LENGTH = "Password must be at least 8 characters"
+export const USER_NOT_PRESENT = "User not found"
+export const PASSWORD_DONOT_MATCH = "Email or password donot match"

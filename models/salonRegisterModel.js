@@ -166,6 +166,10 @@ const salonsSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    mobileBookingAvailability:{
+        type:Boolean,
+        default: false
+    },
     gallery: [
         {
             public_id: {

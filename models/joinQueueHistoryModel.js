@@ -1,6 +1,10 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
-const joinqueueHistorySchema = new mongoose.Schema({ 
+const joinqueueHistorySchema = new mongoose.Schema({
+    // id:{
+    //     type: Number,
+    //     required: true
+    // },
     salonId: {
         type: Number,
     },
@@ -16,12 +20,12 @@ const joinqueueHistorySchema = new mongoose.Schema({
         customerEmail: {
             type: String
         },
+        mobileCountryCode:{
+            type: Number
+        },
         mobileNumber:{
             type: Number
         },
-        mobileCountryCode:{
-            type: Number
-        },    
         joinedQ: {
             type: Boolean
         },
@@ -98,7 +102,7 @@ const joinqueueHistorySchema = new mongoose.Schema({
             type: String,
             default: ""
         },
-        isAdmin: {
+        isAdmin:{
             type: Boolean,
             default: false
         },
@@ -115,5 +119,5 @@ const joinqueueHistorySchema = new mongoose.Schema({
 
 const JoinedQueueHistory = mongoose.model("JoinQueueHistory", joinqueueHistorySchema)
 
-export default JoinedQueueHistory
+export default JoinedQueueHistory;
 
