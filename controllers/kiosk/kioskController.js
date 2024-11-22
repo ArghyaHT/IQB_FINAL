@@ -1519,7 +1519,7 @@ export const barberServedQueueKiosk = async (req, res, next) => {
 
                 return res.status(200).json({
                     success: true,
-                    message: 'Customer served from the queue successfully.',
+                    message: 'Customer served successfully.',
                 });
             }
         }
