@@ -973,7 +973,6 @@ export const getSalonInfo = async (req, res, next) => {
 }
 
 //DESC:UPLOAD SALON LOGO ==================
-
 export const uploadSalonLogo = async (req, res, next) => {
   try {
     const salonLogo = req.files.salonLogo;
