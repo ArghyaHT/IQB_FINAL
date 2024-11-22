@@ -32,6 +32,7 @@ import notificationRoutes from "./routes/web/notifications/notificationsRoutes.j
 import ratingRoutes from "./routes/web/ratings/ratingsRoutes.js"
 import iconRoutes from "./routes/web/icons/iconsRoutes.js"
 import countryRoutes from "./routes/web/countries/countryRoutes.js"
+import customerRoutesWeb from "./routes/web/customer/customerRoutes.js"
 import bulkMessageAndEmailsRoutes from "./routes/web/bulkMessagesAndEmailRoutes/bulkMesagesAndEmailRoutes.js"
 import reports from "./routes/web/reports/reportsRoutes.js"
 
@@ -162,6 +163,8 @@ app.use("/api/customer", customerRoutes)
 app.use("/api/mobileRoutes", mobileRoutes)
 
 
+//WEB ROUTES
+
 //Admin Base Route
 app.use("/api/admin", adminRoutes)
 
@@ -170,6 +173,9 @@ app.use("/api/salon", salonRoutes)
 
 //Barber Base Route
 app.use("/api/barber", barberRoutes)
+
+//Customer Base Route
+app.use("/api/customer", customerRoutesWeb)
 
 //Queue Base Routes
 app.use("/api/queue", queueRoutes)
