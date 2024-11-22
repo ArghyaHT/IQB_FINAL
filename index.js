@@ -78,7 +78,8 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://kiosk123.netlify.app",
   "https://iqb-kiyosk-final.netlify.app",
-  "http://127.0.0.1:5173"  
+  "http://127.0.0.1:5173",
+  "https://iqb-final.onrender.com"
 ];
 
 // //Use Multiple Cors
