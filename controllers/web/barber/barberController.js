@@ -179,7 +179,7 @@ export const loginController = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: "Barber Logged In Successfully",
+            message: "Barber logged in successfully",
             accessToken,
             foundUser
         });
@@ -202,7 +202,7 @@ export const googleBarberSignup = async (req, res, next) => {
         if (!token) {
             return res.status(404).json({
                 success: false,
-                message: "UnAuthorized Barber or Token not present"
+                message: "Barber token not found"
             })
         }
 
@@ -224,7 +224,7 @@ export const googleBarberSignup = async (req, res, next) => {
         const existingUser = await findBarberByEmailAndRole(payload.email)
 
         if (existingUser) {
-            return res.status(404).json({ success: false, message: 'Barber Email already exists' })
+            return res.status(404).json({ success: false, message: 'Barber already exists' })
         }
 
 
@@ -277,7 +277,7 @@ export const googleBarberLogin = async (req, res, next) => {
         const { webFcmToken, androidFcmToken, iosFcmToken } = req.query;
 
         if (!token) {
-            return res.status(404).json({ success: false, message: "UnAuthorized Barber or Token not present" })
+            return res.status(404).json({ success: false, message: "Barber token not found" })
         }
 
         const client = new OAuth2Client(CLIENT_ID);
@@ -297,7 +297,7 @@ export const googleBarberLogin = async (req, res, next) => {
         const foundUser = await googleLoginBarber(payload.email)
 
         if (!foundUser) {
-            return res.status(401).json({ success: false, message: 'Barber not found or unauthorized' })
+            return res.status(401).json({ success: false, message: 'Email does not match' })
         }
 
         const accessToken = jwt.sign(
@@ -335,7 +335,7 @@ export const googleBarberLogin = async (req, res, next) => {
         })
         res.status(201).json({
             success: true,
-            message: "Barber Logged In Successfully",
+            message: "Barber logged in successfully",
             accessToken,
             foundUser
         })

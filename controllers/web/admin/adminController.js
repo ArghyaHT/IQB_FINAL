@@ -55,7 +55,7 @@ export const registerAdmin = async (req, res, next) => {
         if (!validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email"
             });
         }
 
@@ -190,7 +190,7 @@ export const loginAdmin = async (req, res, next) => {
         // Send accessToken containing username and roles 
         res.status(201).json({
             success: true,
-            message: "Admin Logged In Successfully",
+            message: "Admin logged in successfully",
             accessToken,
             foundUser
         })
@@ -340,12 +340,10 @@ export const googleAdminSignup = async (req, res, next) => {
 
         const token = req.query.token;
 
-        console.log(token)
-
         if (!token) {
             return res.status(404).json({
                 success: false,
-                message: "UnAuthorized Admin or Token not present"
+                message: "Admin token not found"
             })
         }
 
@@ -367,7 +365,7 @@ export const googleAdminSignup = async (req, res, next) => {
         const existingUser = await findAdminByEmailandRole(payload.email)
 
         if (existingUser) {
-            return res.status(404).json({ success: false, message: 'Admin Email already exists' })
+            return res.status(404).json({ success: false, message: 'Admin already exists' })
         }
 
         // Create a new user
@@ -394,7 +392,7 @@ export const googleAdminLogin = async (req, res, next) => {
         const token = req.query.token;
 
         if (!token) {
-            return res.status(404).json({ success: false, message: "UnAuthorized Admin or Token not present" })
+            return res.status(404).json({ success: false, message: "Admin token not found" })
         }
 
         const client = new OAuth2Client(CLIENT_ID);
@@ -414,7 +412,7 @@ export const googleAdminLogin = async (req, res, next) => {
         const foundUser = await googleLoginAdmin(payload.email)
 
         if (!foundUser) {
-            return res.status(401).json({ success: false, message: 'Unauthorized Admin' })
+            return res.status(401).json({ success: false, message: 'Email does not match' })
         }
 
         const accessToken = jwt.sign(
@@ -437,7 +435,7 @@ export const googleAdminLogin = async (req, res, next) => {
         })
         res.status(201).json({
             success: true,
-            message: "Admin Logged In Successfully",
+            message: "Admin logged in successfully",
             accessToken,
             foundUser
         })
