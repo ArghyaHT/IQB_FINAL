@@ -1823,7 +1823,7 @@ export const getAllAdvertisementsKiosk = async (req, res, next) => {
         const salonSettings = await getAdvertisements(salonId)
 
         // Sort advertisements array in descending order
-        const sortedAdvertisements = salonSettings.advertisements.reverse();
+        const sortedAdvertisements = salonSettings.advertisements;
 
         if (!salonSettings) {
             return res.status(404).json({ success: false, message: "Salon not found" });
