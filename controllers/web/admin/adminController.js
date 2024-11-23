@@ -126,7 +126,7 @@ export const loginAdmin = async (req, res, next) => {
         if (!validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email "
             });
         }
 
@@ -465,7 +465,7 @@ export const updateAdminInfo = async (req, res, next) => {
         if (!validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email "
             });
         }
 
@@ -609,7 +609,7 @@ export const deleteSingleAdmin = async (req, res, next) => {
         if (!validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email "
             });
         }
 
@@ -647,7 +647,7 @@ export const updateAdminAccountDetails = async (req, res, next) => {
         if (!validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email "
             });
         }
 
@@ -1154,7 +1154,7 @@ export const approveBarber = async (req, res, next) => {
         if (!validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email "
             });
         }
 
@@ -1354,7 +1354,7 @@ export const adminchangepassword = async (req, res, next) => {
         if (!validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email "
             });
         }
 

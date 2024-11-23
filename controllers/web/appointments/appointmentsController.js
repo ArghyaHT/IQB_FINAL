@@ -25,7 +25,7 @@ export const createAppointment = async (req, res, next) => {
         // if (!email || !validateEmail(email)) {
         //   return res.status(400).json({
         //     success: false,
-        //     message: "Invalid email format"
+        //     message: "Invalid Email "
         //   });
         // }
     

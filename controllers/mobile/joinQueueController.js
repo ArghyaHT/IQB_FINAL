@@ -540,7 +540,7 @@ export const cancelQueue = async (req, res, next) => {
         if (!validateEmail(customerEmail)) {
             return res.status(201).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email "
             });
         }
 

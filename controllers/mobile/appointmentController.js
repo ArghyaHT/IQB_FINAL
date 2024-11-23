@@ -73,7 +73,7 @@ if (customerName.length < 1 || customerName.length > 20) {
     if (!email || !validateEmail(email)) {
       return res.status(201).json({
         success: false,
-        message: "Invalid email format"
+        message: "Invalid Email "
       });
     }
 

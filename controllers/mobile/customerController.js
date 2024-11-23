@@ -33,7 +33,7 @@ export const checkEmail = async (req, res, next) => {
         if (!email || !validateEmail(email)) {
             return res.status(201).json({
                 success: false,
-                message: "Invalid email format"
+                message: "Invalid Email "
             });
         }
 
@@ -80,7 +80,7 @@ export const signUp = async (req, res, next) => {
         if (!email || !validateEmail(email)) {
             return res.status(201).json({
                 success: false,
-                message: "Invalid email format"
+                message: "Invalid Email "
             });
         }
 
@@ -239,7 +239,7 @@ export const signIn = async (req, res, next) => {
         if (!email || !validateEmail(email)) {
             return res.status(201).json({
                 success: false,
-                message: "Invalid email format"
+                message: "Invalid Email "
             });
         }
 
@@ -816,7 +816,7 @@ export const updateCustomer = async (req, res, next) => {
         if (!email || !validateEmail(email)) {
             return res.status(201).json({
                 success: false,
-                message: "Invalid email format"
+                message: "Invalid Email "
             });
         }
 

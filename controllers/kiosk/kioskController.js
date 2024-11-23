@@ -79,7 +79,7 @@ export const loginKiosk = async (req, res, next) => {
             if (!match) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Email or password didnot match'
+                    message: 'Email or password donot match'
                 });
             }
     
@@ -113,7 +113,7 @@ export const loginKiosk = async (req, res, next) => {
     
             if (!match) return res.status(400).json({
                 success: false,
-                message: 'Email or password didnot match'
+                message: 'Email or password donot match'
             })
     
             const barberKioskToken = jwt.sign(
@@ -400,7 +400,7 @@ export const barberLoginKiosk = async (req, res, next) => {
         if (!foundUser) {
             return res.status(400).json({
                 success: false,
-                message: 'Email or password didnot match'
+                message: 'Email or password donot match'
             })
         }
 
@@ -416,7 +416,7 @@ export const barberLoginKiosk = async (req, res, next) => {
 
         if (!match) return res.status(400).json({
             success: false,
-            message: 'Email or password didnot match'
+            message: 'Email or password donot match'
         })
 
         const barberToken = jwt.sign(
@@ -644,6 +644,13 @@ export const joinQueueKiosk = async (req, res, next) => {
 
         if (name.length < 1 || name.length > 20) {
             return res.status(400).json({ success: false, message: "Please enter name between 1 to 20 characters" });
+        }
+
+        if (customerEmail && !validateEmail(customerEmail)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Email "
+            });
         }
 
         if (mobileNumber) {
@@ -2019,7 +2026,7 @@ export const salonAccountLogin = async (req, res, next) => {
         if (!validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email "
             });
         }
 
@@ -2050,7 +2057,7 @@ export const salonAccountLogin = async (req, res, next) => {
             if (!foundUser) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Email or password didnot match'
+                    message: 'Email or password donot match'
                 })
             }
 
@@ -2058,7 +2065,7 @@ export const salonAccountLogin = async (req, res, next) => {
 
             if (!match) return res.status(400).json({
                 message: false,
-                message: 'Email or password didnot match'
+                message: 'Email or password donot match'
             })
 
             res.status(201).json({
@@ -2161,7 +2168,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
         if (!validateEmail(adminEmail)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email "
             });
         }
 
@@ -2457,7 +2464,7 @@ export const cancelQueueTvApp= async (req, res, next) => {
         if (!validateEmail(adminEmail)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email "
             });
         }
 

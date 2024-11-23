@@ -1184,14 +1184,14 @@ export const cancelQueue = async (req, res, next) => {
         if (barberEmail && !validateEmail(barberEmail)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email "
             });
         }
 
         if (adminEmail && !validateEmail(adminEmail)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email "
             });
         }
 

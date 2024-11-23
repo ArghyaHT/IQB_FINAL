@@ -36,7 +36,7 @@ export const registerController = async (req, res, next) => {
         if (!email || !validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid email format"
+                message: "Invalid Email "
             });
         }
 
@@ -106,7 +106,7 @@ export const loginController = async (req, res, next) => {
         if (!validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email "
             });
         }
 
@@ -1805,7 +1805,7 @@ export const barberchangepassword = async (req, res, next) => {
         if (!validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email "
             });
         }
 
