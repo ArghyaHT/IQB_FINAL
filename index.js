@@ -106,12 +106,10 @@ app.use(rateLimiter)
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
-//Global Error Handler
-app.use(ErrorHandler)
 
 //Image upload =============
 
-console.log(process.env.CLOUDINARY_URL)
+// console.log(process.env.CLOUDINARY_URL)
 
 if (process.env.NODE_ENV != "production") {
 app.use(morgan("dev"));
@@ -212,6 +210,9 @@ app.use("/api/reports",reports)
 //   }
 // }
 // main();
+
+//Global Error Handler
+app.use(ErrorHandler)
 
 const __dirname = path.resolve();
   app.use(express.static(path.join(__dirname, 'dist')));

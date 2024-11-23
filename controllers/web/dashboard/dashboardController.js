@@ -32,21 +32,26 @@ export const addAdvertisements = async (req, res, next) => {
       // Maximum file size in bytes (e.g., 5MB)
       const maxFileSize = 2 * 1024 * 1024;
 
+        // Validate each image
+        for (const advertisement of advertisements) {
+          const extension = path.extname(advertisement.name).toLowerCase().slice(1);
+          if (!allowedExtensions.includes(extension)) {
+            return res.status(400).json({
+              success: false,
+              message: `Invalid file extension for ${advertisement.name}. Allowed: ${allowedExtensions.join(', ')}`,
+            });
+          }
+    
+          if (advertisement.size > maxFileSize) {
+            return res.status(400).json({
+              success: false,
+              message: `File size exceeds the maximum file size of 2MB.`,
+            });
+          }
+        }
+
     const uploadPromises = advertisements.map(advertisement => {
       return new Promise((resolve, reject) => {
-
-
-           // Get file extension and check if it's allowed
-           const extension = path.extname(advertisement.name).toLowerCase().slice(1);
-           if (!allowedExtensions.includes(extension)) {
-               return res.status(400).json({ success: false, message: "File extension must be jpg, png, jfif, svg, jpeg, webp" });
-           }
-
-           // Check file size
-           if (advertisement.size > maxFileSize) {
-               return res.status(400).json({ success: false, message: "File size must be lower than 2mb" });
-           }
-
 
         const timestamp = Date.now();
         const uniqueId = uuidv4(); // Generate a unique identifier

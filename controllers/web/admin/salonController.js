@@ -50,10 +50,10 @@ export const createSalonByAdmin = async (req, res, next) => {
 
     if (!adminEmail) {
       return res.status(400).json({
-          success: false,
-          message: "Email not found"
+        success: false,
+        message: "Email not found"
       });
-  }
+    }
 
 
     // Validate email format
@@ -67,10 +67,10 @@ export const createSalonByAdmin = async (req, res, next) => {
 
     if (!salonEmail) {
       return res.status(400).json({
-          success: false,
-          message: "Please enter salon email"
+        success: false,
+        message: "Please enter salon email"
       });
-  }
+    }
 
     // Validate email format
     if (!validateEmail(salonEmail)) {
@@ -139,34 +139,34 @@ export const createSalonByAdmin = async (req, res, next) => {
 
 
 
-   
-          // Convert mobile number to string only if it's a number
-          let contactTelStr = typeof contactTel === 'number' ? contactTel.toString() : contactTel;
 
-          const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance();
-  
-          const regionCode = phoneUtil.getRegionCodeForCountryCode(countryCode);
-  
-          console.log(regionCode)
-  
-          // Parse the mobile number, specifying the region code
-          const phoneNumberProto = phoneUtil.parse(contactTelStr, regionCode);
-  
-             // Check if the parsed phone number is valid
-             const isValid = phoneUtil.isValidNumber(phoneNumberProto);
-  
-             if (!isValid) {
-                 return res.status(400).json({
-                     success: false,
-                     message: "Invalid Mobile Number"
-                 });
-             }
-  
-          // Get the national significant number (i.e., without the country code)
-          const nationalNumber = phoneNumberProto.getNationalNumber();
-  
-          // Convert formatted number back to a number for storage
-          const formattedNumberAsNumber = parseInt(nationalNumber);
+    // Convert mobile number to string only if it's a number
+    let contactTelStr = typeof contactTel === 'number' ? contactTel.toString() : contactTel;
+
+    const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance();
+
+    const regionCode = phoneUtil.getRegionCodeForCountryCode(countryCode);
+
+    console.log(regionCode)
+
+    // Parse the mobile number, specifying the region code
+    const phoneNumberProto = phoneUtil.parse(contactTelStr, regionCode);
+
+    // Check if the parsed phone number is valid
+    const isValid = phoneUtil.isValidNumber(phoneNumberProto);
+
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Mobile Number"
+      });
+    }
+
+    // Get the national significant number (i.e., without the country code)
+    const nationalNumber = phoneNumberProto.getNationalNumber();
+
+    // Convert formatted number back to a number for storage
+    const formattedNumberAsNumber = parseInt(nationalNumber);
 
     // Validate the format and length of the contactTel
     if (postCode && !/^\d{1,8}$/.test(postCode)) {
@@ -185,10 +185,10 @@ export const createSalonByAdmin = async (req, res, next) => {
 
     if (salonDesc && salonDesc.length > 150) {
       return res.status(400).json({
-          success: false,
-          message: "Please enter description between 1 to 150 characters"
+        success: false,
+        message: "Please enter description between 1 to 150 characters"
       });
-  } 
+    }
 
     //Find the Salon If exits 
     const existingSalon = await findSalonBySalonNameOrEmail(salonName, salonEmail)
@@ -315,10 +315,10 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
     }
     if (!adminEmail) {
       return res.status(400).json({
-          success: false,
-          message: "Email not found"
+        success: false,
+        message: "Email not found"
       });
-  }
+    }
 
 
     // Validate email format
@@ -353,38 +353,38 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
 
     if (salonDesc && salonDesc.length > 150) {
       return res.status(400).json({
-          success: false,
-          message: "Please enter description between 1 to 150 characters"
+        success: false,
+        message: "Please enter description between 1 to 150 characters"
       });
-  } 
+    }
 
-         // Convert mobile number to string only if it's a number
-         let contactTelStr = typeof contactTel === 'number' ? contactTel.toString() : contactTel;
+    // Convert mobile number to string only if it's a number
+    let contactTelStr = typeof contactTel === 'number' ? contactTel.toString() : contactTel;
 
-         const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance();
- 
-         const regionCode = phoneUtil.getRegionCodeForCountryCode(countryCode);
- 
-         console.log(regionCode)
- 
-         // Parse the mobile number, specifying the region code
-         const phoneNumberProto = phoneUtil.parse(contactTelStr, regionCode);
- 
-            // Check if the parsed phone number is valid
-            const isValid = phoneUtil.isValidNumber(phoneNumberProto);
- 
-            if (!isValid) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Invalid Mobile Number"
-                });
-            }
- 
-         // Get the national significant number (i.e., without the country code)
-         const nationalNumber = phoneNumberProto.getNationalNumber();
- 
-         // Convert formatted number back to a number for storage
-         const formattedNumberAsNumber = parseInt(nationalNumber);
+    const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance();
+
+    const regionCode = phoneUtil.getRegionCodeForCountryCode(countryCode);
+
+    console.log(regionCode)
+
+    // Parse the mobile number, specifying the region code
+    const phoneNumberProto = phoneUtil.parse(contactTelStr, regionCode);
+
+    // Check if the parsed phone number is valid
+    const isValid = phoneUtil.isValidNumber(phoneNumberProto);
+
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Mobile Number"
+      });
+    }
+
+    // Get the national significant number (i.e., without the country code)
+    const nationalNumber = phoneNumberProto.getNationalNumber();
+
+    // Convert formatted number back to a number for storage
+    const formattedNumberAsNumber = parseInt(nationalNumber);
 
     const salon = await findSalonBySalonIdAndAdmin(salonId, adminEmail)
 
@@ -423,41 +423,41 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
       const existingServices = salon.services;
 
 
-let lastServiceId = existingServices.length ? existingServices[existingServices.length - 1].serviceId : 0;
+      let lastServiceId = existingServices.length ? existingServices[existingServices.length - 1].serviceId : 0;
 
-// Loop through each new service
-services.forEach((newService) => {
-  const existingService = existingServices.find((s) => s.serviceId === newService.serviceId);
+      // Loop through each new service
+      services.forEach((newService) => {
+        const existingService = existingServices.find((s) => s.serviceId === newService.serviceId);
 
-  // If the service doesn't exist or serviceId is 0, we create a new serviceId and serviceCode
-  if (!existingService) {
-    // If serviceId is 0, generate a unique serviceId using the salonId and incremented value
-    const newServiceId = newService.serviceId === 0 
-      ? `${lastServiceId + 1}`  // Combine salonId and incremented value
-      : newService.serviceId; // Use the provided serviceId if it's not 0
+        // If the service doesn't exist or serviceId is 0, we create a new serviceId and serviceCode
+        if (!existingService) {
+          // If serviceId is 0, generate a unique serviceId using the salonId and incremented value
+          const newServiceId = newService.serviceId === 0
+            ? `${lastServiceId + 1}`  // Combine salonId and incremented value
+            : newService.serviceId; // Use the provided serviceId if it's not 0
 
-    // Update lastServiceId for the next iteration to increment properly
-    if (newService.serviceId === 0) {
-      lastServiceId++;
+          // Update lastServiceId for the next iteration to increment properly
+          if (newService.serviceId === 0) {
+            lastServiceId++;
+          }
+
+          // Generate serviceCode based on the new serviceName and new serviceId
+          const newServiceCode = newService.serviceId === 0
+            ? `${newService.serviceName.slice(0, 2).toUpperCase()}${lastServiceId}`
+            : newService.serviceCode; // Use the provided serviceCode if it's not 0
+
+          // Push the new service with the generated serviceId and serviceCode
+          updatedServices.push({
+            ...newService,
+            serviceId: newServiceId,
+            serviceCode: newServiceCode,
+          });
+        }
+      });
+
+      // Assign the updated services back to the salon object
+      salon.services = updatedServices;
     }
-
-    // Generate serviceCode based on the new serviceName and new serviceId
-    const newServiceCode = newService.serviceId === 0
-      ? `${newService.serviceName.slice(0, 2).toUpperCase()}${lastServiceId}`
-      : newService.serviceCode; // Use the provided serviceCode if it's not 0
-
-    // Push the new service with the generated serviceId and serviceCode
-    updatedServices.push({
-      ...newService,
-      serviceId: newServiceId,
-      serviceCode: newServiceCode,
-    });
-  }
-});
-
-// Assign the updated services back to the salon object
-salon.services = updatedServices;
- }
 
 
 
@@ -513,33 +513,26 @@ export const uploadSalonGalleryImages = async (req, res, next) => {
       galleries = [galleries];
     }
 
-    galleries.map(gallery =>{
+    // Validate each image
+    for (const gallery of galleries) {
       const extension = path.extname(gallery.name).toLowerCase().slice(1);
       if (!allowedExtensions.includes(extension)) {
-        return res.status(400).json({ success: false, message: "File extension must be jpg, png, jfif, svg, jpeg, webp" });
+        return res.status(400).json({
+          success: false,
+          message: `Invalid file extension for ${gallery.name}. Allowed: ${allowedExtensions.join(', ')}`,
+        });
       }
 
-      // Check file size
       if (gallery.size > maxFileSize) {
-        return res.status(400).json({ success: false, message: "File size must be lower than 2mb" });
+        return res.status(400).json({
+          success: false,
+          message: `File size exceeds the maximum file size of 2MB.`,
+        });
       }
-    })
+    }
 
     const uploadPromises = galleries.map(gallery => {
       return new Promise((resolve, reject) => {
-
-        // // Get file extension and check if it's allowed
-        // const extension = path.extname(gallery.name).toLowerCase().slice(1);
-        // if (!allowedExtensions.includes(extension)) {
-        //   return res.status(400).json({ success: false, message: "File extension must be jpg, png, jfif, svg, jpeg, webp" });
-        // }
-
-        // // Check file size
-        // if (gallery.size > maxFileSize) {
-        //   return res.status(400).json({ success: false, message: "File size must be lower than 2mb" });
-        // }
-
-
 
         const public_id = `${gallery.name.split(".")[0]}_${uuidv4()}`;
         const folderPath = `salon-gallery/salon-${salonId}`
@@ -598,30 +591,37 @@ export const uploadMoreSalonGalleryImages = async (req, res, next) => {
     let galleries = req.files.gallery;
     let salonId = req.body.salonId;
 
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', "svg"];
+    // Maximum file size in bytes (e.g., 5MB)
+    const maxFileSize = 2 * 1024 * 1024;
+
     // Ensure that profiles is an array, even for single uploads
     if (!Array.isArray(galleries)) {
       galleries = [galleries];
     }
 
-    const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', "svg"];
-    // Maximum file size in bytes (e.g., 5MB)
-    const maxFileSize = 2 * 1024 * 1024;
+    // Validate each image
+    for (const gallery of galleries) {
+      const extension = path.extname(gallery.name).toLowerCase().slice(1);
+      if (!allowedExtensions.includes(extension)) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid file extension for ${gallery.name}. Allowed: ${allowedExtensions.join(', ')}`,
+        });
+      }
+
+      if (gallery.size > maxFileSize) {
+        return res.status(400).json({
+          success: false,
+          message: `File size exceeds the maximum file size of 2MB.`,
+        });
+      }
+    }
+
 
 
     const uploadPromises = galleries.map(gallery => {
       return new Promise((resolve, reject) => {
-
-        // Get file extension and check if it's allowed
-        const extension = path.extname(gallery.name).toLowerCase().slice(1);
-
-        if (!allowedExtensions.includes(extension)) {
-          return res.status(400).json({ success: false, message: "File extension must be jpg, png, jfif, svg, jpeg, webp" });
-        }
-
-        // Check file size
-        if (gallery.size > maxFileSize) {
-          return res.status(400).json({ success: false, message: "File size must be lower than 2mb" });
-        }
 
         const public_id = `${gallery.name.split(".")[0]}`;
         const folderPath = `salon-gallery/salon-${salonId}`
@@ -827,7 +827,7 @@ export const getAllSalons = async (req, res, next) => {
       success: true,
       response: salons
     });
-  }  catch (error) {
+  } catch (error) {
     next(error);
   }
 }
@@ -952,8 +952,8 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
     }
     if (isOnline === true) {
       return res.status(200).json({ success: true, message: "The salon is currently online.", response: updatedSalon });
-  }
-  else {
+    }
+    else {
 
       updatedSalon.mobileBookingAvailability = false;
 
@@ -962,7 +962,7 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
       await changeBarberStatusAtSalonOffline(salonId);
 
       return res.status(200).json({ success: true, message: "The salon is currently offline.", response: updatedSalon });
-  }
+    }
   } catch (error) {
     // console.log(error);
     next(error);
