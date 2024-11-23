@@ -818,7 +818,7 @@ export const getSalonImages = async (req, res, next) => {
 }
 
 //DESC:GET ALL SALONS =====================
-export const getAllSalons = async (req, res) => {
+export const getAllSalons = async (req, res, next) => {
   try {
     const salons = await allSalons(); // Retrieve all salons from the database
 
@@ -827,12 +827,8 @@ export const getAllSalons = async (req, res) => {
       success: true,
       response: salons
     });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      response: 'Server Error',
-      error: error.message
-    });
+  }  catch (error) {
+    next(error);
   }
 }
 
@@ -853,7 +849,6 @@ export const getSalonsByLocation = async (req, res, next) => {
     });
   }
   catch (error) {
-    console.log(error);
     next(error);
   }
 }
@@ -867,7 +862,7 @@ export const getAllSalonServices = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: "Salon services retrieved",
+      message: "Salon services retrieved successfully.",
       response: salonServices
     })
   }
