@@ -420,10 +420,12 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
       });
 
       // Extract existing services from the salon document
-      const existingServices = salon.services;
+      const existingServices = salon.services.sort((a, b) => a.serviceId - b.serviceId);
 
 
       let lastServiceId = existingServices.length ? existingServices[existingServices.length - 1].serviceId : 0;
+
+      // console.log("Last Service Id ", lastServiceId)
 
       // Loop through each new service
       services.forEach((newService) => {
@@ -488,7 +490,6 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
     });
   }
   catch (error) {
-    console.log(error);
     next(error);
   }
 }
