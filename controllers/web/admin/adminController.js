@@ -412,7 +412,7 @@ export const googleAdminLogin = async (req, res, next) => {
         const foundUser = await googleLoginAdmin(payload.email)
 
         if (!foundUser) {
-            return res.status(401).json({ success: false, message: 'Email does not match' })
+            return res.status(401).json({ success: false, message: 'Email does not exist' })
         }
 
         const accessToken = jwt.sign(
