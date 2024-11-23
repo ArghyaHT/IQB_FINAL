@@ -531,6 +531,8 @@ export const uploadSalonGalleryImages = async (req, res, next) => {
       }
     }
 
+    // Maximum total image size should be 10mb .
+
     const uploadPromises = galleries.map(gallery => {
       return new Promise((resolve, reject) => {
 

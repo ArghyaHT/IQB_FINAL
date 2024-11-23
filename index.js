@@ -73,6 +73,8 @@ connectDB()
 // Writing the cors for for both dev and prod
 const app = express()
 
+app.use(helmet()); 
+
 app.use(cookieParser())
 const allowedOrigins = [
   "http://localhost:5173",
@@ -201,15 +203,6 @@ app.use("/api/bulkMessageAndEmails",bulkMessageAndEmailsRoutes)
 
 app.use("/api/reports",reports)
 
-
-// async function main() {
-//   try {
-//       await storeCountries();
-//   } catch (error) {
-//       console.error('Error:', error);
-//   }
-// }
-// main();
 
 //Global Error Handler
 app.use(ErrorHandler)
