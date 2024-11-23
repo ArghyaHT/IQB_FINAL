@@ -884,7 +884,7 @@ export const barberServedQueue = async (req, res, next) => {
 
                     return res.status(200).json({
                         success: true,
-                        message: 'Customer served from the queue successfully.',
+                        message: 'Customer serve successfully.',
                     });
                 }
             }
@@ -1202,7 +1202,7 @@ export const cancelQueue = async (req, res, next) => {
             if (!foundUser) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Unauthorized Admin'
+                    message: 'Admin not found'
                 });
             }
             
@@ -1384,7 +1384,7 @@ export const cancelQueue = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: "Queue cancellation processed and position updated successfully",
+            message: "Customer cancel successfully.",
             updatedQueueList: updatedQueue.queueList
         });
     } catch (error) {

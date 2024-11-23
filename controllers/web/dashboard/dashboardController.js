@@ -294,7 +294,7 @@ export const setDragAdvertisement = async (req, res, next) => {
       if (advertisements.length === 0) {
         return res.status(400).json({
           success: false,
-          message: "No advertisements present currently."
+          message: "No advertisements available."
         });
       }
 
@@ -314,7 +314,6 @@ export const setDragAdvertisement = async (req, res, next) => {
     }
   }
   catch (error) {
-    console.log(error);
     next(error);
   }
 }

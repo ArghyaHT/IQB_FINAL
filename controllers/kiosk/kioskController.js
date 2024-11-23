@@ -22,10 +22,7 @@ export const loginKiosk = async (req, res, next) => {
     try {
         let { email, password, role } = req.body
 
-        // Convert email to lowercase
-        email = email.toLowerCase();
-
-       if (!email && !password ) {
+        if (!email && !password) {
             return res.status(400).json({
                 success: false,
                 message: "Please enter email and password."
@@ -42,25 +39,29 @@ export const loginKiosk = async (req, res, next) => {
         if (!validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email"
+            });
+        }
+        
+        // Convert email to lowercase
+        email = email.toLowerCase();
+
+        // Validate password length
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter your password."
             });
         }
 
         // Validate password length
-      if (!password) {
-        return res.status(400).json({
-            success: false,
-            message: "Please enter your password."
-        });
-    }
+        if (password.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters."
+            });
+        }
 
-      // Validate password length
-      if (password.length < 8) {
-        return res.status(400).json({
-            success: false,
-            message: "Password must be at least 8 characters."
-        });
-    }
 
         if( role === "Admin"){
 
@@ -69,7 +70,7 @@ export const loginKiosk = async (req, res, next) => {
             if (!foundUser) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Email or password didnot match'
+                    message: 'Email or password donot match'
                 });
             }
     
@@ -104,7 +105,7 @@ export const loginKiosk = async (req, res, next) => {
             if (!foundUser) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Email or password didnot match.'
+                    message: 'Email or password donot match.'
                 })
             }
     
@@ -136,7 +137,7 @@ export const loginKiosk = async (req, res, next) => {
       
     }
     catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 };
@@ -159,7 +160,7 @@ export const logoutKiosk = async (req, res, next) => {
             message: 'Logout successful.'
         });
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 };
@@ -187,7 +188,7 @@ export const getAllSalonsByAdmin = async (req, res, next) => {
             salons: salons,
         });
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 }
@@ -211,7 +212,7 @@ export const adminConnectKiosk = async (req, res, next) => {
 
         if (!foundUser) {
             return res.status(404).json({
-                message: 'No admin found.',
+                message: 'Admin not found.',
             });
         }
 
@@ -221,7 +222,7 @@ export const adminConnectKiosk = async (req, res, next) => {
         const salon = await getSalonBySalonId(salonId)
 
         return res.status(200).json({
-            message: 'Admin successfully connected.',
+            message: 'Admin connected successfully',
             response: salon
         });
     } catch (error) {
@@ -240,14 +241,14 @@ export const getDefaultSalon = async (req, res, next) => {
             if (!admin) {
                 res.status(404).json({
                     success: false,
-                    message: 'No admin account found for the provided email.',
+                    message: 'Admin not found',
                 });
             }
             else {
                 const defaultSalon = await getDefaultSalonDetailsEmail(admin.salonId)
                 res.status(200).json({
                     success: true,
-                    message: "Salon Found",
+                    message: "Salon found successfully",
                     response: defaultSalon
                 })
             }
@@ -257,14 +258,14 @@ export const getDefaultSalon = async (req, res, next) => {
             if (!barber) {
                 res.status(404).json({
                     success: false,
-                    message: 'No barber account found for the provided email.',
+                    message: 'Barber not found',
                 });
             }
             else {
                 const defaultSalon = await getDefaultSalonDetailsEmail(barber.salonId)
                 res.status(200).json({
                     success: true,
-                    message: "Salon Found",
+                    message: "Salon found successfully",
                     response: defaultSalon
                 })
             }
@@ -272,7 +273,7 @@ export const getDefaultSalon = async (req, res, next) => {
        
     }
     catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 }
@@ -291,7 +292,7 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
             });
         }
         if (isOnline === true) {
-            return res.status(200).json({ success: true, message: "The salon is currently online.", response: updatedSalon });
+            return res.status(200).json({ success: true, message: "Salon is currently online.", response: updatedSalon });
         }
         else {
 
@@ -300,7 +301,7 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
             await changeBarberStatusAtSalonOffline(salonId);
 
-            return res.status(200).json({ success: true, message: "The salon is currently offline.", response: updatedSalon });
+            return res.status(200).json({ success: true, message: "Salon is currently offline.", response: updatedSalon });
         }
 
     } catch (error) {
@@ -332,13 +333,13 @@ export const getAllBarberbySalonIdKiosk = async (req, res, next) => {
         if (getAllBarbers.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: "No barbers found",
+                message: "Barbers not found",
             });
         }
 
         return res.status(200).json({
             success: true,
-            message: "All barbers fetched successfully",
+            message: "Barbers retrieved successfully",
             response: getAllBarbers
         });
     } catch (error) {
@@ -353,10 +354,7 @@ export const barberLoginKiosk = async (req, res, next) => {
 
         let { email, password } = req.body
 
-        // Convert email to lowercase
-        email = email.toLowerCase();
-
-        if (!email && !password ) {
+        if (!email && !password) {
             return res.status(400).json({
                 success: false,
                 message: "Please enter email and password."
@@ -373,25 +371,29 @@ export const barberLoginKiosk = async (req, res, next) => {
         if (!validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email"
+            });
+        }
+        
+        // Convert email to lowercase
+        email = email.toLowerCase();
+
+        // Validate password length
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter your password."
             });
         }
 
         // Validate password length
-      if (!password) {
-        return res.status(400).json({
-            success: false,
-            message: "Please enter your password."
-        });
-    }
+        if (password.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters."
+            });
+        }
 
-      // Validate password length
-      if (password.length < 8) {
-        return res.status(400).json({
-            success: false,
-            message: "Password must be at least 8 characters."
-        });
-    }
 
         const foundUser = await findBarberByEmailAndRole(email)
 
@@ -426,34 +428,19 @@ export const barberLoginKiosk = async (req, res, next) => {
             { expiresIn: '1d' }
         )
 
-        // const refreshToken = jwt.sign(
-        //     { "email": foundUser.email, "role": foundUser.role },
-        //     REFRESH_TOKEN_SECRET,
-        //     { expiresIn: '1d' }
-        // )
-
-        // Create secure cookie with refresh token 
-        // res.cookie('BarberToken', accessToken, {
-        //     httpOnly: true, //accessible only by web server 
-        //     secure: true, //https
-        //     sameSite: 'None', //cross-site cookie 
-        //     maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
-        // })
-
-        // Include salon online status within foundUser object
 
 
         // Send accessToken containing username and roles 
         res.status(201).json({
             success: true,
-            message: "Barber Logged In Successfully",
+            message: "Barber Logged-In Successfully",
             barberToken,
             foundUser,
 
         })
     }
     catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 };
@@ -599,12 +586,12 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
         const salon = await getSalonBySalonId(salonId);
 
         if (salon.isOnline === false) {
-            return res.status(400).json({ success: false, message: 'Currently salon is offline' });
+            return res.status(400).json({ success: false, message: 'Salon is offline.' });
         }
 
         // Extract token from the body
         if (!barberToken) {
-            return res.status(400).json({ success: false, message: 'BarberToken is missing' });
+            return res.status(400).json({ success: false, message: 'BarberToken missing' });
         }
 
         // Verify the token
@@ -628,18 +615,18 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
                 const updatedBarber = await barberOnlineStatus(barberId, salonId, isOnline);
 
                 if (!updatedBarber) {
-                    return res.status(404).json({ success: false, message: "Unable to change online status. No barber found." });
+                    return res.status(404).json({ success: false, message: "Barber not found" });
                 }
 
                 return res.status(200).json({
                     success: true,
-                    message: "Barber online status changed successfully.",
+                    message: "Barber online/offline status changed successfully.",
                     response: updatedBarber
                 });
             }
         );
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 };
@@ -652,11 +639,11 @@ export const joinQueueKiosk = async (req, res, next) => {
         const salon = await getSalonTimeZone(salonId);
 
         if (salon.isOnline === false) {
-            return res.status(400).json({ success: false, message: "Please set the salon to online to join the queue." });
+            return res.status(400).json({ success: false, message: "Cant join queue as salon offline" });
         }
 
         if (name.length < 1 || name.length > 20) {
-            return res.status(400).json({ success: false, message: "Please enter a name that is between 1 and 20 characters in length." });
+            return res.status(400).json({ success: false, message: "Please enter name between 1 to 20 characters" });
         }
 
         if (mobileNumber) {
@@ -666,33 +653,6 @@ export const joinQueueKiosk = async (req, res, next) => {
             // Or using the unary + operator
             // mobileNumber = +mobileNumber;
         }
-
-        // // Validate mobile number format (assuming it should be exactly 10 digits)
-        // if (mobileNumber && (!/^\d{12}$/.test(mobileNumber))) {
-        //     return res.status(400).json({ success: false, message: "Invalid mobile number." });
-        // }
-
-         
-        // if(!validateName(name)){
-        //     res.status(400).json({
-        //         success: false,
-        //         message: "Name must contain only alphabetic characters"
-        //     })
-        // }
-
-        // // Parse the mobileNumber if it's provided
-        // let parsedMobileNumber;
-        // if (mobileNumber !== undefined && mobileNumber.trim() !== '') {
-        //     parsedMobileNumber = parseInt(mobileNumber);
-        // } else {
-        //     parsedMobileNumber = null; // Store null for empty mobile number
-        // }
-
-        // // Validate mobile number format if parsed successfully
-        // if (parsedMobileNumber !== null && parsedMobileNumber.toString().length !== 10) {
-        //     return res.status(400).json({ success: false, message: "Mobile number should be 10 digit" });
-        // }
-
 
         const isVipServiceRequested = services.some(service => service.vipService);
 
@@ -711,7 +671,7 @@ export const joinQueueKiosk = async (req, res, next) => {
             if (!availableBarber) {
                 return res.status(400).json({
                     success: false,
-                    message: 'No barbers available to provide the services.',
+                    message: 'No barbers available',
                 });
             }
 
@@ -732,7 +692,7 @@ export const joinQueueKiosk = async (req, res, next) => {
             // Extracting the data after '+'
             const offset = timeZoneParts[1];
 
-            console.log(offset)
+            // console.log(offset)
 
             // Parse offset into hours and minutes
             const [offsetHours, offsetMinutes] = offset.split(':').map(Number);
@@ -842,9 +802,9 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             try {
                 await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
-                console.log('Email sent successfully.');
+                // console.log('Email sent successfully.');
             } catch (error) {
-                console.error('Error sending email:', error);
+                // console.error('Error sending email:', error);
                 // Handle error if email sending fails
             }
 
@@ -853,7 +813,7 @@ export const joinQueueKiosk = async (req, res, next) => {
             const getBarber = await findBaberByBarberId(barberId);
 
             if (getBarber.isClockedIn === false) {
-                return res.status(400).json({ success: false, message: "The Barber is unable to take queue" });
+                return res.status(400).json({ success: false, message: "Barber unable to take queue" });
             }
 
             // Handle when a specific barber is provided
@@ -862,7 +822,7 @@ export const joinQueueKiosk = async (req, res, next) => {
             if (!updatedBarber) {
                 return res.status(400).json({
                     success: false,
-                    message: "The barber is not online",
+                    message: "Barber offline",
                 });
             }
 
@@ -1002,7 +962,7 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             try {
                 await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
-                console.log('Email sent successfully.');
+                // console.log('Email sent successfully.');
             } catch (error) {
                 console.error('Error sending email:', error);
                 // Handle error if email sending fails
@@ -1011,11 +971,11 @@ export const joinQueueKiosk = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: "Joined Queue",
+            message: "Join Queue successfully",
             response: existingQueue,
         });
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 };
@@ -1028,12 +988,12 @@ export const getAllSalonServices = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: "Salon services retrieved",
+            message: "Salon services retrieved successfully",
             response: salonServices
         })
     }
     catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 }
@@ -1052,7 +1012,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
             res.status(200).json({
                 success: true,
-                message: "QList By Salon Id retrieved",
+                message: "Queue-list retrieved successfully",
                 response: sortedQueueList,
             });
         } else {
@@ -1065,7 +1025,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
     }
     catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 }
@@ -1083,7 +1043,7 @@ export const getAvailableBarbersForQKiosk = async (req, res, next) => {
         if (availableBarbers.length === 0) {
             res.status(404).json({
                 success: false,
-                message: 'No available Barbers found at this moment.'
+                message: 'No barbers available'
             });
         }
         else {
@@ -1119,13 +1079,13 @@ export const getAvailableBarbersForQKiosk = async (req, res, next) => {
 
             res.status(200).json({
                 success: true,
-                message: 'All Barbers retrieved',
+                message: 'Barbers retrieved successfully',
                 response: availableBarbers
             });
         }
     }
     catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 }
@@ -1145,18 +1105,18 @@ export const getBarberByServicesKiosk = async (req, res, next) => {
         if (!barbers || barbers.length === 0) {
             return res.status(404).json({
                 success: false,
-                response: 'No barbers found for the provided services.'
+                response: 'No barbers found'
             });
         }
 
         return res.status(200).json({
             success: true,
-            message: "Barbers retrieved for the particular Services",
+            message: "Barbers retrieved sucessFully",
             response: barbers
         });
 
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 };
@@ -1190,19 +1150,19 @@ export const getBarberServicesByBarberIdKiosk = async (req, res, next) => {
             if (!barbers) {
                 return res.status(404).json({
                     success: false,
-                    message: "No barbers found for the geiven BarberId"
+                    message: "barber not found"
                 });
             }
         }
 
         return res.status(200).json({
             success: true,
-            message: "Barber services retrieved",
+            message: "Barber services retrieved successfully",
             response: barberServices
         });
     }
     catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 
@@ -1212,9 +1172,6 @@ export const getBarberServicesByBarberIdKiosk = async (req, res, next) => {
 export const barberServedQueueKiosk = async (req, res, next) => {
     try {
         let { salonId, barberId, barberEmail, password, services, _id } = req.body;
-
-        // Convert email to lowercase
-        barberEmail = barberEmail.toLowerCase();
 
         if (!barberEmail && !password ) {
             return res.status(400).json({
@@ -1233,9 +1190,11 @@ export const barberServedQueueKiosk = async (req, res, next) => {
         if (!validateEmail(barberEmail)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email"
             });
         }
+            // Convert email to lowercase
+            barberEmail = barberEmail.toLowerCase();
 
         // Validate password length
       if (!password) {
@@ -1259,7 +1218,7 @@ export const barberServedQueueKiosk = async (req, res, next) => {
         if (!foundUser) {
             return res.status(400).json({
                 success: false,
-                message: 'Email or password didnot match.'
+                message: 'Email or password donot match.'
             })
         }
 
@@ -1267,7 +1226,7 @@ export const barberServedQueueKiosk = async (req, res, next) => {
 
         if (!match) return res.status(400).json({
             message: false,
-            message: 'Email or password didnot match.'
+            message: 'Email or password donot match.'
         })
 
         const updatedByBarberEmail = foundUser.email;
@@ -1519,7 +1478,7 @@ export const barberServedQueueKiosk = async (req, res, next) => {
 
                 return res.status(200).json({
                     success: true,
-                    message: 'Customer served successfully.',
+                    message: 'Customer serve successfully.',
                 });
             }
         }
@@ -1529,7 +1488,7 @@ export const barberServedQueueKiosk = async (req, res, next) => {
             message: 'Queue position is not 1.',
         });
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 }
@@ -1538,9 +1497,6 @@ export const barberServedQueueKiosk = async (req, res, next) => {
 export const cancelQueueKiosk = async (req, res, next) => {
     try {
         let { salonId, barberEmail, password, barberId, _id } = req.body;
-
-        // Convert email to lowercase
-        barberEmail = barberEmail.toLowerCase();
 
         if (!barberEmail && !password ) {
             return res.status(400).json({
@@ -1559,9 +1515,13 @@ export const cancelQueueKiosk = async (req, res, next) => {
         if (!validateEmail(barberEmail)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid Email Format"
+                message: "Invalid Email"
             });
         }
+
+
+        // Convert email to lowercase
+        barberEmail = barberEmail.toLowerCase();
 
         // Validate password length
       if (!password) {
@@ -1583,7 +1543,7 @@ export const cancelQueueKiosk = async (req, res, next) => {
         if (!foundUser) {
             return res.status(400).json({
                 success: false,
-                message: 'Email or password didnot match.'
+                message: 'Email or password donot match.'
             });
         }
 
@@ -1592,7 +1552,7 @@ export const cancelQueueKiosk = async (req, res, next) => {
         if (!match) {
             return res.status(400).json({
                 success: false,
-                message: 'Email or password didnot match.'
+                message: 'Email or password donot match.'
             });
         }
 
@@ -1604,7 +1564,7 @@ export const cancelQueueKiosk = async (req, res, next) => {
         if (!updatedQueue) {
             return res.status(404).json({
                 success: false,
-                message: 'Queue not found for the given salon ID',
+                message: 'Queue not found.',
             });
         }
 
@@ -1613,7 +1573,7 @@ export const cancelQueueKiosk = async (req, res, next) => {
         if (canceledQueueIndex === -1) {
             return res.status(404).json({
                 success: false,
-                message: 'Queue not found with the given _id',
+                message: 'Queue not found.',
             });
         }
 
@@ -1739,7 +1699,7 @@ export const cancelQueueKiosk = async (req, res, next) => {
         // Send email to the customer who is getting cancelled
         try {
             await sendQueuePositionEmail(canceledQueue.customerEmail, servedEmailSubject, servedEmailBody);
-            console.log('Email sent to the served customer successfully.');
+            // console.log('Email sent to the served customer successfully.');
         } catch (error) {
             console.error('Error sending email to the served customer:', error);
             // Handle error if email sending fails
@@ -1843,12 +1803,12 @@ export const cancelQueueKiosk = async (req, res, next) => {
 
         return res.status(200).json({
             success: true,
-            message: 'Queue canceled successfully',
+            message: 'Customer cancel successfully',
             updatedQueueList: updatedQueue.queueList,
         });
 
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 };
@@ -1866,16 +1826,16 @@ export const getAllAdvertisementsKiosk = async (req, res, next) => {
         const sortedAdvertisements = salonSettings.advertisements.reverse();
 
         if (!salonSettings) {
-            return res.status(404).json({ success: false, message: "Salon settings not found" });
+            return res.status(404).json({ success: false, message: "Salon not found" });
         }
 
         res.status(200).json({
             success: true,
-            message: 'Advertisement images retrieved successfully',
+            message: 'Advertisements retrieved successfully',
             advertisements: sortedAdvertisements
         });
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 }
@@ -1887,24 +1847,24 @@ export const getAttendenceByBarberIdKiosk = async (req, res, next) => {
         const { salonId, barberId } = req.body;
 
         if (salonId === 0) {
-            return res.status(404).json({ success: false, message: "Barber is not connected to any salon" })
+            return res.status(404).json({ success: false, message: "Barber not connected to salon" })
         }
 
         const attendance = await getBarberAttendence(salonId, barberId);
 
         if (!attendance) {
-            return res.status(400).json({ success: false, message: "Attendence List not found for the barber" });
+            return res.status(400).json({ success: false, message: "Attendence list not found" });
         }
         // Sort attendance records in descending order by date
         attendance.attendance.sort((a, b) => new Date(b.date) - new Date(a.date));
         res.status(200).json({
             success: true,
-            message: 'Attendence retrieved successfully',
+            message: 'Attendence list retrieved successfully',
             response: attendance
         });
 
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 }
@@ -1918,12 +1878,12 @@ export const changeBarberClockInStatus = async (req, res, next) => {
         const salon = await getSalonBySalonId(salonId);
 
         if (salon.isOnline === false) {
-            return res.status(400).json({ success: false, message: 'Currently salon is Offline' });
+            return res.status(400).json({ success: false, message: 'Salon is offline.' });
         }
 
         // Extract token from the body
         if (!barberToken) {
-            return res.status(400).json({ success: false, message: 'BarberToken is missing' });
+            return res.status(400).json({ success: false, message: 'Barber token is missing' });
         }
 
         // Verify the token
@@ -1942,7 +1902,7 @@ export const changeBarberClockInStatus = async (req, res, next) => {
                     const updatedBarber = await barberClockInStatus(barberId, salonId, isClockedIn);
 
                     if (!updatedBarber) {
-                        return res.status(404).json({ success: false, message: "Cant clockedIn as barber not found" });
+                        return res.status(404).json({ success: false, message: "Barber not found" });
                     }
                     await barberLogInTime(updatedBarber.salonId, updatedBarber.barberId, updatedBarber.updatedAt);
 
@@ -1963,7 +1923,7 @@ export const changeBarberClockInStatus = async (req, res, next) => {
                         const updatedBarber = await barberClockInStatus(barberId, salonId, isClockedIn);
 
                         if (!updatedBarber) {
-                            return res.status(404).json({ success: false, message: "Cant clockedIn as barber not found" });
+                            return res.status(404).json({ success: false, message: "Barber not found" });
                         }
 
                         await barberLogOutTime(updatedBarber.salonId, updatedBarber.barberId, updatedBarber.updatedAt);
@@ -1978,7 +1938,7 @@ export const changeBarberClockInStatus = async (req, res, next) => {
                     else {
                         return res.status(404).json({
                             success: false,
-                            message: "Cant clock you out as you have customers in the queue",
+                            message: "Cant clock out as customers in the queue",
                         });
                     }
 
@@ -1987,7 +1947,7 @@ export const changeBarberClockInStatus = async (req, res, next) => {
             }
         );
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 };
@@ -2011,27 +1971,27 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
         const updatedSalon = await mobileBookingAvailabilityStatus(salonId, mobileBookingAvailability);
 
         if (!updatedSalon) {
-            return res.status(404).json({ success: false, message: "MobileBookingAvailability Status cant be changed as no salon found" });
+            return res.status(404).json({ success: false, message: "Mobile booking status cant be changed" });
         }
 
         if (mobileBookingAvailability === true) {
             return res.status(200).json({
                 success: true,
-                message: "Booking Availability status online",
+                message: "Mobile booking status online",
                 response: updatedSalon
             });
         }
         else {
             return res.status(200).json({
                 success: true,
-                message: "Booking Availability status offline",
+                message: "Mobile booking status offline",
                 response: updatedSalon
             });
         }
 
 
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 };
@@ -2041,10 +2001,7 @@ export const salonAccountLogin = async (req, res, next) => {
     try {
         let { email, password, role, salonId } = req.body
 
-        // Convert email to lowercase
-        email = email.toLowerCase();
-
-        
+    
         if (!email && !password ) {
             return res.status(400).json({
                 success: false,
@@ -2065,6 +2022,10 @@ export const salonAccountLogin = async (req, res, next) => {
                 message: "Invalid Email Format"
             });
         }
+
+            // Convert email to lowercase
+            email = email.toLowerCase();
+
 
         // Validate password length
       if (!password) {
@@ -2112,7 +2073,7 @@ export const salonAccountLogin = async (req, res, next) => {
             if (!foundUser) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Email or password didnot match.'
+                    message: 'Email or password donot match.'
                 })
             }
 
@@ -2120,19 +2081,19 @@ export const salonAccountLogin = async (req, res, next) => {
 
             if (!match) return res.status(400).json({
                 message: false,
-                message: 'Email or password didnot match.'
+                message: 'Email or password donot match.'
             })
 
             res.status(201).json({
                 success: true,
-                message: "Barber Logged In Successfully",
+                message: "Barber Logged-In Successfully",
                 foundUser,
             })
         }
 
     }
     catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 }
@@ -2145,7 +2106,7 @@ export const getAllBarberbySalonId = async (req, res, next) => {
         if (Number(salonId) === 0) {
             return res.status(200).json({
                 success: false,
-                message: "No barbers are currently available to show.",
+                message: "No barbers available",
                 getAllBarbers: []
             });
         }
@@ -2155,7 +2116,7 @@ export const getAllBarberbySalonId = async (req, res, next) => {
         if (salonExists === null) {
             return res.status(400).json({
                 success: false,
-                message: "Salon does not exist.",
+                message: "Salon not found.",
             });
         }
 
@@ -2165,19 +2126,19 @@ export const getAllBarberbySalonId = async (req, res, next) => {
         if (getAllBarbers && getAllBarbers.length > 0) {
             return res.status(200).json({
                 success: true,
-                message: "All barbers fetched successfully",
+                message: "Barbers retrieved successfully",
                 getAllBarbers: getAllBarbers,
             });
         } else {
             return res.status(200).json({
                 success: false,
-                message: "No barbers to show.",
+                message: "No barbers found.",
                 getAllBarbers: [],
             });
         }
 
     } catch (error) {
-        console.error(error);
+        // console.error(error);
         next(error);
     }
 };
@@ -2189,16 +2150,23 @@ export const barberServedQueueTvApp = async (req, res, next) => {
     try {
         let { salonId, barberId, adminEmail, services, _id } = req.body;
 
-        // Convert email to lowercase
-        if (adminEmail) {
-            adminEmail = adminEmail.toLowerCase();
-        }
-        if (adminEmail && !validateEmail(adminEmail)) {
+    
+        if (!adminEmail) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid admin email"
+                message: "Please enter your email."
             });
         }
+
+        if (!validateEmail(adminEmail)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Email Format"
+            });
+        }
+
+        adminEmail = adminEmail.toLowerCase();
+
         if (adminEmail) {
 
             const foundUser = await findAdminByEmailandSalonId(adminEmail, salonId);
@@ -2468,7 +2436,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
             });
         }
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 };
@@ -2479,13 +2447,10 @@ export const cancelQueueTvApp= async (req, res, next) => {
     try {
         let { salonId, adminEmail, barberId, _id } = req.body;
 
-        // Convert email to lowercase
-        adminEmail = adminEmail.toLowerCase();
-
-        if (!adminEmail) {
+         if (!adminEmail) {
             return res.status(400).json({
                 success: false,
-                message: "Please ensure the email field is filled correctly."
+                message: "Please enter your email."
             });
         }
 
@@ -2496,15 +2461,14 @@ export const cancelQueueTvApp= async (req, res, next) => {
             });
         }
 
-
-
+        adminEmail = adminEmail.toLowerCase();
 
         const foundUser = await findAdminByEmailandRole(adminEmail);
 
         if (!foundUser) {
             return res.status(400).json({
                 success: false,
-                message: 'Email or password didnot match.'
+                message: 'Email or password donot match.'
             });
         }
 
@@ -2517,7 +2481,7 @@ export const cancelQueueTvApp= async (req, res, next) => {
         if (!updatedQueue) {
             return res.status(404).json({
                 success: false,
-                message: 'Queue not found for the given salon ID',
+                message: 'Queue not found',
             });
         }
 
@@ -2526,7 +2490,7 @@ export const cancelQueueTvApp= async (req, res, next) => {
         if (canceledQueueIndex === -1) {
             return res.status(404).json({
                 success: false,
-                message: 'Queue not found with the given _id',
+                message: 'Queue not found',
             });
         }
 
@@ -2761,7 +2725,7 @@ export const cancelQueueTvApp= async (req, res, next) => {
         });
 
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         next(error);
     }
 };

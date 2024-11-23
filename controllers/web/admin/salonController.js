@@ -858,8 +858,17 @@ export const getSalonsByLocation = async (req, res, next) => {
 
 //DESC:GET ALL SALON SERVICES ======================
 export const getAllSalonServices = async (req, res, next) => {
-  const { salonId } = req.query;
   try {
+
+    const { salonId } = req.query;
+
+    if(salonId === 0){
+      res.status(400).json({
+        success: false,
+        message: "Salon not found",
+      })
+    }
+
     const salonServices = await allSalonServices(salonId)
 
     res.status(200).json({
@@ -869,7 +878,6 @@ export const getAllSalonServices = async (req, res, next) => {
     })
   }
   catch (error) {
-    console.log(error);
     next(error);
   }
 }

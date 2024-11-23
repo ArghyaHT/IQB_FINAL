@@ -35,9 +35,6 @@ export const registerAdmin = async (req, res, next) => {
     try {
         let { email, password } = req.body
 
-        // Convert email to lowercase
-        email = email.toLowerCase();
-
         if (!email && !password) {
             return res.status(400).json({
                 success: false,
@@ -58,6 +55,10 @@ export const registerAdmin = async (req, res, next) => {
                 message: "Invalid Email"
             });
         }
+
+
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         // Validate password length
         if (!password) {
@@ -108,9 +109,6 @@ export const loginAdmin = async (req, res, next) => {
     try {
         let { email, password } = req.body
 
-        // Convert email to lowercase
-        email = email.toLowerCase();
-
         if (!email && !password) {
             return res.status(400).json({
                 success: false,
@@ -131,6 +129,9 @@ export const loginAdmin = async (req, res, next) => {
                 message: "Invalid Email Format"
             });
         }
+
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         // Validate password length
         if (!password) {
@@ -471,7 +472,7 @@ export const updateAdminInfo = async (req, res, next) => {
         if (name && (name.length < 1 || name.length > 20)) {
             return res.status(400).json({
                 success: false,
-                message: "Please enter a name that is between 1 and 20 characters in length."
+                message: "Please enter name between 1 to 20 characters"
             });
         }
 
@@ -712,7 +713,7 @@ export const updateAdminAccountDetails = async (req, res, next) => {
 //DESC:UPLOAD ADMIN PROFILE PICTURE ============================
 export const uploadAdminprofilePic = async (req, res, next) => {
     try {
-     
+
 
         let profiles = req.files.profile;
         const { email } = req.body;
@@ -1357,7 +1358,7 @@ export const adminchangepassword = async (req, res, next) => {
             });
         }
 
-        if(!oldPassword && !password){
+        if (!oldPassword && !password) {
             return res.status(400).json({
                 success: false,
                 message: "Please enter all the fields."
