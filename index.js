@@ -73,7 +73,7 @@ connectDB()
 // Writing the cors for for both dev and prod
 const app = express()
 
-app.use(helmet()); 
+// app.use(helmet()); 
 
 app.use(cookieParser())
 const allowedOrigins = [
