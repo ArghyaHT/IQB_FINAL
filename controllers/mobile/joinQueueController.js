@@ -882,7 +882,6 @@ export const getBarberServicesByBarberId = async (req, res, next) => {
         });
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 
@@ -908,7 +907,6 @@ export const getQlistbyBarberId = async (req, res, next) => {
             response: qList[0].queueList // Extracting the queue list from the result
         });
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };

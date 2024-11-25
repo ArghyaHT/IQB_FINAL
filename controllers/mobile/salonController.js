@@ -11,7 +11,6 @@ export const getAllSalons = async (req, res, next) => {
       response: salons
     });
   } catch (error) {
-    //console.log(error);
     next(error);
 }
 }
@@ -37,7 +36,6 @@ export const getAllSalonServices = async (req, res, next) => {
     
   }
   catch (error) {
-    //console.log(error);
     next(error);
   }
 }
@@ -71,7 +69,6 @@ try {
     },
   });
 } catch (error) {
-  //console.log(error);
   next(error);
 }
 }
@@ -110,7 +107,6 @@ try {
     response: getAllSalons,
   })
 } catch (error) {
-  //console.log(error);
   next(error);
 }
 }
@@ -134,7 +130,6 @@ try {
   });
 }
 catch (error) {
-  //console.log(error);
   next(error);
 }
 }

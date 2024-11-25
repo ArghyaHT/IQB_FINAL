@@ -99,7 +99,6 @@ export const registerAdmin = async (req, res, next) => {
         })
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -225,7 +224,6 @@ export const handleLogoutAdmin = async (req, res, next) => {
             message: 'Admin Cookie cleared'
         })
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -234,9 +232,6 @@ export const handleLogoutAdmin = async (req, res, next) => {
 export const handleForgetPasswordAdmin = async (req, res, next) => {
     try {
         let { email } = req.body
-
-        // Convert email to lowercase
-        email = email.toLowerCase();
 
         if (!email) {
             return res.status(400).json({
@@ -251,6 +246,9 @@ export const handleForgetPasswordAdmin = async (req, res, next) => {
                 message: "Invalid Email"
             });
         }
+
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
 
         const user = await findAdminByEmailandRole(email)
@@ -329,7 +327,6 @@ export const handleResetPasswordAdmin = async (req, res, next) => {
         })
 
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -378,7 +375,6 @@ export const googleAdminSignup = async (req, res, next) => {
 
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -437,7 +433,6 @@ export const googleAdminLogin = async (req, res, next) => {
             foundUser
         })
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -445,11 +440,6 @@ export const googleAdminLogin = async (req, res, next) => {
 export const updateAdminInfo = async (req, res, next) => {
     try {
         let { email, name, countryCode, mobileNumber, gender, dateOfBirth } = req.body
-
-        // Convert email to lowercase
-        if (email) {
-            email = email.toLowerCase();
-        }
 
         if (!email) {
             return res.status(400).json({
@@ -464,6 +454,8 @@ export const updateAdminInfo = async (req, res, next) => {
                 message: "Invalid Email "
             });
         }
+
+        email = email.toLowerCase();
 
         if (name && (name.length < 1 || name.length > 20)) {
             return res.status(400).json({
@@ -554,7 +546,6 @@ export const updateAdminInfo = async (req, res, next) => {
             updatedAdmin
         })
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -582,7 +573,6 @@ export const refreshTokenControllerAdmin = async (req, res, next) => {
 
         res.status(201).json({ success: true, message: "New accessToken generated" });
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -618,7 +608,6 @@ export const deleteSingleAdmin = async (req, res, next) => {
 
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -629,9 +618,6 @@ export const updateAdminAccountDetails = async (req, res, next) => {
     try {
 
         let { name, gender, email, countryCode, mobileNumber, dateOfBirth } = req.body;
-
-        // Convert email to lowercase
-        email = email.toLowerCase();
 
         if (!email) {
             return res.status(400).json({
@@ -647,6 +633,8 @@ export const updateAdminAccountDetails = async (req, res, next) => {
             });
         }
 
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         if (name && (name.length < 1 || name.length > 20)) {
             return res.status(400).json({
@@ -699,7 +687,6 @@ export const updateAdminAccountDetails = async (req, res, next) => {
 
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -721,9 +708,7 @@ export const uploadAdminprofilePic = async (req, res, next) => {
 
         if (!req.files || !req.files.profile) {
             return res.status(400).json({ success: false, message: "Admin profile image empty." });
-        }
-
-        // console.log('Received profiles:', profiles); 
+        } 
 
         if (!Array.isArray(profiles)) {
             profiles = [profiles]; // Ensure profiles is always an array
@@ -782,7 +767,6 @@ export const uploadAdminprofilePic = async (req, res, next) => {
         });
 
     } catch (error) {
-        // console.log('Error uploading profile picture:', error);
         next(error);
     }
 };
@@ -852,7 +836,6 @@ export const updateAdminProfilePic = async (req, res, next) => {
             })
 
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -937,7 +920,6 @@ export const sendVerificationCodeForAdminEmail = async (req, res, next) => {
             message: `Please check your email (${email}) for verification code.`,
         });
     } catch (error) {
-        // //console.log(error);
         next(error);
     }
 }
@@ -973,7 +955,6 @@ export const changeEmailVerifiedStatus = async (req, res, next) => {
             message: "Enter a valid Verification code",
         });
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1034,7 +1015,6 @@ export const getAllSalonsByAdmin = async (req, res, next) => {
         }
 
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1075,7 +1055,6 @@ export const getDefaultSalonByAdmin = async (req, res, next) => {
         }
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1124,7 +1103,6 @@ export const changeDefaultSalonIdOfAdmin = async (req, res, next) => {
             },
         });
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };
@@ -1230,7 +1208,6 @@ export const approveBarber = async (req, res, next) => {
         });
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1281,7 +1258,6 @@ export const sendVerificationCodeForAdminMobile = async (req, res, next) => {
             message: `Please check your mobile inbox for verification code.`,
         });
     } catch (error) {
-        // //console.log(error);
         next(error);
     }
 }
@@ -1326,7 +1302,6 @@ export const changeMobileVerifiedStatus = async (req, res, next) => {
         }
 
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1456,7 +1431,6 @@ export const adminchangepassword = async (req, res, next) => {
 
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }

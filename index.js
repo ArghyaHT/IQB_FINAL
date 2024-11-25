@@ -110,9 +110,6 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 
 //Image upload =============
-
-// console.log(process.env.CLOUDINARY_URL)
-
 if (process.env.NODE_ENV != "production") {
 app.use(morgan("dev"));
 }
@@ -120,7 +117,6 @@ app.use(morgan("dev"));
 app.use(fileUpload({
 debug: true,
 useTempFiles: true,
-// tempFileDir: path.join(__dirname,"./temp")
 }));
 app.use(express.static("uploads"));
 

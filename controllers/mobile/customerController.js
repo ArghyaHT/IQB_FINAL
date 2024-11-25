@@ -139,7 +139,6 @@ export const signUp = async (req, res, next) => {
                 await sendVerificationCode(email, name, verificationCode);
                 await sendMobileVerificationCode(formattedNumber, verificationCode);
             } catch (error) {
-                //console.log(error);
                 next(error);
             }
             
@@ -154,7 +153,6 @@ export const signUp = async (req, res, next) => {
             });
         }
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };
@@ -223,7 +221,6 @@ export const matchVerificationCode = async (req, res, next) => {
             message: "Verification code didn't match. Please enter a valid verification code",
         });
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };
@@ -329,7 +326,6 @@ export const signIn = async (req, res, next) => {
         })
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 };
@@ -502,7 +498,6 @@ export const forgetPassword = async (req, res, next) => {
         try {
             await sendForgetPasswordMail(email, user.name, verificationCode);
         } catch (error) {
-            //console.log(error);
             next(error);
         }
         return res.status(200).json({
@@ -511,7 +506,6 @@ export const forgetPassword = async (req, res, next) => {
             // verificationCode: verificationCode
         });
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };
@@ -551,7 +545,6 @@ export const verifyPasswordResetCode = async (req, res, next) => {
             });
         }
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };
@@ -589,7 +582,6 @@ export const resetPassword = async (req, res, next) => {
         });
 
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };

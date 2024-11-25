@@ -656,9 +656,6 @@ export const joinQueueKiosk = async (req, res, next) => {
         if (mobileNumber) {
             // Using Number() function
             mobileNumber = Number(mobileNumber);
-        
-            // Or using the unary + operator
-            // mobileNumber = +mobileNumber;
         }
 
         const isVipServiceRequested = services.some(service => service.vipService);
@@ -699,8 +696,6 @@ export const joinQueueKiosk = async (req, res, next) => {
             // Extracting the data after '+'
             const offset = timeZoneParts[1];
 
-            // console.log(offset)
-
             // Parse offset into hours and minutes
             const [offsetHours, offsetMinutes] = offset.split(':').map(Number);
 
@@ -714,7 +709,6 @@ export const joinQueueKiosk = async (req, res, next) => {
                 customerEmail,
                 joinedQ: true,
                 joinedQType,
-                // qPosition: isVipServiceRequested ? 1 : availableBarber.queueCount,
                 dateJoinedQ: new Date(),
                 timeJoinedQ: adjustedTime,
                 methodUsed,
@@ -809,9 +803,8 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             try {
                 await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
-                // console.log('Email sent successfully.');
             } catch (error) {
-                // console.error('Error sending email:', error);
+                console.error('Error sending email:', error);
                 // Handle error if email sending fails
             }
 
@@ -871,7 +864,6 @@ export const joinQueueKiosk = async (req, res, next) => {
                 customerEmail,
                 joinedQ: true,
                 joinedQType,
-                // qPosition: isVipServiceRequested ? 1 : updatedBarber.queueCount,
                 dateJoinedQ: new Date(),
                 timeJoinedQ: adjustedTime,
                 methodUsed,
@@ -969,7 +961,6 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             try {
                 await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
-                // console.log('Email sent successfully.');
             } catch (error) {
                 console.error('Error sending email:', error);
                 // Handle error if email sending fails
@@ -982,7 +973,6 @@ export const joinQueueKiosk = async (req, res, next) => {
             response: existingQueue,
         });
     } catch (error) {
-        // //console.log(error);
         next(error);
     }
 };
@@ -1000,7 +990,6 @@ export const getAllSalonServices = async (req, res, next) => {
         })
     }
     catch (error) {
-        // //console.log(error);
         next(error);
     }
 }
@@ -1032,7 +1021,6 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
     }
     catch (error) {
-        // //console.log(error);
         next(error);
     }
 }
@@ -1092,7 +1080,6 @@ export const getAvailableBarbersForQKiosk = async (req, res, next) => {
         }
     }
     catch (error) {
-        // //console.log(error);
         next(error);
     }
 }
@@ -1123,7 +1110,6 @@ export const getBarberByServicesKiosk = async (req, res, next) => {
         });
 
     } catch (error) {
-        // //console.log(error);
         next(error);
     }
 };
@@ -1476,7 +1462,6 @@ export const barberServedQueueKiosk = async (req, res, next) => {
                                     console.log('Email sent successfully.');
                                 } catch (error) {
                                     console.error('Error sending email:', error);
-                                    // Handle error if email sending fails
                                 }
                             }
                         }
@@ -1495,7 +1480,6 @@ export const barberServedQueueKiosk = async (req, res, next) => {
             message: 'Queue position is not 1.',
         });
     } catch (error) {
-        // //console.log(error);
         next(error);
     }
 }
@@ -1706,10 +1690,8 @@ export const cancelQueueKiosk = async (req, res, next) => {
         // Send email to the customer who is getting cancelled
         try {
             await sendQueuePositionEmail(canceledQueue.customerEmail, servedEmailSubject, servedEmailBody);
-            // console.log('Email sent to the served customer successfully.');
         } catch (error) {
             console.error('Error sending email to the served customer:', error);
-            // Handle error if email sending fails
         }
 
         const customers = await findCustomersToMail(salonId, barberId);
@@ -1801,7 +1783,6 @@ export const cancelQueueKiosk = async (req, res, next) => {
                             console.log('Email sent successfully.');
                         } catch (error) {
                             console.error('Error sending email:', error);
-                            // Handle error if email sending fails
                         }
                     }
                 }
@@ -1842,7 +1823,6 @@ export const getAllAdvertisementsKiosk = async (req, res, next) => {
             advertisements: sortedAdvertisements
         });
     } catch (error) {
-        // //console.log(error);
         next(error);
     }
 }
@@ -1998,7 +1978,6 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
 
 
     } catch (error) {
-        // //console.log(error);
         next(error);
     }
 };
@@ -2100,7 +2079,6 @@ export const salonAccountLogin = async (req, res, next) => {
 
     }
     catch (error) {
-        // //console.log(error);
         next(error);
     }
 }
@@ -2145,7 +2123,6 @@ export const getAllBarberbySalonId = async (req, res, next) => {
         }
 
     } catch (error) {
-        // console.error(error);
         next(error);
     }
 };
@@ -2443,7 +2420,6 @@ export const barberServedQueueTvApp = async (req, res, next) => {
             });
         }
     } catch (error) {
-        // //console.log(error);
         next(error);
     }
 };
@@ -2732,7 +2708,6 @@ export const cancelQueueTvApp= async (req, res, next) => {
         });
 
     } catch (error) {
-        // //console.log(error);
         next(error);
     }
 };
