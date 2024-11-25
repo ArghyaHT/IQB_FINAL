@@ -62,7 +62,7 @@ export const addIcons = async (req, res, next) => {
         response: updatedIcons.icons,
       });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
   };
@@ -87,7 +87,7 @@ export const addIcons = async (req, res, next) => {
         response: allIcons.icons,
       });
     } catch (error) {
-      console.log(error);
+      //console.log(error);
       next(error);
   }
   };

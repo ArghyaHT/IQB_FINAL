@@ -47,7 +47,7 @@ export const sendNotification = async (req, res, next) => {
         message: 'Notification sent and saved successfully'
       });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
   }
@@ -98,7 +98,7 @@ export const sendNotification = async (req, res, next) => {
         message: 'Notifications sent and saved successfully'
       });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
   }
@@ -132,7 +132,7 @@ export const sendNotification = async (req, res, next) => {
         }
        });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
   };

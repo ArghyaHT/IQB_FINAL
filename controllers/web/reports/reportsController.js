@@ -34,7 +34,7 @@ export const salonServedReport = async(req, res, next) => {
         });
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -72,7 +72,7 @@ export const salonCancelledReport = async(req, res, next) => {
         });
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }

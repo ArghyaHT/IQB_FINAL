@@ -137,7 +137,7 @@ export const loginKiosk = async (req, res, next) => {
       
     }
     catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 };
@@ -160,7 +160,7 @@ export const logoutKiosk = async (req, res, next) => {
             message: 'Logout successful.'
         });
     } catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 };
@@ -188,7 +188,7 @@ export const getAllSalonsByAdmin = async (req, res, next) => {
             salons: salons,
         });
     } catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 }
@@ -226,7 +226,7 @@ export const adminConnectKiosk = async (req, res, next) => {
             response: salon
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -273,7 +273,7 @@ export const getDefaultSalon = async (req, res, next) => {
        
     }
     catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 }
@@ -305,7 +305,7 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
         }
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -343,7 +343,7 @@ export const getAllBarberbySalonIdKiosk = async (req, res, next) => {
             response: getAllBarbers
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -440,7 +440,7 @@ export const barberLoginKiosk = async (req, res, next) => {
         })
     }
     catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 };
@@ -573,7 +573,7 @@ export const googleBarberLoginKiosk = async (req, res, next) => {
             isSalonOnline: salonOnlineStatus,
         })
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -626,7 +626,7 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
             }
         );
     } catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 };
@@ -982,7 +982,7 @@ export const joinQueueKiosk = async (req, res, next) => {
             response: existingQueue,
         });
     } catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 };
@@ -1000,7 +1000,7 @@ export const getAllSalonServices = async (req, res, next) => {
         })
     }
     catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 }
@@ -1032,7 +1032,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
     }
     catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 }
@@ -1092,7 +1092,7 @@ export const getAvailableBarbersForQKiosk = async (req, res, next) => {
         }
     }
     catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 }
@@ -1123,7 +1123,7 @@ export const getBarberByServicesKiosk = async (req, res, next) => {
         });
 
     } catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 };
@@ -1169,7 +1169,7 @@ export const getBarberServicesByBarberIdKiosk = async (req, res, next) => {
         });
     }
     catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 
@@ -1495,7 +1495,7 @@ export const barberServedQueueKiosk = async (req, res, next) => {
             message: 'Queue position is not 1.',
         });
     } catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 }
@@ -1815,7 +1815,7 @@ export const cancelQueueKiosk = async (req, res, next) => {
         });
 
     } catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 };
@@ -1842,7 +1842,7 @@ export const getAllAdvertisementsKiosk = async (req, res, next) => {
             advertisements: sortedAdvertisements
         });
     } catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 }
@@ -1871,7 +1871,7 @@ export const getAttendenceByBarberIdKiosk = async (req, res, next) => {
         });
 
     } catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 }
@@ -1954,7 +1954,7 @@ export const changeBarberClockInStatus = async (req, res, next) => {
             }
         );
     } catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 };
@@ -1998,7 +1998,7 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
 
 
     } catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 };
@@ -2100,7 +2100,7 @@ export const salonAccountLogin = async (req, res, next) => {
 
     }
     catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 }
@@ -2443,7 +2443,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
             });
         }
     } catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 };
@@ -2732,7 +2732,7 @@ export const cancelQueueTvApp= async (req, res, next) => {
         });
 
     } catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 };

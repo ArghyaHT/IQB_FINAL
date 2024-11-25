@@ -28,7 +28,7 @@ export const handleProtectedRoute = async (req, res, next) => {
         req.user = decodeToken.user;
         next();
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 
@@ -68,7 +68,7 @@ export const AdminLoggedIn = async (req, res, next) => {
       )
   }
   catch (error) {
-      console.log(error);
+      //console.log(error);
       next(error);
   }
 
@@ -107,7 +107,7 @@ export const BarberLoggedIn = async (req, res, next) => {
     )
   }
   catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 

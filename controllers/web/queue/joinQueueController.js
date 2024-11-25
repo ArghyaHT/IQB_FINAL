@@ -345,7 +345,7 @@ export const singleJoinQueue = async (req, res, next) => {
             response: existingQueue,
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -538,7 +538,7 @@ export const groupJoinQueue = async (req, res, next) => {
 
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -593,7 +593,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1165,7 +1165,7 @@ export const barberServedQueue = async (req, res, next) => {
         }
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -1415,7 +1415,7 @@ export const getAvailableBarbersForQ = async (req, res, next) => {
         }
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1448,7 +1448,7 @@ export const getBarberByMultipleServiceId = async (req, res, next) => {
         });
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -1486,7 +1486,7 @@ export const getQlistbyBarberId = async (req, res, next) => {
             queueList: qList[0].queueList // Extracting the queue list from the result
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };

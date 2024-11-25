@@ -29,22 +29,43 @@ export const registerController = async (req, res, next) => {
     try {
         let { email, password } = req.body
 
-        // Convert email to lowercase
-        email = email.toLowerCase();
+        if (!email && !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter email and password."
+            });
+        }
 
-        // Validate email format
-        if (!email || !validateEmail(email)) {
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter your email."
+            });
+        }
+
+        if (!validateEmail(email)) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid Email "
             });
         }
 
+          // Convert email to lowercase
+          email = email.toLowerCase();
+
         // Validate password length
-        if (!password || password.length < 8) {
+        if (!password) {
             return res.status(400).json({
                 success: false,
-                message: "Password must be at least 8 characters long"
+                message: "Please enter your password."
+            });
+        }
+
+        // Validate password length
+        if (password.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters."
             });
         }
 
@@ -74,7 +95,7 @@ export const registerController = async (req, res, next) => {
             newUser
         })
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -86,10 +107,7 @@ export const loginController = async (req, res, next) => {
         const password = req.body.password;
         const { webFcmToken, androidFcmToken, iosFcmToken } = req.body;
 
-        // Convert email to lowercase
-        email = email.toLowerCase();
-
-        if (!email && !password ) {
+        if (!email && !password) {
             return res.status(400).json({
                 success: false,
                 message: "Please enter email and password."
@@ -110,21 +128,24 @@ export const loginController = async (req, res, next) => {
             });
         }
 
-        // Validate password length
-      if (!password) {
-        return res.status(400).json({
-            success: false,
-            message: "Please enter your password."
-        });
-    }
+          // Convert email to lowercase
+          email = email.toLowerCase();
 
-      // Validate password length
-      if (password.length < 8) {
-        return res.status(400).json({
-            success: false,
-            message: "Password must be at least 8 characters."
-        });
-    }
+        // Validate password length
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter your password."
+            });
+        }
+
+        // Validate password length
+        if (password.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters."
+            });
+        }
 
 
         // Find user by email in the MongoDB database
@@ -184,7 +205,7 @@ export const loginController = async (req, res, next) => {
             foundUser
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -264,7 +285,7 @@ export const googleBarberSignup = async (req, res, next) => {
         })
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -340,7 +361,7 @@ export const googleBarberLogin = async (req, res, next) => {
             foundUser
         })
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -368,7 +389,7 @@ export const handleLogout = async (req, res, next) => {
             message: 'Barber logout successfull'
         })
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -485,7 +506,7 @@ export const updateBarberInfo = async (req, res, next) => {
             updatedBarber
         })
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -509,7 +530,7 @@ export const handleForgetPassword = async (req, res, next) => {
             });
         }
 
-     
+
 
         const user = await findBarberByEmailAndRole(email)
 
@@ -554,7 +575,7 @@ export const handleForgetPassword = async (req, res, next) => {
             }
         })
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -588,7 +609,7 @@ export const handleResetPassword = async (req, res, next) => {
         })
 
     } catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 }
@@ -614,7 +635,7 @@ export const createBarberByAdmin = async (req, res, next) => {
 
         // Convert email to lowercase
         // console.log(email)
-        
+
         if (!email) {
             return res.status(400).json({
                 success: false,
@@ -834,7 +855,7 @@ export const createBarberByAdmin = async (req, res, next) => {
             response: savedBarber
         });
     } catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 };
@@ -939,7 +960,7 @@ export const updateBarberByAdmin = async (req, res, next) => {
         })
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 
@@ -1107,7 +1128,7 @@ export const updateBarberProfilePic = async (req, res, next) => {
 
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1146,7 +1167,7 @@ export const deleteBarberProfilePicture = async (req, res, next) => {
             });
         }
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1186,7 +1207,7 @@ export const connectBarberToSalon = async (req, res, next) => {
         });
     }
     catch (error) {
-        // console.log(error);
+        // //console.log(error);
         next(error);
     }
 }
@@ -1268,7 +1289,7 @@ export const getAllBarberbySalonId = async (req, res, next) => {
         }
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -1294,8 +1315,8 @@ export const updateBarberAccountDetails = async (req, res, next) => {
             });
         }
 
-            email = email.toLowerCase();
-     
+        email = email.toLowerCase();
+
 
         if (name && (name.length < 1 || name.length > 20)) {
             return res.status(400).json({
@@ -1370,7 +1391,7 @@ export const updateBarberAccountDetails = async (req, res, next) => {
         // }
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1398,7 +1419,7 @@ export const deleteBarber = async (req, res, next) => {
         });
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1422,7 +1443,7 @@ export const changeBarberWorkingStatus = async (req, res, next) => {
             respone: updatedBarber
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 
@@ -1460,7 +1481,7 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
         });
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -1485,7 +1506,7 @@ export const getAllBarbersByServiceId = async (req, res, next) => {
         });
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1513,7 +1534,7 @@ export const getBarberServicesByBarberId = async (req, res, next) => {
         });
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 
@@ -1553,7 +1574,7 @@ export const sendVerificationCodeForBarberEmail = async (req, res, next) => {
             verificationCode: verificationCode
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1585,7 +1606,7 @@ export const changeBarberEmailVerifiedStatus = async (req, res, next) => {
             message: "Enter valid Verification code",
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1618,7 +1639,7 @@ export const getBarberDetailsByEmail = async (req, res) => {
         });
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1687,7 +1708,7 @@ export const changeBarberClockInStatus = async (req, res, next) => {
         }
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -1729,7 +1750,7 @@ export const sendVerificationCodeForBarberMobile = async (req, res, next) => {
         try {
             await sendMobileVerificationCode(formattedNumber, verificationCode);
         } catch (error) {
-            console.log(error);
+            //console.log(error);
             next(error);
         }
 
@@ -1739,7 +1760,7 @@ export const sendVerificationCodeForBarberMobile = async (req, res, next) => {
         });
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1784,7 +1805,7 @@ export const changeBarberMobileVerifiedStatus = async (req, res, next) => {
             });
         }
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1809,7 +1830,7 @@ export const barberchangepassword = async (req, res, next) => {
             });
         }
 
-        if(!oldPassword && !password){
+        if (!oldPassword && !password) {
             return res.status(400).json({
                 success: false,
                 message: "Please enter all the fields."
@@ -1830,8 +1851,8 @@ export const barberchangepassword = async (req, res, next) => {
             });
         }
 
- // Convert email to lowercase
- email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         const getBarber = await findBarberByEmailAndRole(email)
 
@@ -1915,7 +1936,7 @@ export const barberchangepassword = async (req, res, next) => {
 
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }

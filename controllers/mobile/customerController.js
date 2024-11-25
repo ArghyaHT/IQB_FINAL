@@ -56,7 +56,7 @@ export const checkEmail = async (req, res, next) => {
         }
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -139,7 +139,7 @@ export const signUp = async (req, res, next) => {
                 await sendVerificationCode(email, name, verificationCode);
                 await sendMobileVerificationCode(formattedNumber, verificationCode);
             } catch (error) {
-                console.log(error);
+                //console.log(error);
                 next(error);
             }
             
@@ -154,7 +154,7 @@ export const signUp = async (req, res, next) => {
             });
         }
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -223,7 +223,7 @@ export const matchVerificationCode = async (req, res, next) => {
             message: "Verification code didn't match. Please enter a valid verification code",
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -329,7 +329,7 @@ export const signIn = async (req, res, next) => {
         })
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -384,7 +384,7 @@ export const signIn = async (req, res, next) => {
 
 //     }
 //     catch (error) {
-//         console.log(error);
+//         //console.log(error);
 //         next(error);
 //     }
 // }
@@ -472,7 +472,7 @@ export const signIn = async (req, res, next) => {
 //             message: 'Customer Cookie cleared'
 //         })
 //     } catch (error) {
-//         console.log(error);
+//         //console.log(error);
 //         next(error);
 //     }
 // }
@@ -502,7 +502,7 @@ export const forgetPassword = async (req, res, next) => {
         try {
             await sendForgetPasswordMail(email, user.name, verificationCode);
         } catch (error) {
-            console.log(error);
+            //console.log(error);
             next(error);
         }
         return res.status(200).json({
@@ -511,7 +511,7 @@ export const forgetPassword = async (req, res, next) => {
             // verificationCode: verificationCode
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -551,7 +551,7 @@ export const verifyPasswordResetCode = async (req, res, next) => {
             });
         }
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -589,7 +589,7 @@ export const resetPassword = async (req, res, next) => {
         });
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -633,7 +633,7 @@ export const customerConnectSalon = async (req, res, next) => {
             response: customer,
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -669,7 +669,7 @@ export const customerDisconnectSalon = async (req, res, next) => {
             response: customer,
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -703,7 +703,7 @@ export const getAllSalonsByCustomer = async (req, res, next) => {
             response: salons,
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -736,7 +736,7 @@ export const changeDefaultSalonIdOfCustomer = async (req, res, next) => {
             response: customer,
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -792,7 +792,7 @@ export const getAllCustomers = async (req, res, next) => {
 
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -849,7 +849,7 @@ export const updateCustomer = async (req, res, next) => {
         })
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -881,7 +881,7 @@ export const deleteSingleCustomer = async (req, res, next) => {
         });
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -953,7 +953,7 @@ export const uploadCustomerprofilePic = async (req, res, next) => {
                 });
             });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1025,7 +1025,7 @@ export const updateCustomerProfilePic = async (req, res, next) => {
             })
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1062,7 +1062,7 @@ export const deleteCustomerProfilePicture = async (req, res, next) => {
             });
         }
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1091,7 +1091,7 @@ export const sendMailToCustomer = async (req, res, next) => {
         }
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 
@@ -1118,7 +1118,7 @@ export const getCustomerDetails = async (req, res, next) => {
         });
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1144,7 +1144,7 @@ export const sendBulkEmailToCustomers = async (req, res, next) => {
         });
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -1180,7 +1180,7 @@ export const getAllAppointmentsByCustomer = async (req, res, next) => {
             response: appointments
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -1244,7 +1244,7 @@ export const customerDashboard = async (req, res, next) => {
             },
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1288,7 +1288,7 @@ export const customerFavoriteSalon = async (req, res, next) => {
         }
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1319,7 +1319,7 @@ export const getAllCustomerFavoriteSalons = async (req, res, next) => {
             response: salons,
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -1363,7 +1363,7 @@ export const deleteCustomerFavoriteSalon = async (req, res, next) => {
             });
         }
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };

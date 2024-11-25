@@ -100,7 +100,7 @@ export const addAdvertisements = async (req, res, next) => {
       response: uploadedAdvertisements,
     });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 };
@@ -135,7 +135,7 @@ export const getAllAdvertisements = async (req, res, next) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 }
@@ -251,7 +251,7 @@ export const deleteAdvertisements = async (req, res, next) => {
       return res.status(500).json({ success: false, message: 'Failed to delete image.' });
     }
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 };
@@ -279,7 +279,7 @@ export const getDashboardAppointmentList = async (req, res, next) => {
     }
 
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 };

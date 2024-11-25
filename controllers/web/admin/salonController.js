@@ -275,7 +275,7 @@ export const createSalonByAdmin = async (req, res, next) => {
 
   }
   catch (error) {
-    // console.log(error);
+    // //console.log(error);
     next(error);
   }
 }
@@ -363,7 +363,7 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
 
     const regionCode = phoneUtil.getRegionCodeForCountryCode(countryCode);
 
-    console.log(regionCode)
+    // console.log(regionCode)
 
     // Parse the mobile number, specifying the region code
     const phoneNumberProto = phoneUtil.parse(contactTelStr, regionCode);
@@ -587,7 +587,7 @@ export const uploadSalonGalleryImages = async (req, res, next) => {
       response: newImages,
     });
   } catch (error) {
-    // console.log(error);
+    // //console.log(error);
     next(error);
   }
 }
@@ -671,7 +671,7 @@ export const uploadMoreSalonGalleryImages = async (req, res, next) => {
       response: updatedSalon,
     });
   } catch (error) {
-    console.log(error);
+    // //console.log(error);
     next(error);
   }
 };
@@ -740,7 +740,7 @@ export const updateSalonImages = async (req, res, next) => {
       })
 
   } catch (error) {
-    console.log(error);
+    // //console.log(error);
     next(error);
   }
 }
@@ -782,7 +782,7 @@ export const deleteSalonImages = async (req, res, next) => {
     }
 
   } catch (error) {
-    console.log(error);
+    // //console.log(error);
     next(error);
   }
 }
@@ -819,7 +819,7 @@ export const getSalonImages = async (req, res, next) => {
       response: sortedSalonGallery
     });
   } catch (error) {
-    console.log(error);
+    // //console.log(error);
     next(error);
   }
 }
@@ -920,7 +920,7 @@ export const searchSalonsByNameAndCity = async (req, res, next) => {
       getAllSalons,
     })
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 }
@@ -946,7 +946,7 @@ export const deleteSalon = async (req, res, next) => {
     })
   }
   catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 }
@@ -979,7 +979,7 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
       return res.status(200).json({ success: true, message: "The salon is currently offline.", response: updatedSalon });
     }
   } catch (error) {
-    // console.log(error);
+    // //console.log(error);
     next(error);
   }
 }
@@ -1013,7 +1013,7 @@ export const getSalonInfo = async (req, res, next) => {
       },
     });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 }
@@ -1202,7 +1202,7 @@ export const getSalonLogo = async (req, res, next) => {
       response: salonlogo
     });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 };
@@ -1235,7 +1235,7 @@ export const deleteSalonLogo = async (req, res) => {
     }
 
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 };
@@ -1337,7 +1337,7 @@ export const getSalonInfoBySalonId = async (req, res, next) => {
 //     });
 //   }
 //   catch (error) {
-//     console.log(error);
+//     //console.log(error);
 //     next(error);
 //   }
 // }

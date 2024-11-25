@@ -32,7 +32,7 @@ export const barberRating = async (req, res, next) => {
         response: barberRatingDoc,
       });
     }  catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
   };
@@ -70,7 +70,7 @@ export const barberRating = async (req, res, next) => {
             response: salonRatingDoc,
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };

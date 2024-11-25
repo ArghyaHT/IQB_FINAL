@@ -24,7 +24,7 @@ export const getAllAdvertisements = async (req, res, next) => {
       response: sortedAdvertisements
     });
   } catch (error) {
-      console.log(error);
+      //console.log(error);
       next(error);
   }
 }

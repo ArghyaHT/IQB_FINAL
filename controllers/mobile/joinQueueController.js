@@ -324,7 +324,7 @@ export const singleJoinQueue = async (req, res, next) => {
     }
 
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -517,7 +517,7 @@ export const groupJoinQueue = async (req, res, next) => {
         });
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -724,7 +724,7 @@ export const cancelQueue = async (req, res, next) => {
         });
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -756,7 +756,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -816,7 +816,7 @@ export const getAvailableBarbersForQ = async (req, res, next) => {
         }
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 }
@@ -847,7 +847,7 @@ export const getBarberByServices = async (req, res, next) => {
         });
 
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };
@@ -882,7 +882,7 @@ export const getBarberServicesByBarberId = async (req, res, next) => {
         });
     }
     catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 
@@ -908,7 +908,7 @@ export const getQlistbyBarberId = async (req, res, next) => {
             response: qList[0].queueList // Extracting the queue list from the result
         });
     } catch (error) {
-        console.log(error);
+        //console.log(error);
         next(error);
     }
 };

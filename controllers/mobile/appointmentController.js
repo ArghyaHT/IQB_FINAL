@@ -180,7 +180,7 @@ if (customerName.length < 1 || customerName.length > 20) {
     }
 
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 };
@@ -268,7 +268,7 @@ export const editAppointment = async (req, res, next) => {
       response: existingAppointment,
     });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 };
@@ -293,7 +293,7 @@ export const deleteAppointment = async (req, res, next) => {
       message: 'Appointment deleted successfully',
     });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 };
@@ -359,7 +359,7 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
       response: timeSlots
     });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 };
@@ -385,7 +385,7 @@ export const getAllAppointmentsBySalonId = async (req, res, next) => {
       response: appointments.map(appointment => appointment.appointmentList),
     });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 };
@@ -406,7 +406,7 @@ export const getAllAppointmentsBySalonIdAndDate = async (req, res, next) => {
       response: appointments
     });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 };
@@ -432,7 +432,7 @@ export const getAllAppointmentsByBarberId = async (req, res, next) => {
     });
   }
   catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 };
@@ -458,7 +458,7 @@ export const getAllAppointmentsByBarberIdAndDate = async (req, res, next) => {
       response: appointments,
     });
   } catch (error) {
-    console.log(error);
+    //console.log(error);
     next(error);
   }
 };
