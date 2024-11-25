@@ -147,8 +147,6 @@ export const createSalonByAdmin = async (req, res, next) => {
 
     const regionCode = phoneUtil.getRegionCodeForCountryCode(countryCode);
 
-    console.log(regionCode)
-
     // Parse the mobile number, specifying the region code
     const phoneNumberProto = phoneUtil.parse(contactTelStr, regionCode);
 
@@ -403,14 +401,14 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
 
       
       // If services are provided, update the services
-      const updatedServices = salon.services.map((existingService) => {
+      const updatedServices = salon.services.map((existingService, i) => {
         const matchingService = services.find((s) => s.serviceId === existingService.serviceId);
 
         if (matchingService) {
           return {
             ...existingService,
             serviceId: matchingService.serviceId,
-            serviceCode: matchingService.serviceCode,
+            serviceCode: `${matchingService.serviceName.slice(0, 2).toUpperCase()}${salonId}${i + 1}`,
             serviceName: matchingService.serviceName,
             serviceIcon: {
               public_id: matchingService.serviceIcon.public_id,
