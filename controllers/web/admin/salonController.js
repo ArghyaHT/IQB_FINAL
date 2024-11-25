@@ -396,12 +396,6 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
     }
 
     if (services && Array.isArray(services)) {
-
-      salon.services = salon.services.filter((existingService) =>
-        services.some((s) => s.serviceId === existingService.serviceId)
-      );
-
-      
       // If services are provided, update the services
       const updatedServices = salon.services.map((existingService) => {
         const matchingService = services.find((s) => s.serviceId === existingService.serviceId);
