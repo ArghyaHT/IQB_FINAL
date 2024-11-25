@@ -20,7 +20,6 @@ export const getSalonSettingsBySalonId = async (req, res, next) => {
         });
 
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -85,7 +84,6 @@ export const updateSalonSettings = async (req, res, next) => {
         }
 
     } catch (error) {
-        // //console.log(error);
         next(error);
     }
 };
