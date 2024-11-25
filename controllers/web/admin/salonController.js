@@ -41,7 +41,6 @@ export const createSalonByAdmin = async (req, res, next) => {
     instraLink,
     tiktokLink,
     services,
-    // appointmentSettings,
     adminEmail
   } = req.body
 
@@ -264,9 +263,6 @@ export const createSalonByAdmin = async (req, res, next) => {
       });
     }
 
-    // // Create a new SalonSettings instance to generate time slots
-    // await createSalonSettings(savedSalon.salonId, appointmentSettings);
-
     return res.status(200).json({
       success: true,
       message: 'Salon created successfully',
@@ -275,7 +271,6 @@ export const createSalonByAdmin = async (req, res, next) => {
 
   }
   catch (error) {
-    // //console.log(error);
     next(error);
   }
 }
@@ -585,7 +580,6 @@ export const uploadSalonGalleryImages = async (req, res, next) => {
       response: newImages,
     });
   } catch (error) {
-    // //console.log(error);
     next(error);
   }
 }
@@ -669,7 +663,6 @@ export const uploadMoreSalonGalleryImages = async (req, res, next) => {
       response: updatedSalon,
     });
   } catch (error) {
-    // //console.log(error);
     next(error);
   }
 };
@@ -738,7 +731,6 @@ export const updateSalonImages = async (req, res, next) => {
       })
 
   } catch (error) {
-    // //console.log(error);
     next(error);
   }
 }
@@ -761,11 +753,6 @@ export const deleteSalonImages = async (req, res, next) => {
       });
     }
 
-    // console.log("Cloudinary image deleted");
-
-    //  // Find the newly added advertisement
-    //  const deletedSalonImage = updatedSalon.gallery.find(si => si.public_id === image.public_id);
-
     if (updatedSalon) {
       res.status(200).json({
         success: true,
@@ -780,7 +767,6 @@ export const deleteSalonImages = async (req, res, next) => {
     }
 
   } catch (error) {
-    // //console.log(error);
     next(error);
   }
 }
@@ -817,7 +803,6 @@ export const getSalonImages = async (req, res, next) => {
       response: sortedSalonGallery
     });
   } catch (error) {
-    // //console.log(error);
     next(error);
   }
 }
@@ -918,7 +903,6 @@ export const searchSalonsByNameAndCity = async (req, res, next) => {
       getAllSalons,
     })
   } catch (error) {
-    //console.log(error);
     next(error);
   }
 }
@@ -944,7 +928,6 @@ export const deleteSalon = async (req, res, next) => {
     })
   }
   catch (error) {
-    //console.log(error);
     next(error);
   }
 }
@@ -977,7 +960,6 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
       return res.status(200).json({ success: true, message: "The salon is currently offline.", response: updatedSalon });
     }
   } catch (error) {
-    // //console.log(error);
     next(error);
   }
 }
@@ -1011,7 +993,6 @@ export const getSalonInfo = async (req, res, next) => {
       },
     });
   } catch (error) {
-    //console.log(error);
     next(error);
   }
 }
@@ -1110,7 +1091,6 @@ export const uploadSalonLogo = async (req, res, next) => {
       response: updatedSalon
     });
   } catch (error) {
-    // console.error('Error in uploadSalonLogo:', error);
     next(error);
   }
 };
@@ -1199,7 +1179,6 @@ export const getSalonLogo = async (req, res, next) => {
       response: salonlogo
     });
   } catch (error) {
-    //console.log(error);
     next(error);
   }
 };
@@ -1232,7 +1211,6 @@ export const deleteSalonLogo = async (req, res) => {
     }
 
   } catch (error) {
-    //console.log(error);
     next(error);
   }
 };
@@ -1267,7 +1245,6 @@ export const updateSalonInfo = async (req, res, next) => {
       response: updatedSalon.salonDesc,
     });
   } catch (error) {
-    console.error(error);
     next(error);
   }
 }
@@ -1311,7 +1288,6 @@ export const getSalonInfoBySalonId = async (req, res, next) => {
       });
     }
   } catch (error) {
-    console.error(error);
     next(error);
   }
 }

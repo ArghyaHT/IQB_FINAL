@@ -95,7 +95,6 @@ export const registerController = async (req, res, next) => {
             newUser
         })
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -205,7 +204,6 @@ export const loginController = async (req, res, next) => {
             foundUser
         });
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };
@@ -354,7 +352,6 @@ export const googleBarberLogin = async (req, res, next) => {
             foundUser
         })
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -499,7 +496,6 @@ export const updateBarberInfo = async (req, res, next) => {
             updatedBarber
         })
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -602,7 +598,6 @@ export const handleResetPassword = async (req, res, next) => {
         })
 
     } catch (error) {
-        // //console.log(error);
         next(error);
     }
 }
@@ -840,7 +835,6 @@ export const createBarberByAdmin = async (req, res, next) => {
             response: savedBarber
         });
     } catch (error) {
-        // //console.log(error);
         next(error);
     }
 };
@@ -943,7 +937,6 @@ export const updateBarberByAdmin = async (req, res, next) => {
         })
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 
@@ -1107,10 +1100,7 @@ export const updateBarberProfilePic = async (req, res, next) => {
 
             })
 
-
-
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1149,7 +1139,6 @@ export const deleteBarberProfilePicture = async (req, res, next) => {
             });
         }
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1189,7 +1178,6 @@ export const connectBarberToSalon = async (req, res, next) => {
         });
     }
     catch (error) {
-        // //console.log(error);
         next(error);
     }
 }
@@ -1271,7 +1259,6 @@ export const getAllBarberbySalonId = async (req, res, next) => {
         }
 
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };
@@ -1371,7 +1358,6 @@ export const updateBarberAccountDetails = async (req, res, next) => {
         // }
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1399,7 +1385,6 @@ export const deleteBarber = async (req, res, next) => {
         });
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1423,7 +1408,6 @@ export const changeBarberWorkingStatus = async (req, res, next) => {
             respone: updatedBarber
         });
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 
@@ -1461,7 +1445,6 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
         });
 
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };
@@ -1486,7 +1469,6 @@ export const getAllBarbersByServiceId = async (req, res, next) => {
         });
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1514,7 +1496,6 @@ export const getBarberServicesByBarberId = async (req, res, next) => {
         });
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 
@@ -1554,7 +1535,6 @@ export const sendVerificationCodeForBarberEmail = async (req, res, next) => {
             verificationCode: verificationCode
         });
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1586,7 +1566,6 @@ export const changeBarberEmailVerifiedStatus = async (req, res, next) => {
             message: "Enter valid Verification code",
         });
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1619,7 +1598,6 @@ export const getBarberDetailsByEmail = async (req, res) => {
         });
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1688,7 +1666,6 @@ export const changeBarberClockInStatus = async (req, res, next) => {
         }
 
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };
@@ -1740,7 +1717,6 @@ export const sendVerificationCodeForBarberMobile = async (req, res, next) => {
         });
 
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1785,7 +1761,6 @@ export const changeBarberMobileVerifiedStatus = async (req, res, next) => {
             });
         }
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1916,7 +1891,6 @@ export const barberchangepassword = async (req, res, next) => {
 
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }

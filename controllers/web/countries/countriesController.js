@@ -45,7 +45,6 @@ export const getAllCountries = async (req, res, next) => {
         }
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -75,7 +74,6 @@ export const getAllTimeZonesByCountry = async (req, res, next) => {
         });
 
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -121,7 +119,6 @@ export const getAllCitiesByCountryCode = async (req, res, next) => {
         });
 
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
