@@ -429,8 +429,6 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
 
       let lastServiceId = existingServices.length ? existingServices[existingServices.length - 1].serviceId : 0;
 
-      // console.log("Last Service Id ", lastServiceId)
-
       // Loop through each new service
       services.forEach((newService) => {
         const existingService = existingServices.find((s) => s.serviceId === newService.serviceId);
@@ -1176,7 +1174,6 @@ export const updateSalonLogo = async (req, res, next) => {
       });
     }
   } catch (error) {
-    console.error(error);
     next(error);
   }
 };

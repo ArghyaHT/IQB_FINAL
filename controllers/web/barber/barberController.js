@@ -218,8 +218,6 @@ export const googleBarberSignup = async (req, res, next) => {
         const token = req.query.token;
         const { webFcmToken, androidFcmToken, iosFcmToken } = req.query;
 
-        console.log(token)
-
         if (!token) {
             return res.status(404).json({
                 success: false,
@@ -238,8 +236,6 @@ export const googleBarberSignup = async (req, res, next) => {
 
         // Get the JSON with all the user info
         const payload = ticket.getPayload();
-
-        // console.log("Google payload ", payload)
 
         // Check if the email is already registered
         const existingUser = await findBarberByEmailAndRole(payload.email)
@@ -285,7 +281,6 @@ export const googleBarberSignup = async (req, res, next) => {
         })
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -312,8 +307,6 @@ export const googleBarberLogin = async (req, res, next) => {
 
         // Get the JSON with all the user info
         const payload = ticket.getPayload();
-
-        console.log("Google Login payload ", payload)
 
         const foundUser = await googleLoginBarber(payload.email)
 
@@ -630,12 +623,6 @@ export const createBarberByAdmin = async (req, res, next) => {
             barberServices
         } = req.body;
 
-        // Convert email to lowercase
-        // email = email.toLowerCase();
-
-        // Convert email to lowercase
-        // console.log(email)
-
         if (!email) {
             return res.status(400).json({
                 success: false,
@@ -675,8 +662,6 @@ export const createBarberByAdmin = async (req, res, next) => {
         const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance();
 
         const regionCode = phoneUtil.getRegionCodeForCountryCode(countryCode);
-
-        console.log(regionCode)
 
         // Parse the mobile number, specifying the region code
         const phoneNumberProto = phoneUtil.parse(mobileNumberStr, regionCode);
@@ -898,8 +883,6 @@ export const updateBarberByAdmin = async (req, res, next) => {
 
         const regionCode = phoneUtil.getRegionCodeForCountryCode(countryCode);
 
-        console.log(regionCode)
-
         // Parse the mobile number, specifying the region code
         const phoneNumberProto = phoneUtil.parse(mobileNumberStr, regionCode);
 
@@ -1055,7 +1038,6 @@ export const uploadBarberprofilePic = async (req, res, next) => {
             response: barberImage,
         });
     } catch (error) {
-        console.error('Error during barber profile picture upload:', error);
         next(error);
     }
 };
@@ -1332,8 +1314,6 @@ export const updateBarberAccountDetails = async (req, res, next) => {
         const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance();
 
         const regionCode = phoneUtil.getRegionCodeForCountryCode(countryCode);
-
-        console.log(regionCode)
 
         // Parse the mobile number, specifying the region code
         const phoneNumberProto = phoneUtil.parse(mobileNumberStr, regionCode);

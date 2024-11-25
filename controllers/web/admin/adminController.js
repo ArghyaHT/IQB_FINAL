@@ -360,8 +360,6 @@ export const googleAdminSignup = async (req, res, next) => {
         // Get the JSON with all the user info
         const payload = ticket.getPayload();
 
-        console.log("Google payload ", payload)
-
         // Check if the email is already registered
         const existingUser = await findAdminByEmailandRole(payload.email)
 
@@ -407,8 +405,6 @@ export const googleAdminLogin = async (req, res, next) => {
 
         // Get the JSON with all the user info
         const payload = ticket.getPayload();
-
-        console.log("Google Login payload ", payload)
 
         const foundUser = await googleLoginAdmin(payload.email)
 
@@ -666,8 +662,6 @@ export const updateAdminAccountDetails = async (req, res, next) => {
 
         const regionCode = phoneUtil.getRegionCodeForCountryCode(countryCode);
 
-        console.log(regionCode)
-
         // Parse the mobile number, specifying the region code
         const phoneNumberProto = phoneUtil.parse(mobileNumberStr, regionCode);
 
@@ -895,7 +889,6 @@ export const deleteAdminProfilePicture = async (req, res, next) => {
             });
         }
     } catch (error) {
-        console.error(error);
         next(error);
     }
 };

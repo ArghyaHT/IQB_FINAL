@@ -513,8 +513,8 @@ const googleLoginControllerCustomer = async (req, res) => {
             tokens: { accessToken, refreshToken }
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, error: 'Failed to sign in' });
+         //console.log(error);
+         next(error);
     }
 };
 

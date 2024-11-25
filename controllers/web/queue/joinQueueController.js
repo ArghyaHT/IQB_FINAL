@@ -78,15 +78,11 @@ export const singleJoinQueue = async (req, res, next) => {
             // Extracting the data after '+'
             const offset = timeZoneParts[1];
 
-            console.log(offset)
-
             // Parse offset into hours and minutes
             const [offsetHours, offsetMinutes] = offset.split(':').map(Number);
 
             // Add offset to the time
             const adjustedTime = moment(time, 'HH:mm:ss').add(offsetHours, 'hours').add(offsetMinutes, 'minutes').format('HH:mm:ss');
-
-            console.log(adjustedTime)
 
             const newQueue = {
                 customerName: name,
@@ -187,7 +183,6 @@ export const singleJoinQueue = async (req, res, next) => {
 
             try {
                 await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
-                console.log('Email sent successfully.');
             } catch (error) {
                 console.error('Error sending email:', error);
                 // Handle error if email sending fails
@@ -332,7 +327,6 @@ export const singleJoinQueue = async (req, res, next) => {
 
             try {
                 await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
-                console.log('Email sent successfully.');
             } catch (error) {
                 console.error('Error sending email:', error);
                 // Handle error if email sending fails
@@ -523,7 +517,6 @@ export const groupJoinQueue = async (req, res, next) => {
 
             try {
                 await sendQueuePositionEmail(member.customerEmail, emailSubject, emailBody);
-                console.log('Email sent successfully.');
             } catch (error) {
                 console.error('Error sending email:', error);
                 // Handle error if email sending fails
@@ -761,7 +754,6 @@ export const barberServedQueue = async (req, res, next) => {
                         // Send email to the customer who is getting served
                         try {
                             await sendQueuePositionEmail(element.customerEmail, servedEmailSubject, servedEmailBody);
-                            console.log('Email sent to the served customer successfully.');
                         } catch (error) {
                             console.error('Error sending email to the served customer:', error);
                             // Handle error if email sending fails
@@ -793,7 +785,6 @@ export const barberServedQueue = async (req, res, next) => {
                         for (const customer of customers) {
                             if (customer.queueList && Array.isArray(customer.queueList)) {
                                 for (const queueItem of customer.queueList) {
-                                    console.log('Queue Item:', queueItem);
                                     const salon = await getSalonBySalonId(salonId);
                                     const { customerEmail, qPosition, customerName, barberName, serviceEWT, customerEWT, services, dateJoinedQ } = queueItem;
 
@@ -872,7 +863,6 @@ export const barberServedQueue = async (req, res, next) => {
 
                                     try {
                                         await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
-                                        console.log('Email sent successfully.');
                                     } catch (error) {
                                         console.error('Error sending email:', error);
                                         // Handle error if email sending fails
@@ -919,8 +909,6 @@ export const barberServedQueue = async (req, res, next) => {
                     const allServicesMatch = services.every(requestedService => {
                         return element.services.some(queueService => queueService.serviceId === requestedService.serviceId);
                     });
-
-                    console.log(element._id)
 
                     if (
                         element.qPosition === 1 &&
@@ -1030,7 +1018,6 @@ export const barberServedQueue = async (req, res, next) => {
                         // Send email to the customer who is getting served
                         try {
                             await sendQueuePositionEmail(element.customerEmail, servedEmailSubject, servedEmailBody);
-                            console.log('Email sent to the served customer successfully.');
                         } catch (error) {
                             console.error('Error sending email to the served customer:', error);
                             // Handle error if email sending fails
@@ -1062,7 +1049,6 @@ export const barberServedQueue = async (req, res, next) => {
                         for (const customer of customers) {
                             if (customer.queueList && Array.isArray(customer.queueList)) {
                                 for (const queueItem of customer.queueList) {
-                                    console.log('Queue Item:', queueItem);
                                     const salon = await getSalonBySalonId(salonId);
                                     const { customerEmail, qPosition, customerName, barberName, serviceEWT, customerEWT, services, dateJoinedQ } = queueItem;
 
@@ -1141,7 +1127,6 @@ export const barberServedQueue = async (req, res, next) => {
 
                                     try {
                                         await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
-                                        console.log('Email sent successfully.');
                                     } catch (error) {
                                         console.error('Error sending email:', error);
                                         // Handle error if email sending fails
@@ -1312,7 +1297,6 @@ export const cancelQueue = async (req, res, next) => {
 
         try {
             await sendQueuePositionEmail(canceledQueue.customerEmail, servedEmailSubject, servedEmailBody);
-            console.log('Email sent to the served customer successfully.');
         } catch (error) {
             console.error('Error sending email to the served customer:', error);
         }
@@ -1322,7 +1306,6 @@ export const cancelQueue = async (req, res, next) => {
             for (const customer of customers) {
                 if (customer.queueList && Array.isArray(customer.queueList)) {
                     for (const queueItem of customer.queueList) {
-                        console.log('Queue Item:', queueItem);
 
                         const salon = await getSalonBySalonId(salonId);
                         const { customerEmail, qPosition, customerName, barberName, serviceEWT, customerEWT, services, dateJoinedQ } = queueItem;
@@ -1373,7 +1356,6 @@ export const cancelQueue = async (req, res, next) => {
 
                         try {
                             await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
-                            console.log('Email sent to the customer successfully.');
                         } catch (error) {
                             console.error('Error sending email to the customer:', error);
                         }
@@ -1388,7 +1370,6 @@ export const cancelQueue = async (req, res, next) => {
             updatedQueueList: updatedQueue.queueList
         });
     } catch (error) {
-        console.error('Error cancelling queue:', error);
         next(error);
     }
 };
@@ -1514,11 +1495,7 @@ export const getQhistoryByCustomerEmail = async (req, res) => {
             response: getQHistory,
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to retrieve queue history',
-            error: error.message,
-        });
+        //console.log(error);
+        next(error);
     }
 };

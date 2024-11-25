@@ -186,8 +186,6 @@ export const updateAdvertisements = async (req, res, next) => {
           return res.status(500).json({ success: false, message: 'Failed to delete image.' });
         }
 
-        console.log("Cloud image deleted");
-
         // Delete the temporary file after uploading to Cloudinary
         fs.unlink(advertisements.tempFilePath, (err) => {
           if (err) {
@@ -210,7 +208,6 @@ export const updateAdvertisements = async (req, res, next) => {
 
       })
       .catch((uploadError) => {
-        console.error(uploadError);
         return res.status(500).json({
           success: false,
           message: "Failed to upload image to Cloudinary",
@@ -219,7 +216,6 @@ export const updateAdvertisements = async (req, res, next) => {
       });
 
   } catch (error) {
-    console.error(error);
     next(error);
   }
 };

@@ -28,7 +28,6 @@ export const sendNotification = async (req, res, next) => {
       };
   
       const response = await admin.messaging().sendEachForMulticast(message);
-      console.log('Notification sent:', response);
   
       for (const user of users) {
         const existingNotification = await findUserByEmail(user.email)
@@ -80,7 +79,6 @@ export const sendNotification = async (req, res, next) => {
       };
   
       const response = await admin.messaging().sendEachForMulticast(message);
-      console.log('Notification sent:', response);
   
       for (const user of users) {
         const existingNotification = await findUserByEmail(user.email)
@@ -136,60 +134,3 @@ export const sendNotification = async (req, res, next) => {
         next(error);
     }
   };
-  
-//   //Send notification to android
-//   const sendNotificationToAndroid = async (req, res) => {
-//     const { title, body } = req.body;
-  
-//     if (!title || !body) {
-//       return res.status(400).json({ error: 'Title and body are required' });
-//     }
-  
-//     try {
-//       const androidUsers = await UserTokenTable.find({ androidFcmToken: { $exists: true } });
-  
-//       if (androidUsers.length === 0) {
-//         return res.status(400).json({ error: 'No Android users found' });
-//       }
-  
-//       const androidTokens = androidUsers.map(user => user.androidFcmToken);
-  
-//       const message = {
-//         notification: {
-//           title,
-//           body,
-//         },
-//         tokens: androidTokens, // Pass Android FCM tokens as an array
-//       };
-  
-//       const response = await admin.messaging().sendMulticast(message);
-//       console.log('Notification sent to Android devices:', response);
-  
-//       for (const androidUser of androidUsers) {
-//         const existingNotification = await Notification.findOne({ email: androidUser.email });
-  
-//         if (existingNotification) {
-//           // Email already exists, update the existing document
-//           await Notification.findOneAndUpdate(
-//             { email: androidUser.email },
-//             { $push: { sentNotifications: { title, body } } }
-//           );
-//         } else {
-//           // Email doesn't exist, create a new document
-//           await Notification.create({ email: androidUser.email, sentNotifications: [{ title, body }] });
-//         }
-//       }
-  
-//       res.status(200).json({
-//         success: true,
-//         message: 'Notifications sent to Android devices and saved successfully'
-//       });
-//     } catch (error) {
-//       console.error(error);
-//       res.status(500).json({
-//         success: false,
-//         message: 'Internal server error',
-//         error: error.message
-//       });
-//     }
-//   };

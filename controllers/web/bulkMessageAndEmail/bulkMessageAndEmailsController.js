@@ -28,7 +28,6 @@ export const sendBulkTextMessages = async (req, res, next) => {
       // Iterate over each mobile number and send SMS
       for (const number of formattedNumbers) {
   
-        // console.log(number, smsBody)
         // Replace sendSms with your actual SMS sending logic
         await sendSmsLogic(smsBody, number);
       }
