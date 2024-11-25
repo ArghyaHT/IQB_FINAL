@@ -125,7 +125,7 @@ useTempFiles: true,
 app.use(express.static("uploads"));
 
 
-app.use("/kiosk/logger", loggerRoutes)
+app.use("/logger", loggerRoutes)
 
 app.use((req, res, next) => {
   if (req.query) {
