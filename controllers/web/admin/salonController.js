@@ -408,7 +408,7 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
           return {
             ...existingService,
             serviceId: matchingService.serviceId,
-            serviceCode: `${matchingService.serviceName.slice(0, 2).toUpperCase()}${salonId}${i + 1}`,
+            serviceCode: `${matchingService.serviceName.slice(0, 2).toUpperCase()}${matchingService.serviceId}`,
             serviceName: matchingService.serviceName,
             serviceIcon: {
               public_id: matchingService.serviceIcon.public_id,
