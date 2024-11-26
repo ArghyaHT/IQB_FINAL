@@ -11,6 +11,7 @@ import morgan from "morgan";
 // import serviceAccount from './notification_push_service_key.json';
 import jsonFile from "jsonfile"
 import path from "path"
+import { v2 as cloudinary } from "cloudinary";
 
 //KIOSK ROUTES
 import kioskRoutes from "./routes/kiosk/kioskRouter.js"
@@ -70,10 +71,18 @@ process.on('unhandledRejection', (reason, promise) => {
 
 connectDB()
 
+
 // setupCronJobs(); 
 
 // Writing the cors for for both dev and prod
 const app = express()
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 
 // app.use(helmet()); 
 
