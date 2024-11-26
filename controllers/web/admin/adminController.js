@@ -1,4 +1,4 @@
-import { deleteAdmin, deleteAdminProPic, findAdminProfileById, findAdminByEmailandRole, resetPassword, updateAdmin, updateAdminProPic, updateDefaultSalonId, uploadAdminProPic, createAdmin, createGoogleAdmin, updateGoogleAdmin, googleLoginAdmin } from "../../../services/web/admin/adminService.js";
+import { findAdminByEmailandRole, resetPassword, updateAdmin, updateDefaultSalonId, uploadAdminProPic, createAdmin, createGoogleAdmin, updateGoogleAdmin, googleLoginAdmin } from "../../../services/web/admin/adminService.js";
 
 import jwt from "jsonwebtoken"
 import { OAuth2Client } from "google-auth-library";
@@ -10,7 +10,6 @@ import { barberApprovalStatus, emailWithNodeMail, sendVerificationCode } from ".
 import { allSalonsByAdmin, getDefaultSalonDetailsByAdmin, getSalonBySalonId } from "../../../services/web/admin/salonService.js";
 
 
-//Upload Profile Picture Config
 import path from "path"
 import fs from "fs"
 import { v2 as cloudinary } from "cloudinary";
@@ -19,8 +18,11 @@ import { validateEmail } from "../../../middlewares/validator.js";
 import { findSalonSetingsBySalonId } from "../../../services/web/salonSettings/salonSettingsService.js";
 import { v4 as uuidv4 } from 'uuid';
 
-import moment from "moment"
 import { sendMobileVerificationCode } from "../../../utils/mobileMessageSender/mobileMessageSender.js";
+import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
+import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
+import { ADMIN_EXISTS_ERROR, EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, FORGOT_PASSWORD_EMAIL_ERROR, INVALID_EMAIL_ERROR, MOBILE_NUMBER_ERROR, NAME_LENGTH_ERROR, NEW_PASSWORD_ERROR, OLD_PASSWORD_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, ADMIN_NOT_EXIST_ERROR, IMAGE_EMPTY_ERROR, IMAGE_FILE_SIZE_ERROR, IMAGE_FILE_EXTENSION_ERROR, VERIFICATION_EMAIL_ERROR, EMAIL_VERIFY_CODE_ERROR, MOBILE_VERIFY_CODE_ERROR, FILL_ALL_FIELDS_ERROR, OLD_AND_NEW_PASSWORD_DONOT_MATCH, INCORRECT_OLD_PASSWORD_ERROR } from "../../../constants/Admin/ErrorConstants.js";
+import { APPROVE_BARBER_SUCCESS, CHANGE_DEFAULT_SALON_SUCCESS, CHANGE_PASSWORD_SUCCESS, EMAIL_VERIFIED_SUCCESS, FORGET_PASSWORD_SUCCESS, GET_DEFAULT_SALON_SUCCESS, IMAGE_UPLOAD_SUCCESS, LOGOUT_SUCCESS, MOBILE_VERIFIED_SUCCESS, RESET_PASSWORD_SUCCESS, SALONS_RETRIEVE_SUCCESS, SEND_VERIFICATION_EMAIL_SUCCESS, SEND_VERIFICATION_MOBILE_SUCCESS, SIGNIN_SUCCESS, SIGNUP_SUCCESS, UPDATE_ADMIN_SUCCESS } from "../../../constants/Admin/SuccessConstants.js";
 
 
 cloudinary.config({
@@ -29,140 +31,91 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-
-//DESC: REGISTER ADMIN ====================
+// Desc: Register Admin
 export const registerAdmin = async (req, res, next) => {
     try {
         let { email, password } = req.body
 
         if (!email && !password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter email and password."
-            });
+            return ErrorHandler(EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your email."
-            });
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email"
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
 
-        // Convert email to lowercase
+        if (!password) {
+            return ErrorHandler(PASSWORD_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        if (password.length < 8) {
+            return ErrorHandler(PASSWORD_LENGTH_ERROR, ERROR_STATUS_CODE, res)
+        }
+
         email = email.toLowerCase();
 
-        // Validate password length
-        if (!password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your password."
-            });
-        }
-
-        // Validate password length
-        if (password.length < 8) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters."
-            });
-        }
-
-        // Check if the email is already registered
         const existingUser = await findAdminByEmailandRole(email)
 
         if (existingUser) {
-            return res.status(400).json({
-                success: false,
-                message: "Admin already exists"
-            });
+            return ErrorHandler(ADMIN_EXISTS_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10)
 
-        // Create a new user
         const newUser = await createAdmin(email, hashedPassword)
 
-        res.status(200).json({
-            success: true,
-            message: 'Admin registered successfully',
-            newUser
-        })
+        return SuccessHandler(SIGNUP_SUCCESS, SUCCESS_STATUS_CODE, res, { newUser })
+
     }
     catch (error) {
         next(error);
     }
 }
 
-//DESC:LOGIN A ADMIN =========================
+// Desc: Login Admin
 export const loginAdmin = async (req, res, next) => {
     try {
         let { email, password } = req.body
 
         if (!email && !password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter email and password."
-            });
+            return ErrorHandler(EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your email."
-            });
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email "
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // Convert email to lowercase
-        email = email.toLowerCase();
 
-        // Validate password length
         if (!password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your password."
-            });
+            return ErrorHandler(PASSWORD_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // Validate password length
         if (password.length < 8) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters."
-            });
+            return ErrorHandler(PASSWORD_LENGTH_ERROR, ERROR_STATUS_CODE, res)
         }
+
+        email = email.toLowerCase();
 
         const foundUser = await findAdminByEmailandRole(email)
 
         if (!foundUser) {
-            return res.status(400).json({
-                success: false,
-                message: 'Email or password donot match.'
-            })
+            return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const match = await bcrypt.compare(password, foundUser.password)
 
-        if (!match) return res.status(400).json({
-            message: false,
-            message: 'Email or password donot match.'
-        })
+        if (!match) {
+            return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
+        }
 
         const accessToken = jwt.sign(
             {
@@ -173,13 +126,6 @@ export const loginAdmin = async (req, res, next) => {
             { expiresIn: '1d' }
         )
 
-        // const refreshToken = jwt.sign(
-        //     { "email": foundUser.email, "role": foundUser.role },
-        //     REFRESH_TOKEN_SECRET,
-        //     { expiresIn: '1d' }
-        // )
-
-        // Create secure cookie with refresh token 
         res.cookie('AdminToken', accessToken, {
             httpOnly: true, //accessible only by web server 
             secure: true, //https
@@ -187,10 +133,7 @@ export const loginAdmin = async (req, res, next) => {
             maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
         })
 
-        // Send accessToken containing username and roles 
-        res.status(201).json({
-            success: true,
-            message: "Admin logged in successfully",
+        return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
             accessToken,
             foundUser
         })
@@ -201,67 +144,56 @@ export const loginAdmin = async (req, res, next) => {
 };
 
 
-//DESC:LOGOUT A ADMIN ========================
+// Desc: Logout Admin
 export const handleLogoutAdmin = async (req, res, next) => {
     try {
-        //cookie parse na use korle ata kaj korbe na
         const cookies = req.cookies
 
-        // Ai line ta lagia ami logout error check korbo
-        // if(cookies) { return res.status(401).json({ message:"Unauthorize Admin" }) }
+        if (!cookies?.AdminToken) {
+            return res.status(404).json({
+                success: false,
+                message: "Unauthorize Admin"
+            })
+        }
 
-        if (!cookies?.AdminToken) return res.status(404).json({
-            success: false,
-            message: "Unauthorize Admin"
-        }) //No content
+
         res.clearCookie('AdminToken', {
             httpOnly: true,
             sameSite: 'None',
             secure: true
         })
-        res.status(200).json({
-            success: true,
-            message: 'Admin Cookie cleared'
-        })
+
+        SuccessHandler(LOGOUT_SUCCESS, SUCCESS_STATUS_CODE, res)
+
     } catch (error) {
         next(error);
     }
 }
 
-//DESC:FORGOT PASSWORD SENDING EMAIL TO USER ===========
+
+// Desc: Forgot Password 
 export const handleForgetPasswordAdmin = async (req, res, next) => {
     try {
         let { email } = req.body
 
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your email."
-            });
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email"
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // Convert email to lowercase
         email = email.toLowerCase();
-
 
         const user = await findAdminByEmailandRole(email)
 
         if (!user) {
-            res.status(404).json({
-                success: false,
-                message: "Email does not exist"
-            })
+            return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (user.AuthType === "google") {
-            return res.status(400).json({
+            return res.status(ERROR_STATUS_CODE).json({
                 success: false,
                 message: 'Password cant be changed as you are logged in with google'
             })
@@ -272,37 +204,25 @@ export const handleForgetPasswordAdmin = async (req, res, next) => {
 
         await user.save({ validatebeforeSave: false })
 
-        const CLIENT_URL = "https://iqb-final.onrender.com"
-
-        // const CLIENT_URL = "http://localhost:5173"
-
         try {
-            await emailWithNodeMail(email, user.name, CLIENT_URL, "adminchangepassword", resetToken)
+            await emailWithNodeMail(email, user.name, process.env.FORGET_PASSWORD_CLIENT_URL, "adminchangepassword", resetToken)
         } catch (error) {
-            res.status(500).json({
-                success: false,
-                message: 'Failed to send reset password email'
-            })
+            ErrorHandler(FORGOT_PASSWORD_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        res.status(200).json({
-            success: true,
-            message: `Please go to your email for reseting password`,
-            payload: {
-                resetToken
-            }
-        })
+        return SuccessHandler(FORGET_PASSWORD_SUCCESS, SUCCESS_STATUS_CODE, res, { payload: { resetToken } })
     } catch (error) {
-        // //console.log(error);
         next(error);
     }
 }
 
-//DESC:RESET PASSWORD =================================
+// Desc: Reset Password 
 export const handleResetPasswordAdmin = async (req, res, next) => {
     try {
+        const resetToken = req.params.token
+
         //creating token hash
-        const resetPasswordToken = crypto.createHash("sha256").update(req.params.token).digest("hex")
+        const resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex")
 
         const user = await resetPassword(resetPasswordToken)
 
@@ -321,17 +241,14 @@ export const handleResetPasswordAdmin = async (req, res, next) => {
 
         await user.save()
 
-        res.status(200).json({
-            success: true,
-            message: 'Password reset successfully'
-        })
+        return SuccessHandler(RESET_PASSWORD_SUCCESS, SUCCESS_STATUS_CODE, res)
 
     } catch (error) {
         next(error);
     }
 }
 
-//GOOGLE SIGNUP ===================================
+// Desc: Google Signup
 export const googleAdminSignup = async (req, res, next) => {
     try {
         const CLIENT_ID = process.env.CLIENT_ID;
@@ -347,31 +264,23 @@ export const googleAdminSignup = async (req, res, next) => {
 
         const client = new OAuth2Client(CLIENT_ID);
 
-        // Call the verifyIdToken to
-        // varify and decode it
         const ticket = await client.verifyIdToken({
             idToken: token,
             audience: CLIENT_ID,
         });
 
-        // Get the JSON with all the user info
         const payload = ticket.getPayload();
 
-        // Check if the email is already registered
         const existingUser = await findAdminByEmailandRole(payload.email)
 
         if (existingUser) {
-            return res.status(404).json({ success: false, message: 'Admin already exists' })
+            return ErrorHandler(ADMIN_EXISTS_ERROR, ERROR_STATUS_CODE, res)
         }
 
         // Create a new user
         const newUser = await createGoogleAdmin(payload.email)
 
-        res.status(201).json({
-            success: true,
-            message: 'Admin registered successfully',
-            newUser
-        })
+        return SuccessHandler(SIGNUP_SUCCESS, SUCCESS_STATUS_CODE, res, { newUser })
 
     }
     catch (error) {
@@ -379,7 +288,7 @@ export const googleAdminSignup = async (req, res, next) => {
     }
 }
 
-//GOOGLE SIGNIN ===================================
+// Desc: Google Signin
 export const googleAdminLogin = async (req, res, next) => {
     try {
         const CLIENT_ID = process.env.CLIENT_ID;
@@ -392,20 +301,18 @@ export const googleAdminLogin = async (req, res, next) => {
 
         const client = new OAuth2Client(CLIENT_ID);
 
-        // Call the verifyIdToken to
-        // varify and decode it
         const ticket = await client.verifyIdToken({
             idToken: token,
             audience: CLIENT_ID,
         });
 
-        // Get the JSON with all the user info
+
         const payload = ticket.getPayload();
 
         const foundUser = await googleLoginAdmin(payload.email)
 
         if (!foundUser) {
-            return res.status(401).json({ success: false, message: 'Email does not exist' })
+            return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const accessToken = jwt.sign(
@@ -419,16 +326,14 @@ export const googleAdminLogin = async (req, res, next) => {
         )
 
 
-        // Create secure cookie with refresh token 
         res.cookie('AdminToken', accessToken, {
             httpOnly: true, //accessible only by web server 
             secure: true, //https
             sameSite: 'None', //cross-site cookie 
             maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
         })
-        res.status(201).json({
-            success: true,
-            message: "Admin logged in successfully",
+
+        return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
             accessToken,
             foundUser
         })
@@ -437,31 +342,23 @@ export const googleAdminLogin = async (req, res, next) => {
     }
 }
 
+// Desc: Update Admin Info
 export const updateAdminInfo = async (req, res, next) => {
     try {
         let { email, name, countryCode, mobileNumber, gender, dateOfBirth } = req.body
 
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your email."
-            });
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email "
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
         email = email.toLowerCase();
 
         if (name && (name.length < 1 || name.length > 20)) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter name between 1 to 20 characters"
-            });
+            return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE, res)
         }
 
         let formattedNumberAsNumber = null;
@@ -482,10 +379,7 @@ export const updateAdminInfo = async (req, res, next) => {
             const isValid = phoneUtil.isValidNumber(phoneNumberProto);
 
             if (!isValid) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Invalid Mobile Number"
-                });
+                return ErrorHandler(MOBILE_NUMBER_ERROR, ERROR_STATUS_CODE, res)
             }
 
             // Get the national significant number (i.e., without the country code)
@@ -499,10 +393,7 @@ export const updateAdminInfo = async (req, res, next) => {
         const foundUser = await findAdminByEmailandRole(email)
 
         if (!foundUser) {
-            return res.status(400).json({
-                success: false,
-                message: 'Unauthorized Admin'
-            })
+            return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
 
@@ -524,13 +415,6 @@ export const updateAdminInfo = async (req, res, next) => {
             { expiresIn: '1d' }
         )
 
-        // const refreshToken = jwt.sign(
-        //     { "email": email, "role": foundUser.role },
-        //     REFRESH_TOKEN_SECRET,
-        //     { expiresIn: '1d' }
-        // )
-
-        // Create secure cookie with refresh token 
         res.cookie('AdminToken', accessToken, {
             httpOnly: true, //accessible only by web server 
             secure: true, //https
@@ -538,110 +422,37 @@ export const updateAdminInfo = async (req, res, next) => {
             maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
         })
 
-        // Send accessToken containing username and roles 
-        res.status(201).json({
-            success: true,
-            message: 'Admin information updated successfully',
+
+        return SuccessHandler(UPDATE_ADMIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
             accessToken,
             updatedAdmin
         })
+
     } catch (error) {
         next(error);
     }
 }
 
-//DESC:REFRESH TOKEN ==============================
-export const refreshTokenControllerAdmin = async (req, res, next) => {
-    const refreshToken = req.cookies.refreshToken;
-
-    if (!refreshToken) {
-        return res.status(401).json({ success: false, message: "Refresh token not provided." });
-    }
-
-    try {
-        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-
-        const newAccessToken = jwt.sign({ user: decoded.user }, process.env.JWT_ACCESS_SECRET, { expiresIn: "20s" });
-
-        // Set the new access token as an HTTP-only cookie
-        res.cookie('accessToken', newAccessToken, {
-            httpOnly: true,
-            expires: new Date(Date.now() + 20 * 1000),
-            secure: true,
-            sameSite: "None"
-        });
-
-        res.status(201).json({ success: true, message: "New accessToken generated" });
-    } catch (error) {
-        next(error);
-    }
-}
-
-//DESC:DELETE ADMIN =================================
-export const deleteSingleAdmin = async (req, res, next) => {
-    let { email } = req.body;
-
-    // Convert email to lowercase
-    email = email.toLowerCase();
-
-    try {
-        if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your email."
-            });
-        }
-
-        if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email "
-            });
-        }
-
-        const admin = await deleteAdmin(email);
-        res.status(200).json({
-            success: true,
-            message: "Admin deleted successfully",
-            response: admin
-        })
-
-    }
-    catch (error) {
-        next(error);
-    }
-}
 
 
-//DESC:UPDATE ADMIN =================================
+// Desc: Update Account Details
 export const updateAdminAccountDetails = async (req, res, next) => {
     try {
-
         let { name, gender, email, countryCode, mobileNumber, dateOfBirth } = req.body;
 
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your email."
-            });
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email "
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
-
-        // Convert email to lowercase
-        email = email.toLowerCase();
 
         if (name && (name.length < 1 || name.length > 20)) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter name between 1 to 20 characters."
-            });
+            return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE, res)
         }
+
+        email = email.toLowerCase();
 
         // Convert mobile number to string only if it's a number
         let mobileNumberStr = typeof mobileNumber === 'number' ? mobileNumber.toString() : mobileNumber;
@@ -657,10 +468,7 @@ export const updateAdminAccountDetails = async (req, res, next) => {
         const isValid = phoneUtil.isValidNumber(phoneNumberProto);
 
         if (!isValid) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Mobile Number"
-            });
+            return ErrorHandler(MOBILE_NUMBER_ERROR, ERROR_STATUS_CODE, res)
         }
 
         // Get the national significant number (i.e., without the country code)
@@ -679,36 +487,27 @@ export const updateAdminAccountDetails = async (req, res, next) => {
 
         const admin = await updateAdmin(name, gender, email, countryCode, formattedNumberAsNumber, dateOfBirth, currentAdmin.mobileVerified);
 
-        res.status(200).json({
-            success: true,
-            message: "Admin updated successfully",
-            response: admin
-        })
-
+        return SuccessHandler(UPDATE_ADMIN_SUCCESS, SUCCESS_STATUS_CODE, res, { response: admin });
     }
     catch (error) {
         next(error);
     }
 }
 
-//DESC:UPLOAD ADMIN PROFILE PICTURE ============================
+// Desc: Upload Admin Profile Pic (Upload, Update, Delete) in same api
 export const uploadAdminprofilePic = async (req, res, next) => {
     try {
-
 
         let profiles = req.files.profile;
         const { email } = req.body;
 
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Email does not exist"
-            });
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!req.files || !req.files.profile) {
-            return res.status(400).json({ success: false, message: "Admin profile image empty." });
-        } 
+            return ErrorHandler(IMAGE_EMPTY_ERROR, ERROR_STATUS_CODE, res)
+        }
 
         if (!Array.isArray(profiles)) {
             profiles = [profiles]; // Ensure profiles is always an array
@@ -716,26 +515,24 @@ export const uploadAdminprofilePic = async (req, res, next) => {
 
         // Allowed file extensions
         const allowedExtensions = ["jpg", "png", "jfif", "svg", "jpeg", "webp"];
-        // Maximum file size in bytes (e.g., 2MB)
         const maxFileSize = 2 * 1024 * 1024;
 
         // Find the existing admin by email and role
         const existingAdmin = await findAdminByEmailandRole(email);
 
         if (!existingAdmin) {
-            // console.log('Admin not found');
-            return res.status(404).json({ success: false, message: 'Admin not found' });
+            return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         // Validate each profile image before uploading
         for (const profile of profiles) {
             const extension = path.extname(profile.name).toLowerCase().slice(1);
             if (!allowedExtensions.includes(extension)) {
-                return res.status(400).json({ success: false, message: "File extension must be jpg, png, jfif, svg, jpeg, webp" });
+                return ErrorHandler(IMAGE_FILE_EXTENSION_ERROR, ERROR_STATUS_CODE, res)
             }
 
             if (profile.size > maxFileSize) {
-                return res.status(400).json({ success: false, message: "File size must be lower than 2MB" });
+                return ErrorHandler(IMAGE_FILE_SIZE_ERROR, ERROR_STATUS_CODE, res)
             }
         }
 
@@ -760,144 +557,27 @@ export const uploadAdminprofilePic = async (req, res, next) => {
         // Update the admin profile picture without deleting old image
         const adminImage = await uploadAdminProPic(email, profileimg);
 
-        return res.status(200).json({
-            success: true,
-            message: "File Uploaded successfully",
-            adminImage,
-        });
-
+        return SuccessHandler(IMAGE_UPLOAD_SUCCESS, SUCCESS_STATUS_CODE, res, { adminImage });
     } catch (error) {
         next(error);
     }
 };
 
-
-//DESC:UPDATE ADMIN PROFILE PICTURE ============================
-export const updateAdminProfilePic = async (req, res, next) => {
-    try {
-        const id = req.body.id;
-        const public_imgid = req.body.public_imgid;
-        const profile = req.files.profile;
-        const salonId = req.body.salonId;
-
-        const adminProfile = await findAdminProfileById(id);
-
-        // Validate Image
-        const fileSize = profile.size / 1000;
-        const fileExt = profile.name.split(".")[1];
-
-        if (fileSize > 2048) {
-            return res.status(400).json({ success: false, message: "File size must be lower than 2mb" });
-        }
-
-        if (!["jpg", "png", "jfif", "svg", "jpeg", "webp"].includes(fileExt)) {
-            return res.status(400).json({ success: false, message: "File extension must be jpg or png" });
-        }
-
-        // Generate a unique public_id based on the original file name
-        const public_id = `${profile.name.split(".")[0]}`;
-        const folderPath = `admins/salon-${salonId}`
-
-        cloudinary.uploader.upload(profile.tempFilePath, {
-            public_id: public_id,
-            folder: folderPath
-        })
-            .then(async (image) => {
-
-                const result = await cloudinary.uploader.destroy(public_imgid);
-
-                if (result.result === 'ok') {
-                    console.log("cloud img deleted")
-
-                } else {
-                    res.status(500).json({
-                        message: 'Failed to delete image.'
-                    });
-                }
-
-                // Delete the temporary file after uploading to Cloudinary
-                fs.unlink(profile.tempFilePath, (err) => {
-                    if (err) {
-                        console.error(err);
-                    }
-                });
-
-                const updatedAdmin = await updateAdminProPic(id, image)
-
-                // Find the newly added advertisement
-                const updatedAdminImage = updatedAdmin.profile.find(adm => adm.public_id === image.public_id);
-
-                res.status(200).json({
-                    success: true,
-                    message: "Files Updated successfully",
-                    response: updatedAdminImage
-                });
-
-            })
-
-    } catch (error) {
-        next(error);
-    }
-}
-
-//DESC:DELETE ADMIN PROFILE PICTURE ============================
-export const deleteAdminProfilePicture = async (req, res, next) => {
-    try {
-        const { public_id, img_id } = req.body;
-
-        const { updatedAdmin, deletedImage } = await deleteAdminProPic(img_id);
-
-        // Delete the image from Cloudinary
-        const result = await cloudinary.uploader.destroy(public_id);
-
-        if (result.result !== 'ok') {
-            return res.status(404).json({
-                success: false,
-                message: 'Failed to delete image from Cloudinary'
-            });
-        }
-
-        console.log("Cloudinary image deleted");
-
-        if (updatedAdmin) {
-            return res.status(200).json({
-                success: true,
-                message: "Image successfully deleted",
-                response: deletedImage // Include the updated admin data if necessary
-            });
-        } else {
-            return res.status(404).json({
-                success: false,
-                message: 'Image not found in the admin profile'
-            });
-        }
-    } catch (error) {
-        next(error);
-    }
-};
-
-//DESC:SEND ADMIN EMAIL VERIFICATION CODE ============================
+// Desc: Admin Send Verification Code
 export const sendVerificationCodeForAdminEmail = async (req, res, next) => {
     try {
         let { email } = req.body;
 
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Email not found"
-            });
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
-
-        // Convert email to lowercase
         email = email.toLowerCase();
 
         const user = await findAdminByEmailandRole(email);
+
         if (!user) {
-            return res.status(404).json({
-                success: false,
-                response: "Email does not exist",
-            });
+            return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
@@ -908,75 +588,61 @@ export const sendVerificationCodeForAdminEmail = async (req, res, next) => {
         try {
             await sendVerificationCode(email, user.name, verificationCode);
         } catch (error) {
-            return res.status(400).json({
-                success: false,
-                message: 'Failed to send verification code',
-                error: error.message
-            });
+            return ErrorHandler(VERIFICATION_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        return res.status(200).json({
-            success: true,
-            message: `Please check your email (${email}) for verification code.`,
-        });
+        return SuccessHandler(SEND_VERIFICATION_EMAIL_SUCCESS, SUCCESS_STATUS_CODE, res);
+
     } catch (error) {
         next(error);
     }
 }
 
-//DESC:CHANGE ADMIN EMAIL VERIFIED STATUS ============================
+// Desc: Change Admin Email Verifiied Status
 export const changeEmailVerifiedStatus = async (req, res, next) => {
     try {
         let { email, verificationCode } = req.body;
 
-        // Convert email to lowercase
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
+        }
+
         email = email.toLowerCase();
 
-        // FIND THE CUSTOMER 
         const admin = await findAdminByEmailandRole(email);
 
         if (admin && admin.verificationCode === verificationCode) {
-            // If verification code matches, clear it from the database
             admin.verificationCode = '';
             admin.emailVerified = true;
             await admin.save();
 
-            return res.status(200).json({
-                success: true,
-                message: "Your email has been verified successfully.",
-                response: admin,
-            });
+            return SuccessHandler(EMAIL_VERIFIED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: admin });
         }
 
-        // If verification code doesn't match or customer not found
-        return res.status(400).json({
-            success: false,
-            response: "Verification Code didn't match",
-            message: "Enter a valid Verification code",
-        });
+        return ErrorHandler(EMAIL_VERIFY_CODE_ERROR, ERROR_STATUS_CODE, res)
+
     } catch (error) {
         next(error);
     }
 }
 
-//DESC:GET ALL SALONS BY ADMIN ============================
+// Desc: Get All Salons of that active admin
 export const getAllSalonsByAdmin = async (req, res, next) => {
     try {
-        const { adminEmail } = req.body; // Assuming admin's email is provided in the request body
+        const { adminEmail } = req.body;
 
         let email = adminEmail
 
-        // Convert email to lowercase
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
+        }
+
         email = email.toLowerCase();
 
-        // Find the admin based on the email
         const admin = await findAdminByEmailandRole(email)
 
         if (!admin) {
-            return res.status(404).json({
-                success: false,
-                message: 'Admin not found',
-            });
+            return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         // Fetch all salons associated with the admin from registeredSalons array
@@ -999,46 +665,29 @@ export const getAllSalonsByAdmin = async (req, res, next) => {
             salonsWithSettings.push(salonWithSettings);
         }
 
-        if (salonsWithSettings) {
-            res.status(200).json({
-                success: true,
-                message: 'Salons retrieved successfully',
-                salons: salonsWithSettings,
-            });
-        }
-        else {
-            res.status(200).json({
-                success: false,
-                message: 'No salons to show',
-                salons: [],
-            });
-        }
+        return SuccessHandler(SALONS_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { salons: salonsWithSettings })
 
     } catch (error) {
         next(error);
     }
 }
 
-//DESC:GET DEFAULT SALON BY ADMIN ============================
+// Desc: Salon that admin currently selected
 export const getDefaultSalonByAdmin = async (req, res, next) => {
     try {
         const { adminEmail } = req.body;
 
         let email = adminEmail
 
-        // Convert email to lowercase
         email = email.toLowerCase();
 
         const admin = await findAdminByEmailandRole(email)
         if (!admin) {
-            res.status(404).json({
-                success: false,
-                message: 'No admin found.',
-            });
+            return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (admin.salonId === 0) {
-            res.status(200).json({
+            res.status(SUCCESS_STATUS_CODE).json({
                 success: false,
                 message: "There are no salons present for this admin",
                 response: []
@@ -1047,11 +696,8 @@ export const getDefaultSalonByAdmin = async (req, res, next) => {
 
             const defaultSalon = await getDefaultSalonDetailsByAdmin(admin.salonId);
 
-            res.status(200).json({
-                success: true,
-                message: "Salon Found",
-                response: defaultSalon
-            })
+            return SuccessHandler(GET_DEFAULT_SALON_SUCCESS, SUCCESS_STATUS_CODE, res, { response: defaultSalon });
+
         }
     }
     catch (error) {
@@ -1059,31 +705,26 @@ export const getDefaultSalonByAdmin = async (req, res, next) => {
     }
 }
 
-//DESC:CHANGE ADMIN DEFAULT SALON ============================
+// Desc: Change default Salon ID of admin
 export const changeDefaultSalonIdOfAdmin = async (req, res, next) => {
     try {
-        const { adminEmail, salonId } = req.body; // Assuming admin's email and new salonId are provided in the request body
+        const { adminEmail, salonId } = req.body;
 
         let email = adminEmail
 
-        // Convert email to lowercase
         email = email.toLowerCase();
 
-        // Find the admin based on the provided email
         const admin = await findAdminByEmailandRole(email);
 
         if (!admin) {
-            return res.status(404).json({
-                success: false,
-                message: 'Admin not found',
-            });
+            return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const salon = await getSalonBySalonId(salonId);
 
         if (!salon) {
 
-            res.status(400).json({
+            res.status(ERROR_STATUS_CODE).json({
                 success: true,
                 message: 'Salon not found',
             });
@@ -1094,40 +735,34 @@ export const changeDefaultSalonIdOfAdmin = async (req, res, next) => {
         // Update the default salonId of the admin
         const updatedAdmin = await updateDefaultSalonId(admin, salonId);
 
-        res.status(200).json({
-            success: true,
-            message: 'Default salon ID of admin updated successfully',
+        return SuccessHandler(CHANGE_DEFAULT_SALON_SUCCESS, SUCCESS_STATUS_CODE, res, {
             admin: {
                 ...updatedAdmin.toObject(),
                 salonName: salon.salonName
             },
         });
+
+
     } catch (error) {
         next(error);
     }
 };
 
-//DESC: APPROVE BARBER================
+// Desc: Approve Barber of admin
 export const approveBarber = async (req, res, next) => {
     try {
         let { salonId, email, isApproved } = req.body;
 
-        // Convert email to lowercase
-        email = email.toLowerCase();
 
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please ensure the email field is filled correctly."
-            });
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email "
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
+
+        email = email.toLowerCase();
 
         const barberApprovedStatus = await approveBarberByadmin(salonId, email, isApproved)
 
@@ -1159,7 +794,7 @@ export const approveBarber = async (req, res, next) => {
                     margin-bottom: 20px;
                 }
                 .logo img {
-                    max-width: 200px;
+                    max-width: SUCCESS_STATUS_CODEpx;
                 }
                 .email-content {
                     background-color: #f8f8f8;
@@ -1195,17 +830,11 @@ export const approveBarber = async (req, res, next) => {
 
         try {
             await barberApprovalStatus(email, emailSubject, emailBody);
-            console.log('Email sent successfully.');
         } catch (error) {
             console.error('Error sending email:', error);
-            // Handle error if email sending fails
         }
 
-        res.status(200).json({
-            success: true,
-            message: "Barber has been approved",
-            response: barberApprovedStatus
-        });
+        return SuccessHandler(APPROVE_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barberApprovedStatus })
     }
     catch (error) {
         next(error);
@@ -1213,29 +842,25 @@ export const approveBarber = async (req, res, next) => {
 }
 
 
-//DESC:SEND ADMIN MOBILE NUMBER VERIFICATION CODE ============================
+// Desc: Send Verification Code
 export const sendVerificationCodeForAdminMobile = async (req, res, next) => {
     try {
         let { email } = req.body;
 
-        // Validate input fields
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Email is required."
-            });
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // Convert email to lowercase
+        if (!validateEmail(email)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+        }
+
         email = email.toLowerCase();
 
         const user = await findAdminByEmailandRole(email);
 
         if (!user) {
-            return res.status(404).json({
-                success: false,
-                response: "Email does not exist.",
-            });
+            return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
@@ -1249,56 +874,42 @@ export const sendVerificationCodeForAdminMobile = async (req, res, next) => {
         try {
             await sendMobileVerificationCode(formattedNumber, verificationCode);
         } catch (error) {
-            // //console.log(error);
             next(error);
         }
 
-        return res.status(200).json({
-            success: true,
-            message: `Please check your mobile inbox for verification code.`,
-        });
+        return SuccessHandler(SEND_VERIFICATION_MOBILE_SUCCESS, SUCCESS_STATUS_CODE, res)
     } catch (error) {
         next(error);
     }
 }
 
-//DESC:CHANGE ADMIN MOBILE VERIFIED STATUS ============================
+// Desc: Change Mobile Verified Status
 export const changeMobileVerifiedStatus = async (req, res, next) => {
     try {
         let { email, verificationCode } = req.body;
 
-        // Validate input fields
+
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Email is required."
-            });
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // Convert email to lowercase
+        if (!validateEmail(email)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+        }
+
         email = email.toLowerCase();
 
-        // FIND THE CUSTOMER 
         const admin = await findAdminByEmailandRole(email);
 
         if (admin && admin.verificationCode === verificationCode) {
-            // If verification code matches, clear it from the database
             admin.verificationCode = '';
             admin.mobileVerified = true;
             await admin.save();
 
-            return res.status(200).json({
-                success: true,
-                message: "Your mobile number has been verified successfully.",
-                response: admin,
-            });
+            return SuccessHandler(MOBILE_VERIFIED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: admin })
         }
         else {
-            // If verification code doesn't match or customer not found
-            return res.status(400).json({
-                success: false,
-                message: "Enter a valid Verification code",
-            });
+            return ErrorHandler(MOBILE_VERIFY_CODE_ERROR, ERROR_STATUS_CODE, res)
         }
 
     } catch (error) {
@@ -1307,85 +918,53 @@ export const changeMobileVerifiedStatus = async (req, res, next) => {
 }
 
 
-//DESC:CHANGE ADMIN PASSWORD ============================
+// Desc: Change Admin Password 
 export const adminchangepassword = async (req, res, next) => {
     try {
         let { email, oldPassword, password } = req.body;
 
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Email not found"
-            });
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email "
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!oldPassword && !password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter all the fields."
-            });
+            return ErrorHandler(FILL_ALL_FIELDS_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!oldPassword) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your old password."
-            });
+            return ErrorHandler(OLD_PASSWORD_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your new password."
-            });
+            return ErrorHandler(NEW_PASSWORD_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // Convert email to lowercase
         email = email.toLowerCase();
 
         const getAdmin = await findAdminByEmailandRole(email)
 
         if (!getAdmin) {
-            return res.status(404).json({
-                success: false,
-                message: "Admin not found."
-            });
+            return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (getAdmin.AuthType === "local") {
 
             if (oldPassword === password) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Old and new password can't be same."
-                });
+                return ErrorHandler(OLD_AND_NEW_PASSWORD_DONOT_MATCH, ERROR_STATUS_CODE, res)
             }
 
-            //Match the old password
             const isMatch = await bcrypt.compare(oldPassword, getAdmin.password);
 
             if (!isMatch) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Old password is incorrect."
-                });
+                return ErrorHandler(INCORRECT_OLD_PASSWORD_ERROR, ERROR_STATUS_CODE, res)
             }
 
-            if (password) {
-                // Check if the password meets the minimum length requirement
-                if (password.length < 8) {
-                    return res.status(400).json({
-                        success: false,
-                        message: "Password must be at least 8 characters.",
-                    });
-                }
+            if (password && password.length < 8) {
+                return ErrorHandler(PASSWORD_LENGTH_ERROR, ERROR_STATUS_CODE, res)
             }
 
 
@@ -1397,22 +976,12 @@ export const adminchangepassword = async (req, res, next) => {
 
             getAdmin.save();
 
-            res.status(200).json({
-                success: true,
-                message: "Admin password updated successfully",
-                response: getAdmin
-            })
+            return SuccessHandler(CHANGE_PASSWORD_SUCCESS, SUCCESS_STATUS_CODE, res, { response: getAdmin })
         }
         else {
 
-            if (password) {
-                // Check if the password meets the minimum length requirement
-                if (password.length < 8) {
-                    return res.status(400).json({
-                        success: false,
-                        message: "Password must be at least 8 characters.",
-                    });
-                }
+            if (password && password.length < 8) {
+                return ErrorHandler(PASSWORD_LENGTH_ERROR, ERROR_STATUS_CODE, res)
             }
 
             // Hash the new password
@@ -1422,11 +991,7 @@ export const adminchangepassword = async (req, res, next) => {
 
             getAdmin.save();
 
-            res.status(200).json({
-                success: true,
-                message: "Admin password updated successfully",
-                response: getAdmin
-            })
+            return SuccessHandler(CHANGE_PASSWORD_SUCCESS, SUCCESS_STATUS_CODE, res, { response: getAdmin })
         }
 
     }

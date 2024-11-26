@@ -1,5 +1,5 @@
 import express from "express";
-import { adminchangepassword, approveBarber, changeDefaultSalonIdOfAdmin, changeEmailVerifiedStatus, changeMobileVerifiedStatus, deleteAdminProfilePicture, deleteSingleAdmin, getAllSalonsByAdmin, getDefaultSalonByAdmin, googleAdminLogin, googleAdminSignup, handleForgetPasswordAdmin, handleLogoutAdmin, handleResetPasswordAdmin, loginAdmin, registerAdmin, sendVerificationCodeForAdminEmail, sendVerificationCodeForAdminMobile, updateAdminAccountDetails, updateAdminInfo, updateAdminProfilePic, uploadAdminprofilePic } from "../../../controllers/web/admin/adminController.js";
+import { adminchangepassword, approveBarber, changeDefaultSalonIdOfAdmin, changeEmailVerifiedStatus, changeMobileVerifiedStatus, getAllSalonsByAdmin, getDefaultSalonByAdmin, googleAdminLogin, googleAdminSignup, handleForgetPasswordAdmin, handleLogoutAdmin, handleResetPasswordAdmin, loginAdmin, registerAdmin, sendVerificationCodeForAdminEmail, sendVerificationCodeForAdminMobile, updateAdminAccountDetails, updateAdminInfo, uploadAdminprofilePic } from "../../../controllers/web/admin/adminController.js";
 import { AdminLoggedIn } from "../../../middlewares/web/middlewares.js";
 import { verifyRefreshTokenAdmin } from "../../../middlewares/web/VerifyRefreshTokenAdmin.js";
 import { getAllSalonServices } from "../../../controllers/web/admin/salonController.js";
@@ -14,43 +14,15 @@ router.route("/login").post(loginAdmin)
 router.route('/logout').post(handleLogoutAdmin)
 router.route("/adminloggedin").get(AdminLoggedIn)
 router.route("/updateadminInfo").put(updateAdminInfo)
-
-// router.route("/demo").get(verifyRefreshTokenAdmin, demoController)
-
-
 router.route('/forget-password').post(handleForgetPasswordAdmin)
 router.route('/reset-password/:token').post(handleResetPasswordAdmin)
 
 router.route("/googleAdminSignUp").post(googleAdminSignup)
 router.route("/googleAdminLogin").post(googleAdminLogin)
 
-
-// //GOOGLE_LOGIN
-// router.route("/google-login").post(googleLoginController)
-
-// //FOR REFRESHING NEW ACCESS TOKEN
-// router.route("/refresh-token").post(refreshTokenController)
-
-// //ISLOGOUT MIDDLEWARE
-// router.route("/loggedoutmiddleware").get(verifyRefreshTokenAdmin,isLoggedOutMiddleware)
-
-// //ISLOGIN MIDDLEWARE
-// router.route("/loggedinmiddleware").get(verifyRefreshTokenAdmin, isLogginMiddleware)
-
-//ALL PROTECTED ROUTES
-// router.route("/profile").get(handleProtectedRoute,profileController)
-// router.route("/getAllAdmins").get(allAdmins)
-
-router.route("/deleteAdmin").post(verifyRefreshTokenAdmin,deleteSingleAdmin)
-
 //Upload Admin Profile Picture
 router.route("/uploadAdminProfilePicture").post(verifyRefreshTokenAdmin, uploadAdminprofilePic)
 
-//UPDATE BARBER PROFILE PICTURE
-router.route("/updateAdminProfilePicture").put(verifyRefreshTokenAdmin, updateAdminProfilePic)
-
-//DELETE BARBER PROFILE PICTURE
-router.route("/deleteAdminProfilePicture").delete(verifyRefreshTokenAdmin, deleteAdminProfilePicture)
 
 //UPDATE ADMIN ACCOUNT DETAILS
 router.route("/updateAdminAcoountDetails").put(verifyRefreshTokenAdmin, updateAdminAccountDetails)

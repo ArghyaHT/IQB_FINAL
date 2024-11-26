@@ -43,6 +43,8 @@ import reports from "./routes/web/reports/reportsRoutes.js"
 import loggerRoutes from "./routes/loggerRoutes.js"
 import logger from "./utils/logger/logger.js";
 
+dotenv.config()
+
 const rateLimiter = rateLimit({
   windowMs: 20 * 1000, // 15 minutes
   limit: 1000, // Limit each IP to 100 requests per `window` (here, per 15 minutes)

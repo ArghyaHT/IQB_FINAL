@@ -154,6 +154,14 @@ const salonsSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isQueuing:{
+        type: Boolean,
+        default: false
+    },
+    isAppointments:{
+        type: Boolean,
+        default: false
+    },
     moduleAvailability: {
         type: String,
         enum: ["Queuing", "Appointment", "Both"],

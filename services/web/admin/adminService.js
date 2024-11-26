@@ -34,7 +34,7 @@ export const resetPassword = async (resetPasswordToken) => {
       resetPasswordToken: resetPasswordToken, resetPasswordExpire: {
          $gt: Date.now()
       }
-   });
+   }); // From here return two things one is user and other is token
    return user;
 }
 
