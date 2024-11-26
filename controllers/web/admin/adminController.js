@@ -21,7 +21,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { sendMobileVerificationCode } from "../../../utils/mobileMessageSender/mobileMessageSender.js";
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
-import { ADMIN_EXISTS_ERROR, EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, FORGOT_PASSWORD_EMAIL_ERROR, INVALID_EMAIL_ERROR, MOBILE_NUMBER_ERROR, NAME_LENGTH_ERROR, NEW_PASSWORD_ERROR, OLD_PASSWORD_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, ADMIN_NOT_EXIST_ERROR, IMAGE_EMPTY_ERROR, IMAGE_FILE_SIZE_ERROR, IMAGE_FILE_EXTENSION_ERROR, VERIFICATION_EMAIL_ERROR, EMAIL_VERIFY_CODE_ERROR, MOBILE_VERIFY_CODE_ERROR, FILL_ALL_FIELDS_ERROR, OLD_AND_NEW_PASSWORD_DONOT_MATCH, INCORRECT_OLD_PASSWORD_ERROR, APPROVE_BARBER_SUCCESS, CHANGE_DEFAULT_SALON_SUCCESS, CHANGE_PASSWORD_SUCCESS, EMAIL_VERIFIED_SUCCESS, FORGET_PASSWORD_SUCCESS, GET_DEFAULT_SALON_SUCCESS, IMAGE_UPLOAD_SUCCESS, LOGOUT_SUCCESS, MOBILE_VERIFIED_SUCCESS, RESET_PASSWORD_SUCCESS, SALONS_RETRIEVE_SUCCESS, SEND_VERIFICATION_EMAIL_SUCCESS, SEND_VERIFICATION_MOBILE_SUCCESS, SIGNIN_SUCCESS, SIGNUP_SUCCESS, SUCCESS_STATUS_CODE, UPDATE_ADMIN_SUCCESS } from "../../../constants/web/adminConstants.js";
+import { ADMIN_EXISTS_ERROR, EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, FORGOT_PASSWORD_EMAIL_ERROR, INVALID_EMAIL_ERROR, MOBILE_NUMBER_ERROR, NAME_LENGTH_ERROR, NEW_PASSWORD_ERROR, OLD_PASSWORD_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, ADMIN_NOT_EXIST_ERROR, IMAGE_EMPTY_ERROR, IMAGE_FILE_SIZE_ERROR, IMAGE_FILE_EXTENSION_ERROR, VERIFICATION_EMAIL_ERROR, EMAIL_VERIFY_CODE_ERROR, MOBILE_VERIFY_CODE_ERROR, FILL_ALL_FIELDS_ERROR, OLD_AND_NEW_PASSWORD_DONOT_MATCH, INCORRECT_OLD_PASSWORD_ERROR, APPROVE_BARBER_SUCCESS, CHANGE_DEFAULT_SALON_SUCCESS, CHANGE_PASSWORD_SUCCESS, EMAIL_VERIFIED_SUCCESS, FORGET_PASSWORD_SUCCESS, GET_DEFAULT_SALON_SUCCESS, IMAGE_UPLOAD_SUCCESS, LOGOUT_SUCCESS, MOBILE_VERIFIED_SUCCESS, RESET_PASSWORD_SUCCESS, SALONS_RETRIEVE_SUCCESS, SEND_VERIFICATION_EMAIL_SUCCESS, SEND_VERIFICATION_MOBILE_SUCCESS, SIGNIN_SUCCESS, SIGNUP_SUCCESS, UPDATE_ADMIN_SUCCESS } from "../../../constants/web/adminConstants.js";
+import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
 
 // Desc: Register Admin
 export const registerAdmin = async (req, res, next) => {
@@ -155,7 +156,7 @@ export const handleLogoutAdmin = async (req, res, next) => {
             secure: true
         })
 
-        SuccessHandler(LOGOUT_SUCCESS, SUCCESS_STATUS_CODE, res)
+        return SuccessHandler(LOGOUT_SUCCESS, SUCCESS_STATUS_CODE, res)
 
     } catch (error) {
         next(error);
@@ -199,7 +200,7 @@ export const handleForgetPasswordAdmin = async (req, res, next) => {
         try {
             await emailWithNodeMail(email, user.name, process.env.FORGET_PASSWORD_CLIENT_URL, "adminchangepassword", resetToken)
         } catch (error) {
-            ErrorHandler(FORGOT_PASSWORD_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+            return ErrorHandler(FORGOT_PASSWORD_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
         return SuccessHandler(FORGET_PASSWORD_SUCCESS, SUCCESS_STATUS_CODE, res, { payload: { resetToken } })
@@ -432,19 +433,10 @@ export const updateAdminAccountDetails = async (req, res, next) => {
     try {
         let { name, gender, email, countryCode, mobileNumber, dateOfBirth } = req.body;
 
-        if (!email) {
-            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
-        }
-
-        if (!validateEmail(email)) {
-            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
-        }
 
         if (name && (name.length < 1 || name.length > 20)) {
             return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE, res)
         }
-
-        email = email.toLowerCase();
 
         // Convert mobile number to string only if it's a number
         let mobileNumberStr = typeof mobileNumber === 'number' ? mobileNumber.toString() : mobileNumber;
@@ -563,8 +555,6 @@ export const sendVerificationCodeForAdminEmail = async (req, res, next) => {
         if (!email) {
             return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
-
-        email = email.toLowerCase();
 
         const user = await findAdminByEmailandRole(email);
 

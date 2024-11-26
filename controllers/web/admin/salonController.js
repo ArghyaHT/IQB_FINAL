@@ -11,12 +11,8 @@ import { v2 as cloudinary } from "cloudinary";
 import { changeBarberStatusAtSalonOffline, getbarbersBySalonId } from "../../../services/web/barber/barberService.js";
 import { getAverageSalonRating } from "../../../services/web/ratings/ratingsService.js";
 import { validateEmail } from "../../../middlewares/validator.js";
-
-// cloudinary.config({
-//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-//   api_key: process.env.CLOUDINARY_API_KEY,
-//   api_secret: process.env.CLOUDINARY_API_SECRET,
-// });
+import { EMAIL_NOT_FOUND_ERROR } from "../../../constants/web/SalonConstants.js";
+import { ERROR_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
 
 
 //DESC:CREATE SALON BY ADMIN============================
@@ -48,10 +44,7 @@ export const createSalonByAdmin = async (req, res, next) => {
 
 
     if (!adminEmail) {
-      return res.status(400).json({
-        success: false,
-        message: "Email not found"
-      });
+      return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
     }
 
 

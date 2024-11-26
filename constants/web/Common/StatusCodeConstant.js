@@ -1,0 +1,2 @@
+export const ERROR_STATUS_CODE = 400
+export const SUCCESS_STATUS_CODE = 200

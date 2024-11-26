@@ -6,14 +6,6 @@ import { findBarberByEmailAndRole } from "../../services/web/barber/barberServic
 export const handleProtectedRoute = async (req, res, next) => {
     try {
         const accessToken = req.cookies.accessToken;
-        // const refreshToken = req.cookies.refreshToken;
-
-        // if (!refreshToken) {
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: "Refresh Token not present.Please Login Again",
-        //     });
-        // }
 
         // Verify old refresh token
         const decodeToken = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
@@ -38,8 +30,6 @@ export const handleProtectedRoute = async (req, res, next) => {
 export const AdminLoggedIn = async (req, res, next) => {
   try {
       const admincookie = req.cookies
-
-      console.log(admincookie)
 
       if (!admincookie?.AdminToken) {
           return res.status(401).json({
@@ -68,7 +58,6 @@ export const AdminLoggedIn = async (req, res, next) => {
       )
   }
   catch (error) {
-      //console.log(error);
       next(error);
   }
 

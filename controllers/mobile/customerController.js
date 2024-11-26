@@ -17,11 +17,6 @@ import { findBarbersBySalonIdforCustomerDashboard } from "../../services/mobile/
 import { getSalonQlist } from "../../services/mobile/joinQueueService.js";
 import { sendMobileVerificationCode } from "../../utils/mobileMessageSender/mobileMessageSender.js";
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 //DESC:CHECK WEATHER THE EMAIL ALREADY EXISTS IN THE DATABASE =======
 export const checkEmail = async (req, res, next) => {

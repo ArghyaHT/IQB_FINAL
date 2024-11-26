@@ -1,6 +1,4 @@
 //ERROR
-export const ERROR_STATUS_CODE = 400
-
 export const EMAIL_AND_PASSWORD_NOT_FOUND_ERROR =  "Please enter email and password"
 export const EMAIL_NOT_PRESENT_ERROR = "Please enter your email"
 export const INVALID_EMAIL_ERROR = "Invalid Email"
@@ -33,8 +31,6 @@ export const INCORRECT_OLD_PASSWORD_ERROR = "Incorrect old password"
 
 
 //SUCCESS
-export const SUCCESS_STATUS_CODE = 200
-
 export const SIGNIN_SUCCESS = "Admin logged in successfully"
 export const SIGNUP_SUCCESS = "Admin registered successfully"
 export const LOGOUT_SUCCESS = "Admin logout successfully"

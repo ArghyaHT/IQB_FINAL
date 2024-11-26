@@ -3,7 +3,6 @@ import connectDB from "./db/db.js";
 import cors from "cors";
 import cookieParser from "cookie-parser"; 
 import {rateLimit} from "express-rate-limit";
-import { ErrorHandler } from "./middlewares/kiosk/errorHandler.js";
 import dotenv from "dotenv"
 import admin from "firebase-admin";
 import fileUpload from "express-fileupload";
@@ -13,15 +12,10 @@ import jsonFile from "jsonfile"
 import path from "path"
 import { v2 as cloudinary } from "cloudinary";
 
-//KIOSK ROUTES
 import kioskRoutes from "./routes/kiosk/kioskRouter.js"
-
-//MOBILE ROUTES
 import customerRoutes from "./routes/mobile/customerRoutes.js"
 import mobileRoutes from "./routes/mobile/mobileRoutes.js"
-
 import tvappRoutes from "./routes/TvRoutes/tvAppRoutes.js"
-
 import adminRoutes from "./routes/web/admin/adminRoutes.js"
 import salonRoutes from "./routes/web/admin/salonRoutes.js"
 import barberRoutes from "./routes/web/barber/barberRoutes.js"
@@ -43,6 +37,7 @@ import reports from "./routes/web/reports/reportsRoutes.js"
 
 import loggerRoutes from "./routes/loggerRoutes.js"
 import logger from "./utils/logger/logger.js";
+import { GlobalErrorHandler } from "./middlewares/GlobalErrorHandler.js";
 
 dotenv.config()
 
@@ -87,6 +82,7 @@ cloudinary.config({
 // app.use(helmet()); 
 
 app.use(cookieParser())
+
 const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
@@ -155,64 +151,36 @@ app.use((req, res, next) => {
 });
 
 
-//KIOSK BASE ROUTES
+//Kiosk base routes
 app.use("/kiosk", kioskRoutes)
 
+//Tv app base routes
 app.use("/tvAppRoutes", tvappRoutes)
 
-//MOBILE BASE ROUTES
-//Customer Base Route
+//Mobile base routes
 app.use("/api/customer", customerRoutes)
-
-//Other Mobile Routes
 app.use("/api/mobileRoutes", mobileRoutes)
 
-
-//WEB ROUTES
-
-//Admin Base Route
+//Web base routes
 app.use("/api/admin", adminRoutes)
-
-//Salon Base Route
 app.use("/api/salon", salonRoutes)
-
-//Barber Base Route
 app.use("/api/barber", barberRoutes)
-
-//Customer Base Route
 app.use("/api/customers", customerRoutesWeb)
-
-//Queue Base Routes
 app.use("/api/queue", queueRoutes)
-
-//Appointment Base Routes
 app.use("/api/appointments", appointmentRoutes)
-
-//Advertisements Base Route
 app.use("/api/advertisement", advertisementRoutes)
-
-//SalonSettings Base Routes
 app.use("/api/salonSettings", salonSettingsRoutes)
-
-//Notification Base Routes
 app.use("/api/notifications", notificationRoutes)
-
-//Rating Base Routes
 app.use("/api/ratings", ratingRoutes)
-
-//Icons Base Routes
 app.use("/api/icons", iconRoutes)
-
-//Countries Base Routes
 app.use("/api/country", countryRoutes)
-
 app.use("/api/bulkMessageAndEmails",bulkMessageAndEmailsRoutes)
-
 app.use("/api/reports",reports)
 
 
-//Global Error Handler
-app.use(ErrorHandler)
+// Global Error Handler
+app.use(GlobalErrorHandler)
+
 
 const __dirname = path.resolve();
   app.use(express.static(path.join(__dirname, 'dist')));
