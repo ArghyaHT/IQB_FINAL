@@ -1,8 +1,8 @@
 import express from "express";
 import connectDB from "./db/db.js";
 import cors from "cors";
-import cookieParser from "cookie-parser"; 
-import {rateLimit} from "express-rate-limit";
+import cookieParser from "cookie-parser";
+import { rateLimit } from "express-rate-limit";
 import dotenv from "dotenv"
 import admin from "firebase-admin";
 import fileUpload from "express-fileupload";
@@ -107,7 +107,7 @@ app.use(cors({
 const serviceAccount = jsonFile.readFileSync('./notification_push_service_key.json');
 
 admin.initializeApp({
-credential: admin.credential.cert(serviceAccount),
+  credential: admin.credential.cert(serviceAccount),
 });
 
 app.use(cookieParser())
@@ -118,12 +118,12 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 //Image upload =============
 if (process.env.NODE_ENV != "production") {
-app.use(morgan("dev"));
+  app.use(morgan("dev"));
 }
 
 app.use(fileUpload({
-debug: true,
-useTempFiles: true,
+  debug: true,
+  useTempFiles: true,
 }));
 app.use(express.static("uploads"));
 
@@ -174,8 +174,8 @@ app.use("/api/notifications", notificationRoutes)
 app.use("/api/ratings", ratingRoutes)
 app.use("/api/icons", iconRoutes)
 app.use("/api/country", countryRoutes)
-app.use("/api/bulkMessageAndEmails",bulkMessageAndEmailsRoutes)
-app.use("/api/reports",reports)
+app.use("/api/bulkMessageAndEmails", bulkMessageAndEmailsRoutes)
+app.use("/api/reports", reports)
 
 
 // Global Error Handler
@@ -183,11 +183,11 @@ app.use(GlobalErrorHandler)
 
 
 const __dirname = path.resolve();
-  app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(__dirname, 'dist')));
 
-  app.get('*', (req, res) =>
-    res.sendFile(path.resolve(__dirname, 'dist', 'index.html'))
-  );
+app.get('*', (req, res) =>
+  res.sendFile(path.resolve(__dirname, 'dist', 'index.html'))
+);
 
 const PORT = 8001;
 

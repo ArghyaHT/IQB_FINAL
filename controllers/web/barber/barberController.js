@@ -1,8 +1,5 @@
 import { adminAddNewBarberService, adminCreateBarber, adminUpdateBarber, adminUpdateBarberServices, barberClockInStatus, barberCode, barberOnlineStatus, changeBarberStatus, connectBarberSalon, createBarber, createBarberId, createGoogleBarber, deleteBarberProPic, deletedBarber, fetchedBarbers, findBarberByEmailAndRole, findBarberProfileById, getBarberByBarberId, getBarbersByServiceId, googleLoginBarber, resetBarberPassword, totalBarberCount, updateBarber, updateBarberProPic, uploadBarberProPic } from "../../../services/web/barber/barberService.js";
 import { createBarberFcmToken } from "../../../services/web/userTokenRegister/userTokenRegister.js";
-
-
-
 import jwt from "jsonwebtoken"
 import { OAuth2Client } from "google-auth-library";
 import crypto from "crypto";
@@ -22,84 +19,60 @@ import { v4 as uuidv4 } from 'uuid';
 import { qListByBarberId } from "../../../services/web/queue/joinQueueService.js";
 import { barberLogInTime, barberLogOutTime } from "../../../utils/attendence/barberAttendence.js";
 import { sendMobileVerificationCode } from "../../../utils/mobileMessageSender/mobileMessageSender.js";
+import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
+import { EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, FORGET_PASSWORD_SUCCESS, FORGOT_PASSWORD_EMAIL_ERROR, IMAGE_EMPTY_ERROR, INVALID_EMAIL_ERROR, MOBILE_NUMBER_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, RESET_PASSWORD_SUCCESS } from "../../../constants/web/adminConstants.js";
+import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
+import { BARBER_EXISTS_ERROR, BARBER_NOT_EXIST_ERROR, GET_ALL_BARBER_SUCCESS, LOGOUT_SUCCESS, NO_BARBERS_ERROR, SELECT_SERVICE_ERROR, SIGNIN_SUCCESS, SIGNUP_SUCCESS, UPDATE_BARBER_SUCCESS } from "../../../constants/web/BarberConstants.js";
+import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
+import { ALLOWED_IMAGE_EXTENSIONS, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 
 
-//DESC:REGISTER A BARBER ====================
+// Desc: Register
 export const registerController = async (req, res, next) => {
     try {
         let { email, password } = req.body
 
         if (!email && !password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter email and password."
-            });
+            return ErrorHandler(EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your email."
-            });
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email "
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
-          // Convert email to lowercase
-          email = email.toLowerCase();
-
-        // Validate password length
         if (!password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your password."
-            });
+            return ErrorHandler(PASSWORD_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // Validate password length
         if (password.length < 8) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters."
-            });
+            return ErrorHandler(PASSWORD_LENGTH_ERROR, ERROR_STATUS_CODE, res)
         }
 
+        email = email.toLowerCase();
 
-        // Check if the email is already registered
         const existingUser = await findBarberByEmailAndRole(email)
 
         if (existingUser) {
-            return res.status(400).json({
-                success: false,
-                message: "Barber already exists"
-            });
+            return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const barberId = await createBarberId();
 
-        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10)
 
-        // Create a new user
         const newUser = await createBarber(email, hashedPassword, barberId)
 
-
-        res.status(200).json({
-            success: true,
-            message: "Barber registered successfully",
-            newUser
-        })
+        return SuccessHandler(SIGNUP_SUCCESS, SUCCESS_STATUS_CODE, res, { newUser })
     } catch (error) {
         next(error);
     }
 }
 
-//DESC:LOGIN A USER =========================
+// Desc: Login
 export const loginController = async (req, res, next) => {
     try {
         let email = req.body.email;
@@ -107,62 +80,39 @@ export const loginController = async (req, res, next) => {
         const { webFcmToken, androidFcmToken, iosFcmToken } = req.body;
 
         if (!email && !password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter email and password."
-            });
+            return ErrorHandler(EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your email."
-            });
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email "
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
-          // Convert email to lowercase
-          email = email.toLowerCase();
-
-        // Validate password length
         if (!password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your password."
-            });
+            return ErrorHandler(PASSWORD_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // Validate password length
         if (password.length < 8) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters."
-            });
+            return ErrorHandler(PASSWORD_LENGTH_ERROR, ERROR_STATUS_CODE, res)
         }
 
+        email = email.toLowerCase();
 
         // Find user by email in the MongoDB database
         const foundUser = await findBarberByEmailAndRole(email);
 
         if (!foundUser) {
-            return res.status(400).json({
-                success: false,
-                message: 'Email or password donot match.'
-            })
+            return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const match = await bcrypt.compare(password, foundUser.password)
 
-        if (!match) return res.status(400).json({
-            message: false,
-            message: 'Email or password donot match.'
-        })
+        if (!match) {
+            return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
+        }
 
         // // Save FCM Tokens based on the switch-case logic
         let tokenType, tokenValue;
@@ -189,7 +139,6 @@ export const loginController = async (req, res, next) => {
             { expiresIn: '1d' }
         )
 
-        // Create secure cookie with refresh token 
         res.cookie('BarberToken', accessToken, {
             httpOnly: true, //accessible only by web server 
             secure: true, //https
@@ -197,18 +146,38 @@ export const loginController = async (req, res, next) => {
             maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
         })
 
-        res.status(200).json({
-            success: true,
-            message: "Barber logged in successfully",
+        return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
             accessToken,
             foundUser
-        });
+        })
     } catch (error) {
         next(error);
     }
 };
 
-//GOOGLE SIGNIN ===================================
+
+// Desc: Barber Logout
+export const handleLogout = async (req, res, next) => {
+    try {
+        const cookies = req.cookies
+
+        if (!cookies?.BarberToken) return res.status(404).json({
+            success: false,
+            message: "Unauthorize Barber"
+        })
+
+        res.clearCookie('BarberToken', {
+            httpOnly: true,
+            sameSite: 'None',
+            secure: true
+        })
+        return SuccessHandler(LOGOUT_SUCCESS, SUCCESS_STATUS_CODE, res)
+    } catch (error) {
+        next(error);
+    }
+}
+
+// Desc: Google Signup
 export const googleBarberSignup = async (req, res, next) => {
     try {
         const CLIENT_ID = process.env.CLIENT_ID
@@ -225,21 +194,17 @@ export const googleBarberSignup = async (req, res, next) => {
 
         const client = new OAuth2Client(CLIENT_ID);
 
-        // Call the verifyIdToken to
-        // varify and decode it
         const ticket = await client.verifyIdToken({
             idToken: token,
             audience: CLIENT_ID,
         });
 
-        // Get the JSON with all the user info
         const payload = ticket.getPayload();
 
-        // Check if the email is already registered
         const existingUser = await findBarberByEmailAndRole(payload.email)
 
         if (existingUser) {
-            return res.status(404).json({ success: false, message: 'Barber already exists' })
+            return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE, res)
         }
 
 
@@ -271,18 +236,14 @@ export const googleBarberSignup = async (req, res, next) => {
         //     );
         //   }
 
-
-        res.status(200).json({
-            success: true,
-            message: 'Barber registered successfully',
-            newUser
-        })
+        return SuccessHandler(SIGNUP_SUCCESS, SUCCESS_STATUS_CODE, res, { newUser })
     }
     catch (error) {
         next(error);
     }
 }
 
+// Desc: Google Signin
 export const googleBarberLogin = async (req, res, next) => {
     try {
         const CLIENT_ID = process.env.CLIENT_ID
@@ -309,7 +270,7 @@ export const googleBarberLogin = async (req, res, next) => {
         const foundUser = await googleLoginBarber(payload.email)
 
         if (!foundUser) {
-            return res.status(401).json({ success: false, message: 'Email does not exist' })
+            return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const accessToken = jwt.sign(
@@ -345,9 +306,8 @@ export const googleBarberLogin = async (req, res, next) => {
             sameSite: 'None', //cross-site cookie 
             maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
         })
-        res.status(201).json({
-            success: true,
-            message: "Barber logged in successfully",
+
+        return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
             accessToken,
             foundUser
         })
@@ -356,64 +316,26 @@ export const googleBarberLogin = async (req, res, next) => {
     }
 }
 
-//DESC:LOGOUT A USER ========================
-export const handleLogout = async (req, res, next) => {
-    try {
-        //cookie parse na use korle ata kaj korbe na
-        const cookies = req.cookies
 
-        // Ai line ta lagia ami logout error check korbo
-        // if(cookies) { return res.status(401).json({ message:"Unauthorize Barber" }) }
-
-        if (!cookies?.BarberToken) return res.status(404).json({
-            success: false,
-            message: "Unauthorize Barber"
-        }) //No content
-        res.clearCookie('BarberToken', {
-            httpOnly: true,
-            sameSite: 'None',
-            secure: true
-        })
-        res.status(200).json({
-            success: true,
-            message: 'Barber logout successfull'
-        })
-    } catch (error) {
-        //console.log(error);
-        next(error);
-    }
-}
 
 export const updateBarberInfo = async (req, res, next) => {
     try {
         let { email, name, countryCode, mobileNumber, gender, dateOfBirth } = req.body
 
-        // Convert email to lowercase
-        if (email) {
-            email = email.toLowerCase();
-        }
-
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your email."
-            });
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email."
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
+        email = email.toLowerCase();
 
         if (name && (name.length < 1 || name.length > 20)) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter name between 1 to 20 characters"
-            });
+            return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE, res)
         }
+
         let formattedNumberAsNumber = null;
 
         // Proceed with mobile number validation if provided
@@ -449,10 +371,7 @@ export const updateBarberInfo = async (req, res, next) => {
         const foundUser = await findBarberByEmailAndRole(email)
 
         if (!foundUser) {
-            return res.status(400).json({
-                success: false,
-                message: 'Barber not found.'
-            })
+            return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
 
@@ -474,13 +393,6 @@ export const updateBarberInfo = async (req, res, next) => {
             { expiresIn: '1d' }
         )
 
-        // const refreshToken = jwt.sign(
-        //     { "email": email, "role": foundUser.role },
-        //     REFRESH_TOKEN_SECRET,
-        //     { expiresIn: '1d' }
-        // )
-
-        // Create secure cookie with refresh token 
         res.cookie('BarberToken', accessToken, {
             httpOnly: true, //accessible only by web server 
             secure: true, //https
@@ -488,10 +400,8 @@ export const updateBarberInfo = async (req, res, next) => {
             maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
         })
 
-        // Send accessToken containing username and roles 
-        res.status(201).json({
-            success: true,
-            message: 'Barber updated successfully',
+
+        return SuccessHandler(UPDATE_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, {
             accessToken,
             updatedBarber
         })
@@ -500,34 +410,25 @@ export const updateBarberInfo = async (req, res, next) => {
     }
 }
 
-//DESC:FORGOT PASSWORD SENDING EMAIL TO USER ===========
+// Desc: Forgot Password
 export const handleForgetPassword = async (req, res, next) => {
     try {
         const { email } = req.body
 
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your email."
-            });
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email"
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
-
+        email = email.toLowerCase();
 
         const user = await findBarberByEmailAndRole(email)
 
         if (!user) {
-            res.status(404).json({
-                success: false,
-                message: "Email does not exist"
-            })
+            return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
 
@@ -543,33 +444,20 @@ export const handleForgetPassword = async (req, res, next) => {
 
         await user.save({ validatebeforeSave: false })
 
-        const CLIENT_URL = "https://iqb-final.onrender.com"
-
-        //  const CLIENT_URL = "http://localhost:5173"
-
         try {
-            await emailWithNodeMail(email, user.name, CLIENT_URL, "barberchangepassword", resetToken)
+            await emailWithNodeMail(email, user.name, process.env.FORGET_PASSWORD_CLIENT_URL, "barberchangepassword", resetToken)
         } catch (error) {
-            res.status(400).json({
-                success: false,
-                message: 'Failed to send reset password email'
-            })
+            return ErrorHandler(FORGOT_PASSWORD_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        res.status(200).json({
-            success: true,
-            message: `Please go to your email for reseting password`,
-            payload: {
-                resetToken
-            }
-        })
+        return SuccessHandler(FORGET_PASSWORD_SUCCESS, SUCCESS_STATUS_CODE, res, { payload: { resetToken } })
+
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
 
-//DESC:RESET PASSWORD =================================
+// Desc: Reset Password
 export const handleResetPassword = async (req, res, next) => {
     try {
         //creating token hash
@@ -592,10 +480,7 @@ export const handleResetPassword = async (req, res, next) => {
 
         await user.save()
 
-        res.status(200).json({
-            success: true,
-            message: 'Password reset successfully.'
-        })
+        return SuccessHandler(RESET_PASSWORD_SUCCESS, SUCCESS_STATUS_CODE, res)
 
     } catch (error) {
         next(error);
@@ -942,16 +827,19 @@ export const updateBarberByAdmin = async (req, res, next) => {
 
 }
 
-//DESC:UPLOAD BARBER PROFILE PICTURE ============================
+
+// Desc: Upload Barber Profile Pic
 export const uploadBarberprofilePic = async (req, res, next) => {
     try {
         let profiles = req.files.profile;
         let email = req.body.email;
 
-        email = email.toLowerCase();
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
+        }
 
         if (!profiles) {
-            return res.status(400).json({ success: false, message: "Barber profile image is empty." });
+            return ErrorHandler(IMAGE_EMPTY_ERROR, ERROR_STATUS_CODE, res)
         }
 
         // Ensure profiles is an array for single or multiple uploads
@@ -960,8 +848,8 @@ export const uploadBarberprofilePic = async (req, res, next) => {
         }
 
         // Allowed file extensions and maximum file size (2MB)
-        const allowedExtensions = ["jpg", "png", "jfif", "svg", "jpeg", "webp"];
-        const maxFileSize = 2 * 1024 * 1024;
+        const allowedExtensions = ALLOWED_IMAGE_EXTENSIONS;
+        const maxFileSize = MAX_FILE_SIZE;
 
         // Find the existing barber by email
         const existingBarber = await findBarberByEmailAndRole(email);
@@ -984,15 +872,12 @@ export const uploadBarberprofilePic = async (req, res, next) => {
             const oldProfile = existingBarber.profile[0];
             if (oldProfile && oldProfile.public_id) {
                 try {
-                    console.log('Deleting old profile picture with public_id:', oldProfile.public_id);
                     const result = await cloudinary.uploader.destroy(oldProfile.public_id);
-                    console.log('Deletion result:', result);
 
                     if (result.result !== 'ok') {
                         return res.status(400).json({ success: false, message: 'Failed to delete old image.' });
                     }
                 } catch (err) {
-                    console.error('Error during deletion:', err);
                     return res.status(500).json({ success: false, message: 'Failed to delete old image.', error: err.message });
                 }
             } else {
@@ -1030,120 +915,14 @@ export const uploadBarberprofilePic = async (req, res, next) => {
             message: "Files uploaded successfully",
             response: barberImage,
         });
+
     } catch (error) {
         next(error);
     }
 };
 
 
-
-//DESC:UPDATE BARBER PROFILE PICTURE ============================
-export const updateBarberProfilePic = async (req, res, next) => {
-    try {
-        const id = req.body.id;
-
-        const barberProfile = await findBarberProfileById(id);
-
-        const public_imgid = req.body.public_imgid;
-        const profile = req.files.profile;
-        const salonId = req.body.salonId;
-
-        // Validate Image
-        const fileSize = profile.size / 1000;
-        const fileExt = profile.name.split(".")[1];
-
-        if (fileSize > 2048) {
-            return res.status(400).json({ success: false, message: "File size must be lower than 2mb" });
-        }
-
-        if (!["jpg", "png", "jfif", "jpeg", "svg"].includes(fileExt)) {
-            return res.status(400).json({ success: false, message: "File extension must be jpg or png" });
-        }
-
-        // Generate a unique public_id based on the original file name
-        const public_id = `${profile.name.split(".")[0]}`;
-        const folderPath = `barbers`
-
-        cloudinary.uploader.upload(profile.tempFilePath, {
-            public_id: public_id,
-            folder: folderPath,
-        })
-            .then(async (image) => {
-
-                const result = await cloudinary.uploader.destroy(public_imgid);
-
-                if (result.result === 'ok') {
-                    console.log("cloud img deleted")
-
-                } else {
-                    res.status(500).json({
-                        message: 'Failed to delete image.'
-                    });
-                }
-
-                // Delete the temporary file after uploading to Cloudinary
-                fs.unlink(profile.tempFilePath, (err) => {
-                    if (err) {
-                        console.error(err);
-                    }
-                });
-
-                const updatedBarber = await updateBarberProPic(id, image)
-                // Find the newly added advertisement
-                const updatedBarberImage = updatedBarber.profile.find(br => br.public_id === image.public_id);
-
-                res.status(200).json({
-                    success: true,
-                    message: "Files Updated successfully",
-                    response: updatedBarberImage
-                });
-
-            })
-
-    } catch (error) {
-        next(error);
-    }
-}
-
-//DESC:DELETE BARBER PROFILE PICTURE ============================
-export const deleteBarberProfilePicture = async (req, res, next) => {
-    try {
-        const public_id = req.body.public_id
-        const img_id = req.body.img_id
-
-        const { updatedBarber, deletedImage } = await deleteBarberProPic(img_id);
-
-        const result = await cloudinary.uploader.destroy(public_id);
-
-        if (result.result === 'ok') {
-            console.log("cloud img deleted")
-
-        } else {
-            res.status(500).json({
-                success: true,
-                message: 'Failed to delete image.'
-            });
-        }
-
-
-        if (updatedBarber) {
-            res.status(200).json({
-                success: true,
-                message: "Image successfully deleted",
-                response: deletedImage
-            })
-        } else {
-            res.status(404).json({
-                success: false,
-                message: 'Image not found in the student profile'
-            });
-        }
-    } catch (error) {
-        next(error);
-    }
-}
-
-//DESC:CONNECT BARBER TO SALON ======================
+// Desc: Connect Barber To Salon 
 export const connectBarberToSalon = async (req, res, next) => {
     try {
         const { email, salonId, barberServices } = req.body;
@@ -1153,29 +932,17 @@ export const connectBarberToSalon = async (req, res, next) => {
         const approvePendingMessage = "Your request has been sent for approval. Please wait."
 
         if (barberServices.length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Please select a service",
-            });
+            return ErrorHandler(SELECT_SERVICE_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const barber = await connectBarberSalon(email, salonId, barberServices, approvePendingMessage)
 
         //If barber not found
         if (!barber) {
-            return res.status(404).json({
-                success: false,
-                message: "Barber not found",
-            });
+            return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
-
-        return res.status(200).json({
-            success: true,
-            message: "Your connect salon request has been sent for approval. Please wait",
-            // response: barber,
-            // "Your request has been sent for approval. Please wait"
-        });
+        return SuccessHandler(BARBER_CONNECT_SALON_SUCCESS, SUCCESS_STATUS_CODE, res)
     }
     catch (error) {
         next(error);
@@ -1190,11 +957,7 @@ export const getAllBarberbySalonId = async (req, res, next) => {
 
 
         if (Number(salonId) === 0) {
-            res.status(200).json({
-                success: false,
-                message: "No barbers is currently available to show.",
-                getAllBarbers: []
-            });
+            return ErrorHandler(NO_BARBERS_ERROR, ERROR_STATUS_CODE, res, { getAllBarbers: [] })
         }
         else {
 
@@ -1239,23 +1002,7 @@ export const getAllBarberbySalonId = async (req, res, next) => {
 
             const totalBarbers = await totalBarberCount(query);
 
-            if (getAllBarbers) {
-                res.status(200).json({
-                    success: true,
-                    message: "All barbers fetched successfully",
-                    getAllBarbers: getAllBarbers,
-                    // totalPages: Math.ceil(totalBarbers / Number(limit)),
-                    // currentPage: Number(page),
-                    totalBarbers,
-                });
-            }
-            else {
-                res.status(200).json({
-                    success: false,
-                    message: "No barber to show",
-                    getAllBarbers: [],
-                });
-            }
+            return SuccessHandler(GET_ALL_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { getAllBarbers, totalBarbers })
         }
 
     } catch (error) {
@@ -1270,28 +1017,8 @@ export const updateBarberAccountDetails = async (req, res, next) => {
 
         let { name, email, nickName, countryCode, mobileNumber, dateOfBirth, gender } = barberData
 
-        if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please Enter your email."
-            });
-        }
-
-        if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid email"
-            });
-        }
-
-        email = email.toLowerCase();
-
-
         if (name && (name.length < 1 || name.length > 20)) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter name between 1 to 20 characters"
-            });
+            return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE, res)
         }
 
 
@@ -1309,10 +1036,7 @@ export const updateBarberAccountDetails = async (req, res, next) => {
         const isValid = phoneUtil.isValidNumber(phoneNumberProto);
 
         if (!isValid) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Mobile Number"
-            });
+            return ErrorHandler(MOBILE_NUMBER_ERROR, ERROR_STATUS_CODE, res)
         }
 
         // Get the national significant number (i.e., without the country code)
@@ -1350,12 +1074,7 @@ export const updateBarberAccountDetails = async (req, res, next) => {
         // Updating the barberCode in the database
         await barberCode(email, updatedBarberCode);
 
-        res.status(200).json({
-            success: true,
-            message: "Barber updated successfully",
-            response: barber
-        });
-        // }
+        return SuccessHandler(UPDATE_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barber });
     }
     catch (error) {
         next(error);

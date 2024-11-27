@@ -1,5 +1,4 @@
 import { findAdminByEmailandRole, resetPassword, updateAdmin, updateDefaultSalonId, uploadAdminProPic, createAdmin, createGoogleAdmin, updateGoogleAdmin, googleLoginAdmin } from "../../../services/web/admin/adminService.js";
-// Sagnik in Sumit
 import jwt from "jsonwebtoken"
 import { OAuth2Client } from "google-auth-library";
 import crypto from "crypto";
@@ -326,6 +325,8 @@ export const googleAdminLogin = async (req, res, next) => {
             maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
         })
 
+        console.log(accessToken)
+
         return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
             accessToken,
             foundUser
@@ -432,7 +433,6 @@ export const updateAdminInfo = async (req, res, next) => {
 export const updateAdminAccountDetails = async (req, res, next) => {
     try {
         let { name, gender, email, countryCode, mobileNumber, dateOfBirth } = req.body;
-
 
         if (name && (name.length < 1 || name.length > 20)) {
             return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE, res)
