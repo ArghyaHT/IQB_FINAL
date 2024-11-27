@@ -415,18 +415,10 @@ export const handleForgetPassword = async (req, res, next) => {
         const { email } = req.body
 
         if (!email) {
-            // return res.status(400).json({
-            //     success: false,
-            //     message: "Please enter your email."
-            // });
             return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            // return res.status(400).json({
-            //     success: false,
-            //     message: "Invalid Email"
-            // });
             return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
@@ -435,10 +427,6 @@ export const handleForgetPassword = async (req, res, next) => {
         const user = await findBarberByEmailAndRole(email)
 
         if (!user) {
-            // res.status(404).json({
-            //     success: false,
-            //     message: "Email does not exist"
-            // })
             return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
@@ -455,25 +443,12 @@ export const handleForgetPassword = async (req, res, next) => {
 
         await user.save({ validatebeforeSave: false })
 
-        // const CLIENT_URL = "https://iqb-final.onrender.com"
-
         try {
             await emailWithNodeMail(email, user.name, process.env.FORGET_PASSWORD_CLIENT_URL, "barberchangepassword", resetToken)
         } catch (error) {
-            // res.status(400).json({
-            //     success: false,
-            //     message: 'Failed to send reset password email'
-            // })
             return ErrorHandler(FORGOT_PASSWORD_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // res.status(200).json({
-        //     success: true,
-        //     message: `Please go to your email for reseting password`,
-        //     payload: {
-        //         resetToken
-        //     }
-        // })
         return SuccessHandler(FORGET_PASSWORD_SUCCESS, SUCCESS_STATUS_CODE, res, { payload: { resetToken } })
     } catch (error) {
         next(error);
