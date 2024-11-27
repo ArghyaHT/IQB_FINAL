@@ -1,47 +1,38 @@
 import { deleteCustomer, deleteCustomerProPic, fetchedCustomers, findCustomerByEmail, findCustomerProfileById, saveCustomer, totalCustomerCount, updateCustomerDetails, updateCustomerProPic, uploadCustomerProPic } from "../../../services/web/customer/customerService.js";
-
 import bcrypt from "bcrypt"
 import { bulkEmail, sendCustomerMail, sendForgetPasswordMail, sendVerificationCode } from "../../../utils/emailSender/emailSender.js";
 import { checkSalonExists, findSalonBySalonId, getCustomerConnectedSalons, getCustomerFavouriteSalon } from "../../../services/web/admin/salonService.js";
-
-
-//Upload Profile Picture Config
-import path from "path"
 import fs from "fs"
 import { v2 as cloudinary } from "cloudinary";
 import { getCustomerAppointments } from "../../../services/web/appointments/appointmentsService.js";
-import { findBarberByEmailAndRole, findBarbersBySalonIdforCustomerDashboard } from "../../../services/web/barber/barberService.js";
+import { findBarbersBySalonIdforCustomerDashboard } from "../../../services/web/barber/barberService.js";
 import { getSalonQlist } from "../../../services/web/queue/joinQueueService.js";
+import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
+import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
+import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
+import { CHECK_EMAIL_SUCCESS, EMAIL_EXISTS_ERROR } from "../../../constants/web/CustomerConstants.js";
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// cloudinary.config({
+//     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+//     api_key: process.env.CLOUDINARY_API_KEY,
+//     api_secret: process.env.CLOUDINARY_API_SECRET,
+// });
 
 //DESC:CHECK WEATHER THE EMAIL ALREADY EXISTS IN THE DATABASE =======
 export const checkEmail = async (req, res, next) => {
     try {
         const { email } = req.body;
 
-        //Find existing email for a particular customer
         const existingCustomer = await findCustomerByEmail(email)
 
         if (existingCustomer) {
-            res.status(200).json({
-                success: false,
-                response: "This EmailId already exists",
-            });
+            return ErrorHandler(EMAIL_EXISTS_ERROR, ERROR_STATUS_CODE, res)
         }
         else {
-            res.status(200).json({
-                success: true,
-                response: email,
-            });
+            return SuccessHandler(CHECK_EMAIL_SUCCESS, SUCCESS_STATUS_CODE, res, { response: email })
         }
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -504,7 +495,7 @@ const googleLoginControllerCustomer = async (req, res) => {
             tokens: { accessToken, refreshToken }
         });
     } catch (error) {
-         next(error);
+        next(error);
     }
 };
 
@@ -519,7 +510,7 @@ export const updateCustomer = async (req, res, next) => {
             password,
             mobileNumber,
             mobileCountryCode,
-        } = req.body    
+        } = req.body
 
 
         let customerData = {
@@ -532,12 +523,12 @@ export const updateCustomer = async (req, res, next) => {
             mobileCountryCode
         }
 
-        if(password){
- //Hashing the Password
- const hashedPassword = await bcrypt.hash(password, 10);
- customerData.password = hashedPassword
+        if (password) {
+            //Hashing the Password
+            const hashedPassword = await bcrypt.hash(password, 10);
+            customerData.password = hashedPassword
         }
- 
+
 
         const customer = await updateCustomerDetails(customerData)
         res.status(200).json({
@@ -1033,28 +1024,28 @@ export const getAllCustomersForBarberBySalonId = async (req, res, next) => {
         const { salonId, name, isApproved, email, page = 1, limit = 10, sortField, sortOrder } = req.query
 
         if (Number(salonId) === 0) {
-           return res.status(200).json({
+            return res.status(200).json({
                 success: false,
                 message: "No customers is currently available to show.",
                 getAllCustomers: []
             });
-        } 
-        else if(isApproved === "false"){
-           return res.status(200).json({
+        }
+        else if (isApproved === "false") {
+            return res.status(200).json({
                 success: false,
                 message: "No customers is currently available to show.",
                 getAllCustomers: []
             });
         }
         else {
-        // Check if the salon exists in the database
-        const salonExists = await checkSalonExists(salonId); // Assuming checkSalonExists is a function that checks if the salon exists
-        if (salonExists === null) {
-            return res.status(400).json({
-                success: false,
-                message: "Salon does not exist.",
-            });
-        }
+            // Check if the salon exists in the database
+            const salonExists = await checkSalonExists(salonId); // Assuming checkSalonExists is a function that checks if the salon exists
+            if (salonExists === null) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Salon does not exist.",
+                });
+            }
             let query = {}
 
             const searchRegExpName = new RegExp('.*' + name + ".*", 'i')
@@ -1112,16 +1103,16 @@ export const getAllCustomers = async (req, res, next) => {
                 message: "No customers is currently available to show.",
                 getAllCustomers: []
             });
-        }   
-        else {
-        // Check if the salon exists in the database
-        const salonExists = await checkSalonExists(salonId); // Assuming checkSalonExists is a function that checks if the salon exists
-        if (salonExists === null) {
-            return res.status(400).json({
-                success: false,
-                message: "Salon does not exist.",
-            });
         }
+        else {
+            // Check if the salon exists in the database
+            const salonExists = await checkSalonExists(salonId); // Assuming checkSalonExists is a function that checks if the salon exists
+            if (salonExists === null) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Salon does not exist.",
+                });
+            }
             let query = {}
 
             const searchRegExpName = new RegExp('.*' + name + ".*", 'i')

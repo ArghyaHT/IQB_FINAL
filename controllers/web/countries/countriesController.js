@@ -1,8 +1,10 @@
-import {City} from "country-state-city"
+import { City } from "country-state-city"
 import { findAllCountries, findCountryNameByQuery, getCountryByCountryCode } from "../../../services/web/countries/countryService.js";
 import { getCurrencySymbol } from "../../../utils/currencySymbolMap/currencysymbolmap.js";
-
-
+import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
+import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
+import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
+import { ALL_CITIES_SUCCESS, ALL_COUNTRIES_SUCCESS, ALL_TIMEZONES_SUCCESS, CITY_NOT_FOUND_ERROR, COUNTRY_NOT_FOUND_ERROR, COUNTRY_NOT_SELECT_ERROR } from "../../../constants/web/CountriesConstants.js";
 
 //DESC:GET ALL COUNTRIES ===========================
 export const getAllCountries = async (req, res, next) => {
@@ -22,26 +24,19 @@ export const getAllCountries = async (req, res, next) => {
             countries = await findCountryNameByQuery(query);
         }
         if (countries.length === 0) {
-            res.status(400).json({
-                success: false,
-                message: "No countries found",
-            });
+            return ErrorHandler(COUNTRY_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
         else {
-                // Assuming countries is an array
-        countries = await Promise.all(countries.map(async (country) => {
-            const currencySymbol = await getCurrencySymbol(country.currency);
-            return {
-                ...country.toObject(),
-                currency: currencySymbol
-            };
-        }));
+            // Assuming countries is an array
+            countries = await Promise.all(countries.map(async (country) => {
+                const currencySymbol = await getCurrencySymbol(country.currency);
+                return {
+                    ...country.toObject(),
+                    currency: currencySymbol
+                };
+            }));
 
-            res.status(200).json({
-                success: true,
-                message: "Countries retrieved successfully",
-                response: countries
-            });
+            return SuccessHandler(ALL_COUNTRIES_SUCCESS, SUCCESS_STATUS_CODE, res, { response: countries })
         }
     }
     catch (error) {
@@ -54,24 +49,14 @@ export const getAllTimeZonesByCountry = async (req, res, next) => {
     try {
         const { countryCode } = req.query;
         if (!countryCode) {
-            res.status(400).json({
-                success: false,
-                message: "Please choose a Country first"
-            });
+            return ErrorHandler(COUNTRY_NOT_SELECT_ERROR, ERROR_STATUS_CODE, res)
         }
         const country = await getCountryByCountryCode(countryCode);
 
-        // Extract timeZones array from the country
         const timeZones = country.timeZones;
-        // Extract unique gmtOffsetName values using Set
         const uniqueGmtOffsetNames = new Set(timeZones.map(zone => zone.gmtOffsetName));
 
-
-        res.status(200).json({
-            success: true,
-            message: "Time zones retrieved successfully",
-            response: Array.from(uniqueGmtOffsetNames)
-        });
+        return SuccessHandler(ALL_TIMEZONES_SUCCESS, SUCCESS_STATUS_CODE, res, { response: Array.from(uniqueGmtOffsetNames) })
 
     } catch (error) {
         next(error);
@@ -85,10 +70,7 @@ export const getAllCitiesByCountryCode = async (req, res, next) => {
 
         // Validate input
         if (!countryCode) {
-            return res.status(400).json({
-                success: false,
-                message: "Please choose a Country first"
-            });
+            return ErrorHandler(COUNTRY_NOT_SELECT_ERROR, ERROR_STATUS_CODE, res)
         }
 
         // Retrieve all cities and filter by country code
@@ -105,18 +87,10 @@ export const getAllCitiesByCountryCode = async (req, res, next) => {
 
         // Check if any cities were found
         if (retrievedCities.length === 0) {
-            return res.status(201).json({
-                success: false,
-                message: "No cities found",
-            });
+            return ErrorHandler(CITY_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // Return the list of cities
-        res.status(200).json({
-            success: true,
-            message: "All cities retrieved successfully",
-            response: retrievedCities
-        });
+        return SuccessHandler(ALL_CITIES_SUCCESS, SUCCESS_STATUS_CODE, res, { response: retrievedCities })
 
     } catch (error) {
         next(error);

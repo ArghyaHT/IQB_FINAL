@@ -6,12 +6,18 @@ import { v4 as uuidv4 } from 'uuid';
 import path from "path"
 import fs from "fs"
 import { v2 as cloudinary } from "cloudinary";
+import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
+import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
+import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
+import { ADVERT_DELETE_SUCCESS, ADVERT_DRAG_SUCCESS, ADVERT_IMAGES_SUCCESS, ADVERT_NOT_FOUND, ADVERT_NOT_PRESENT_ERROR, ADVERT_UPDATE_SUCCESS, ADVERT_UPLOAD_SUCCESS } from "../../../constants/web/DashboardConstants.js";
+import { ALLOWED_IMAGE_EXTENSIONS, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
+import { IMAGE_FILE_EXTENSION_ERROR, IMAGE_FILE_SIZE_ERROR } from "../../../constants/web/adminConstants.js";
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// cloudinary.config({
+//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+//   api_key: process.env.CLOUDINARY_API_KEY,
+//   api_secret: process.env.CLOUDINARY_API_SECRET,
+// });
 
 //DESC: ADD ADVERTISEMENTS ====================
 export const addAdvertisements = async (req, res, next) => {
@@ -19,36 +25,32 @@ export const addAdvertisements = async (req, res, next) => {
     let advertisements = req.files.advertisements;
     let salonId = req.body.salonId;
 
-    if(advertisements === null || advertisements === undefined){
-      return res.status(400).json({ success: false, message: "Admvertisements must be provided." });
+    if (advertisements === null || advertisements === undefined) {
+      return ErrorHandler(ADVERT_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
     }
 
     // Ensure that advertisements is an array, even for single uploads
     if (!Array.isArray(advertisements)) {
       advertisements = [advertisements];
     }
-      // Allowed file extensions
-      const allowedExtensions = ["jpg", "png", "jfif", "svg", "jpeg", "webp"];
-      // Maximum file size in bytes (e.g., 5MB)
-      const maxFileSize = 2 * 1024 * 1024;
 
-        // Validate each image
-        for (const advertisement of advertisements) {
-          const extension = path.extname(advertisement.name).toLowerCase().slice(1);
-          if (!allowedExtensions.includes(extension)) {
-            return res.status(400).json({
-              success: false,
-              message: `Invalid file extension for ${advertisement.name}. Allowed: ${allowedExtensions.join(', ')}`,
-            });
-          }
-    
-          if (advertisement.size > maxFileSize) {
-            return res.status(400).json({
-              success: false,
-              message: `File size exceeds the maximum file size of 2MB.`,
-            });
-          }
-        }
+    const allowedExtensions = ALLOWED_IMAGE_EXTENSIONS;
+    const maxFileSize = MAX_FILE_SIZE;
+
+    // Validate each image
+    for (const advertisement of advertisements) {
+      const extension = path.extname(advertisement.name).toLowerCase().slice(1);
+      if (!allowedExtensions.includes(extension)) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid file extension for ${advertisement.name}. Allowed: ${allowedExtensions.join(', ')}`,
+        });
+      }
+
+      if (advertisement.size > maxFileSize) {
+        return ErrorHandler(IMAGE_FILE_SIZE_ERROR, ERROR_STATUS_CODE, res)
+      }
+    }
 
     const uploadPromises = advertisements.map(advertisement => {
       return new Promise((resolve, reject) => {
@@ -94,11 +96,8 @@ export const addAdvertisements = async (req, res, next) => {
     const uploadedAdvertisementIds = uploadedImages.map(img => img.public_id);
     const uploadedAdvertisements = updatedSalon.advertisements.filter(ad => uploadedAdvertisementIds.includes(ad.public_id));
 
-    res.status(200).json({
-      success: true,
-      message: "Advertisement images uploaded successfully",
-      response: uploadedAdvertisements,
-    });
+    return SuccessHandler(ADVERT_UPLOAD_SUCCESS, SUCCESS_STATUS_CODE, res, { response: uploadedAdvertisements })
+
   } catch (error) {
     next(error);
   }
@@ -110,28 +109,20 @@ export const getAllAdvertisements = async (req, res, next) => {
     const { salonId } = req.body;
 
     if (Number(salonId) === 0) {
-      res.status(200).json({
-        success: false,
-        message: "No advertisements available now",
-        advertisements: []
-      });
+      return ErrorHandler(ADVERT_NOT_FOUND, ERROR_STATUS_CODE, res)
     }
     else {
       // Find SalonSettings by salonId and retrieve only the advertisements field
       const allAdvertisements = await getAdvertisements(salonId)
 
       if (!allAdvertisements) {
-        return res.status(200).json({ success: false, message: "No advertisements available now", advertisements: [] });
+        return ErrorHandler(ADVERT_NOT_FOUND, ERROR_STATUS_CODE, res)
       }
 
       // Sort advertisements array in descending order
       const sortedAdvertisements = allAdvertisements.advertisements;
 
-      res.status(200).json({
-        success: true,
-        message: 'Advertisement images retrieved successfully',
-        advertisements: sortedAdvertisements
-      });
+      return SuccessHandler(ADVERT_IMAGES_SUCCESS, SUCCESS_STATUS_CODE, res, { advertisements: sortedAdvertisements })
     }
   } catch (error) {
     next(error);
@@ -146,8 +137,8 @@ export const updateAdvertisements = async (req, res, next) => {
     const advertisements = req.files.advertisements;
     const salonId = req.body.salonId;
 
-    if(advertisements === null || advertisements === undefined){
-      return res.status(400).json({ success: false, message: "Admvertisements must be provided." });
+    if (advertisements === null || advertisements === undefined) {
+      return ErrorHandler(ADVERT_NOT_FOUND, ERROR_STATUS_CODE, res)
     }
 
 
@@ -158,11 +149,11 @@ export const updateAdvertisements = async (req, res, next) => {
     const fileExt = advertisements.name.split(".").pop().toLowerCase(); // get the file extension
 
     if (fileSize > 2048) {
-      return res.status(400).json({ success: false, message: "File size must be lower than 2mb" });
+      return ErrorHandler(IMAGE_FILE_SIZE_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (!["jpg", "png", "jfif", "jpeg", "svg"].includes(fileExt)) {
-      return res.status(400).json({ success: false, message: "File extension must be jpg, png, jfif, jpeg, or svg" });
+    if (!ALLOWED_IMAGE_EXTENSIONS.includes(fileExt)) {
+      return ErrorHandler(IMAGE_FILE_EXTENSION_ERROR, ERROR_STATUS_CODE, res)
     }
 
     const timestamp = Date.now();
@@ -198,11 +189,7 @@ export const updateAdvertisements = async (req, res, next) => {
         const updatedAdvertisement = updatedSalonSettings.advertisements.find(ad => ad.public_id === image.public_id);
 
 
-        res.status(200).json({
-          success: true,
-          message: "File updated successfully",
-          response: updatedAdvertisement
-        });
+        return SuccessHandler(ADVERT_UPDATE_SUCCESS, ERROR_STATUS_CODE, res, { response: updatedAdvertisement })
 
       })
       .catch((uploadError) => {
@@ -230,14 +217,9 @@ export const deleteAdvertisements = async (req, res, next) => {
     const result = await cloudinary.uploader.destroy(public_id);
 
     if (result.result === 'ok') {
-      console.log("Cloud image deleted");
 
       if (updatedSalonSettings) {
-        return res.status(200).json({
-          success: true,
-          message: "Image successfully deleted",
-          response: deletedImage
-        });
+        return ErrorHandler(ADVERT_DELETE_SUCCESS, ERROR_STATUS_CODE, res, { response: deletedImage })
       } else {
         return res.status(404).json({ success: false, message: 'Image not found in the advertisements' });
       }
@@ -284,19 +266,12 @@ export const setDragAdvertisement = async (req, res, next) => {
 
     if (advertisements && salonId) {
       if (advertisements.length === 0) {
-        return res.status(400).json({
-          success: false,
-          message: "No advertisements available."
-        });
+        return ErrorHandler(ADVERT_NOT_FOUND, ERROR_STATUS_CODE, res)
       }
 
       const changeAdvertisements = await setDragAdvertisemnts(salonId, advertisements);
 
-
-      return res.status(200).json({
-        success: false,
-        message: "Advertisements position changed successfully."
-      })
+      return SuccessHandler(ADVERT_DRAG_SUCCESS, ERROR_STATUS_CODE, res)
 
     } else {
       return res.status(400).json({
