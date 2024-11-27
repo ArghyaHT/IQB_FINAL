@@ -189,7 +189,7 @@ export const updateAdvertisements = async (req, res, next) => {
         const updatedAdvertisement = updatedSalonSettings.advertisements.find(ad => ad.public_id === image.public_id);
 
 
-        return SuccessHandler(ADVERT_UPDATE_SUCCESS, ERROR_STATUS_CODE, res, { response: updatedAdvertisement })
+        return SuccessHandler(ADVERT_UPDATE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedAdvertisement })
 
       })
       .catch((uploadError) => {
@@ -219,7 +219,7 @@ export const deleteAdvertisements = async (req, res, next) => {
     if (result.result === 'ok') {
 
       if (updatedSalonSettings) {
-        return ErrorHandler(ADVERT_DELETE_SUCCESS, ERROR_STATUS_CODE, res, { response: deletedImage })
+        return SuccessHandler(ADVERT_DELETE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: deletedImage })
       } else {
         return res.status(404).json({ success: false, message: 'Image not found in the advertisements' });
       }
@@ -271,7 +271,7 @@ export const setDragAdvertisement = async (req, res, next) => {
 
       const changeAdvertisements = await setDragAdvertisemnts(salonId, advertisements);
 
-      return SuccessHandler(ADVERT_DRAG_SUCCESS, ERROR_STATUS_CODE, res)
+      return SuccessHandler(ADVERT_DRAG_SUCCESS, SUCCESS_STATUS_CODE, res)
 
     } else {
       return res.status(400).json({
