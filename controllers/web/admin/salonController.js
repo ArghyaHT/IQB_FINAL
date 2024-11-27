@@ -11,8 +11,11 @@ import { v2 as cloudinary } from "cloudinary";
 import { changeBarberStatusAtSalonOffline, getbarbersBySalonId } from "../../../services/web/barber/barberService.js";
 import { getAverageSalonRating } from "../../../services/web/ratings/ratingsService.js";
 import { validateEmail } from "../../../middlewares/validator.js";
-import { EMAIL_NOT_FOUND_ERROR } from "../../../constants/web/SalonConstants.js";
-import { ERROR_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
+import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
+import { ADMIN_NOT_EXIST_ERROR, EMAIL_NOT_FOUND_ERROR, IMAGE_FILE_EXTENSION_ERROR, IMAGE_FILE_SIZE_ERROR, INVALID_EMAIL_ERROR } from "../../../constants/web/adminConstants.js";
+import { SALON_ADDRESS_ERROR, SALON_BARBERS_FOUND_SUCCESS, SALON_CITY_ERROR, SALON_CONNECT_SUCCESS, SALON_CONTACT_TEL_ERROR, SALON_COORDINATES_ERROR, SALON_COUNTRY_ERROR, SALON_CREATE_SUCCESS, SALON_DELETE_SUCCESS, SALON_DESC_ERROR, SALON_DESCRIPTION_EMPTY_SUCCESS, SALON_DESCRIPTION_RETRIEVED_SUCCESS, SALON_DESCRIPTION_UPDATE_SUCCESS, SALON_EMAIL_NOT_PRESENT_ERROR, SALON_EXISTS_ERROR, SALON_GALLERY_DELETE_ERROR, SALON_GALLERY_EMPTY_ERROR, SALON_GALLERY_NOT_FOUND_ERROR, SALON_GALLERY_UPLOADED_ERROR, SALON_IMAGE_DELETE_SUCESS, SALON_IMAGE_RETRIEVED_SUCESS, SALON_IMAGES_UPLOAD_SUCESS, SALON_INVALID_EMAIL_ERROR, SALON_LOGO_DELETE_ERROR, SALON_LOGO_NOT_FOUND_ERROR, SALON_LOGO_UPLOAD_SUCCESS, SALON_NAME_ERROR, SALON_NOT_FOUND_ERROR, SALON_OFFLINE_SUCCESS, SALON_ONLINE_SUCCESS, SALON_POSTCODE_ERROR, SALON_SERVICES_ERROR, SALON_SERVICES_RETRIEVED_SUCESS, SALON_TIMEZONE_ERROR, SALON_UPDATE_SUCCESS, SALONID_EMPTY_ERROR, SALONS_RETRIEVED_SUCESS } from "../../../constants/web/SalonConstants.js";
+import {ErrorHandler} from "../../../middlewares/ErrorHandler.js"
+import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 
 
 //DESC:CREATE SALON BY ADMIN============================
@@ -50,83 +53,50 @@ export const createSalonByAdmin = async (req, res, next) => {
 
     // Validate email format
     if (!validateEmail(adminEmail)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid email"
-      });
+      return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
     }
 
 
     if (!salonEmail) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter salon email"
-      });
+      return ErrorHandler(SALON_EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
     }
 
     // Validate email format
     if (!validateEmail(salonEmail)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid salon email"
-      });
+      return ErrorHandler(SALON_INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
     }
 
     if (!salonName) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter salon name"
-      });
+      return ErrorHandler(SALON_NAME_ERROR, ERROR_STATUS_CODE, res)
     }
 
 
     if (salonName && (salonName.length < 1 || salonName.length > 40)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter name between 1 to 20 characters"
-      });
+      return ErrorHandler(SALON_NAME_ERROR, ERROR_STATUS_CODE, res)
     }
 
     if (!country) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter country"
-      });
+      return ErrorHandler(SALON_COUNTRY_ERROR, ERROR_STATUS_CODE, res)
     }
 
     if (!city) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter city"
-      });
+      return ErrorHandler(SALON_CITY_ERROR, ERROR_STATUS_CODE, res)
     }
 
     if (!timeZone) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter timezone"
-      });
+      return ErrorHandler(SALON_TIMEZONE_ERROR, ERROR_STATUS_CODE, res)
     }
 
     if (!contactTel) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid phone number"
-      });
+      return ErrorHandler(SALON_CONTACT_TEL_ERROR, ERROR_STATUS_CODE, res)
     }
 
     if (!address && address.length > 100) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter address 1 to 100 characters"
-      });
+      return ErrorHandler(SALON_ADDRESS_ERROR, ERROR_STATUS_CODE, res)
     }
 
     if (!location || !location.coordinates || location.coordinates.latitude === null || location.coordinates.longitude === null) {
-      return res.status(400).json({
-        success: false,
-        message: "Coordinates cannot be null."
-      });
+      return ErrorHandler(SALON_COORDINATES_ERROR, ERROR_STATUS_CODE, res)
     }
 
 
@@ -146,10 +116,7 @@ export const createSalonByAdmin = async (req, res, next) => {
     const isValid = phoneUtil.isValidNumber(phoneNumberProto);
 
     if (!isValid) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid Mobile Number"
-      });
+      return ErrorHandler(SALON_CONTACT_TEL_ERROR, ERROR_STATUS_CODE, res)
     }
 
     // Get the national significant number (i.e., without the country code)
@@ -160,24 +127,16 @@ export const createSalonByAdmin = async (req, res, next) => {
 
     // Validate the format and length of the contactTel
     if (postCode && !/^\d{1,8}$/.test(postCode)) {
-      return res.status(400).json({
-        message: 'Please enter post code between 1 to 8 digits',
-      });
+      return ErrorHandler(SALON_POSTCODE_ERROR, ERROR_STATUS_CODE, res)
     }
 
     // Check if services array is empty
     if (!services || services.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Services is empty',
-      });
+      return ErrorHandler(SALON_SERVICES_ERROR, ERROR_STATUS_CODE, res)
     }
 
     if (salonDesc && salonDesc.length > 150) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter description between 1 to 150 characters"
-      });
+      return ErrorHandler(SALON_DESC_ERROR, ERROR_STATUS_CODE, res)
     }
 
     //Find the Salon If exits 
@@ -185,10 +144,7 @@ export const createSalonByAdmin = async (req, res, next) => {
 
 
     if (existingSalon) {
-      return res.status(400).json({
-        success: false,
-        message: 'Salon already exists',
-      });
+      return ErrorHandler(SALON_EXISTS_ERROR, ERROR_STATUS_CODE, res)
     }
 
 
@@ -249,18 +205,10 @@ export const createSalonByAdmin = async (req, res, next) => {
       await admin.save();
     }
     else {
-      // Handle the case where admin is not found
-      return res.status(400).json({
-        success: false,
-        message: 'Admin not found',
-      });
+      return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    return res.status(200).json({
-      success: true,
-      message: 'Salon created successfully',
-      response: savedSalon
-    });
+    return SuccessHandler(SALON_CREATE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: savedSalon }) 
 
   }
   catch (error) {
@@ -293,55 +241,29 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
 
     // Check if required fields are missing or empty
     if (!salonId) {
-      return res.status(400).json({ success: false, message: "SalonId empty" });
+      return ErrorHandler(SALONID_EMPTY_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (!services) {
-      return res.status(400).json({ success: false, message: "Services is empty" });
+    if (!services || services.length === 0) {
+      return ErrorHandler(SALON_SERVICES_ERROR, ERROR_STATUS_CODE, res)
     }
+
     if (!adminEmail) {
-      return res.status(400).json({
-        success: false,
-        message: "Email not found"
-      });
+      return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
     }
 
 
     // Validate email format
     if (!validateEmail(adminEmail)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid email"
-      });
+      return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
     }
 
     if (!address && address.length > 100) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter address 1 to 100 characters"
-      });
-    }
-
-    // Validate email format for adminEmail
-    if (!validateEmail(adminEmail)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid admin email format"
-      });
-    }
-
-    if (!address && address.length > 150) {
-      return res.status(400).json({
-        success: false,
-        message: "Address can't be above 150 characters."
-      });
+      return ErrorHandler(SALON_ADDRESS_ERROR, ERROR_STATUS_CODE, res)
     }
 
     if (salonDesc && salonDesc.length > 150) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter description between 1 to 150 characters"
-      });
+      return ErrorHandler(SALON_DESC_ERROR, ERROR_STATUS_CODE, res)
     }
 
     // Convert mobile number to string only if it's a number
@@ -360,10 +282,7 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
     const isValid = phoneUtil.isValidNumber(phoneNumberProto);
 
     if (!isValid) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid Mobile Number"
-      });
+      return ErrorHandler(SALON_CONTACT_TEL_ERROR, ERROR_STATUS_CODE, res)
     }
 
     // Get the national significant number (i.e., without the country code)
@@ -375,10 +294,7 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
     const salon = await findSalonBySalonIdAndAdmin(salonId, adminEmail)
 
     if (!salon) {
-      return res.status(500).json({
-        success: false,
-        message: "Salon Not found"
-      });
+      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
     }
 
     if (services && Array.isArray(services)) {
@@ -473,11 +389,13 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
 
     const updatedSalon = await updateSalon(salonId, adminEmail, updateFields)
 
-    return res.status(200).json({
-      success: true,
-      message: "Salon Updated",
-      response: updatedSalon
-    });
+    // return res.status(200).json({
+    //   success: true,
+    //   message: "Salon Updated",
+    //   response: updatedSalon
+    // });
+    return SuccessHandler(SALON_UPDATE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon }) 
+
   }
   catch (error) {
     next(error);
@@ -491,12 +409,10 @@ export const uploadSalonGalleryImages = async (req, res, next) => {
     let salonId = req.body.salonId;
 
     if (galleries === null || galleries === undefined) {
-      return res.status(400).json({ success: false, message: "Salon gallery not found." });
+      return ErrorHandler(SALON_GALLERY_EMPTY_ERROR, ERROR_STATUS_CODE, res)
     }
 
-
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', "svg"];
-    // Maximum file size in bytes (e.g., 5MB)
     const maxFileSize = 2 * 1024 * 1024;
 
     // Ensure that profiles is an array, even for single uploads
@@ -508,17 +424,11 @@ export const uploadSalonGalleryImages = async (req, res, next) => {
     for (const gallery of galleries) {
       const extension = path.extname(gallery.name).toLowerCase().slice(1);
       if (!allowedExtensions.includes(extension)) {
-        return res.status(400).json({
-          success: false,
-          message: `Invalid file extension for ${gallery.name}. Allowed: ${allowedExtensions.join(', ')}`,
-        });
+        return ErrorHandler(IMAGE_FILE_EXTENSION_ERROR, ERROR_STATUS_CODE, res)
       }
 
       if (gallery.size > maxFileSize) {
-        return res.status(400).json({
-          success: false,
-          message: `File size exceeds the maximum file size of 2MB.`,
-        });
+        return ErrorHandler(IMAGE_FILE_SIZE_ERROR, ERROR_STATUS_CODE, res)
       }
     }
 
@@ -564,14 +474,17 @@ export const uploadSalonGalleryImages = async (req, res, next) => {
     );
 
     if (!updatedSalon) {
-      return res.status(404).json({ success: false, message: "Images cant be uploaded" });
+      // return res.status(404).json({ success: false, message: "Images cant be uploaded" });
+      return ErrorHandler(SALON_GALLERY_UPLOADED_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    res.status(200).json({
-      success: true,
-      message: "Salon images uploaded successfully",
-      response: newImages,
-    });
+    // res.status(200).json({
+    //   success: true,
+    //   message: "Salon images uploaded successfully",
+    //   response: newImages,
+    // });
+
+    return SuccessHandler(SALON_IMAGES_UPLOAD_SUCESS, SUCCESS_STATUS_CODE, res, { response: newImages }) 
   } catch (error) {
     next(error);
   }
@@ -584,7 +497,6 @@ export const uploadMoreSalonGalleryImages = async (req, res, next) => {
     let salonId = req.body.salonId;
 
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', "svg"];
-    // Maximum file size in bytes (e.g., 5MB)
     const maxFileSize = 2 * 1024 * 1024;
 
     // Ensure that profiles is an array, even for single uploads
@@ -596,17 +508,11 @@ export const uploadMoreSalonGalleryImages = async (req, res, next) => {
     for (const gallery of galleries) {
       const extension = path.extname(gallery.name).toLowerCase().slice(1);
       if (!allowedExtensions.includes(extension)) {
-        return res.status(400).json({
-          success: false,
-          message: `Invalid file extension for ${gallery.name}. Allowed: ${allowedExtensions.join(', ')}`,
-        });
+        return ErrorHandler(IMAGE_FILE_EXTENSION_ERROR, ERROR_STATUS_CODE, res)
       }
 
       if (gallery.size > maxFileSize) {
-        return res.status(400).json({
-          success: false,
-          message: `File size exceeds the maximum file size of 2MB.`,
-        });
+        return ErrorHandler(IMAGE_FILE_SIZE_ERROR, ERROR_STATUS_CODE, res)
       }
     }
 
@@ -647,14 +553,16 @@ export const uploadMoreSalonGalleryImages = async (req, res, next) => {
     const updatedSalon = await addMoreSalonImages(salonId, uploadedImages)
 
     if (!updatedSalon) {
-      return res.status(404).json({ success: false, message: "Salon image cant be uploaded" });
+      // return res.status(404).json({ success: false, message: "Salon image cant be uploaded" });
+      return ErrorHandler(SALON_GALLERY_UPLOADED_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    res.status(200).json({
-      success: true,
-      message: "Salon Images uploaded successfully",
-      response: updatedSalon,
-    });
+    // res.status(200).json({
+    //   success: true,
+    //   message: "Salon Images uploaded successfully",
+    //   response: updatedSalon,
+    // });
+    return SuccessHandler(SALON_IMAGES_UPLOAD_SUCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon }) 
   } catch (error) {
     next(error);
   }
@@ -672,15 +580,16 @@ export const updateSalonImages = async (req, res, next) => {
     const salonProfile = await findSalonProfileById(id)
 
     // Validate Image
-    const fileSize = gallery.size / 1000;
+    const maxFileSize = 2 * 1024 * 1024;
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', "svg"];
     const fileExt = gallery.name.split(".")[1];
 
-    if (fileSize > 2048) {
-      return res.status(400).json({ success: false, message: "File size must be lower than 2mb" });
+    if (maxFileSize > 2048) {
+      return ErrorHandler(IMAGE_FILE_SIZE_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (!["jpg", "png", "jfif", "svg", "jpeg", "webp"].includes(fileExt)) {
-      return res.status(400).json({ success: false, message: "File extension must be jpg, png, jfif, svg, jpeg, webp" });
+    if (!allowedExtensions.includes(fileExt)) {
+      return ErrorHandler(IMAGE_FILE_SIZE_ERROR, ERROR_STATUS_CODE, res)
     }
 
     // Generate a unique public_id based on the original file name
@@ -699,7 +608,7 @@ export const updateSalonImages = async (req, res, next) => {
           console.log("cloud img deleted")
 
         } else {
-          res.status(500).json({ message: 'Failed to delete image.' });
+          return ErrorHandler(SALON_GALLERY_DELETE_ERROR, ERROR_STATUS_CODE, res)
         }
 
         // Delete the temporary file after uploading to Cloudinary
@@ -715,14 +624,13 @@ export const updateSalonImages = async (req, res, next) => {
         // Find the newly added advertisement
         const updatedSalonImage = updatedSalon.gallery.find(si => si.public_id === image.public_id);
 
-        res.status(200).json({
-          success: true,
-          message: "Salon images updated successfully",
-          response: updatedSalonImage
-        });
-
+        // res.status(200).json({
+        //   success: true,
+        //   message: "Salon images updated successfully",
+        //   response: updatedSalonImage
+        // });
+        return SuccessHandler(SALON_IMAGES_UPLOAD_SUCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalonImage }) 
       })
-
   } catch (error) {
     next(error);
   }
@@ -740,23 +648,27 @@ export const deleteSalonImages = async (req, res, next) => {
 
 
     if (result.result !== 'ok') {
-      return res.status(404).json({
-        success: false,
-        message: 'Failed to delete salon image'
-      });
+      // return res.status(404).json({
+      //   success: false,
+      //   message: 'Failed to delete salon image'
+      // });
+      return ErrorHandler(SALON_GALLERY_DELETE_ERROR, ERROR_STATUS_CODE, res)
     }
 
     if (updatedSalon) {
-      res.status(200).json({
-        success: true,
-        message: "Salon image deleted successfully",
-        response: deletedImage
-      })
+      // res.status(200).json({
+      //   success: true,
+      //   message: "Salon image deleted successfully",
+      //   response: deletedImage
+      // })
+      return SuccessHandler(SALON_IMAGE_DELETE_SUCESS, SUCCESS_STATUS_CODE, res, { response: deletedImage }) 
     } else {
-      res.status(404).json({
-        success: false,
-        message: 'Image not found.'
-      });
+      // res.status(404).json({
+      //   success: false,
+      //   message: 'Image not found.'
+      // });
+      return ErrorHandler(SALON_GALLERY_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
+
     }
 
   } catch (error) {
@@ -770,31 +682,32 @@ export const getSalonImages = async (req, res, next) => {
 
     // Check if salonId is provided in the request body
     if (!salonId) {
-      return res.status(400).json({ success: false, message: "SalonId not found" });
+      return ErrorHandler(SALONID_EMPTY_ERROR, ERROR_STATUS_CODE, res)
     }
     // Check if salonId exists in the database
     const salonExists = await getSalonBySalonId(salonId)
 
     if (!salonExists) {
-      return res.status(201).json({ success: false, message: "Salon not found" });
-    }
-    // Find SalonSettings by salonId and retrieve only the advertisements field
+      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)    }
     const salongallery = await getSalonGallery(salonId);
 
     if (!salongallery) {
-      return res.status(201).json({
-        success: false,
-        message: "Salon not found"
-      });
+      // return res.status(201).json({
+      //   success: false,
+      //   message: "Salon not found"
+      // });
+      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res) 
     }
     // Sort advertisements array in descending order
     const sortedSalonGallery = salongallery.gallery.reverse();
 
-    res.status(200).json({
-      success: true,
-      message: 'Salon images retrieved successfully',
-      response: sortedSalonGallery
-    });
+    // res.status(200).json({
+    //   success: true,
+    //   message: 'Salon images retrieved successfully',
+    //   response: sortedSalonGallery
+    // });
+    return SuccessHandler(SALON_IMAGE_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: sortedSalonGallery }) 
+
   } catch (error) {
     next(error);
   }
@@ -806,10 +719,12 @@ export const getAllSalons = async (req, res, next) => {
     const salons = await allSalons(); // Retrieve all salons from the database
 
 
-    res.status(200).json({
-      success: true,
-      response: salons
-    });
+    // res.status(200).json({
+    //   success: true,
+    //   response: salons
+    // });
+    return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: salons }) 
+
   } catch (error) {
     next(error);
   }
@@ -825,11 +740,13 @@ export const getSalonsByLocation = async (req, res, next) => {
     //  // Populate salonRatings field
     //  await getSalonRating(salons);
 
-    return res.status(200).json({
-      success: true,
-      message: "Salons retrieved successfully",
-      response: salons
-    });
+    // return res.status(200).json({
+    //   success: true,
+    //   message: "Salons retrieved successfully",
+    //   response: salons
+    // });
+    return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: salons }) 
+
   }
   catch (error) {
     next(error);
@@ -844,19 +761,23 @@ export const getAllSalonServices = async (req, res, next) => {
     const { salonId } = req.query;
 
     if(salonId === 0){
-      res.status(400).json({
-        success: false,
-        message: "Salon not found",
-      })
+      // res.status(400).json({
+      //   success: false,
+      //   message: "Salon not found",
+      // })
+      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res) 
+
     }
 
     const salonServices = await allSalonServices(salonId)
 
-    res.status(200).json({
-      success: true,
-      message: "Salon services retrieved successfully.",
-      response: salonServices
-    })
+    // res.status(200).json({
+    //   success: true,
+    //   message: "Salon services retrieved successfully.",
+    //   response: salonServices
+    // })
+
+    return SuccessHandler(SALON_SERVICES_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: salonServices }) 
   }
   catch (error) {
     next(error);
@@ -890,11 +811,14 @@ export const searchSalonsByNameAndCity = async (req, res, next) => {
     }
 
     const getAllSalons = await getSalonsByNameAndCity(query, sortOptions, limit);
-    res.status(200).json({
-      success: true,
-      message: "All Salons fetched successfully",
-      getAllSalons,
-    })
+    // res.status(200).json({
+    //   success: true,
+    //   message: "All Salons fetched successfully",
+    //   getAllSalons,
+    // })
+
+    return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { getAllSalons }) 
+
   } catch (error) {
     next(error);
   }
@@ -908,17 +832,21 @@ export const deleteSalon = async (req, res, next) => {
     const deletedSalon = await toDeleteSalon(salonId)
 
     if (!deletedSalon) {
-      res.status(404).json({
-        success: true,
-        message: "The Salon with the SalonId not found",
-      })
+      // res.status(404).json({
+      //   success: true,
+      //   message: "The Salon with the SalonId not found",
+      // })
+      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res) 
+
     }
 
-    res.status(200).json({
-      success: true,
-      message: "The Salon has been deleted",
-      response: deletedSalon
-    })
+    // res.status(200).json({
+    //   success: true,
+    //   message: "The Salon has been deleted",
+    //   response: deletedSalon
+    // })
+    return SuccessHandler(SALON_DELETE_SUCCESS, SUCCESS_STATUS_CODE, res, { response:deletedSalon }) 
+
   }
   catch (error) {
     next(error);
@@ -934,13 +862,17 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
     const updatedSalon = await salonOnlineStatus(salonId, isOnline)
 
     if (!updatedSalon) {
-      return res.status(404).json({
-        success: false,
-        message: "Salon not found"
-      });
+      // return res.status(404).json({
+      //   success: false,
+      //   message: "Salon not found"
+      // });
+      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res) 
+
     }
     if (isOnline === true) {
-      return res.status(200).json({ success: true, message: "The salon is currently online.", response: updatedSalon });
+      // return res.status(200).json({ success: true, message: "The salon is currently online.", response: updatedSalon });
+      return SuccessHandler(SALON_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response:updatedSalon }) 
+
     }
     else {
 
@@ -950,8 +882,9 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
       await changeBarberStatusAtSalonOffline(salonId);
 
-      return res.status(200).json({ success: true, message: "The salon is currently offline.", response: updatedSalon });
-    }
+      // return res.status(200).json({ success: true, message: "The salon is currently offline.", response: updatedSalon });
+
+      return SuccessHandler(SALON_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response:updatedSalon })     }
   } catch (error) {
     next(error);
   }
@@ -965,10 +898,12 @@ export const getSalonInfo = async (req, res, next) => {
     const salonInfo = await salonInfoDetails(salonId)
 
     if (!salonInfo) {
-      res.status(404).json({
-        success: false,
-        message: 'No salons found for the particular SalonId.',
-      });
+      // res.status(404).json({
+      //   success: false,
+      //   message: 'No salons found for the particular SalonId.',
+      // });
+      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res) 
+
     }
 
     // Find associated barbers using salonId
@@ -976,15 +911,23 @@ export const getSalonInfo = async (req, res, next) => {
 
     const salonRating = await getAverageSalonRating(salonId)
 
-    res.status(200).json({
-      success: true,
-      message: 'Salon and barbers found successfully.',
+    // res.status(200).json({
+    //   success: true,
+    //   message: 'Salon and barbers found successfully.',
+    //   response: {
+    //     salonInfo: salonInfo,
+    //     barbers: barbers,
+    //     salonRating: salonRating
+    //   },
+    // });
+
+    return SuccessHandler(SALON_BARBERS_FOUND_SUCCESS, SUCCESS_STATUS_CODE, res, {
       response: {
-        salonInfo: salonInfo,
-        barbers: barbers,
-        salonRating: salonRating
+          salonInfo: salonInfo,
+          barbers: barbers,
+          salonRating: salonRating,
       },
-    });
+  });
   } catch (error) {
     next(error);
   }
@@ -997,7 +940,7 @@ export const uploadSalonLogo = async (req, res, next) => {
     const salonId = req.body.salonId;
 
     if (!salonLogo) {
-      return res.status(400).json({ success: false, message: "Salon Logo not found." });
+      return ErrorHandler(SALON_LOGO_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res) 
     }
 
     // Allowed file extensions
@@ -1016,12 +959,12 @@ export const uploadSalonLogo = async (req, res, next) => {
       // Get file extension and check if it's allowed
       const extension = path.extname(logo.name).toLowerCase().slice(1);
       if (!allowedExtensions.includes(extension)) {
-        return res.status(400).json({ success: false, message: "File extension must be jpg, png, jfif, svg, jpeg, webp" });
+        return ErrorHandler(IMAGE_FILE_EXTENSION_ERROR, ERROR_STATUS_CODE, res) 
       }
 
       // Check file size
       if (logo.size > maxFileSize) {
-        return res.status(400).json({ success: false, message: "File size must be lower than 2mb" });
+        return ErrorHandler(IMAGE_FILE_SIZE_ERROR, ERROR_STATUS_CODE, res) 
       }
 
       return null; // All checks passed, so continue processing
@@ -1035,18 +978,12 @@ export const uploadSalonLogo = async (req, res, next) => {
     if (existingSalon && existingSalon.salonLogo && Array.isArray(existingSalon.salonLogo) && existingSalon.salonLogo.length > 0) {
       const oldLogo = existingSalon.salonLogo[0]; // Ensure we are getting the correct logo object
       if (oldLogo && oldLogo.public_id) { // Check if oldLogo is not null and has public_id
-        try {
           // console.log('Deleting old logo with public_id:', oldLogo.public_id);
           const result = await cloudinary.uploader.destroy(oldLogo.public_id);
           // console.log('Deletion result:', result);
 
           if (result.result !== 'ok') {
-            return res.status(400).json({ success: false, message: 'Failed to delete old image.' });
-          }
-        } catch (err) {
-          // console.error('Error during deletion:', err);
-          return res.status(500).json({ success: false, message: 'Failed to delete old image.', error: err.message });
-        }
+            return ErrorHandler(SALON_LOGO_DELETE_ERROR, ERROR_STATUS_CODE, res)           }
       } else {
         console.log('No valid logo found or missing public_id for deletion');
       }
@@ -1078,11 +1015,13 @@ export const uploadSalonLogo = async (req, res, next) => {
     // Update the salon document with the new logo details
     const updatedSalon = await uploadedSalonLogo(salonId, uploadedLogos);
 
-    res.status(200).json({
-      success: true,
-      message: "Salon logo uploaded successfully",
-      response: updatedSalon
-    });
+    // res.status(200).json({
+    //   success: true,
+    //   message: "Salon logo uploaded successfully",
+    //   response: updatedSalon
+    // });
+
+    return SuccessHandler(SALON_LOGO_UPLOAD_SUCCESS, SUCCESS_STATUS_CODE, res, { response:updatedSalon }) 
   } catch (error) {
     next(error);
   }
@@ -1158,19 +1097,22 @@ export const getSalonLogo = async (req, res, next) => {
 
 
     if (!salonId) {
-      return res.status(404).json({ success: false, message: 'SalonId is not present' });
+      // return res.status(404).json({ success: false, message: 'SalonId is not present' });
+      return ErrorHandler(SALONID_EMPTY_ERROR, ERROR_STATUS_CODE, res) 
     }
 
     // Find the salonlogo in the database
     const salonlogo = await getSalonLogoBySalonId(salonId)
 
 
-    // Send the salon logo information in the response
-    return res.status(200).json({
-      success: true,
-      message: "Salon logo retrieved",
-      response: salonlogo
-    });
+    // // Send the salon logo information in the response
+    // return res.status(200).json({
+    //   success: true,
+    //   message: "Salon logo retrieved",
+    //   response: salonlogo
+    // });
+    return SuccessHandler(SALON_LOGO_UPLOAD_SUCCESS, SUCCESS_STATUS_CODE, res, { response:salonlogo }) 
+
   } catch (error) {
     next(error);
   }
@@ -1219,10 +1161,11 @@ export const updateSalonInfo = async (req, res, next) => {
     const salon = await getSalonBySalonId(salonId);
 
     if (!salon) {
-      return res.status(404).json({
-        success: false,
-        message: 'Salon not found or salon is not online',
-      });
+      // return res.status(404).json({
+      //   success: false,
+      //   message: 'Salon not found or salon is not online',
+      // });
+      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
     }
 
     // Update the salon description
@@ -1231,12 +1174,15 @@ export const updateSalonInfo = async (req, res, next) => {
     // Save the updated salon information
     const updatedSalon = await salon.save();
 
-    // Send the response
-    res.status(200).json({
-      success: true,
-      message: 'Salon information updated successfully',
-      response: updatedSalon.salonDesc,
-    });
+    // // Send the response
+    // res.status(200).json({
+    //   success: true,
+    //   message: 'Salon information updated successfully',
+    //   response: updatedSalon.salonDesc,
+    // });
+
+    return SuccessHandler(SALON_DESCRIPTION_UPDATE_SUCCESS, SUCCESS_STATUS_CODE, res, { response:updatedSalon.salonDesc }) 
+
   } catch (error) {
     next(error);
   }
@@ -1248,37 +1194,38 @@ export const getSalonInfoBySalonId = async (req, res, next) => {
     const salonId = req.body.salonId;
 
     if (!salonId) {
-      // Send the response
-      res.status(400).json({
-        success: true,
-        message: 'Proper salonId required.'
-      });
+      return ErrorHandler(SALONID_EMPTY_ERROR, ERROR_STATUS_CODE, res)
     }
 
     if (salonId === 0) {
-      // Send the response
-      res.status(200).json({
-        success: true,
-        message: 'Need to connect to salon first.'
-      });
+      // // Send the response
+      // res.status(200).json({
+      //   success: true,
+      //   message: 'Need to connect to salon first.'
+      // });
+      return SuccessHandler(SALON_CONNECT_SUCCESS, SUCCESS_STATUS_CODE, res) 
+
     } else {
       // Find the existing salon by ID
       const salon = await getSalonBySalonId(salonId);
 
       if (salon.salonDesc === "") {
         // Send the response
-        res.status(200).json({
-          success: true,
-          message: 'No salon info present',
-          response: "",
-        });
+        // res.status(200).json({
+        //   success: true,
+        //   message: 'No salon info present',
+        //   response: "",
+        // });
+        return SuccessHandler(SALON_DESCRIPTION_EMPTY_SUCCESS, SUCCESS_STATUS_CODE, res, { response:"" } ) 
+
       }
-      // Send the response
-      res.status(200).json({
-        success: true,
-        message: 'Salon information retrieved successfully',
-        response: salon.salonDesc,
-      });
+      // // Send the response
+      // res.status(200).json({
+      //   success: true,
+      //   message: 'Salon information retrieved successfully',
+      //   response: salon.salonDesc,
+      // });
+      return SuccessHandler(SALON_DESCRIPTION_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, { response:salon.salonDesc } )
     }
   } catch (error) {
     next(error);
