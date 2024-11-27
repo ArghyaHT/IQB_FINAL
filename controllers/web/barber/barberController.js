@@ -20,9 +20,9 @@ import { qListByBarberId } from "../../../services/web/queue/joinQueueService.js
 import { barberLogInTime, barberLogOutTime } from "../../../utils/attendence/barberAttendence.js";
 import { sendMobileVerificationCode } from "../../../utils/mobileMessageSender/mobileMessageSender.js";
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
-import { EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, FORGET_PASSWORD_SUCCESS, FORGOT_PASSWORD_EMAIL_ERROR, IMAGE_EMPTY_ERROR, INVALID_EMAIL_ERROR, MOBILE_NUMBER_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, RESET_PASSWORD_SUCCESS } from "../../../constants/web/adminConstants.js";
+import { EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, EMAIL_VERIFIED_SUCCESS, EMAIL_VERIFY_CODE_ERROR, FORGET_PASSWORD_SUCCESS, FORGOT_PASSWORD_EMAIL_ERROR, IMAGE_EMPTY_ERROR, INCORRECT_OLD_PASSWORD_ERROR, INVALID_EMAIL_ERROR, MOBILE_NUMBER_ERROR, MOBILE_VERIFIED_SUCCESS, MOBILE_VERIFY_CODE_ERROR, NAME_LENGTH_ERROR, OLD_AND_NEW_PASSWORD_DONOT_MATCH, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, RESET_PASSWORD_SUCCESS, SEND_VERIFICATION_EMAIL_SUCCESS, SEND_VERIFICATION_MOBILE_SUCCESS, VERIFICATION_EMAIL_ERROR } from "../../../constants/web/adminConstants.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
-import { BARBER_CONNECT_SALON_SUCCESS, BARBER_EXISTS_ERROR, BARBER_NOT_EXIST_ERROR, CHANGE_BARBER_ONLINE_SUCCESS, GET_ALL_BARBER_SUCCESS, LOGOUT_SUCCESS, NO_BARBERS_ERROR, SELECT_SERVICE_ERROR, SIGNIN_SUCCESS, SIGNUP_SUCCESS, UPDATE_BARBER_SUCCESS } from "../../../constants/web/BarberConstants.js";
+import { BARBER_CLOCKIN_SUCCESS, BARBER_CLOCKOUT_SUCCESS, BARBER_CONNECT_SALON_SUCCESS, BARBER_DETAILS_SUCCESS, BARBER_EXISTS_ERROR, BARBER_NOT_APPROVE_ERROR, BARBER_NOT_EXIST_ERROR, BARBER_SERVICES_SUCCESS, CHANGE_BARBER_ONLINE_SUCCESS, CHANGE_PASSWORD_SUCCESS, CREATE_BARBER_SUCCESS, CUSTOMERS_IN_QUEUE_ERROR, EMPTY_SERVICE_ERROR, GET_ALL_BARBER_SUCCESS, LOGOUT_SUCCESS, NO_BARBER_SERVICEID_ERROR, NO_BARBERS_ERROR, SELECT_SERVICE_ERROR, SIGNIN_SUCCESS, SIGNUP_SUCCESS, UPDATE_BARBER_SUCCESS } from "../../../constants/web/BarberConstants.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ALLOWED_IMAGE_EXTENSIONS, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 
@@ -504,37 +504,23 @@ export const createBarberByAdmin = async (req, res, next) => {
         } = req.body;
 
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your email."
-            });
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email"
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
 
-        email = email.toLowerCase();
-
         if (name && (name.length < 1 || name.length > 20)) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter name between 1 to 20 characters."
-            });
+            return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (barberServices.length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Please provide services."
-            });
+            return ErrorHandler(EMPTY_SERVICE_ERROR, ERROR_STATUS_CODE, res)
         }
 
-
+        email = email.toLowerCase();
 
         // Convert mobile number to string only if it's a number
         let mobileNumberStr = typeof mobileNumber === 'number' ? mobileNumber.toString() : mobileNumber;
@@ -550,10 +536,7 @@ export const createBarberByAdmin = async (req, res, next) => {
         const isValid = phoneUtil.isValidNumber(phoneNumberProto);
 
         if (!isValid) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Mobile Number"
-            });
+            return ErrorHandler(MOBILE_NUMBER_ERROR, ERROR_STATUS_CODE, res)
         }
 
         // Get the national significant number (i.e., without the country code)
@@ -567,10 +550,7 @@ export const createBarberByAdmin = async (req, res, next) => {
         const barber = await findBarberByEmailAndRole(email);
 
         if (barber) {
-            return res.status(400).json({
-                success: false,
-                message: "Email already exists"
-            });
+            return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE, res)
         }
 
         //Creating the random Password of ^ digit
@@ -714,11 +694,8 @@ export const createBarberByAdmin = async (req, res, next) => {
             // Handle error if email sending fails
         }
 
-        res.status(201).json({
-            success: true,
-            message: "Barber created successfully",
-            response: savedBarber
-        });
+        return SuccessHandler(CREATE_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { response: savedBarber })
+
     } catch (error) {
         next(error);
     }
@@ -729,31 +706,20 @@ export const updateBarberByAdmin = async (req, res, next) => {
     try {
         let { email, name, nickName, salonId, countryCode, mobileNumber, dateOfBirth, barberServices } = req.body;
 
-        // Convert email to lowercase
-        if (email) {
-            email = email.toLowerCase();
-        }
-
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your email."
-            });
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid email"
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
+
         if (name && (name.length < 1 || name.length > 20)) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter name between 1 to 20 characters"
-            });
+            return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE, res)
         }
+
+        email = email.toLowerCase();
 
         // Convert mobile number to string only if it's a number
         let mobileNumberStr = typeof mobileNumber === 'number' ? mobileNumber.toString() : mobileNumber;
@@ -769,10 +735,7 @@ export const updateBarberByAdmin = async (req, res, next) => {
         const isValid = phoneUtil.isValidNumber(phoneNumberProto);
 
         if (!isValid) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Mobile Number"
-            });
+            return ErrorHandler(MOBILE_NUMBER_ERROR, ERROR_STATUS_CODE, res)
         }
 
         // Get the national significant number (i.e., without the country code)
@@ -809,17 +772,10 @@ export const updateBarberByAdmin = async (req, res, next) => {
         const updatedBarber = await adminUpdateBarber(email, name, nickName, countryCode, formattedNumberAsNumber, dateOfBirth, barberServices);
 
         if (!updatedBarber) {
-            res.status(404).json({
-                success: false,
-                message: 'Barber not found',
-            });
+            return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        res.status(200).json({
-            success: true,
-            message: "Barber updated successfully",
-            response: updatedBarber
-        })
+        return SuccessHandler(UPDATE_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
     }
     catch (error) {
         next(error);
@@ -1165,31 +1121,25 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
     }
 };
 
-//DESC:GET ALL BARBERS BY SERVICEID =========================
+// Desc: Get all barbers by service Id
 export const getAllBarbersByServiceId = async (req, res, next) => {
     try {
         const { serviceId } = req.query;
 
         const barbers = await getBarbersByServiceId(serviceId)
         if (!barbers || barbers.length === 0) {
-            return res.status(200).json({
-                success: false,
-                message: "No barbers found for the given serviceId"
-            });
+            return ErrorHandler(NO_BARBER_SERVICEID_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        return res.status(200).json({
-            success: true,
-            message: "All Barbers fetched successfully",
-            response: barbers
-        });
+        return SuccessHandler(GET_ALL_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barbers })
+
     }
     catch (error) {
         next(error);
     }
 }
 
-//DESC:GET ALL BARBER SERVICES BY BARBERID ===================
+// Desc: get barber services by barber Id
 export const getBarberServicesByBarberId = async (req, res, next) => {
     try {
         const { barberId } = req.query;
@@ -1199,17 +1149,10 @@ export const getBarberServicesByBarberId = async (req, res, next) => {
         const barberServices = barbers.barberServices;
 
         if (!barbers) {
-            return res.status(404).json({
-                success: false,
-                message: "No barber found"
-            });
+            return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        return res.status(200).json({
-            success: true,
-            message: "Barber services retrieved",
-            response: barberServices
-        });
+        return SuccessHandler(BARBER_SERVICES_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barberServices })
     }
     catch (error) {
         next(error);
@@ -1217,17 +1160,14 @@ export const getBarberServicesByBarberId = async (req, res, next) => {
 
 }
 
-//DESC:SEND EMAIL VERIFICATION CODE TO VERIFY BARBER EMAIL ===============
+//Desc: Send verification code to barber email
 export const sendVerificationCodeForBarberEmail = async (req, res, next) => {
     try {
         const { email } = req.body;
 
         const user = await findBarberByEmailAndRole(email)
         if (!user) {
-            return res.status(404).json({
-                success: false,
-                response: "Please register first",
-            });
+            return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
@@ -1238,55 +1178,44 @@ export const sendVerificationCodeForBarberEmail = async (req, res, next) => {
         try {
             await sendVerificationCode(email, user.name, verificationCode);
         } catch (error) {
-            return res.status(500).json({
-                success: false,
-                message: 'Failed to Verify email',
-                error: error.message
-            });
+            return ErrorHandler(VERIFICATION_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        return res.status(200).json({
-            success: true,
-            message: `Please check mail for verification.`,
-            verificationCode: verificationCode
-        });
+        return SuccessHandler(SEND_VERIFICATION_EMAIL_SUCCESS, SUCCESS_STATUS_CODE, res);
+
     } catch (error) {
         next(error);
     }
 }
 
-//DESC:CHANGE BARBER EMAIL VERIFIED STATUS =====================
+// Desc: Change barber email verified status
 export const changeBarberEmailVerifiedStatus = async (req, res, next) => {
     try {
         const { email, verificationCode } = req.body;
+
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
+        }
 
         // FIND THE CUSTOMER 
         const barber = await findBarberByEmailAndRole(email);
 
         if (barber && barber.verificationCode === verificationCode) {
-            // If verification code matches, clear it from the database
             barber.verificationCode = '';
             barber.emailVerified = true;
-            await barber.save();
+            await barber.save()
 
-            return res.status(200).json({
-                success: true,
-                message: "Email verified successfully",
-                response: barber,
-            });
+            return SuccessHandler(EMAIL_VERIFIED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barber });
         }
 
-        // If verification code doesn't match or customer not found
-        return res.status(400).json({
-            success: false,
-            message: "Enter valid Verification code",
-        });
+        return ErrorHandler(EMAIL_VERIFY_CODE_ERROR, ERROR_STATUS_CODE, res)
+
     } catch (error) {
         next(error);
     }
 }
 
-//DESC:GET BARBER DETAILS BY BARBER EMAIL =====================
+//Desc get barber Detail By Email
 export const getBarberDetailsByEmail = async (req, res) => {
     try {
         let { email } = req.body;
@@ -1296,29 +1225,24 @@ export const getBarberDetailsByEmail = async (req, res) => {
         const barber = await findBarberByEmailAndRole(email)
 
         if (!barber) {
-            return res.status(404).json({
-                success: false,
-                message: "Barber not found",
-            });
+            return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const getBarberRating = await getAverageBarberRating(barber.salonId, barber.barberId)
 
-        res.status(200).json({
-            success: true,
-            message: "Barber retrived successfully",
+        return SuccessHandler(BARBER_DETAILS_SUCCESS, SUCCESS_STATUS_CODE, res, {
             response: {
-                ...barber.toObject(), // Convert Mongoose document to plain JavaScript object
+                ...barber.toObject(),
                 barberRating: getBarberRating,
-            },
-        });
+            }
+        })
     }
     catch (error) {
         next(error);
     }
 }
 
-//DESC:CHANGE BARBER CLOCKIN STATUS ===========================
+//Desc: Change Barber Clock In Status
 export const changeBarberClockInStatus = async (req, res, next) => {
     try {
         const { barberId, salonId, isClockedIn } = req.body;
@@ -1332,7 +1256,7 @@ export const changeBarberClockInStatus = async (req, res, next) => {
         const getBarber = await getBarberByBarberId(barberId);
 
         if (getBarber.isApproved === false) {
-            return res.status(400).json({ success: false, message: 'Barber is not approved.' });
+            return ErrorHandler(BARBER_NOT_APPROVE_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (isClockedIn === true) {
@@ -1340,15 +1264,11 @@ export const changeBarberClockInStatus = async (req, res, next) => {
             const updatedBarber = await barberClockInStatus(barberId, salonId, isClockedIn);
 
             if (!updatedBarber) {
-                return res.status(404).json({ success: false, message: "Cant clockedIn as barber not found" });
+                return ErrorHandler(`Cant clockedIn as ${BARBER_NOT_EXIST_ERROR}`, ERROR_STATUS_CODE, res)
             }
             await barberLogInTime(updatedBarber.salonId, updatedBarber.barberId, updatedBarber.updatedAt);
 
-            return res.status(200).json({
-                success: true,
-                message: "You are clocked in ",
-                response: updatedBarber
-            });
+            return SuccessHandler(BARBER_CLOCKIN_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
         }
         else {
 
@@ -1361,23 +1281,16 @@ export const changeBarberClockInStatus = async (req, res, next) => {
                 const updatedBarber = await barberClockInStatus(barberId, salonId, isClockedIn);
 
                 if (!updatedBarber) {
-                    return res.status(404).json({ success: false, message: "Cant clockedIn as barber not found" });
+                    return ErrorHandler(`Cant clockedIn as ${BARBER_NOT_EXIST_ERROR}`, ERROR_STATUS_CODE, res)
                 }
 
                 await barberLogOutTime(updatedBarber.salonId, updatedBarber.barberId, updatedBarber.updatedAt);
 
-                return res.status(200).json({
-                    success: true,
-                    message: "You are clocked out",
-                    response: updatedBarber
-                });
+                return SuccessHandler(BARBER_CLOCKOUT_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
             }
 
             else {
-                return res.status(404).json({
-                    success: false,
-                    message: "Cant clock you out as you have customers in the queue",
-                });
+                return ErrorHandler(CUSTOMERS_IN_QUEUE_ERROR, ERROR_STATUS_CODE, res)
             }
         }
 
@@ -1392,24 +1305,20 @@ export const sendVerificationCodeForBarberMobile = async (req, res, next) => {
     try {
         let { email } = req.body;
 
-        // Validate input fields
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please Enter your email."
-            });
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // Convert email to lowercase
+        if (!validateEmail(email)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+        }
+
         email = email.toLowerCase();
 
         const user = await findBarberByEmailAndRole(email);
 
         if (!user) {
-            return res.status(404).json({
-                success: false,
-                response: "Please register first",
-            });
+            return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
@@ -1423,14 +1332,10 @@ export const sendVerificationCodeForBarberMobile = async (req, res, next) => {
         try {
             await sendMobileVerificationCode(formattedNumber, verificationCode);
         } catch (error) {
-            //console.log(error);
             next(error);
         }
 
-        return res.status(200).json({
-            success: true,
-            message: `Please check your mobile inbox for verification code.`,
-        });
+        return SuccessHandler(SEND_VERIFICATION_MOBILE_SUCCESS, SUCCESS_STATUS_CODE, res)
 
     } catch (error) {
         next(error);
@@ -1442,39 +1347,28 @@ export const changeBarberMobileVerifiedStatus = async (req, res, next) => {
     try {
         let { email, verificationCode } = req.body;
 
-        // Validate input fields
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please Enter your email."
-            });
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // Convert email to lowercase
+        if (!validateEmail(email)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+        }
+
         email = email.toLowerCase();
 
         // FIND THE CUSTOMER 
         const barber = await findBarberByEmailAndRole(email);
 
         if (barber && barber.verificationCode === verificationCode) {
-            // If verification code matches, clear it from the database
             barber.verificationCode = '';
             barber.mobileVerified = true;
             await barber.save();
 
-            return res.status(200).json({
-                success: true,
-                message: "Your mobile number has been verified successfully.",
-                response: barber,
-            });
+            return SuccessHandler(MOBILE_VERIFIED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barber })
         }
         else {
-
-            // If verification code doesn't match or customer not found
-            return res.status(400).json({
-                success: false,
-                message: "Enter valid Verification code",
-            });
+            return ErrorHandler(MOBILE_VERIFY_CODE_ERROR, ERROR_STATUS_CODE, res)
         }
     } catch (error) {
         next(error);
@@ -1488,80 +1382,49 @@ export const barberchangepassword = async (req, res, next) => {
         let { email, oldPassword, password } = req.body;
 
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Email not found"
-            });
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email "
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!oldPassword && !password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter all the fields."
-            });
+            return ErrorHandler(FILL_ALL_FIELDS_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!oldPassword) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your old password."
-            });
+            return ErrorHandler(OLD_PASSWORD_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your new password."
-            });
+            return ErrorHandler(NEW_PASSWORD_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // Convert email to lowercase
         email = email.toLowerCase();
 
         const getBarber = await findBarberByEmailAndRole(email)
 
         if (!getBarber) {
-            return res.status(404).json({
-                success: false,
-                message: "Barber not found."
-            });
+            return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (getBarber.AuthType === "local") {
 
 
             if (oldPassword === password) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Old and new password can't be same."
-                });
+                return ErrorHandler(OLD_AND_NEW_PASSWORD_DONOT_MATCH, ERROR_STATUS_CODE, res)
             }
 
             //Match the old password
             const isMatch = await bcrypt.compare(oldPassword, getBarber.password);
 
             if (!isMatch) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Old password is incorrect."
-                });
+                return ErrorHandler(INCORRECT_OLD_PASSWORD_ERROR, ERROR_STATUS_CODE, res)
             }
 
-            if (password) {
-                // Check if the password meets the minimum length requirement
-                if (password.length < 8) {
-                    return res.status(400).json({
-                        success: false,
-                        message: "Password must be at least 8 characters.",
-                    });
-                }
+            if (password && password.length < 8) {
+                return ErrorHandler(PASSWORD_LENGTH_ERROR, ERROR_STATUS_CODE, res)
             }
 
 
@@ -1573,24 +1436,13 @@ export const barberchangepassword = async (req, res, next) => {
 
             getBarber.save();
 
-            res.status(200).json({
-                success: true,
-                message: "Barber password updated successfully",
-                response: getBarber
-            })
+            return SuccessHandler(CHANGE_PASSWORD_SUCCESS, SUCCESS_STATUS_CODE, res, { response: getBarber })
         }
         else {
 
-            if (password) {
-                // Check if the password meets the minimum length requirement
-                if (password.length < 8) {
-                    return res.status(400).json({
-                        success: false,
-                        message: "Password must be at least 8 characters.",
-                    });
-                }
+            if (password && password.length < 8) {
+                return ErrorHandler(PASSWORD_LENGTH_ERROR, ERROR_STATUS_CODE, res)
             }
-
             // Hash the new password
             const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -1598,11 +1450,7 @@ export const barberchangepassword = async (req, res, next) => {
 
             getBarber.save();
 
-            res.status(200).json({
-                success: true,
-                message: "Barber password updated successfully.",
-                response: getBarber
-            })
+            return SuccessHandler(CHANGE_PASSWORD_SUCCESS, SUCCESS_STATUS_CODE, res, { response: getBarber })
         }
 
     }
