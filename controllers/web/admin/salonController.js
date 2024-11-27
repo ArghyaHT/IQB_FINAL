@@ -45,6 +45,18 @@ export const createSalonByAdmin = async (req, res, next) => {
 
   try {
 
+
+    if (!adminEmail) {
+      return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
+    }
+
+
+    // Validate email format
+    if (!validateEmail(adminEmail)) {
+      return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+    }
+
+
     if (!salonEmail) {
       return ErrorHandler(SALON_EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
     }
@@ -126,16 +138,6 @@ export const createSalonByAdmin = async (req, res, next) => {
     if (salonDesc && salonDesc.length > 50) {
       return ErrorHandler(SALON_DESC_ERROR, ERROR_STATUS_CODE, res)
     }
-
-    if (!adminEmail) {
-      return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-    // Validate email format
-    if (!validateEmail(adminEmail)) {
-      return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
-    }
-
 
     //Find the Salon If exits 
     const existingSalon = await findSalonBySalonNameOrEmail(salonName, salonEmail)

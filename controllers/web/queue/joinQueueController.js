@@ -37,7 +37,8 @@ export const getQueueListBySalonId = async (req, res, next) => {
                 const sortedQueueList = getSalon[0].queueList;
 
                 return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response:sortedQueueList })
-            } else {
+            } 
+            else {
                 res.status(200).json({
                     success: false,
                     message: "No queuelist to show",
