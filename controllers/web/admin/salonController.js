@@ -45,18 +45,6 @@ export const createSalonByAdmin = async (req, res, next) => {
 
   try {
 
-
-    if (!adminEmail) {
-      return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-
-    // Validate email format
-    if (!validateEmail(adminEmail)) {
-      return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-
     if (!salonEmail) {
       return ErrorHandler(SALON_EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
     }
@@ -135,9 +123,19 @@ export const createSalonByAdmin = async (req, res, next) => {
       return ErrorHandler(SALON_SERVICES_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (salonDesc && salonDesc.length > 150) {
+    if (salonDesc && salonDesc.length > 50) {
       return ErrorHandler(SALON_DESC_ERROR, ERROR_STATUS_CODE, res)
     }
+
+    if (!adminEmail) {
+      return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
+    }
+
+    // Validate email format
+    if (!validateEmail(adminEmail)) {
+      return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+    }
+
 
     //Find the Salon If exits 
     const existingSalon = await findSalonBySalonNameOrEmail(salonName, salonEmail)
@@ -156,6 +154,8 @@ export const createSalonByAdmin = async (req, res, next) => {
     const salonCode = firstTwoLetters + salonId;
 
     const servicesData = services.map((s, i) => ({
+
+      //Service desc 50 characters needed
       serviceId: `${salonId}${i + 1}`,
       serviceCode: `${s.serviceName.slice(0, 2).toUpperCase()}${salonId}${i + 1}`,
       serviceName: s.serviceName,

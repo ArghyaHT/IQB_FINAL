@@ -1,16 +1,11 @@
 import express from "express";
-import { barberServedQueue, cancelQueue, getAvailableBarbersForQ, getBarberByMultipleServiceId, getQhistoryByCustomerEmail, getQlistbyBarberId, getQueueListBySalonId, groupJoinQueue, singleJoinQueue } from "../../../controllers/web/queue/joinQueueController.js";
+import { barberServedQueue, cancelQueue, getAvailableBarbersForQ, getBarberByMultipleServiceId, getQhistoryByCustomerEmail, getQlistbyBarberId, getQueueListBySalonId } from "../../../controllers/web/queue/joinQueueController.js";
 import { verifyRefreshTokenAdmin } from "../../../middlewares/web/VerifyRefreshTokenAdmin.js";
 import { verifyRefreshTokenBarber } from "../../../middlewares/web/VerifyRefreshTokenBarber.js";
 
 
 const router = express.Router();
 
-//Single Join
-router.route("/singleJoinQueue").post(verifyRefreshTokenAdmin,singleJoinQueue)
-
-//Group Join
-router.route("/groupJoinQueue").post(verifyRefreshTokenAdmin,groupJoinQueue)
 
 //getQListBySalonId
 router.route("/getQListBySalonId").get(verifyRefreshTokenAdmin,getQueueListBySalonId)
