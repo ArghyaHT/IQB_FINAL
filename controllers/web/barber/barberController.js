@@ -411,24 +411,79 @@ export const updateBarberInfo = async (req, res, next) => {
 }
 
 // Desc: Forgot Password
+// export const handleForgetPassword = async (req, res, next) => {
+//     try {
+//         const { email } = req.body
+
+//         if (!email) {
+//             return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
+//         }
+
+//         if (!validateEmail(email)) {
+//             return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+//         }
+
+//         email = email.toLowerCase();
+
+//         const user = await findBarberByEmailAndRole(email)
+
+//         if (!user) {
+//             return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
+//         }
+
+
+//         if (user.AuthType === "google") {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'Password cant be changed as you are logged in with google'
+//             })
+//         }
+
+//         //get ResetPassword Token
+//         const resetToken = user.getResetPasswordToken()
+
+//         await user.save({ validatebeforeSave: false })
+
+//         try {
+//             await emailWithNodeMail(email, user.name, process.env.FORGET_PASSWORD_CLIENT_URL, "barberchangepassword", resetToken)
+//         } catch (error) {
+//             return ErrorHandler(FORGOT_PASSWORD_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+//         }
+
+//         return SuccessHandler(FORGET_PASSWORD_SUCCESS, SUCCESS_STATUS_CODE, res, { payload: { resetToken } })
+
+//     } catch (error) {
+//         next(error);
+//     }
+// }
+
 export const handleForgetPassword = async (req, res, next) => {
     try {
         const { email } = req.body
 
         if (!email) {
-            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
+            return res.status(400).json({
+                success: false,
+                message: "Please enter your email."
+            });
         }
 
         if (!validateEmail(email)) {
-            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Email"
+            });
         }
 
-        email = email.toLowerCase();
+
 
         const user = await findBarberByEmailAndRole(email)
 
         if (!user) {
-            return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
+            res.status(404).json({
+                success: false,
+                message: "Email does not exist"
+            })
         }
 
 
@@ -444,15 +499,28 @@ export const handleForgetPassword = async (req, res, next) => {
 
         await user.save({ validatebeforeSave: false })
 
+        const CLIENT_URL = "https://iqb-final.onrender.com"
+
+        //  const CLIENT_URL = "http://localhost:5173"
+
         try {
-            await emailWithNodeMail(email, user.name, process.env.FORGET_PASSWORD_CLIENT_URL, "barberchangepassword", resetToken)
+            await emailWithNodeMail(email, user.name, CLIENT_URL, "barberchangepassword", resetToken)
         } catch (error) {
-            return ErrorHandler(FORGOT_PASSWORD_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+            res.status(400).json({
+                success: false,
+                message: 'Failed to send reset password email'
+            })
         }
 
-        return SuccessHandler(FORGET_PASSWORD_SUCCESS, SUCCESS_STATUS_CODE, res, { payload: { resetToken } })
-
+        res.status(200).json({
+            success: true,
+            message: `Please go to your email for reseting password`,
+            payload: {
+                resetToken
+            }
+        })
     } catch (error) {
+        //console.log(error);
         next(error);
     }
 }
