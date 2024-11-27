@@ -22,7 +22,7 @@ import { sendMobileVerificationCode } from "../../../utils/mobileMessageSender/m
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import { EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, FORGET_PASSWORD_SUCCESS, FORGOT_PASSWORD_EMAIL_ERROR, IMAGE_EMPTY_ERROR, INVALID_EMAIL_ERROR, MOBILE_NUMBER_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, RESET_PASSWORD_SUCCESS } from "../../../constants/web/adminConstants.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
-import { BARBER_EXISTS_ERROR, BARBER_NOT_EXIST_ERROR, GET_ALL_BARBER_SUCCESS, LOGOUT_SUCCESS, NO_BARBERS_ERROR, SELECT_SERVICE_ERROR, SIGNIN_SUCCESS, SIGNUP_SUCCESS, UPDATE_BARBER_SUCCESS } from "../../../constants/web/BarberConstants.js";
+import { BARBER_CONNECT_SALON_SUCCESS, BARBER_EXISTS_ERROR, BARBER_NOT_EXIST_ERROR, CHANGE_BARBER_ONLINE_SUCCESS, GET_ALL_BARBER_SUCCESS, LOGOUT_SUCCESS, NO_BARBERS_ERROR, SELECT_SERVICE_ERROR, SIGNIN_SUCCESS, SIGNUP_SUCCESS, UPDATE_BARBER_SUCCESS } from "../../../constants/web/BarberConstants.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ALLOWED_IMAGE_EXTENSIONS, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 
@@ -949,7 +949,7 @@ export const connectBarberToSalon = async (req, res, next) => {
     }
 }
 
-//DESC:GET ALL BARBERS BY SALONID =================
+// Desc: Get All Barbers in Admin 
 export const getAllBarberbySalonId = async (req, res, next) => {
     try {
         // const { salonId, name, email, page = 1, limit = 10, sortField, sortOrder } = req.query;
@@ -1010,7 +1010,7 @@ export const getAllBarberbySalonId = async (req, res, next) => {
     }
 };
 
-//DESC:UPDATE BARBER ACCOUNT DETAILS =======================
+// Desc: Update Barber Account Details
 export const updateBarberAccountDetails = async (req, res, next) => {
     try {
         const barberData = req.body;
@@ -1081,7 +1081,7 @@ export const updateBarberAccountDetails = async (req, res, next) => {
     }
 }
 
-//DESC:DELETE BARBER ==========================
+// Desc: Delete Barber In Admin
 export const deleteBarber = async (req, res, next) => {
     try {
         let { email } = req.body;
@@ -1132,7 +1132,7 @@ export const changeBarberWorkingStatus = async (req, res, next) => {
 
 }
 
-//DESC:CHANGE BARBER ONLINE STATUS ===========================
+// Desc: Change BarberOnline Status
 export const changeBarberOnlineStatus = async (req, res, next) => {
     try {
         const { barberId, salonId, isOnline } = req.body;
@@ -1147,21 +1147,18 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
 
 
         if (getbarber.isClockedIn === false) {
-            return res.status(404).json({ success: false, message: "Unable to change online status as you are currently clocked out" });
+            return ErrorHandler(BARBER_CLOCKIN_ERROR, ERROR_STATUS_CODE, res)
         }
 
         // Now, you can proceed with the logic after verifying the token
         const updatedBarber = await barberOnlineStatus(barberId, salonId, isOnline);
 
         if (!updatedBarber) {
-            return res.status(404).json({ success: false, message: "Barber not found" });
+            return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        return res.status(200).json({
-            success: true,
-            message: "Barber online status changed successfully.",
-            response: updatedBarber
-        });
+
+        return SuccessHandler(CHANGE_BARBER_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
 
     } catch (error) {
         next(error);
