@@ -71,7 +71,16 @@ export const getSalonQlist = async(salonId) => {
         }
       ]);
 
-      return sortedQlist;
+      if(sortedQlist.length > 0){
+        return sortedQlist
+      }else{
+        return [
+          {
+            queueList:[]
+          }
+        ]
+      }
+
 }
 
 //Find customers to send Mail for Q position change

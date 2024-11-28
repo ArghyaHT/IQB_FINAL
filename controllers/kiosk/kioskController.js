@@ -1765,7 +1765,7 @@ export const getAllBarberbySalonId = async (req, res, next) => {
 
         if (getAllBarbers && getAllBarbers.length > 0) {
         return SuccessHandler(BARBER_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, {
-            fgetAllBarbers: getAllBarbers,
+            getAllBarbers: getAllBarbers,
         })
             
         } else {
