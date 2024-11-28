@@ -875,11 +875,7 @@ export const getBarberByServicesKiosk = async (req, res, next) => {
 
         }
 
-        // return res.status(200).json({
-        //     success: true,
-        //     message: "Barbers retrieved sucessFully",
-        //     response: barbers
-        // });
+        return SuccessHandler(BARBER_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barbers })
 
     } catch (error) {
         next(error);
