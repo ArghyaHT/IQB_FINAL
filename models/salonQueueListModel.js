@@ -103,7 +103,7 @@ const salonQueueListSchema = new mongoose.Schema({
         localLineId: {
             type: Number
         }
-    }]
+    }],
 
 }, { timestamps: true })
 

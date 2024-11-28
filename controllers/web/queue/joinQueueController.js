@@ -38,30 +38,28 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
             // console.log(getSalon)
 
-            // if (getSalon.length > 0) {
-            //     // Access the sorted queueList array from the result
-            //     const sortedQueueList = getSalon[0].queueList;
-
-            //     return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQueueList })
-            // }
-            // else {
-            //     return SuccessHandler(RETRIVE_EMPTY_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: [] })
-            // }
-
-            if (!getSalon ) {
-                // res.status(400).json({
-                //     success: false,
-                //     message: "You currently have no salon"
-                // })
-                return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res,)
-
-            }
-            else{
+            if (getSalon.length > 0) {
+                // Access the sorted queueList array from the result
                 const sortedQueueList = getSalon[0].queueList;
 
                 return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQueueList })
+            }
+            else {
+                return SuccessHandler(RETRIVE_EMPTY_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: [] })
+            }
+
+            // console.log("GET SALON ", getSalon)
+
+            // if (!getSalon ) {
+            //     return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res,)
+
+            // }
+            // else{
+            //     const sortedQueueList = getSalon[0].queueList;
+
+            //     return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQueueList })
     
-            }      
+            // }      
         }
     }
     catch (error) {

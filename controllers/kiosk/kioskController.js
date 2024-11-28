@@ -947,8 +947,7 @@ export const barberServedQueueKiosk = async (req, res, next) => {
             return ErrorHandler(PASSWORD_LENGTH_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        email = email.toLowerCase();
-
+        barberEmail = barberEmail.toLowerCase();
 
         const foundUser = await findBarberByBarberEmailAndSalonId(barberEmail, salonId);
 
@@ -1243,7 +1242,7 @@ export const cancelQueueKiosk = async (req, res, next) => {
             return ErrorHandler(PASSWORD_LENGTH_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        email = email.toLowerCase();
+        barberEmail = barberEmail.toLowerCase();
 
         const foundUser = await findBarberByBarberEmailAndSalonId(barberEmail, salonId);
 
