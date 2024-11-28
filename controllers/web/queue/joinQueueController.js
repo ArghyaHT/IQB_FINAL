@@ -42,7 +42,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
                 return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response:sortedQueueList })
             } 
             else {
-                return SuccessHandler(RETRIVE_EMPTY_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response:sortedQueueList })
+                return SuccessHandler(RETRIVE_EMPTY_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: [] })
             }
 
         } else {
