@@ -1,5 +1,5 @@
 import express from "express";
-import { barberServedQueue, cancelQueue, getAvailableBarbersForQ, getBarberByMultipleServiceId, getQhistoryByCustomerEmail, getQlistbyBarberId, getQueueListBySalonId } from "../../../controllers/web/queue/joinQueueController.js";
+import { barberServedQueue, cancelQueue, getQhistoryByCustomerEmail, getQlistbyBarberId, getQueueListBySalonId } from "../../../controllers/web/queue/joinQueueController.js";
 import { verifyRefreshTokenAdmin } from "../../../middlewares/web/VerifyRefreshTokenAdmin.js";
 import { verifyRefreshTokenBarber } from "../../../middlewares/web/VerifyRefreshTokenBarber.js";
 
@@ -14,12 +14,6 @@ router.route("/getQListBySalonId").get(verifyRefreshTokenAdmin,getQueueListBySal
 // router.route("/autoJoin").post(verifyRefreshTokenAdmin,autoJoin),
 
 //==============================================//
-
-//Get Available Barbers for Queue
-router.route("/getAvailableBarbersForQ").post(verifyRefreshTokenAdmin, getAvailableBarbersForQ)
-
-//Get Barber By Multiple ServiceId
-router.route("/getBarberByMultipleServiceId").post(verifyRefreshTokenAdmin, getBarberByMultipleServiceId)
 
 //Get Q list by BarberId
 router.route("/getQlistByBarberId").post(verifyRefreshTokenBarber, getQlistbyBarberId)

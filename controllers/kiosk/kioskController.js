@@ -15,6 +15,9 @@ import { barberLogInTime, barberLogOutTime } from "../../utils/attendence/barber
 import { validateEmail } from "../../middlewares/validator.js";
 
 import moment from "moment";
+import { EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, INVALID_EMAIL_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, SIGNIN_SUCCESS } from "../../constants/web/adminConstants.js";
+import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../constants/kiosk/StatusCodeConstants.js";
+import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 
 
 //DESC:LOGIN AN ADMIN =========================
@@ -23,64 +26,39 @@ export const loginKiosk = async (req, res, next) => {
         let { email, password, role } = req.body
 
         if (!email && !password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter email and password."
-            });
+            return ErrorHandler(EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your email."
-            });
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email"
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
-        
-        // Convert email to lowercase
-        email = email.toLowerCase();
 
-        // Validate password length
+
         if (!password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your password."
-            });
+            return ErrorHandler(PASSWORD_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // Validate password length
         if (password.length < 8) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters."
-            });
+            return ErrorHandler(PASSWORD_LENGTH_ERROR, ERROR_STATUS_CODE, res)
         }
 
-
+        email = email.toLowerCase();
         if( role === "Admin"){
 
             const foundUser = await findAdminByEmailandRole(email)
 
             if (!foundUser) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Email or password donot match'
-                });
+                return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
             }
     
             const match = await bcrypt.compare(password, foundUser.password)
     
             if (!match) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Email or password donot match'
-                });
+                return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
             }
     
             const adminKioskToken = jwt.sign(
@@ -92,29 +70,30 @@ export const loginKiosk = async (req, res, next) => {
                 { expiresIn: '1d' }
             )
               // Send accessToken containing username and roles 
-        res.status(201).json({
-            success: true,
-            message: "Admin Logged In Successfully",
-            token: adminKioskToken,
-            foundUser,
+        // res.status(201).json({
+        //     success: true,
+        //     message: "Admin Logged In Successfully",
+        //     token: adminKioskToken,
+        //     foundUser,
+        // })
+        return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+            token:adminKioskToken,
+            foundUser
         })
         }
         else{
             const foundUser = await findBarberByEmailAndRole(email)
 
             if (!foundUser) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Email or password donot match.'
-                })
+                return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
             }
     
             const match = await bcrypt.compare(password, foundUser.password)
     
-            if (!match) return res.status(400).json({
-                success: false,
-                message: 'Email or password donot match'
-            })
+            if (!match) {
+                return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
+
+            }
     
             const barberKioskToken = jwt.sign(
                 {

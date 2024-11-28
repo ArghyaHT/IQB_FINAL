@@ -1,3 +1,7 @@
+import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
+import { INTERVAL_MINUTES__ERROR, SALON_SETTINGS_ADD_SUCCESS, SALON_SETTINGS_NOT_FOUND_ERROR, SALON_SETTINGS_UPDATE_SUCCESS, START_END_TIME_EQUAL_ERROR, START_END_TIME_LATER_ERROR } from "../../../constants/web/SalonSettingsConstants.js";
+import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
+import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { findSalonSetingsBySalonId, saveNewSalonSettings } from "../../../services/web/salonSettings/salonSettingsService.js";
 
 
@@ -9,15 +13,9 @@ export const getSalonSettingsBySalonId = async (req, res, next) => {
         let existingSalonSettings = await findSalonSetingsBySalonId(salonId)
 
         if (!existingSalonSettings) {
-            return res.status(404).json({
-                success: false,
-                message: "Salon Settings not found"
-            });
+            return ErrorHandler(SALON_SETTINGS_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
-        res.status(200).json({
-            message: "Salon Settings Updated",
-            response: existingSalonSettings
-        });
+        return SuccessHandler(SALON_SETTINGS_UPDATE_SUCCESS, SUCCESS_STATUS_CODE, res, {response: existingSalonSettings})
 
     } catch (error) {
         next(error);
@@ -31,24 +29,17 @@ export const updateSalonSettings = async (req, res, next) => {
         const { startTime, endTime, intervalInMinutes } = appointmentSettings;
 
         if(startTime === endTime){
-           return res.status(400).json({
-                success: true,
-                message: "Start time and end time can't be same.",
-            });
+        return ErrorHandler(START_END_TIME_EQUAL_ERROR, ERROR_STATUS_CODE, res)
+
         }
 
         if(startTime > endTime){
-           return res.status(400).json({
-                success: true,
-                message: "Start time cannot be later than end time.",
-            });
+        return ErrorHandler(START_END_TIME_LATER_ERROR, ERROR_STATUS_CODE, res)
+
         }
 
         if(intervalInMinutes === 0){
-            return res.status(400).json({
-                success: true,
-                message: "Interval miniutes can't be 0.",
-            });
+            return ErrorHandler(INTERVAL_MINUTES__ERROR, ERROR_STATUS_CODE, res)
         }
         
         if (salonId && appointmentSettings) {
@@ -66,20 +57,14 @@ export const updateSalonSettings = async (req, res, next) => {
                 // Save the updated SalonSettings to the database
                 await existingSalonSettings.save();
 
-                res.status(200).json({
-                    success: true,
-                    message: "Salon settings updated successfully",
-                    response: existingSalonSettings
-                });
+                return SuccessHandler(SALON_SETTINGS_UPDATE_SUCCESS, SUCCESS_STATUS_CODE, res, {response: existingSalonSettings})
+
             }
             else {
                 const newSalonSettings = await saveNewSalonSettings(salonId, startTime, endTime, intervalInMinutes);
 
-                res.status(200).json({
-                    success: true,
-                    message: "New salon Settings added",
-                    response: newSalonSettings
-                });
+                return SuccessHandler(SALON_SETTINGS_ADD_SUCCESS, SUCCESS_STATUS_CODE, res, {response: newSalonSettings})
+
             }
         }
 

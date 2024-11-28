@@ -14,6 +14,9 @@ import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import { SALON_NOT_FOUND_ERROR } from "../../../constants/web/SalonConstants.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
+import { ADMIN_NOT_EXIST_ERROR, EMAIL_NOT_PRESENT_ERROR, INVALID_EMAIL_ERROR } from "../../../constants/web/adminConstants.js";
+import { QUEUE_CANCEL_SUCCESS, QUEUE_NOT_FOUND_BY_ID_ERROR, QUEUE_NOT_FOUND_ERROR, QUEUE_POSITION_ERROR, QUEUE_SERVE_SUCCESS, QUEUE_SERVICES_ERROR, QUEUELIST_EMPTY_FOR_BARBER_SUCCESS, RETRIVE_EMPTY_QUEUELIST_SUCCESS, RETRIVE_QUEUELIST_ERROR, RETRIVE_QUEUELIST_SUCCESS } from "../../../constants/web/QueueConstants.js";
+import { BARBER_EXISTS_ERROR } from "../../../constants/web/BarberConstants.js";
 
 
 //DESC:GET SALON QUEUELIST ================
@@ -39,11 +42,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
                 return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response:sortedQueueList })
             } 
             else {
-                res.status(200).json({
-                    success: false,
-                    message: "No queuelist to show",
-                    response: []
-                });
+                return SuccessHandler(RETRIVE_EMPTY_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response:sortedQueueList })
             }
 
         } else {
@@ -53,7 +52,6 @@ export const getQueueListBySalonId = async (req, res, next) => {
             //     response: []
             // });
             return ErrorHandler(RETRIVE_QUEUELIST_ERROR, ERROR_STATUS_CODE, res)}
-
     }
     catch (error) {
         //console.log(error);
@@ -66,37 +64,32 @@ export const barberServedQueue = async (req, res, next) => {
     try {
         let { salonId, barberId, barberEmail, adminEmail, services, _id } = req.body;
 
-        // Convert email to lowercase
-        if (adminEmail) {
+        
+        if (!adminEmail) {
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        if (!validateEmail(adminEmail)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        if (!barberEmail) {
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        if (!validateEmail(barberEmail)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+
             adminEmail = adminEmail.toLowerCase();
-        }
-        else {
             barberEmail = barberEmail.toLowerCase();
-        }
-
-        if (adminEmail && !validateEmail(adminEmail)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid admin email"
-            });
-        }
-
-        if (barberEmail && !validateEmail(barberEmail)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid barber email"
-            });
-        }
 
         if (adminEmail) {
-
             const foundUser = await findAdminByEmailAndSalonId(adminEmail, salonId);
 
             if (!foundUser) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Admin not found'
-                })
+                return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
             }
 
             const updatedByBarberEmail = foundUser.email;
@@ -342,26 +335,16 @@ export const barberServedQueue = async (req, res, next) => {
                         }
                     }
 
-                    return res.status(200).json({
-                        success: true,
-                        message: 'Customer serve successfully.',
-                    });
-                }
-            }
-            return res.status(404).json({
-                success: false,
-                message: 'Queue position is not 1.',
-            });
+                    return SuccessHandler(QUEUE_SERVE_SUCCESS, SUCCESS_STATUS_CODE, res)
 
+                }
+                return ErrorHandler(QUEUE_POSITION_ERROR, ERROR_STATUS_CODE, res)}
         }
         else {
             const foundUser = await findBarberByBarberEmailAndSalonId(barberEmail, salonId);
 
             if (!foundUser) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Unauthorized Barber'
-                })
+             return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE, res)
             }
 
             const updatedByBarberEmail = foundUser.email;
@@ -606,18 +589,12 @@ export const barberServedQueue = async (req, res, next) => {
                         }
                     }
 
-                    return res.status(200).json({
-                        success: true,
-                        message: 'Customer served from the queue successfully.',
-                    });
+
+                    return SuccessHandler(QUEUE_SERVE_SUCCESS, SUCCESS_STATUS_CODE, res)
+
                 }
             }
-
-            return res.status(404).json({
-                success: false,
-                message: 'Queue position is not 1.',
-            });
-        }
+            return ErrorHandler(QUEUE_POSITION_ERROR, ERROR_STATUS_CODE, res)}
 
     } catch (error) {
         next(error);
@@ -629,35 +606,32 @@ export const cancelQueue = async (req, res, next) => {
     try {
         let { salonId, barberEmail, adminEmail, barberId, _id } = req.body;
 
-        if (adminEmail) {
+        if (!adminEmail) {
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        if (!validateEmail(adminEmail)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        if (!barberEmail) {
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        if (!validateEmail(barberEmail)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+
             adminEmail = adminEmail.toLowerCase();
-        } else {
             barberEmail = barberEmail.toLowerCase();
-        }
-
-        if (barberEmail && !validateEmail(barberEmail)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email "
-            });
-        }
-
-        if (adminEmail && !validateEmail(adminEmail)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email "
-            });
-        }
 
         let foundUser, updatedByBarberEmail, updatedByBarberName;
 
         if (adminEmail) {
             foundUser = await findAdminByEmailAndSalonId(adminEmail, salonId);
             if (!foundUser) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Admin not found'
-                });
+                return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
             }
             
             updatedByBarberEmail = foundUser.email;
@@ -665,10 +639,7 @@ export const cancelQueue = async (req, res, next) => {
         } else {
             foundUser = await findBarberByBarberEmailAndSalonId(barberEmail, salonId);
             if (!foundUser) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Unauthorized Barber'
-                });
+                return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE, res)
             }
             updatedByBarberEmail = foundUser.email;
             updatedByBarberName = foundUser.name;
@@ -677,18 +648,12 @@ export const cancelQueue = async (req, res, next) => {
         const updatedQueue = await findSalonQueueList(salonId);
 
         if (!updatedQueue) {
-            return res.status(404).json({
-                success: false,
-                message: 'Queue not found for the given salon ID',
-            });
+            return ErrorHandler(QUEUE_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const canceledQueueIndex = updatedQueue.queueList.findIndex(queue => queue._id.toString() === _id);
         if (canceledQueueIndex === -1) {
-            return res.status(404).json({
-                success: false,
-                message: 'Queue not found with the given _id',
-            });
+            return ErrorHandler(QUEUE_NOT_FOUND_BY_ID_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const canceledServiceEWT = updatedQueue.queueList[canceledQueueIndex].serviceEWT;
@@ -833,68 +798,7 @@ export const cancelQueue = async (req, res, next) => {
             }
         }
 
-        res.status(200).json({
-            success: true,
-            message: "Customer cancel successfully.",
-            updatedQueueList: updatedQueue.queueList
-        });
-    } catch (error) {
-        next(error);
-    }
-};
-//DESC:GET AVAILABLE BARBERS FOR QUEUE ================
-export const getAvailableBarbersForQ = async (req, res, next) => {
-    try {
-        const { salonId } = req.query;
-
-        //To find the available barbers for the queue
-        const availableBarbers = await getBarbersForQ(salonId);
-
-        if (!availableBarbers) {
-            res.status(201).json({
-                success: false,
-                message: 'No available Barbers found at this moment.'
-            });
-        }
-        else {
-            res.status(200).json({
-                success: true,
-                message: 'All Barbers retrieved',
-                response: availableBarbers
-            });
-        }
-    }
-    catch (error) {
-        next(error);
-    }
-}
-
-
-//DESC:GET AVAILABLE BARBERS By MULTIPLE SERVICE IDS ================
-export const getBarberByMultipleServiceId = async (req, res, next) => {
-    try {
-        const { salonId, serviceIds } = req.query; // Assuming serviceIds are passed as query parameters, e.g., /barbers?serviceIds=1,2,3
-
-        if (!serviceIds) {
-            return res.status(400).json({ error: 'Service IDs are required' });
-        }
-
-        const serviceIdsArray = serviceIds.split(',').map((id) => Number(id)); // Split string into an array of service IDs
-
-        const barbers = await getBarbersWithMulServiceId(salonId, serviceIdsArray);
-
-        if (!barbers || barbers.length === 0) {
-            return res.status(404).json({
-                success: false,
-                response: 'No barbers found for the provided Services'
-            });
-        }
-
-        return res.status(200).json({
-            success: true,
-            message: "Barbers retrieved for the particular Services",
-            response: barbers
-        });
+        return SuccessHandler(QUEUE_CANCEL_SUCCESS, SUCCESS_STATUS_CODE, res, {updatedQueueList: updatedQueue.queueList})
 
     } catch (error) {
         next(error);
@@ -917,6 +821,7 @@ export const getQlistbyBarberId = async (req, res, next) => {
                 message:'Queue list not found for the specified barber and salon ID',
                 queueList: []
             });
+
         }
 
 
@@ -928,11 +833,14 @@ export const getQlistbyBarberId = async (req, res, next) => {
             });
         }
 
-        return res.status(200).json({
-            success: true,
-            message: 'Queue list retrieved successfully for the specified barber',
-            queueList: qList[0].queueList // Extracting the queue list from the result
-        });
+        // return res.status(200).json({
+        //     success: true,
+        //     message: 'Queue list retrieved successfully for the specified barber',
+        //     queueList: qList[0].queueList // Extracting the queue list from the result
+        // });
+
+        return SuccessHandler(QUEUELIST_EMPTY_FOR_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, {queueList: qList[0].queueList})
+
     } catch (error) {
         next(error);
     }

@@ -290,10 +290,9 @@ export const updatedSalonLogo = async (salonId, id, image) => {
   return salon;
 }
 
-
 //GET SALON LOGO
 export const getSalonLogoBySalonId = async (salonId) => {
-  const salonLogo = await Salon.findOne({ salonId }).select("salonLogo");
+  const salonLogo = await Salon.findOne({ salonId }).select("salonName salonLogo");
   return salonLogo;
 }
 
