@@ -14,7 +14,7 @@ import { validateEmail } from "../../../middlewares/validator.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
 import { ADMIN_NOT_EXIST_ERROR, EMAIL_NOT_FOUND_ERROR, IMAGE_FILE_EXTENSION_ERROR, IMAGE_FILE_SIZE_ERROR, INVALID_EMAIL_ERROR } from "../../../constants/web/adminConstants.js";
 import { SALON_ADDRESS_ERROR, SALON_BARBERS_FOUND_SUCCESS, SALON_CITY_ERROR, SALON_CONNECT_SUCCESS, SALON_CONTACT_TEL_ERROR, SALON_COORDINATES_ERROR, SALON_COUNTRY_ERROR, SALON_CREATE_SUCCESS, SALON_DELETE_SUCCESS, SALON_DESC_ERROR, SALON_DESCRIPTION_EMPTY_SUCCESS, SALON_DESCRIPTION_RETRIEVED_SUCCESS, SALON_DESCRIPTION_UPDATE_SUCCESS, SALON_EMAIL_NOT_PRESENT_ERROR, SALON_EXISTS_ERROR, SALON_GALLERY_DELETE_ERROR, SALON_GALLERY_EMPTY_ERROR, SALON_GALLERY_NOT_FOUND_ERROR, SALON_GALLERY_UPLOADED_ERROR, SALON_IMAGE_DELETE_SUCESS, SALON_IMAGE_RETRIEVED_SUCESS, SALON_IMAGES_UPLOAD_SUCESS, SALON_INVALID_EMAIL_ERROR, SALON_LOGO_DELETE_ERROR, SALON_LOGO_NOT_FOUND_ERROR, SALON_LOGO_UPLOAD_SUCCESS, SALON_NAME_ERROR, SALON_NOT_FOUND_ERROR, SALON_OFFLINE_SUCCESS, SALON_ONLINE_SUCCESS, SALON_POSTCODE_ERROR, SALON_SERVICES_ERROR, SALON_SERVICES_RETRIEVED_SUCESS, SALON_TIMEZONE_ERROR, SALON_UPDATE_SUCCESS, SALONID_EMPTY_ERROR, SALONS_RETRIEVED_SUCESS } from "../../../constants/web/SalonConstants.js";
-import {ErrorHandler} from "../../../middlewares/ErrorHandler.js"
+import { ErrorHandler } from "../../../middlewares/ErrorHandler.js"
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 
 
@@ -71,7 +71,7 @@ export const createSalonByAdmin = async (req, res, next) => {
     }
 
 
-    if (salonName && (salonName.length < 1 || salonName.length > 40)) {
+    if (salonName && (salonName.length < 1 || salonName.length > 20)) {
       return ErrorHandler(SALON_NAME_ERROR, ERROR_STATUS_CODE, res)
     }
 
@@ -91,7 +91,7 @@ export const createSalonByAdmin = async (req, res, next) => {
       return ErrorHandler(SALON_CONTACT_TEL_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (!address && address.length > 100) {
+    if (address && (address.length < 1 || address.length > 100)) {
       return ErrorHandler(SALON_ADDRESS_ERROR, ERROR_STATUS_CODE, res)
     }
 
@@ -135,7 +135,7 @@ export const createSalonByAdmin = async (req, res, next) => {
       return ErrorHandler(SALON_SERVICES_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (salonDesc && salonDesc.length > 35) {
+    if (salonDesc&& (salonDesc.length < 1 || salonDesc.length > 35)) {
       return ErrorHandler(SALON_DESC_ERROR, ERROR_STATUS_CODE, res)
     }
 
@@ -210,7 +210,7 @@ export const createSalonByAdmin = async (req, res, next) => {
       return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    return SuccessHandler(SALON_CREATE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: savedSalon }) 
+    return SuccessHandler(SALON_CREATE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: savedSalon })
 
   }
   catch (error) {
@@ -260,11 +260,15 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
       return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (!address && address.length > 100) {
+    if (salonName && (salonName.length < 1 || salonName.length > 20)) {
+      return ErrorHandler(SALON_NAME_ERROR, ERROR_STATUS_CODE, res)
+    }
+
+    if (address && (address.length < 1 || address.length > 100)) {
       return ErrorHandler(SALON_ADDRESS_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (salonDesc && salonDesc.length > 150) {
+    if (salonDesc&& (salonDesc.length < 1 || salonDesc.length > 35)) {
       return ErrorHandler(SALON_DESC_ERROR, ERROR_STATUS_CODE, res)
     }
 
@@ -305,7 +309,7 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
         services.some((s) => s.serviceId === existingService.serviceId)
       );
 
-      
+
       // If services are provided, update the services
       const updatedServices = salon.services.map((existingService, i) => {
         const matchingService = services.find((s) => s.serviceId === existingService.serviceId);
@@ -396,7 +400,7 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
     //   message: "Salon Updated",
     //   response: updatedSalon
     // });
-    return SuccessHandler(SALON_UPDATE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon }) 
+    return SuccessHandler(SALON_UPDATE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
 
   }
   catch (error) {
@@ -486,7 +490,7 @@ export const uploadSalonGalleryImages = async (req, res, next) => {
     //   response: newImages,
     // });
 
-    return SuccessHandler(SALON_IMAGES_UPLOAD_SUCESS, SUCCESS_STATUS_CODE, res, { response: newImages }) 
+    return SuccessHandler(SALON_IMAGES_UPLOAD_SUCESS, SUCCESS_STATUS_CODE, res, { response: newImages })
   } catch (error) {
     next(error);
   }
@@ -564,7 +568,7 @@ export const uploadMoreSalonGalleryImages = async (req, res, next) => {
     //   message: "Salon Images uploaded successfully",
     //   response: updatedSalon,
     // });
-    return SuccessHandler(SALON_IMAGES_UPLOAD_SUCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon }) 
+    return SuccessHandler(SALON_IMAGES_UPLOAD_SUCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
   } catch (error) {
     next(error);
   }
@@ -631,7 +635,7 @@ export const updateSalonImages = async (req, res, next) => {
         //   message: "Salon images updated successfully",
         //   response: updatedSalonImage
         // });
-        return SuccessHandler(SALON_IMAGES_UPLOAD_SUCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalonImage }) 
+        return SuccessHandler(SALON_IMAGES_UPLOAD_SUCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalonImage })
       })
   } catch (error) {
     next(error);
@@ -663,7 +667,7 @@ export const deleteSalonImages = async (req, res, next) => {
       //   message: "Salon image deleted successfully",
       //   response: deletedImage
       // })
-      return SuccessHandler(SALON_IMAGE_DELETE_SUCESS, SUCCESS_STATUS_CODE, res, { response: deletedImage }) 
+      return SuccessHandler(SALON_IMAGE_DELETE_SUCESS, SUCCESS_STATUS_CODE, res, { response: deletedImage })
     } else {
       // res.status(404).json({
       //   success: false,
@@ -690,7 +694,8 @@ export const getSalonImages = async (req, res, next) => {
     const salonExists = await getSalonBySalonId(salonId)
 
     if (!salonExists) {
-      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)    }
+      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
+    }
     const salongallery = await getSalonGallery(salonId);
 
     if (!salongallery) {
@@ -698,7 +703,7 @@ export const getSalonImages = async (req, res, next) => {
       //   success: false,
       //   message: "Salon not found"
       // });
-      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res) 
+      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
     }
     // Sort advertisements array in descending order
     const sortedSalonGallery = salongallery.gallery.reverse();
@@ -708,7 +713,7 @@ export const getSalonImages = async (req, res, next) => {
     //   message: 'Salon images retrieved successfully',
     //   response: sortedSalonGallery
     // });
-    return SuccessHandler(SALON_IMAGE_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: sortedSalonGallery }) 
+    return SuccessHandler(SALON_IMAGE_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: sortedSalonGallery })
 
   } catch (error) {
     next(error);
@@ -725,7 +730,7 @@ export const getAllSalons = async (req, res, next) => {
     //   success: true,
     //   response: salons
     // });
-    return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: salons }) 
+    return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: salons })
 
   } catch (error) {
     next(error);
@@ -747,7 +752,7 @@ export const getSalonsByLocation = async (req, res, next) => {
     //   message: "Salons retrieved successfully",
     //   response: salons
     // });
-    return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: salons }) 
+    return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: salons })
 
   }
   catch (error) {
@@ -762,12 +767,12 @@ export const getAllSalonServices = async (req, res, next) => {
 
     const { salonId } = req.query;
 
-    if(salonId === 0){
+    if (salonId === 0) {
       // res.status(400).json({
       //   success: false,
       //   message: "Salon not found",
       // })
-      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res) 
+      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
 
     }
 
@@ -779,7 +784,7 @@ export const getAllSalonServices = async (req, res, next) => {
     //   response: salonServices
     // })
 
-    return SuccessHandler(SALON_SERVICES_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: salonServices }) 
+    return SuccessHandler(SALON_SERVICES_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: salonServices })
   }
   catch (error) {
     next(error);
@@ -819,7 +824,7 @@ export const searchSalonsByNameAndCity = async (req, res, next) => {
     //   getAllSalons,
     // })
 
-    return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { getAllSalons }) 
+    return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { getAllSalons })
 
   } catch (error) {
     next(error);
@@ -838,7 +843,7 @@ export const deleteSalon = async (req, res, next) => {
       //   success: true,
       //   message: "The Salon with the SalonId not found",
       // })
-      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res) 
+      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
 
     }
 
@@ -847,7 +852,7 @@ export const deleteSalon = async (req, res, next) => {
     //   message: "The Salon has been deleted",
     //   response: deletedSalon
     // })
-    return SuccessHandler(SALON_DELETE_SUCCESS, SUCCESS_STATUS_CODE, res, { response:deletedSalon }) 
+    return SuccessHandler(SALON_DELETE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: deletedSalon })
 
   }
   catch (error) {
@@ -868,12 +873,12 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
       //   success: false,
       //   message: "Salon not found"
       // });
-      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res) 
+      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
 
     }
     if (isOnline === true) {
       // return res.status(200).json({ success: true, message: "The salon is currently online.", response: updatedSalon });
-      return SuccessHandler(SALON_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response:updatedSalon }) 
+      return SuccessHandler(SALON_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
 
     }
     else {
@@ -886,7 +891,8 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
       // return res.status(200).json({ success: true, message: "The salon is currently offline.", response: updatedSalon });
 
-      return SuccessHandler(SALON_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response:updatedSalon })     }
+      return SuccessHandler(SALON_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
+    }
   } catch (error) {
     next(error);
   }
@@ -904,7 +910,7 @@ export const getSalonInfo = async (req, res, next) => {
       //   success: false,
       //   message: 'No salons found for the particular SalonId.',
       // });
-      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res) 
+      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
 
     }
 
@@ -925,11 +931,11 @@ export const getSalonInfo = async (req, res, next) => {
 
     return SuccessHandler(SALON_BARBERS_FOUND_SUCCESS, SUCCESS_STATUS_CODE, res, {
       response: {
-          salonInfo: salonInfo,
-          barbers: barbers,
-          salonRating: salonRating,
+        salonInfo: salonInfo,
+        barbers: barbers,
+        salonRating: salonRating,
       },
-  });
+    });
   } catch (error) {
     next(error);
   }
@@ -942,7 +948,7 @@ export const uploadSalonLogo = async (req, res, next) => {
     const salonId = req.body.salonId;
 
     if (!salonLogo) {
-      return ErrorHandler(SALON_LOGO_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res) 
+      return ErrorHandler(SALON_LOGO_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
     }
 
     // Allowed file extensions
@@ -961,12 +967,12 @@ export const uploadSalonLogo = async (req, res, next) => {
       // Get file extension and check if it's allowed
       const extension = path.extname(logo.name).toLowerCase().slice(1);
       if (!allowedExtensions.includes(extension)) {
-        return ErrorHandler(IMAGE_FILE_EXTENSION_ERROR, ERROR_STATUS_CODE, res) 
+        return ErrorHandler(IMAGE_FILE_EXTENSION_ERROR, ERROR_STATUS_CODE, res)
       }
 
       // Check file size
       if (logo.size > maxFileSize) {
-        return ErrorHandler(IMAGE_FILE_SIZE_ERROR, ERROR_STATUS_CODE, res) 
+        return ErrorHandler(IMAGE_FILE_SIZE_ERROR, ERROR_STATUS_CODE, res)
       }
 
       return null; // All checks passed, so continue processing
@@ -980,12 +986,13 @@ export const uploadSalonLogo = async (req, res, next) => {
     if (existingSalon && existingSalon.salonLogo && Array.isArray(existingSalon.salonLogo) && existingSalon.salonLogo.length > 0) {
       const oldLogo = existingSalon.salonLogo[0]; // Ensure we are getting the correct logo object
       if (oldLogo && oldLogo.public_id) { // Check if oldLogo is not null and has public_id
-          // console.log('Deleting old logo with public_id:', oldLogo.public_id);
-          const result = await cloudinary.uploader.destroy(oldLogo.public_id);
-          // console.log('Deletion result:', result);
+        // console.log('Deleting old logo with public_id:', oldLogo.public_id);
+        const result = await cloudinary.uploader.destroy(oldLogo.public_id);
+        // console.log('Deletion result:', result);
 
-          if (result.result !== 'ok') {
-            return ErrorHandler(SALON_LOGO_DELETE_ERROR, ERROR_STATUS_CODE, res)           }
+        if (result.result !== 'ok') {
+          return ErrorHandler(SALON_LOGO_DELETE_ERROR, ERROR_STATUS_CODE, res)
+        }
       } else {
         console.log('No valid logo found or missing public_id for deletion');
       }
@@ -1023,7 +1030,7 @@ export const uploadSalonLogo = async (req, res, next) => {
     //   response: updatedSalon
     // });
 
-    return SuccessHandler(SALON_LOGO_UPLOAD_SUCCESS, SUCCESS_STATUS_CODE, res, { response:updatedSalon }) 
+    return SuccessHandler(SALON_LOGO_UPLOAD_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
   } catch (error) {
     next(error);
   }
@@ -1100,7 +1107,7 @@ export const getSalonLogo = async (req, res, next) => {
 
     if (!salonId) {
       // return res.status(404).json({ success: false, message: 'SalonId is not present' });
-      return ErrorHandler(SALONID_EMPTY_ERROR, ERROR_STATUS_CODE, res) 
+      return ErrorHandler(SALONID_EMPTY_ERROR, ERROR_STATUS_CODE, res)
     }
 
     // Find the salonlogo in the database
@@ -1113,7 +1120,7 @@ export const getSalonLogo = async (req, res, next) => {
     //   message: "Salon logo retrieved",
     //   response: salonlogo
     // });
-    return SuccessHandler(SALON_LOGO_UPLOAD_SUCCESS, SUCCESS_STATUS_CODE, res, { response:salonlogo }) 
+    return SuccessHandler(SALON_LOGO_UPLOAD_SUCCESS, SUCCESS_STATUS_CODE, res, { response: salonlogo })
 
   } catch (error) {
     next(error);
@@ -1183,7 +1190,7 @@ export const updateSalonInfo = async (req, res, next) => {
     //   response: updatedSalon.salonDesc,
     // });
 
-    return SuccessHandler(SALON_DESCRIPTION_UPDATE_SUCCESS, SUCCESS_STATUS_CODE, res, { response:updatedSalon.salonDesc }) 
+    return SuccessHandler(SALON_DESCRIPTION_UPDATE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon.salonDesc })
 
   } catch (error) {
     next(error);
@@ -1205,7 +1212,7 @@ export const getSalonInfoBySalonId = async (req, res, next) => {
       //   success: true,
       //   message: 'Need to connect to salon first.'
       // });
-      return SuccessHandler(SALON_CONNECT_SUCCESS, SUCCESS_STATUS_CODE, res) 
+      return SuccessHandler(SALON_CONNECT_SUCCESS, SUCCESS_STATUS_CODE, res)
 
     } else {
       // Find the existing salon by ID
@@ -1218,7 +1225,7 @@ export const getSalonInfoBySalonId = async (req, res, next) => {
         //   message: 'No salon info present',
         //   response: "",
         // });
-        return SuccessHandler(SALON_DESCRIPTION_EMPTY_SUCCESS, SUCCESS_STATUS_CODE, res, { response:"" } ) 
+        return SuccessHandler(SALON_DESCRIPTION_EMPTY_SUCCESS, SUCCESS_STATUS_CODE, res, { response: "" })
 
       }
       // // Send the response
@@ -1227,7 +1234,7 @@ export const getSalonInfoBySalonId = async (req, res, next) => {
       //   message: 'Salon information retrieved successfully',
       //   response: salon.salonDesc,
       // });
-      return SuccessHandler(SALON_DESCRIPTION_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, { response:salon.salonDesc } )
+      return SuccessHandler(SALON_DESCRIPTION_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: salon.salonDesc })
     }
   } catch (error) {
     next(error);
