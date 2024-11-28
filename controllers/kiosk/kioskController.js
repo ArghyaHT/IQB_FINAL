@@ -15,14 +15,15 @@ import { barberLogInTime, barberLogOutTime } from "../../utils/attendence/barber
 import { validateEmail } from "../../middlewares/validator.js";
 
 import moment from "moment";
-import { ADMIN_NOT_EXIST_ERROR, EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, INVALID_EMAIL_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, SIGNIN_SUCCESS } from "../../constants/web/adminConstants.js";
+import { ADMIN_NOT_EXIST_ERROR, EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, INVALID_EMAIL_ERROR, NAME_LENGTH_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, SIGNIN_SUCCESS } from "../../constants/web/adminConstants.js";
 import { ERROR_STATUS_CODE, ERROR_STATUS_CODE_403, ERROR_STATUS_CODE_404, SUCCESS_STATUS_CODE } from "../../constants/kiosk/StatusCodeConstants.js";
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
-import { ADMIN_CONNECT_SUCCESS, BARBER_CLOCKIN_CLOCKOUT_SUCCESS, BARBER_SIGNIN_SUCCESS, BARBER_TOKEN_MISSING_ERROR, DEFAULT_SALON_RETRIEVED_SUCESS, FORBIDDEN_BARBER_ERROR, LOGOUT_SUCCESS, SALON_OFFLINE_ERROR, SALON_VALID_ERROR } from "../../constants/kiosk/KioskConstants.js";
+import { ADMIN_CONNECT_SUCCESS, BARBER_CLOCKIN_CLOCKOUT_SUCCESS, BARBER_OFFLINE_ERROR, BARBER_RETRIEVED_SUCCESS, BARBER_SIGNIN_SUCCESS, BARBER_TOKEN_MISSING_ERROR, BARBERS_UNABLE_QUEUE_ERROR, DEFAULT_SALON_RETRIEVED_SUCESS, FORBIDDEN_BARBER_ERROR, JOIN_QUEUE_SUCCESS, LOGOUT_SUCCESS, NO_BARBERS_AVAILABLE_ERROR, SALON_JOIN_QUEUE_ERROR, SALON_OFFLINE_ERROR, SALON_VALID_ERROR } from "../../constants/kiosk/KioskConstants.js";
 import { SALON_EXISTS_ERROR, SALON_OFFLINE_SUCCESS, SALON_ONLINE_SUCCESS, SALONS_RETRIEVED_SUCESS } from "../../constants/web/SalonConstants.js";
-import { BARBER_CLOCKIN_ERROR, BARBER_EXISTS_ERROR, BARBER_NOT_APPROVE_ERROR, GET_ALL_BARBER_SUCCESS } from "../../constants/web/BarberConstants.js";
+import { BARBER_CLOCKIN_ERROR, BARBER_EXISTS_ERROR, BARBER_NOT_APPROVE_ERROR, GET_ALL_BARBER_SUCCESS, SELECT_SERVICE_ERROR } from "../../constants/web/BarberConstants.js";
 
 import { ErrorHandler } from "../../middlewares/ErrorHandler.js";
+import { RETRIVE_EMPTY_QUEUELIST_SUCCESS, RETRIVE_QUEUELIST_SUCCESS } from "../../constants/web/QueueConstants.js";
 
 //DESC:LOGIN AN ADMIN =========================
 export const loginKiosk = async (req, res, next) => {
@@ -198,10 +199,6 @@ export const getDefaultSalon = async (req, res, next) => {
         if (role === "Admin") {
             const admin = await findAdminByEmailandRole(email)
             if (!admin) {
-                // res.status(404).json({
-                //     success: false,
-                //     message: 'Admin not found',
-                // });
                 return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE_404, res)
             }
             else {
@@ -214,10 +211,6 @@ export const getDefaultSalon = async (req, res, next) => {
         else {
             const barber = await findBarberByEmailAndRole(email)
             if (!barber) {
-                // res.status(404).json({
-                //     success: false,
-                //     message: 'Barber not found',
-                // });
                 return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE_404, res)
 
             }
@@ -241,10 +234,6 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
         const updatedSalon = await salonOnlineStatus(salonId, isOnline);
 
         if (!updatedSalon) {
-            // return res.status(404).json({
-            //     success: false,
-            //     message: "Salon not found"
-            // });
             return ErrorHandler(SALON_EXISTS_ERROR, ERROR_STATUS_CODE_404, res)
 
         }
@@ -357,14 +346,6 @@ export const barberLoginKiosk = async (req, res, next) => {
         )
 
 
-
-        // // Send accessToken containing username and roles 
-        // res.status(201).json({
-        //     success: true,
-        //     message: "Barber Logged-In Successfully",
-        //     barberToken,
-        //     foundUser,
-        // })
         // Send accessToken containing username and roles 
         return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
             barberToken,
@@ -436,19 +417,15 @@ export const joinQueueKiosk = async (req, res, next) => {
         const salon = await getSalonTimeZone(salonId);
 
         if (salon.isOnline === false) {
-            // return res.status(400).json({ success: false, message: "Cant join queue as salon offline" });
             return ErrorHandler(SALON_JOIN_QUEUE_ERROR, ERROR_STATUS_CODE_404, res)
         }
 
         if (name.length < 1 || name.length > 20) {
-            return res.status(400).json({ success: false, message: "Please enter name between 1 to 20 characters" });
+            return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE_404, res)
         }
 
         if (customerEmail && !validateEmail(customerEmail)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email "
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE_404, res)
         }
 
         if (mobileNumber) {
@@ -471,14 +448,11 @@ export const joinQueueKiosk = async (req, res, next) => {
             const availableBarber = await availableBarberAutoJoin(salonId, services.map(service => service.serviceId), totalServiceEWT);
 
             if (!availableBarber) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'No barbers available',
-                });
+                return ErrorHandler(NO_BARBERS_AVAILABLE_ERROR, ERROR_STATUS_CODE_404, res)
             }
 
             if (availableBarber.isOnline === false || availableBarber.isClockedIn === false || availableBarber.isActive === false) {
-                return res.status(400).json({ success: false, message: "The Barber is unable to take queue" });
+                return ErrorHandler(BARBERS_UNABLE_QUEUE_ERROR, ERROR_STATUS_CODE_404, res)
             }
 
             existingQueue = await findSalonQueueList(salonId);
@@ -611,17 +585,15 @@ export const joinQueueKiosk = async (req, res, next) => {
             const getBarber = await findBaberByBarberId(barberId);
 
             if (getBarber.isClockedIn === false) {
-                return res.status(400).json({ success: false, message: "Barber unable to take queue" });
+                return ErrorHandler(BARBERS_UNABLE_QUEUE_ERROR, ERROR_STATUS_CODE_404, res)
             }
 
             // Handle when a specific barber is provided
             const updatedBarber = await updateBarberEWT(salonId, barberId, totalServiceEWT);
 
             if (!updatedBarber) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Barber offline",
-                });
+                return ErrorHandler(BARBER_OFFLINE_ERROR, ERROR_STATUS_CODE_404, res)
+
             }
 
             existingQueue = await findSalonQueueList(salonId);
@@ -689,7 +661,7 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             const emailSubject = `${salon.salonName}: ${formattedDate} - Your Queue Information`;
             const emailBody = `
-    <!DOCTYPE html>
+       <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
@@ -765,11 +737,8 @@ export const joinQueueKiosk = async (req, res, next) => {
             }
         }
 
-        res.status(200).json({
-            success: true,
-            message: "Join Queue successfully",
-            response: existingQueue,
-        });
+        return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingQueue})
+
     } catch (error) {
         next(error);
     }
@@ -781,11 +750,8 @@ export const getAllSalonServices = async (req, res, next) => {
     try {
         const salonServices = await allSalonServices(salonId)
 
-        res.status(200).json({
-            success: true,
-            message: "Salon services retrieved successfully",
-            response: salonServices
-        })
+        return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: salonServices})
+
     }
     catch (error) {
         next(error);
@@ -797,24 +763,41 @@ export const getQueueListBySalonId = async (req, res, next) => {
     try {
         const salonId = parseInt(req.query.salonId, 10);
 
+          // Check if the salon exists in the database
+          if (salonId) {
+            const salonExists = await checkSalonExists(salonId); // Assuming checkSalonExists is a function that checks if the salon exists
+            if (salonExists === null) {
+                return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
+            }
+        }
+
         //To find the queueList according to salonId and sort it according to qposition
         const getSalon = await getSalonQlist(salonId)
 
+        // if (getSalon.length > 0) {
+        //     // Access the sorted queueList array from the result
+        //     const sortedQueueList = getSalon[0].queueList;
+
+        //     res.status(200).json({
+        //         success: true,
+        //         message: "Queue-list retrieved successfully",
+        //         response: sortedQueueList,
+        //     });
+        // } else {
+        //     res.status(404).json({
+        //         success: false,
+        //         message: "Salon not found",
+        //         response: []
+        //     });
+        // }
         if (getSalon.length > 0) {
             // Access the sorted queueList array from the result
             const sortedQueueList = getSalon[0].queueList;
 
-            res.status(200).json({
-                success: true,
-                message: "Queue-list retrieved successfully",
-                response: sortedQueueList,
-            });
-        } else {
-            res.status(404).json({
-                success: false,
-                message: "Salon not found",
-                response: []
-            });
+            return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQueueList })
+        }
+        else {
+            return SuccessHandler(RETRIVE_EMPTY_QUEUELIST_SUCCESS, ERROR_STATUS_CODE_404, res, { response: [] })
         }
 
     }
@@ -834,10 +817,7 @@ export const getAvailableBarbersForQKiosk = async (req, res, next) => {
         const availableBarbers = await getBarbersForQ(salonId);
 
         if (availableBarbers.length === 0) {
-            res.status(404).json({
-                success: false,
-                message: 'No barbers available'
-            });
+            return ErrorHandler(NO_BARBERS_AVAILABLE_ERROR, ERROR_STATUS_CODE_404, res)
         }
         else {
 
@@ -869,12 +849,7 @@ export const getAvailableBarbersForQKiosk = async (req, res, next) => {
 
             // Insert anybarber at the beginning of availableBarbers array
             availableBarbers.unshift(anybarber);
-
-            res.status(200).json({
-                success: true,
-                message: 'Barbers retrieved successfully',
-                response: availableBarbers
-            });
+            return SuccessHandler(BARBER_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: availableBarbers })
         }
     }
     catch (error) {
@@ -889,23 +864,22 @@ export const getBarberByServicesKiosk = async (req, res, next) => {
         const { salonId, serviceIds } = req.body; // Assuming serviceIds are passed as query parameters, e.g., /barbers?serviceIds=1,2,3
 
         if (!serviceIds || !Array.isArray(serviceIds) || serviceIds.length === 0) {
-            return res.status(400).json({ success: false, message: 'Please select at least one service.' });
+            return ErrorHandler(SELECT_SERVICE_ERROR, ERROR_STATUS_CODE, res)
+
         }
 
         const barbers = await getBarbersWithMulServices(salonId, serviceIds);
 
         if (!barbers || barbers.length === 0) {
-            return res.status(404).json({
-                success: false,
-                response: 'No barbers found'
-            });
+            return ErrorHandler(NO_BARBERS_AVAILABLE_ERROR, ERROR_STATUS_CODE_404, res)
+
         }
 
-        return res.status(200).json({
-            success: true,
-            message: "Barbers retrieved sucessFully",
-            response: barbers
-        });
+        // return res.status(200).json({
+        //     success: true,
+        //     message: "Barbers retrieved sucessFully",
+        //     response: barbers
+        // });
 
     } catch (error) {
         next(error);

@@ -38,6 +38,7 @@ import reports from "./routes/web/reports/reportsRoutes.js"
 import loggerRoutes from "./routes/loggerRoutes.js"
 import logger from "./utils/logger/logger.js";
 import { GlobalErrorHandler } from "./middlewares/GlobalErrorHandler.js";
+import { logMiddleware } from "./controllers/loggerController.js";
 
 dotenv.config()
 
@@ -127,28 +128,32 @@ app.use(fileUpload({
 }));
 app.use(express.static("uploads"));
 
+app.use(logMiddleware);
 
 app.use("/logger", loggerRoutes)
 
 app.use((req, res, next) => {
-  if (req.query) {
+  if (Object.keys(req.query).length > 0) {
     logger.info("Request Query Parameters:", req.query);
   }
-  if (req.body) {
+  if (req.body && Object.keys(req.body).length > 0) {
     logger.info("Request Body:", req.body);
   }
 
-  let oldSend = res.send;
+  const oldSend = res.send;
   res.send = function (data) {
     try {
-      logger.info("Response Data:", JSON.parse(data));
+      const parsedData = typeof data === "string" ? JSON.parse(data) : data;
+      logger.info("Response Data:", parsedData);
     } catch (error) {
-      logger.error('Error parsing response data:', error);
+      logger.error("Response Data (Raw):", data);
+      logger.error("Error parsing response data:", error);
     }
-    oldSend.apply(res, arguments);
-  }
+    return oldSend.apply(res, arguments);
+  };
+
   next();
-});
+})
 
 
 //Kiosk base routes

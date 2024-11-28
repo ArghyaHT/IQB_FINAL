@@ -7,6 +7,11 @@ export const FORBIDDEN_BARBER_ERROR = "Access forbidden for barber"
 
 
 export const SALON_JOIN_QUEUE_ERROR = "Cant join queue as salon offline"
+export const NO_BARBERS_AVAILABLE_ERROR = "No barbers available"
+export const BARBERS_UNABLE_QUEUE_ERROR = "The Barber is unable to take queue"
+export const BARBER_OFFLINE_ERROR = "The Barber is unable to take queue"
+
+
 
 
 //SUCCESS
@@ -16,6 +21,12 @@ export const ADMIN_CONNECT_SUCCESS = "Admin connected successfully"
 export const DEFAULT_SALON_RETRIEVED_SUCESS = "Default Salon retrieved successfully"
 
 export const BARBER_CLOCKIN_CLOCKOUT_SUCCESS = "Barber online/offline status changed successfully"
+
+export const JOIN_QUEUE_SUCCESS = "Joined Queue successfully"
+
+export const BARBER_RETRIEVED_SUCCESS = "Barbers retrieved successfully'"
+
+
 
 
 
