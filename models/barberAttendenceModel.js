@@ -2,10 +2,13 @@ import mongoose from "mongoose";
 
 const barberAttendenceSchema = new mongoose.Schema ({
     salonId: {
-        type: Number
+        type: Number,
+        default: 0
     },
     barberId: {
-        type: Number
+        type: Number,
+        default: 0
+
     },
     attendance: [{
         day: {

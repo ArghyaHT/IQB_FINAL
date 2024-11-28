@@ -1,2 +1,5 @@
 export const ERROR_STATUS_CODE = 400
 export const SUCCESS_STATUS_CODE = 200
+export const ERROR_STATUS_CODE_404 = 404
+
+export const ERROR_STATUS_CODE_403 = 403

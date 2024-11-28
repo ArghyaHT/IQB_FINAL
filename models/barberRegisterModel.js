@@ -5,7 +5,7 @@ const barberSchema = new mongoose.Schema({
 
     name: {
         type: String,
-        // required:true
+        default: ""
     },
     email: {
         type: String,
@@ -16,7 +16,6 @@ const barberSchema = new mongoose.Schema({
     },
     verificationCode: {
         type: String,
-        // required:true
     },
     password: {
         type: String
@@ -30,7 +29,7 @@ const barberSchema = new mongoose.Schema({
     },
     nickName: {
         type: String,
-        // required: true,
+        default: ""
     },
     gender: {
         type: String
@@ -38,7 +37,6 @@ const barberSchema = new mongoose.Schema({
 
     mobileNumber: {
         type: Number,
-        // required: true,
     },
     mobileCountryCode:{
         type: Number
@@ -50,13 +48,15 @@ const barberSchema = new mongoose.Schema({
     },
     dateOfBirth: {
         type: Date,
+        default: ""
     },
     salonId: {
         type: Number,
         default: 0
     },
     barberId: {
-        type: Number
+        type: Number,
+        default: 0
     },
     barberCode: {
         type: String
@@ -87,13 +87,16 @@ const barberSchema = new mongoose.Schema({
     },
     barberServices: [{
         serviceId: {
-            type: Number
+            type: Number,
+            default: 0
         },
         serviceCode: {
-            type: String
+            type: String,
+            default: ""
         },
         serviceName: {
-            type: String
+            type: String,
+            default: ""
         },
         serviceIcon: {
             public_id: {
@@ -101,17 +104,21 @@ const barberSchema = new mongoose.Schema({
             },
             url: {
                 type: String,
+                default: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720532593/depositphotos_247872612-stock-illustration-no-image-available-icon-vector_fhytrg.jpg"
             }
         },
         servicePrice: {
-            type: Number
+            type: Number,
+            default: 0
         },
         vipService:{
             type: Boolean,
             default: false
         },
         barberServiceEWT: {
-            type: Number
+            type: Number,
+            default: 0
+
         }
 
     }],

@@ -6,10 +6,12 @@ const notificationSchema = new mongoose.Schema({
    },
    sentNotifications:[{
     title:{
-        type: String
+        type: String,
+         default:""
     },
     body:{
-        type: String
+        type: String,
+         default:""
     }
    }]
 },{ timestamps: true })

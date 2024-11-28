@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 
 const salonRatingSchema = new mongoose.Schema({
     salonId: {
-        type: Number
+        type: Number,
+         default:0
     },
     ratings: [{
         rating: {

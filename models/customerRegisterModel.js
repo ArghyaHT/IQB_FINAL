@@ -32,6 +32,7 @@ const customerSchema = new mongoose.Schema({
     },
     name: {
         type: String,
+        default: ""
     },
     userName: {
         type: String,
@@ -39,6 +40,7 @@ const customerSchema = new mongoose.Schema({
     },
     gender: {
         type: String,
+        default:"Male"
     },
 
     dateOfBirth: {

@@ -16,10 +16,11 @@ import { validateEmail } from "../../middlewares/validator.js";
 
 import moment from "moment";
 import { ADMIN_NOT_EXIST_ERROR, EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, INVALID_EMAIL_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, SIGNIN_SUCCESS } from "../../constants/web/adminConstants.js";
-import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../constants/kiosk/StatusCodeConstants.js";
+import { ERROR_STATUS_CODE, ERROR_STATUS_CODE_403, ERROR_STATUS_CODE_404, SUCCESS_STATUS_CODE } from "../../constants/kiosk/StatusCodeConstants.js";
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
-import { BARBER_SIGNIN_SUCCESS, LOGOUT_SUCCESS } from "../../constants/kiosk/KioskConstants.js";
-import { SALONS_RETRIEVED_SUCESS } from "../../constants/web/SalonConstants.js";
+import { ADMIN_CONNECT_SUCCESS, BARBER_CLOCKIN_CLOCKOUT_SUCCESS, BARBER_SIGNIN_SUCCESS, BARBER_TOKEN_MISSING_ERROR, DEFAULT_SALON_RETRIEVED_SUCESS, FORBIDDEN_BARBER_ERROR, LOGOUT_SUCCESS, SALON_OFFLINE_ERROR, SALON_VALID_ERROR } from "../../constants/kiosk/KioskConstants.js";
+import { SALON_EXISTS_ERROR, SALON_OFFLINE_SUCCESS, SALON_ONLINE_SUCCESS, SALONS_RETRIEVED_SUCESS } from "../../constants/web/SalonConstants.js";
+import { BARBER_CLOCKIN_ERROR, BARBER_EXISTS_ERROR, BARBER_NOT_APPROVE_ERROR, GET_ALL_BARBER_SUCCESS } from "../../constants/web/BarberConstants.js";
 
 
 //DESC:LOGIN AN ADMIN =========================
@@ -49,20 +50,21 @@ export const loginKiosk = async (req, res, next) => {
         }
 
         email = email.toLowerCase();
-        if( role === "Admin"){
+
+        if (role === "Admin") {
 
             const foundUser = await findAdminByEmailandRole(email)
 
             if (!foundUser) {
                 return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
             }
-    
+
             const match = await bcrypt.compare(password, foundUser.password)
-    
+
             if (!match) {
                 return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
             }
-    
+
             const adminKioskToken = jwt.sign(
                 {
                     "email": foundUser.email,
@@ -71,26 +73,26 @@ export const loginKiosk = async (req, res, next) => {
                 process.env.JWT_ADMIN_ACCESS_SECRET,
                 { expiresIn: '1d' }
             )
-        // Send accessToken containing username and roles 
-        return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
-            token:adminKioskToken,
-            foundUser
-        })
+            // Send accessToken containing username and roles 
+            return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+                token: adminKioskToken,
+                foundUser
+            })
         }
-        else{
+        else {
             const foundUser = await findBarberByEmailAndRole(email)
 
             if (!foundUser) {
                 return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
             }
-    
+
             const match = await bcrypt.compare(password, foundUser.password)
-    
+
             if (!match) {
                 return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
 
             }
-    
+
             const barberKioskToken = jwt.sign(
                 {
                     "email": foundUser.email,
@@ -99,14 +101,14 @@ export const loginKiosk = async (req, res, next) => {
                 process.env.JWT_BARBER_ACCESS_SECRET,
                 { expiresIn: '1d' }
             )
-    
-        // Send accessToken containing username and roles 
-        return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
-            token: barberKioskToken,
-            foundUser
-        })
-        }   
-      
+
+            // Send accessToken containing username and roles 
+            return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+                token: barberKioskToken,
+                foundUser
+            })
+        }
+
     }
     catch (error) {
         // //console.log(error);
@@ -126,8 +128,8 @@ export const logoutKiosk = async (req, res, next) => {
             // Perform any additional action if needed (e.g., logging out from another system)
         }
 
-          // Send accessToken containing username and roles 
-          return SuccessHandler(LOGOUT_SUCCESS, SUCCESS_STATUS_CODE, res)
+        // Send accessToken containing username and roles 
+        return SuccessHandler(LOGOUT_SUCCESS, SUCCESS_STATUS_CODE, res)
     } catch (error) {
         // //console.log(error);
         next(error);
@@ -144,16 +146,15 @@ export const getAllSalonsByAdmin = async (req, res, next) => {
         const admin = await findAdminByEmailandRole(email)
 
         if (!admin) {
-            return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
+            return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE_404, res)
         }
 
         // Fetch all salons associated with the admin from registeredSalons array
         const salons = await allSalonsByAdmin(admin.registeredSalons)
 
-        return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, {salons: salons})
+        return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { salons: salons })
 
     } catch (error) {
-        // //console.log(error);
         next(error);
     }
 }
@@ -164,10 +165,7 @@ export const adminConnectKiosk = async (req, res, next) => {
         const { adminEmail, salonId } = req.body; // Assuming admin's email is provided in the request body
 
         if (salonId === null || undefined) {
-            return res.status(404).json({
-                success: false,
-                message: 'Please select a valid salon.',
-            });
+            return ErrorHandler(SALON_VALID_ERROR, ERROR_STATUS_CODE_404, res)
         }
 
 
@@ -176,9 +174,7 @@ export const adminConnectKiosk = async (req, res, next) => {
         const foundUser = await findAdminByEmailandRole(email)
 
         if (!foundUser) {
-            return res.status(404).json({
-                message: 'Admin not found.',
-            });
+            return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE_404, res)
         }
 
         // Fetch all salons associated with the admin from registeredSalons array
@@ -186,12 +182,9 @@ export const adminConnectKiosk = async (req, res, next) => {
 
         const salon = await getSalonBySalonId(salonId)
 
-        return res.status(200).json({
-            message: 'Admin connected successfully',
-            response: salon
-        });
+        return SuccessHandler(ADMIN_CONNECT_SUCCESS, SUCCESS_STATUS_CODE, res, { response: salon })
+
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -199,46 +192,42 @@ export const adminConnectKiosk = async (req, res, next) => {
 //DESC:GET DEFAULT SALON BY ADMIN ============================
 export const getDefaultSalon = async (req, res, next) => {
     try {
-        const { email, role} = req.body;
+        const { email, role } = req.body;
 
-        if(role === "Admin"){
+        if (role === "Admin") {
             const admin = await findAdminByEmailandRole(email)
             if (!admin) {
-                res.status(404).json({
-                    success: false,
-                    message: 'Admin not found',
-                });
+                // res.status(404).json({
+                //     success: false,
+                //     message: 'Admin not found',
+                // });
+                return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE_404, res)
             }
             else {
                 const defaultSalon = await getDefaultSalonDetailsEmail(admin.salonId)
-                res.status(200).json({
-                    success: true,
-                    message: "Salon found successfully",
-                    response: defaultSalon
-                })
+
+                return SuccessHandler(DEFAULT_SALON_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: defaultSalon })
+
             }
         }
-        else{
+        else {
             const barber = await findBarberByEmailAndRole(email)
             if (!barber) {
-                res.status(404).json({
-                    success: false,
-                    message: 'Barber not found',
-                });
+                // res.status(404).json({
+                //     success: false,
+                //     message: 'Barber not found',
+                // });
+                return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE_404, res)
+
             }
             else {
                 const defaultSalon = await getDefaultSalonDetailsEmail(barber.salonId)
-                res.status(200).json({
-                    success: true,
-                    message: "Salon found successfully",
-                    response: defaultSalon
-                })
+
+                return SuccessHandler(DEFAULT_SALON_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: defaultSalon })
             }
         }
-       
     }
     catch (error) {
-        // //console.log(error);
         next(error);
     }
 }
@@ -251,13 +240,15 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
         const updatedSalon = await salonOnlineStatus(salonId, isOnline);
 
         if (!updatedSalon) {
-            return res.status(404).json({
-                success: false,
-                message: "Salon not found"
-            });
+            // return res.status(404).json({
+            //     success: false,
+            //     message: "Salon not found"
+            // });
+            return ErrorHandler(SALON_EXISTS_ERROR, ERROR_STATUS_CODE_404, res)
+
         }
         if (isOnline === true) {
-            return res.status(200).json({ success: true, message: "Salon is currently online.", response: updatedSalon });
+            return SuccessHandler(SALON_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
         }
         else {
 
@@ -266,7 +257,7 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
             await changeBarberStatusAtSalonOffline(salonId);
 
-            return res.status(200).json({ success: true, message: "Salon is currently offline.", response: updatedSalon });
+            return SuccessHandler(SALON_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
         }
 
     } catch (error) {
@@ -296,17 +287,11 @@ export const getAllBarberbySalonIdKiosk = async (req, res, next) => {
         const getAllBarbers = await fetchedBarbers(query);
 
         if (getAllBarbers.length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Barbers not found",
-            });
+            return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        return res.status(200).json({
-            success: true,
-            message: "Barbers retrieved successfully",
-            response: getAllBarbers
-        });
+        return SuccessHandler(GET_ALL_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { response: getAllBarbers })
+
     } catch (error) {
         //console.log(error);
         next(error);
@@ -320,69 +305,46 @@ export const barberLoginKiosk = async (req, res, next) => {
         let { email, password } = req.body
 
         if (!email && !password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter email and password."
-            });
+            return ErrorHandler(EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your email."
-            });
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid Email"
-            });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
-        
-        // Convert email to lowercase
-        email = email.toLowerCase();
 
-        // Validate password length
+
         if (!password) {
-            return res.status(400).json({
-                success: false,
-                message: "Please enter your password."
-            });
+            return ErrorHandler(PASSWORD_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // Validate password length
         if (password.length < 8) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters."
-            });
+            return ErrorHandler(PASSWORD_LENGTH_ERROR, ERROR_STATUS_CODE, res)
         }
+
+        email = email.toLowerCase();
 
 
         const foundUser = await findBarberByEmailAndRole(email)
 
         if (!foundUser) {
-            return res.status(400).json({
-                success: false,
-                message: 'Email or password donot match'
-            })
+            return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
         }
 
 
         if (foundUser.isApproved === false) {
-            return res.status(400).json({
-                success: false,
-                message: 'Barber is not approved'
-            })
+            return ErrorHandler(BARBER_NOT_APPROVE_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const match = await bcrypt.compare(password, foundUser.password)
 
-        if (!match) return res.status(400).json({
-            success: false,
-            message: 'Email or password donot match'
-        })
+        if (!match) {
+            return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
+
+        }
 
         const barberToken = jwt.sign(
             {
@@ -395,153 +357,24 @@ export const barberLoginKiosk = async (req, res, next) => {
 
 
 
+        // // Send accessToken containing username and roles 
+        // res.status(201).json({
+        //     success: true,
+        //     message: "Barber Logged-In Successfully",
+        //     barberToken,
+        //     foundUser,
+        // })
         // Send accessToken containing username and roles 
-        res.status(201).json({
-            success: true,
-            message: "Barber Logged-In Successfully",
+        return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
             barberToken,
-            foundUser,
-
+            foundUser
         })
     }
     catch (error) {
-        // //console.log(error);
         next(error);
     }
 };
 
-//GOOGLE ADMIN SIGNIN ===================================
-export const googleAdminLoginKiosk = async (req, res, next) => {
-    try {
-        const CLIENT_ID = '508224318018-quta6u0n38vml0up7snscdrtl64555l1.apps.googleusercontent.com'
-
-        const token = req.query.token;
-
-        if (!token) {
-            return res.status(404).json({ success: false, message: "UnAuthorized Admin or Token not present" })
-        }
-
-        const client = new OAuth2Client(CLIENT_ID);
-
-        // Call the verifyIdToken to
-        // varify and decode it
-        const ticket = await client.verifyIdToken({
-            idToken: token,
-            audience: CLIENT_ID,
-        });
-
-        // Get the JSON with all the user info
-        const payload = ticket.getPayload();
-
-        console.log("Google Login payload ", payload)
-
-        const foundUser = await findAdminByEmailandRole(payload.email)
-
-        if (!foundUser) {
-            return res.status(401).json({ success: false, message: 'Unauthorized access. Please sign up as a admin first.' })
-        }
-
-        const adminKiyoskToken = jwt.sign(
-            {
-                "email": foundUser.email,
-                "role": foundUser.role
-            },
-            process.env.JWT_ADMIN_ACCESS_SECRET,
-            { expiresIn: '1d' }
-        )
-        // Send accessToken containing username and roles 
-        res.status(201).json({
-            success: true,
-            message: "Admin Logged In Successfully",
-            adminToken: adminKiyoskToken,
-            foundUser,
-        })
-
-        // const accessToken = jwt.sign(
-        //     {
-
-        //         "email": foundUser.email,
-        //         "role": foundUser.role,
-        //     },
-        //     JWT_ACCESS_SECRET,
-        //     { expiresIn: '1d' }
-        // )
-
-
-        // // Create secure cookie with refresh token 
-        // res.cookie('AdminToken', accessToken, {
-        //     httpOnly: true, //accessible only by web server 
-        //     secure: true, //https
-        //     sameSite: 'None', //cross-site cookie 
-        //     maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
-        // })
-        // res.status(201).json({
-        //     success: true,
-        //     message: "Admin Logged In Successfully",
-        //     accessToken,
-        //     foundUser
-        // })
-    } catch (error) {
-        console.log(error)
-        next(error);
-    }
-}
-
-//GOOGLE BARBER SIGNIN ===================================
-export const googleBarberLoginKiosk = async (req, res, next) => {
-    try {
-        const CLIENT_ID = '508224318018-quta6u0n38vml0up7snscdrtl64555l1.apps.googleusercontent.com'
-
-        const token = req.query.token;
-
-        if (!token) {
-            return res.status(404).json({ success: false, message: "UnAuthorized Barber or Token not present" })
-        }
-
-        const client = new OAuth2Client(CLIENT_ID);
-
-        // Call the verifyIdToken to
-        // varify and decode it
-        const ticket = await client.verifyIdToken({
-            idToken: token,
-            audience: CLIENT_ID,
-        });
-
-        // Get the JSON with all the user info
-        const payload = ticket.getPayload();
-
-        console.log("Google Login payload ", payload)
-
-        const foundUser = await findBarberByEmailAndRole(payload.email)
-
-        if (!foundUser) {
-            return res.status(401).json({ success: false, message: 'Unauthorized access. Please sign up as a barber first.' })
-        }
-
-        const salonOnlineStatus = await getSalonOnlineStatus(foundUser.salonId)
-
-        const barberToken = jwt.sign(
-            {
-                "email": foundUser.email,
-                "role": foundUser.role
-            },
-            process.env.JWT_BARBER_ACCESS_SECRET,
-            { expiresIn: '1d' }
-        )
-
-        // Send accessToken containing username and roles 
-        res.status(201).json({
-            success: true,
-            message: "Barber Logged In Successfully",
-            barberToken,
-            foundUser,
-            isSalonOnline: salonOnlineStatus,
-        })
-    } catch (error) {
-        //console.log(error);
-        next(error);
-    }
-}
 
 //DESC:CHANGE BARBER ONLINE STATUS ===========================
 export const changeBarberOnlineStatus = async (req, res, next) => {
@@ -551,12 +384,12 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
         const salon = await getSalonBySalonId(salonId);
 
         if (salon.isOnline === false) {
-            return res.status(400).json({ success: false, message: 'Salon is offline.' });
+            return ErrorHandler(SALON_OFFLINE_ERROR, ERROR_STATUS_CODE, res)
         }
 
         // Extract token from the body
         if (!barberToken) {
-            return res.status(400).json({ success: false, message: 'BarberToken missing' });
+            return ErrorHandler(BARBER_TOKEN_MISSING_ERROR, ERROR_STATUS_CODE, res)
         }
 
         // Verify the token
@@ -565,7 +398,7 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
             process.env.JWT_BARBER_ACCESS_SECRET,
             async (err, decoded) => {
                 if (err) {
-                    return res.status(403).json({ success: false, message: 'Access forbidden for barber.' });
+                    return ErrorHandler(FORBIDDEN_BARBER_ERROR, ERROR_STATUS_CODE_403, res)
                 }
                 req.email = decoded.email;
                 req.role = decoded.role;
@@ -573,21 +406,20 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
                 const getbarber = await getBarberByBarberId(barberId);
 
                 if (getbarber.isClockedIn === false) {
-                    return res.status(404).json({ success: false, message: "Unable to change online status as you are currently clocked out" });
+                    // return res.status(404).json({ success: false, message: "Unable to change online status as you are currently clocked out" });
+                    return ErrorHandler(BARBER_CLOCKIN_ERROR, ERROR_STATUS_CODE_404, res)
                 }
 
                 // Now, you can proceed with the logic after verifying the token
                 const updatedBarber = await barberOnlineStatus(barberId, salonId, isOnline);
 
                 if (!updatedBarber) {
-                    return res.status(404).json({ success: false, message: "Barber not found" });
+                    return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE_404, res)
+
                 }
 
-                return res.status(200).json({
-                    success: true,
-                    message: "Barber online/offline status changed successfully.",
-                    response: updatedBarber
-                });
+                // Send accessToken containing username and roles 
+                return SuccessHandler(BARBER_CLOCKIN_CLOCKOUT_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber})
             }
         );
     } catch (error) {
@@ -799,10 +631,10 @@ export const joinQueueKiosk = async (req, res, next) => {
 
 
             const timeZoneData = salon.timeZone;
-  
+
             let offsetHours = 0;
             let offsetMinutes = 0;
-        
+
             // Handle special case of UTC±00, UTC+00, or UTC-00
             if (timeZoneData === 'UTC±00' || timeZoneData === 'UTC+00' || timeZoneData === 'UTC-00') {
                 offsetHours = 0;
@@ -812,7 +644,7 @@ export const joinQueueKiosk = async (req, res, next) => {
                 const timeZoneParts = timeZoneData.split(sign);
                 const offset = timeZoneParts[1];
                 [offsetHours, offsetMinutes] = offset.split(':').map(Number);
-        
+
                 if (sign === '-') {
                     offsetHours = -offsetHours;
                     offsetMinutes = -offsetMinutes;
@@ -1131,7 +963,7 @@ export const barberServedQueueKiosk = async (req, res, next) => {
     try {
         let { salonId, barberId, barberEmail, password, services, _id } = req.body;
 
-        if (!barberEmail && !password ) {
+        if (!barberEmail && !password) {
             return res.status(400).json({
                 success: false,
                 message: "Please enter email and password."
@@ -1151,24 +983,24 @@ export const barberServedQueueKiosk = async (req, res, next) => {
                 message: "Invalid Email"
             });
         }
-            // Convert email to lowercase
-            barberEmail = barberEmail.toLowerCase();
+        // Convert email to lowercase
+        barberEmail = barberEmail.toLowerCase();
 
         // Validate password length
-      if (!password) {
-        return res.status(400).json({
-            success: false,
-            message: "Please enter your password."
-        });
-    }
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter your password."
+            });
+        }
 
-      // Validate password length
-      if (password.length < 8) {
-        return res.status(400).json({
-            success: false,
-            message: "Password must be at least 8 characters."
-        });
-    }
+        // Validate password length
+        if (password.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters."
+            });
+        }
 
 
         const foundUser = await findBarberByBarberEmailAndSalonId(barberEmail, salonId);
@@ -1352,7 +1184,7 @@ export const barberServedQueueKiosk = async (req, res, next) => {
                                 const formattedDate = moment(dateJoinedQ, 'YYYY-MM-DD').format('DD-MM-YYYY');
 
                                 const totalServicePrice = services.reduce((total, service) => total + service.servicePrice, 0);
-                                
+
                                 const emailSubject = `${salon.salonName}: ${formattedDate} Queue Position Changed (${qPosition})`;
                                 const emailBody = `
                         <!DOCTYPE html>
@@ -1454,7 +1286,7 @@ export const cancelQueueKiosk = async (req, res, next) => {
     try {
         let { salonId, barberEmail, password, barberId, _id } = req.body;
 
-        if (!barberEmail && !password ) {
+        if (!barberEmail && !password) {
             return res.status(400).json({
                 success: false,
                 message: "Please enter email and password."
@@ -1480,20 +1312,20 @@ export const cancelQueueKiosk = async (req, res, next) => {
         barberEmail = barberEmail.toLowerCase();
 
         // Validate password length
-      if (!password) {
-        return res.status(400).json({
-            success: false,
-            message: "Please enter your password."
-        });
-    }
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter your password."
+            });
+        }
 
-      // Validate password length
-      if (password.length < 8) {
-        return res.status(400).json({
-            success: false,
-            message: "Password must be at least 8 characters."
-        });
-    }
+        // Validate password length
+        if (password.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters."
+            });
+        }
         const foundUser = await findBarberByBarberEmailAndSalonId(barberEmail, salonId);
 
         if (!foundUser) {
@@ -1952,8 +1784,8 @@ export const salonAccountLogin = async (req, res, next) => {
     try {
         let { email, password, role, salonId } = req.body
 
-    
-        if (!email && !password ) {
+
+        if (!email && !password) {
             return res.status(400).json({
                 success: false,
                 message: "Please enter email and password."
@@ -1974,25 +1806,25 @@ export const salonAccountLogin = async (req, res, next) => {
             });
         }
 
-            // Convert email to lowercase
-            email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
 
         // Validate password length
-      if (!password) {
-        return res.status(400).json({
-            success: false,
-            message: "Please enter your password."
-        });
-    }
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter your password."
+            });
+        }
 
-      // Validate password length
-      if (password.length < 8) {
-        return res.status(400).json({
-            success: false,
-            message: "Password must be at least 8 characters."
-        });
-    }
+        // Validate password length
+        if (password.length < 8) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 8 characters."
+            });
+        }
 
         if (role === "Admin") {
 
@@ -2099,7 +1931,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
     try {
         let { salonId, barberId, adminEmail, services, _id } = req.body;
 
-    
+
         if (!adminEmail) {
             return res.status(400).json({
                 success: false,
@@ -2391,11 +2223,11 @@ export const barberServedQueueTvApp = async (req, res, next) => {
 
 
 //DESC:CANCEL QUEUE ================
-export const cancelQueueTvApp= async (req, res, next) => {
+export const cancelQueueTvApp = async (req, res, next) => {
     try {
         let { salonId, adminEmail, barberId, _id } = req.body;
 
-         if (!adminEmail) {
+        if (!adminEmail) {
             return res.status(400).json({
                 success: false,
                 message: "Please enter your email."

@@ -7,6 +7,7 @@ const joinqueueHistorySchema = new mongoose.Schema({
     // },
     salonId: {
         type: Number,
+        default: 0
     },
 
     queueList: [{
@@ -15,6 +16,7 @@ const joinqueueHistorySchema = new mongoose.Schema({
         },
         customerName: {
             type: String,
+            default:""
             // required: true
         },
         customerEmail: {
@@ -35,10 +37,12 @@ const joinqueueHistorySchema = new mongoose.Schema({
             enum: ['Single-Join', 'Group-Join', 'Auto-Join']
         },
         dateJoinedQ: {
-            type: Date
+            type: Date,
+            default:""
         },
         timeJoinedQ: {
-            type: String
+            type: String,
+             default:""
         },
         timePositionChanged: {
             type: String

@@ -29,7 +29,7 @@ export const SALON_LOGO_DELETE_ERROR = "Failed to delete salon logo"
 
 //SUCCESS
 export const SALON_CREATE_SUCCESS = "Salon created successfully"
-export const SALON_UPDATE_SUCCESS = "Salon Updated"
+export const SALON_UPDATE_SUCCESS = "Salon updated successfully"
 
 export const SALON_IMAGES_UPLOAD_SUCESS = "Salon images uploaded successfully"
 export const SALON_IMAGE_DELETE_SUCESS = "Salon image deleted successfully"

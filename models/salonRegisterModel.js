@@ -13,9 +13,11 @@ const coordinatesSchema = new mongoose.Schema({
 const salonsSchema = new mongoose.Schema({
     salonId: {
         type: Number,
+         default:0
     },
     salonName: {
         type: String,
+         default:""
     },
     adminEmail: {
         type: String,
@@ -33,7 +35,7 @@ const salonsSchema = new mongoose.Schema({
             default: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720532593/depositphotos_247872612-stock-illustration-no-image-available-icon-vector_fhytrg.jpg"
           }
         }],
-        default: []
+        default: [{}]
       },
     salonType: {
         type: String
@@ -44,6 +46,7 @@ const salonsSchema = new mongoose.Schema({
     },
     address: {
         type: String,
+         default:""
         // required: true
     },
     city: {
@@ -58,7 +61,8 @@ const salonsSchema = new mongoose.Schema({
         type: String
     },
     currency: {
-        type: String
+        type: String,
+         default:"£"
     },
     postCode: {
         type: String,
@@ -66,7 +70,6 @@ const salonsSchema = new mongoose.Schema({
     },
     contactTel: {
         type: Number,
-        // required: true
     },
 
     mobileCountryCode:{
@@ -75,20 +78,25 @@ const salonsSchema = new mongoose.Schema({
 
     webLink: {
         type: String,
-        // required: true
+        default:""
     },
     fbLink: {
         type: String,
+         default:""
 
     },
     twitterLink: {
         type: String,
+         default:""
     },
     instraLink: {
         type: String,
+          default:""
     },
+    
     tiktokLink: {
-        type: String
+        type: String,
+         default:""
     },
     salonEmail: {
         type: String
@@ -114,6 +122,7 @@ const salonsSchema = new mongoose.Schema({
     services: [{
         serviceId: {
             type: Number,
+             default:0
             // required: true,
         },
         serviceCode: {
@@ -122,6 +131,7 @@ const salonsSchema = new mongoose.Schema({
         },
         serviceName: {
             type: String,
+             default:""
             // required: true,
         },
         serviceIcon: {
@@ -130,17 +140,22 @@ const salonsSchema = new mongoose.Schema({
             },
             url: {
                 type: String,
+                default: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720532593/depositphotos_247872612-stock-illustration-no-image-available-icon-vector_fhytrg.jpg"
+
             }
         },
         serviceDesc: {
             type: String,
+            default:""
         },
         servicePrice: {
             type: Number,
+             default:0
             // required: true
         },
         serviceEWT: {
-            type: Number
+            type: Number,
+             default:0
         },
         vipService:{
             type:Boolean,

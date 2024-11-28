@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 
 const salonSettingsSchema  = new mongoose.Schema({
     salonId:{
-        type: Number
+        type: Number,
+        default:0
     },
     advertisements: [
         {
@@ -16,13 +17,16 @@ const salonSettingsSchema  = new mongoose.Schema({
     ],
     appointmentSettings:{
         appointmentStartTime:{
-            type:String
+            type:String,
+             default:""
         },
         appointmentEndTime:{
-            type:String
+            type:String,
+             default:""
         }, 
         intervalInMinutes:{
-            type: Number
+            type: Number,
+             default:0
         }
     }
 },{timestamps: true})

@@ -9,6 +9,8 @@ const countrySchema = new mongoose.Schema({
     },
     currency: {
         type: String,
+        default: "£"
+
     },
     timeZones: [
         {

@@ -11,6 +11,7 @@ const adminSchema = new mongoose.Schema({
     }],
     name: {
         type: String,
+        default: ""
     },
     email: {
         type: String,
@@ -24,7 +25,7 @@ const adminSchema = new mongoose.Schema({
         // required:true
     },
     password: {
-        type: String
+        type: String,
     },
     role:{
         type:String
@@ -52,6 +53,7 @@ const adminSchema = new mongoose.Schema({
 
     dateOfBirth:{
         type: Date,
+        default: ""
     },
     mobileNumber:{
         type: Number,

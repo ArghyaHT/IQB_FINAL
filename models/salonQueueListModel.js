@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const salonQueueListSchema = new mongoose.Schema({
     salonId: {
         type: Number,
+        default: 0,
         required: true
     },
 
@@ -12,6 +13,7 @@ const salonQueueListSchema = new mongoose.Schema({
         },
         customerName: {
             type: String,
+             default:""
         },
         customerEmail: {
             type: String
@@ -47,7 +49,8 @@ const salonQueueListSchema = new mongoose.Schema({
             enum: ['Walk-In', 'Admin', 'App']
         },
         barberName: {
-            type: String
+            type: String,
+             default:""
         },
         forceUpdate: {
             type: Boolean
