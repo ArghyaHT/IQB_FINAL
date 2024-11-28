@@ -107,79 +107,79 @@ export const singleJoinQueue = async (req, res, next) => {
             existingQueue = await addCustomerToQueue(salonId, newQueue, barberId);
 
 
-        //     const emailSubject = 'Your Queue Information';
-        //     const emailBody = `
-        //     <!DOCTYPE html>
-        //     <html lang="en">
-        //     <head>
-        //         <meta charset="UTF-8">
-        //         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        //         <title>Salon Queue Details</title>
-        //         <style>
-        //             body {
-        //                 font-family: Arial, sans-serif;
-        //                 margin: 0;
-        //                 padding: 0;
-        //             }
-        //             .container {
-        //                 max-width: 600px;
-        //                 margin: 0 auto;
-        //                 padding: 20px;
-        //             }
-        //             .logo {
-        //                 text-align: center;
-        //                 margin-bottom: 20px;
-        //             }
-        //             .logo img {
-        //                 max-width: 200px;
-        //             }
-        //             .email-content {
-        //                 background-color: #f8f8f8;
-        //                 padding: 20px;
-        //                 border-radius: 10px;
-        //             }
-        //             ul {
-        //                 padding-left: 20px;
-        //             }
-        //         </style>
-        //     </head>
-        //     <body>
-        //         <div class="container">
-        //             <div class="email-content">
-        //             <div class="logo">
-        //             <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
-        //         </div>
-        //                 <h1 style="text-align: center;">Salon Queue Details</h1>
-        //                 <p>Dear ${name},</p>
-        //                 <p>Thank you for joining the queue at our salon. Here are your queue details:</p>
-        //                 <ul>
-        //                     <li>Customer Name: ${name}</li>
-        //                     <li>Service Name: ${services.map(service => service.serviceName).join(', ')}</li>
-        //                     <li>Service Type: ${services.some(service => service.vipService === true) ? 'VIP' : 'Regular'}</li>
-        //                     <li>Barber Name: ${barberName}</li>
-        //                     <li>Service Estimated Waiting time: ${totalServiceEWT}</li>
-        //                     <li>Your Estimated Waiting time: ${isVipServiceRequested ? 0 : (availableBarber.barberEWT - totalServiceEWT)} mins</li>
-        //                     <li>Queue Position: ${isVipServiceRequested ? 1 : availableBarber.queueCount}</li>
-        //                 </ul>
-        //                 <p>Please feel free to contact us if you have any questions or need further assistance at the below mentioned.</p>
-        //                 <p>Best regards,</p>
-        //                 <p style="margin: 0; padding: 10px 0 5px;">
-        //                 ${salon.salonName}<br>
-        //                 Contact No.: ${salon.contactTel}<br>
-        //                 EmailId: ${salon.salonEmail}
-        //             </div>
-        //         </div>
-        //     </body>
-        //     </html>
-        // `;
+            const emailSubject = 'Your Queue Information';
+            const emailBody = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Salon Queue Details</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .container {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                    }
+                    .logo {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    .logo img {
+                        max-width: 200px;
+                    }
+                    .email-content {
+                        background-color: #f8f8f8;
+                        padding: 20px;
+                        border-radius: 10px;
+                    }
+                    ul {
+                        padding-left: 20px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="email-content">
+                    <div class="logo">
+                    <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
+                </div>
+                        <h1 style="text-align: center;">Salon Queue Details</h1>
+                        <p>Dear ${name},</p>
+                        <p>Thank you for joining the queue at our salon. Here are your queue details:</p>
+                        <ul>
+                            <li>Customer Name: ${name}</li>
+                            <li>Service Name: ${services.map(service => service.serviceName).join(', ')}</li>
+                            <li>Service Type: ${services.some(service => service.vipService === true) ? 'VIP' : 'Regular'}</li>
+                            <li>Barber Name: ${barberName}</li>
+                            <li>Service Estimated Waiting time: ${totalServiceEWT}</li>
+                            <li>Your Estimated Waiting time: ${isVipServiceRequested ? 0 : (availableBarber.barberEWT - totalServiceEWT)} mins</li>
+                            <li>Queue Position: ${isVipServiceRequested ? 1 : availableBarber.queueCount}</li>
+                        </ul>
+                        <p>Please feel free to contact us if you have any questions or need further assistance at the below mentioned.</p>
+                        <p>Best regards,</p>
+                        <p style="margin: 0; padding: 10px 0 5px;">
+                        ${salon.salonName}<br>
+                        Contact No.: ${salon.contactTel}<br>
+                        EmailId: ${salon.salonEmail}
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
 
-        //     try {
-        //         await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
-        //         console.log('Email sent successfully.');
-        //     } catch (error) {
-        //         console.error('Error sending email:', error);
-        //         // Handle error if email sending fails
-        //     }
+            try {
+                await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                console.log('Email sent successfully.');
+            } catch (error) {
+                console.error('Error sending email:', error);
+                // Handle error if email sending fails
+            }
 
         } else {
             // Handle when a specific barber is provided
@@ -238,82 +238,82 @@ export const singleJoinQueue = async (req, res, next) => {
 
             existingQueue = await addCustomerToQueue(salonId, newQueue, barberId);
 
-//             const emailSubject = 'Your Queue Information';
-//             const emailBody = `
-//     <!DOCTYPE html>
-//     <html lang="en">
-//     <head>
-//         <meta charset="UTF-8">
-//         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//         <title>Salon Queue Details</title>
-//         <style>
-//             body {
-//                 font-family: Arial, sans-serif;
-//                 margin: 0;
-//                 padding: 0;
-//             }
-//             .container {
-//                 max-width: 600px;
-//                 margin: 0 auto;
-//                 padding: 20px;
-//             }
-//             .logo {
-//                 text-align: center;
-//                 margin-bottom: 20px;
-//             }
-//             .logo img {
-//                 max-width: 200px;
-//             }
-//             .email-content {
-//                 background-color: #f8f8f8;
-//                 padding: 20px;
-//                 border-radius: 10px;
-//             }
-//             ul {
-//                 padding-left: 20px;
-//             }
-//         </style>
-//     </head>
-//     <body>
-//         <div class="container">
+            const emailSubject = 'Your Queue Information';
+            const emailBody = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Salon Queue Details</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            .logo {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .logo img {
+                max-width: 200px;
+            }
+            .email-content {
+                background-color: #f8f8f8;
+                padding: 20px;
+                border-radius: 10px;
+            }
+            ul {
+                padding-left: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
 
-//             <div class="email-content">
-//             <div class="logo">
-//             <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
-//         </div>
-//                 <h1 style="text-align: center;">Salon Queue Details</h1>
-//                 <p>Dear ${name},</p>
-//                 <p>Thank you for joining the queue at our salon. Here are your queue details:</p>
-//                 <ul>
-//                     <li>Customer Name: ${name}</li>
-//                     <li>Service Name: ${services.map(service => service.serviceName).join(', ')}</li>
-//                     <li>Service Type: ${services.some(service => service.vipService === true) ? 'VIP' : 'Regular'}</li>
-//                     <li>Barber Name: ${barberName}</li>
-//                     <li>Service Estimated Waiting time: ${totalServiceEWT} mins</li>
-//                     <li>Your Estimated Waiting time: ${isVipServiceRequested ? 0 : (updatedBarber.barberEWT - totalServiceEWT)} mins</li>
-//                     <li>Queue Position: ${isVipServiceRequested ? 1 : updatedBarber.queueCount}</li>
-//                 </ul>
-//                 <p>Please feel free to contact us if you have any questions or need further assistance at the below mentioned.</p>
-//                 <p>Best regards,</p>
-//                 <p style="margin: 0; padding: 10px 0 5px;">
-//                 ${salon.salonName}<br>
-//                 Contact No.: ${salon.contactTel}<br>
-//                 EmailId: ${salon.salonEmail}
-//             </p>
-//             </p>
-//             </div>
-//         </div>
-//     </body>
-//     </html>
-// `;
+            <div class="email-content">
+            <div class="logo">
+            <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
+        </div>
+                <h1 style="text-align: center;">Salon Queue Details</h1>
+                <p>Dear ${name},</p>
+                <p>Thank you for joining the queue at our salon. Here are your queue details:</p>
+                <ul>
+                    <li>Customer Name: ${name}</li>
+                    <li>Service Name: ${services.map(service => service.serviceName).join(', ')}</li>
+                    <li>Service Type: ${services.some(service => service.vipService === true) ? 'VIP' : 'Regular'}</li>
+                    <li>Barber Name: ${barberName}</li>
+                    <li>Service Estimated Waiting time: ${totalServiceEWT} mins</li>
+                    <li>Your Estimated Waiting time: ${isVipServiceRequested ? 0 : (updatedBarber.barberEWT - totalServiceEWT)} mins</li>
+                    <li>Queue Position: ${isVipServiceRequested ? 1 : updatedBarber.queueCount}</li>
+                </ul>
+                <p>Please feel free to contact us if you have any questions or need further assistance at the below mentioned.</p>
+                <p>Best regards,</p>
+                <p style="margin: 0; padding: 10px 0 5px;">
+                ${salon.salonName}<br>
+                Contact No.: ${salon.contactTel}<br>
+                EmailId: ${salon.salonEmail}
+            </p>
+            </p>
+            </div>
+        </div>
+    </body>
+    </html>
+`;
 
-//             try {
-//                 await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
-//                 console.log('Email sent successfully.');
-//             } catch (error) {
-//                 console.error('Error sending email:', error);
-//                 // Handle error if email sending fails
-//             }
+            try {
+                await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                console.log('Email sent successfully.');
+            } catch (error) {
+                console.error('Error sending email:', error);
+                // Handle error if email sending fails
+            }
         }
 
         res.status(200).json({
@@ -432,82 +432,82 @@ export const groupJoinQueue = async (req, res, next) => {
 
             existingQueue = await addCustomerToQueue(salonId, newQueue, member.barberId);
 
-//             const emailSubject = 'Your Queue Information';
-//             const emailBody = `
-// <!DOCTYPE html>
-// <html lang="en">
-// <head>
-//     <meta charset="UTF-8">
-//     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//     <title>Salon Queue Details</title>
-//     <style>
-//         body {
-//             font-family: Arial, sans-serif;
-//             margin: 0;
-//             padding: 0;
-//         }
-//         .container {
-//             max-width: 600px;
-//             margin: 0 auto;
-//             padding: 20px;
-//         }
-//         .logo {
-//             text-align: center;
-//             margin-bottom: 20px;
-//         }
-//         .logo img {
-//             max-width: 200px;
-//         }
-//         .email-content {
-//             background-color: #f8f8f8;
-//             padding: 20px;
-//             border-radius: 10px;
-//         }
-//         ul {
-//             padding-left: 20px;
-//         }
-//     </style>
-// </head>
-// <body>
-//     <div class="container">
+            const emailSubject = 'Your Queue Information';
+            const emailBody = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salon Queue Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            max-width: 200px;
+        }
+        .email-content {
+            background-color: #f8f8f8;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
 
-//         <div class="email-content">
-//         <div class="logo">
-//         <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
-//     </div>
-//             <h1 style="text-align: center;">Salon Queue Details</h1>
-//             <p>Dear ${member.name},</p>
-//             <p>Thank you for joining the queue at our salon. Here are your queue details:</p>
-//             <ul>
-//                 <li>Customer Name: ${member.name}</li>
-//                 <li>Service Name: ${member.services.map(service => service.serviceName).join(', ')}</li>
-//                 <li>Service Type: ${member.services.some(service => service.vipService === true) ? 'VIP' : 'Regular'}</li>
-//                 <li>Barber Name: ${member.barberName}</li>
-//                 <li>Service Estimated Waiting time: ${totalServiceEWT} mins</li>
-//                 <li>Your Estimated Waiting time: ${isVipServiceRequested ? 0 : (updatedBarber.barberEWT - totalServiceEWT)} mins</li>
-//                 <li>Queue Position: ${isVipServiceRequested ? 1 : updatedBarber.queueCount}</li>
-//             </ul>
-//             <p>Please feel free to contact us if you have any questions or need further assistance at the below mentioned.</p>
-//             <p>Best regards,</p>
-//             <p style="margin: 0; padding: 10px 0 5px;">
-//             ${salon.salonName}<br>
-//             Contact No.: ${salon.contactTel}<br>
-//             EmailId: ${salon.salonEmail}
-//         </p>
-//         </p>
-//         </div>
-//     </div>
-// </body>
-// </html>
-// `;
+        <div class="email-content">
+        <div class="logo">
+        <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
+    </div>
+            <h1 style="text-align: center;">Salon Queue Details</h1>
+            <p>Dear ${member.name},</p>
+            <p>Thank you for joining the queue at our salon. Here are your queue details:</p>
+            <ul>
+                <li>Customer Name: ${member.name}</li>
+                <li>Service Name: ${member.services.map(service => service.serviceName).join(', ')}</li>
+                <li>Service Type: ${member.services.some(service => service.vipService === true) ? 'VIP' : 'Regular'}</li>
+                <li>Barber Name: ${member.barberName}</li>
+                <li>Service Estimated Waiting time: ${totalServiceEWT} mins</li>
+                <li>Your Estimated Waiting time: ${isVipServiceRequested ? 0 : (updatedBarber.barberEWT - totalServiceEWT)} mins</li>
+                <li>Queue Position: ${isVipServiceRequested ? 1 : updatedBarber.queueCount}</li>
+            </ul>
+            <p>Please feel free to contact us if you have any questions or need further assistance at the below mentioned.</p>
+            <p>Best regards,</p>
+            <p style="margin: 0; padding: 10px 0 5px;">
+            ${salon.salonName}<br>
+            Contact No.: ${salon.contactTel}<br>
+            EmailId: ${salon.salonEmail}
+        </p>
+        </p>
+        </div>
+    </div>
+</body>
+</html>
+`;
 
-//             try {
-//                 await sendQueuePositionEmail(member.customerEmail, emailSubject, emailBody);
-//                 console.log('Email sent successfully.');
-//             } catch (error) {
-//                 console.error('Error sending email:', error);
-//                 // Handle error if email sending fails
-//             }
+            try {
+                await sendQueuePositionEmail(member.customerEmail, emailSubject, emailBody);
+                console.log('Email sent successfully.');
+            } catch (error) {
+                console.error('Error sending email:', error);
+                // Handle error if email sending fails
+            }
         }
 
         res.status(200).json({
