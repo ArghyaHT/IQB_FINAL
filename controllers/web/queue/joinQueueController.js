@@ -14,8 +14,8 @@ import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import { SALON_NOT_FOUND_ERROR } from "../../../constants/web/SalonConstants.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
-import { ADMIN_NOT_EXIST_ERROR, EMAIL_NOT_PRESENT_ERROR, INVALID_EMAIL_ERROR } from "../../../constants/web/adminConstants.js";
-import { QUEUE_CANCEL_SUCCESS, QUEUE_NOT_FOUND_BY_ID_ERROR, QUEUE_NOT_FOUND_ERROR, QUEUE_POSITION_ERROR, QUEUE_SERVE_SUCCESS, QUEUE_SERVICES_ERROR, QUEUELIST_EMPTY_FOR_BARBER_SUCCESS, RETRIVE_EMPTY_QUEUELIST_SUCCESS, RETRIVE_QUEUELIST_ERROR, RETRIVE_QUEUELIST_SUCCESS } from "../../../constants/web/QueueConstants.js";
+import { ADMIN_NOT_EXIST_ERROR, INVALID_EMAIL_ERROR } from "../../../constants/web/adminConstants.js";
+import { NO_SALON_CONNECTED_ERROR, QUEUE_CANCEL_SUCCESS, QUEUE_NOT_FOUND_BY_ID_ERROR, QUEUE_NOT_FOUND_ERROR, QUEUE_POSITION_ERROR, QUEUE_SERVE_SUCCESS, QUEUELIST_BARBER_ERROR, QUEUELIST_EMPTY_FOR_BARBER_SUCCESS, RETRIVE_EMPTY_QUEUELIST_SUCCESS, RETRIVE_QUEUELIST_SUCCESS } from "../../../constants/web/QueueConstants.js";
 import { BARBER_EXISTS_ERROR } from "../../../constants/web/BarberConstants.js";
 
 
@@ -28,30 +28,40 @@ export const getQueueListBySalonId = async (req, res, next) => {
         // Check if the salon exists in the database
         if (salonId) {
             const salonExists = await checkSalonExists(salonId); // Assuming checkSalonExists is a function that checks if the salon exists
-            if (salonExists === null) {
+
+            if (!salonExists) {
                 return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
             }
 
             //To find the queueList according to salonId and sort it according to qposition
             const getSalon = await getSalonQlist(salonId)
 
-            if (getSalon.length > 0) {
-                // Access the sorted queueList array from the result
+            // console.log(getSalon)
+
+            // if (getSalon.length > 0) {
+            //     // Access the sorted queueList array from the result
+            //     const sortedQueueList = getSalon[0].queueList;
+
+            //     return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQueueList })
+            // }
+            // else {
+            //     return SuccessHandler(RETRIVE_EMPTY_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: [] })
+            // }
+
+            if (!getSalon ) {
+                // res.status(400).json({
+                //     success: false,
+                //     message: "You currently have no salon"
+                // })
+                return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res,)
+
+            }
+            else{
                 const sortedQueueList = getSalon[0].queueList;
 
                 return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQueueList })
-            }
-            else {
-                return SuccessHandler(RETRIVE_EMPTY_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: [] })
-            }
-
-        } else {
-            // res.status(400).json({
-            //     success: false,
-            //     message: "Failed to fetch queuelist",
-            //     response: []
-            // });
-            return ErrorHandler(RETRIVE_QUEUELIST_ERROR, ERROR_STATUS_CODE, res)
+    
+            }      
         }
     }
     catch (error) {
@@ -812,21 +822,25 @@ export const getQlistbyBarberId = async (req, res, next) => {
 
         if (approvedBarber.isApproved === false) {
 
-            return res.status(201).json({
-                success: false,
-                message: 'Queue list not found for the specified barber and salon ID',
-                queueList: []
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: 'Queue list not found for the specified barber and salon ID',
+            //     queueList: []
+            // });
+            return ErrorHandler(QUEUELIST_BARBER_ERROR, ERROR_STATUS_CODE, res,)
 
         }
 
 
         if (!qList || qList.length === 0) {
-            return res.status(201).json({
-                success: false,
-                message: 'Queue list not found for the specified barber and salon ID',
-                queueList: []
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: 'Queue list not found for the specified barber',
+            //     queueList: []
+            // });
+
+        return ErrorHandler(QUEUELIST_BARBER_ERROR, ERROR_STATUS_CODE, res,)
+
         }
 
         // return res.status(200).json({

@@ -29,7 +29,7 @@ export const addGroupJoin = async(salonId) => {
 
 //Get salon queue list
 export const getSalonQlist = async(salonId) => {
-    const Qlist = await SalonQueueList.aggregate([
+    const sortedQlist = await SalonQueueList.aggregate([
         {
           $match: { salonId } // Match the document based on salonId
         },
@@ -71,7 +71,7 @@ export const getSalonQlist = async(salonId) => {
         }
       ]);
 
-      return Qlist;
+      return sortedQlist;
 }
 
 //Find customers to send Mail for Q position change

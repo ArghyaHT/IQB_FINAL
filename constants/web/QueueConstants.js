@@ -6,6 +6,13 @@ export const QUEUE_NOT_FOUND_BY_ID_ERROR = "Queue not found with the given id"
 
 export const  QUEUE_SERVICES_ERROR= "Service IDs are required"
 
+export const NO_SALON_CONNECTED_ERROR= "You are not connected to any salon"
+
+export const QUEUELIST_BARBER_ERROR= "Queue list not found for the specified barber"
+
+
+
+
 
 
 //SUCCESS
