@@ -15,10 +15,11 @@ import { barberLogInTime, barberLogOutTime } from "../../utils/attendence/barber
 import { validateEmail } from "../../middlewares/validator.js";
 
 import moment from "moment";
-import { EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, INVALID_EMAIL_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, SIGNIN_SUCCESS } from "../../constants/web/adminConstants.js";
+import { ADMIN_NOT_EXIST_ERROR, EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, INVALID_EMAIL_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, SIGNIN_SUCCESS } from "../../constants/web/adminConstants.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../constants/kiosk/StatusCodeConstants.js";
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 import { BARBER_SIGNIN_SUCCESS, LOGOUT_SUCCESS } from "../../constants/kiosk/KioskConstants.js";
+import { SALONS_RETRIEVED_SUCESS } from "../../constants/web/SalonConstants.js";
 
 
 //DESC:LOGIN AN ADMIN =========================
@@ -143,18 +144,14 @@ export const getAllSalonsByAdmin = async (req, res, next) => {
         const admin = await findAdminByEmailandRole(email)
 
         if (!admin) {
-            return res.status(404).json({
-                message: 'Admin not found',
-            });
+            return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         // Fetch all salons associated with the admin from registeredSalons array
         const salons = await allSalonsByAdmin(admin.registeredSalons)
 
-        res.status(200).json({
-            message: 'Salons retrieved successfully',
-            salons: salons,
-        });
+        return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, {salons: salons})
+
     } catch (error) {
         // //console.log(error);
         next(error);
