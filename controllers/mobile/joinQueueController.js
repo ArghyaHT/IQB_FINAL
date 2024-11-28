@@ -104,7 +104,7 @@ export const singleJoinQueue = async (req, res, next) => {
             };
 
 
-            existingQueue = await addCustomerToQueue(salonId, newQueue);
+            existingQueue = await addCustomerToQueue(salonId, newQueue, barberId);
 
 
         //     const emailSubject = 'Your Queue Information';
@@ -236,7 +236,7 @@ export const singleJoinQueue = async (req, res, next) => {
                 customerEWT: isVipServiceRequested ? 0 : (updatedBarber.barberEWT - totalServiceEWT),
             };
 
-            existingQueue = await addCustomerToQueue(salonId, newQueue);
+            existingQueue = await addCustomerToQueue(salonId, newQueue, barberId);
 
 //             const emailSubject = 'Your Queue Information';
 //             const emailBody = `
@@ -430,7 +430,7 @@ export const groupJoinQueue = async (req, res, next) => {
             };
 
 
-            existingQueue = await addCustomerToQueue(salonId, newQueue);
+            existingQueue = await addCustomerToQueue(salonId, newQueue, member.barberId);
 
 //             const emailSubject = 'Your Queue Information';
 //             const emailBody = `

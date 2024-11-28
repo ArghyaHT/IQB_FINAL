@@ -87,6 +87,9 @@ export const addCustomerToQueue = async (salonId, newQueue, barberId) => {
         qPosition = currentPosition;
 
         const barber = await getBarberByBarberId(barberId);
+      
+      console.log(barber)
+
 
         const initialCustomerEWT = barber.barberEWT;
 
