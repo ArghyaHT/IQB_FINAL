@@ -22,6 +22,7 @@ import { ADMIN_CONNECT_SUCCESS, BARBER_CLOCKIN_CLOCKOUT_SUCCESS, BARBER_SIGNIN_S
 import { SALON_EXISTS_ERROR, SALON_OFFLINE_SUCCESS, SALON_ONLINE_SUCCESS, SALONS_RETRIEVED_SUCESS } from "../../constants/web/SalonConstants.js";
 import { BARBER_CLOCKIN_ERROR, BARBER_EXISTS_ERROR, BARBER_NOT_APPROVE_ERROR, GET_ALL_BARBER_SUCCESS } from "../../constants/web/BarberConstants.js";
 
+import { ErrorHandler } from "../../middlewares/ErrorHandler.js";
 
 //DESC:LOGIN AN ADMIN =========================
 export const loginKiosk = async (req, res, next) => {
@@ -423,7 +424,6 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
             }
         );
     } catch (error) {
-        // //console.log(error);
         next(error);
     }
 };
@@ -436,7 +436,8 @@ export const joinQueueKiosk = async (req, res, next) => {
         const salon = await getSalonTimeZone(salonId);
 
         if (salon.isOnline === false) {
-            return res.status(400).json({ success: false, message: "Cant join queue as salon offline" });
+            // return res.status(400).json({ success: false, message: "Cant join queue as salon offline" });
+            return ErrorHandler(SALON_JOIN_QUEUE_ERROR, ERROR_STATUS_CODE_404, res)
         }
 
         if (name.length < 1 || name.length > 20) {

@@ -4,6 +4,8 @@ export const SALON_VALID_ERROR = "Please select a valid salon"
 export const SALON_OFFLINE_ERROR = "Salon is currently offline"
 export const BARBER_TOKEN_MISSING_ERROR = "BarberToken missing"
 export const FORBIDDEN_BARBER_ERROR = "Access forbidden for barber"
+
+
 export const SALON_JOIN_QUEUE_ERROR = "Cant join queue as salon offline"
 
 
