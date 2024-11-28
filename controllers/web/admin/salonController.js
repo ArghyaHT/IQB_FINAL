@@ -135,7 +135,7 @@ export const createSalonByAdmin = async (req, res, next) => {
       return ErrorHandler(SALON_SERVICES_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (salonDesc && salonDesc.length > 50) {
+    if (salonDesc && salonDesc.length > 35) {
       return ErrorHandler(SALON_DESC_ERROR, ERROR_STATUS_CODE, res)
     }
 

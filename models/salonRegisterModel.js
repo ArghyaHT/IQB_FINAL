@@ -16,7 +16,7 @@ const salonsSchema = new mongoose.Schema({
     },
     salonName: {
         type: String,
-        // required: true,
+        maxlength: [19, 'Salon name cannot exceed 19 characters'],
     },
     adminEmail: {
         type: String,
@@ -135,7 +135,8 @@ const salonsSchema = new mongoose.Schema({
         },
         serviceDesc: {
             type: String,
-            // required: true,
+            maxlength: [50, 'Service description cannot exceed 50 characters'],
+
         },
         servicePrice: {
             type: Number,

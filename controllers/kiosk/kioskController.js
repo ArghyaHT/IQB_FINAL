@@ -18,6 +18,7 @@ import moment from "moment";
 import { EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, INVALID_EMAIL_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, SIGNIN_SUCCESS } from "../../constants/web/adminConstants.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../constants/kiosk/StatusCodeConstants.js";
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
+import { BARBER_SIGNIN_SUCCESS, LOGOUT_SUCCESS } from "../../constants/kiosk/KioskConstants.js";
 
 
 //DESC:LOGIN AN ADMIN =========================
@@ -69,13 +70,7 @@ export const loginKiosk = async (req, res, next) => {
                 process.env.JWT_ADMIN_ACCESS_SECRET,
                 { expiresIn: '1d' }
             )
-              // Send accessToken containing username and roles 
-        // res.status(201).json({
-        //     success: true,
-        //     message: "Admin Logged In Successfully",
-        //     token: adminKioskToken,
-        //     foundUser,
-        // })
+        // Send accessToken containing username and roles 
         return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
             token:adminKioskToken,
             foundUser
@@ -104,14 +99,11 @@ export const loginKiosk = async (req, res, next) => {
                 { expiresIn: '1d' }
             )
     
-            // Send accessToken containing username and roles 
-            res.status(201).json({
-                success: true,
-                message: "Barber Logged In Successfully",
-                token: barberKioskToken,
-                foundUser,
-    
-            })
+        // Send accessToken containing username and roles 
+        return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+            token: barberKioskToken,
+            foundUser
+        })
         }   
       
     }
@@ -133,11 +125,8 @@ export const logoutKiosk = async (req, res, next) => {
             // Perform any additional action if needed (e.g., logging out from another system)
         }
 
-        // Respond with success message
-        res.status(200).json({
-            success: true,
-            message: 'Logout successful.'
-        });
+          // Send accessToken containing username and roles 
+          return SuccessHandler(LOGOUT_SUCCESS, SUCCESS_STATUS_CODE, res)
     } catch (error) {
         // //console.log(error);
         next(error);
