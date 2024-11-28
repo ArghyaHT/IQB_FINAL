@@ -64,20 +64,13 @@ export const barberServedQueue = async (req, res, next) => {
     try {
         let { salonId, barberId, barberEmail, adminEmail, services, _id } = req.body;
 
-        
-        if (!adminEmail) {
-            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
-        }
 
-        if (!validateEmail(adminEmail)) {
+        if (adminEmail && !validateEmail(adminEmail)) {
             return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        if (!barberEmail) {
-            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
-        }
 
-        if (!validateEmail(barberEmail)) {
+        if (barberEmail && !validateEmail(barberEmail)) {
             return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
@@ -606,19 +599,11 @@ export const cancelQueue = async (req, res, next) => {
     try {
         let { salonId, barberEmail, adminEmail, barberId, _id } = req.body;
 
-        if (!adminEmail) {
-            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
-        }
-
-        if (!validateEmail(adminEmail)) {
+        if (adminEmail && !validateEmail(adminEmail)) {
             return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        if (!barberEmail) {
-            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
-        }
-
-        if (!validateEmail(barberEmail)) {
+        if (barberEmail && !validateEmail(barberEmail)) {
             return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
