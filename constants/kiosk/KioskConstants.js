@@ -11,10 +11,21 @@ export const NO_BARBERS_AVAILABLE_ERROR = "No barbers available"
 export const BARBERS_UNABLE_QUEUE_ERROR = "The Barber is unable to take queue"
 export const BARBER_OFFLINE_ERROR = "The Barber is unable to take queue"
 
+export const BARBER_NOT_FOUND_ERROR = "Barber not found"
+
+export const BARBER_CONNECT_SALON_ERROR = "Barber not connected to salon"
+export const BARBER_ATTENDENCE_ERROR = "Attendence list not found"
+
+export const SALON_MOBILE_BOOKING_AVAILABILITY_ERROR= "Salon offline so mobile booking status cant be changed"
+export const MOBILE_BOOKING_AVAILABILITY_ERROR= "Mobile booking status cant be changed"
+
+
+
 
 
 
 //SUCCESS
+export const NO_BARBERS_AVAILABLE_SUCCESS = "No barbers available"
 export const BARBER_SIGNIN_SUCCESS = "Barber logged in successfully"
 export const LOGOUT_SUCCESS = "Barber logged in successfully"
 export const ADMIN_CONNECT_SUCCESS = "Admin connected successfully"
@@ -24,7 +35,18 @@ export const BARBER_CLOCKIN_CLOCKOUT_SUCCESS = "Barber online/offline status cha
 
 export const JOIN_QUEUE_SUCCESS = "Joined Queue successfully"
 
-export const BARBER_RETRIEVED_SUCCESS = "Barbers retrieved successfully'"
+export const BARBER_RETRIEVED_SUCCESS = "Barbers retrieved successfully"
+
+export const BARBER_ATTENDENCE_RETRIEVED_SUCCESS = "Attendence list retrieved successfully"
+
+export const MOBILE_BOOKING_ONLINE_SUCCESS = "Mobile booking status online"
+export const MOBILE_BOOKING_OFFLINE_SUCCESS = "Mobile booking status offline"
+
+
+
+
+
+
 
 
 
