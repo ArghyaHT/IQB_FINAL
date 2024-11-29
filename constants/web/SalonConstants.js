@@ -16,6 +16,8 @@ export const SALON_EXISTS_ERROR = "Salon already exists"
 export const SALONID_EMPTY_ERROR = "SalonId not found"
 export const SALON_NOT_FOUND_ERROR = "Salon Not found"
 
+export const SALON_NOT_CREATED_ERROR = "There is no salon available currently"
+
 
 export const SALON_GALLERY_EMPTY_ERROR = "Salon gallery images empty"
 export const SALON_GALLERY_UPLOADED_ERROR = "Salon gallery images cant be uploaded"

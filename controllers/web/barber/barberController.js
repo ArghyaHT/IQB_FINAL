@@ -25,6 +25,7 @@ import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/C
 import { BARBER_CLOCKIN_ERROR, BARBER_CLOCKIN_SUCCESS, BARBER_CLOCKOUT_SUCCESS, BARBER_CONNECT_SALON_SUCCESS, BARBER_DETAILS_SUCCESS, BARBER_EXISTS_ERROR, BARBER_NOT_APPROVE_ERROR, BARBER_NOT_EXIST_ERROR, BARBER_SERVICES_SUCCESS, CHANGE_BARBER_ONLINE_SUCCESS, CHANGE_PASSWORD_SUCCESS, CREATE_BARBER_SUCCESS, CUSTOMERS_IN_QUEUE_ERROR, EMPTY_SERVICE_ERROR, GET_ALL_BARBER_SUCCESS, LOGOUT_SUCCESS, NO_BARBER_SERVICEID_ERROR, NO_BARBERS_ERROR, SELECT_SERVICE_ERROR, SIGNIN_SUCCESS, SIGNUP_SUCCESS, UPDATE_BARBER_SUCCESS } from "../../../constants/web/BarberConstants.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ALLOWED_IMAGE_EXTENSIONS, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
+import { SALON_EXISTS_ERROR, SALON_NOT_CREATED_ERROR } from "../../../constants/web/SalonConstants.js";
 
 
 // Desc: Register
@@ -911,17 +912,14 @@ export const getAllBarberbySalonId = async (req, res, next) => {
 
 
         if (Number(salonId) === 0) {
-            return ErrorHandler(NO_BARBERS_ERROR, ERROR_STATUS_CODE, res, { getAllBarbers: [] })
+            return ErrorHandler(SALON_NOT_CREATED_ERROR, ERROR_STATUS_CODE, res)
         }
         else {
 
             // Check if the salon exists in the database
             const salonExists = await checkSalonExists(salonId); // Assuming checkSalonExists is a function that checks if the salon exists
             if (salonExists === null) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Salon does not exist.",
-                });
+                return ErrorHandler(SALON_EXISTS_ERROR, ERROR_STATUS_CODE, res)
             }
 
             let query = {}; // Filter for isDeleted set to false

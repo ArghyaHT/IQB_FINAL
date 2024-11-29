@@ -39,7 +39,7 @@ export const saveCustomer = async(newCustomer) => {
 export const fetchedCustomers = async (query, sortOptions, skip, limit) => {
     const customers = await Customer.find(query).sort(sortOptions).skip(skip).limit(Number(limit));
  
-    return customers;
+    return customers || [];
  }
  
  //TOTAL CUSTOMER COUNT 

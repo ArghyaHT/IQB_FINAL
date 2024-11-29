@@ -194,7 +194,7 @@ export const connectBarberSalon = async (email, salonId, barberServices, approve
 export const fetchedBarbers = async (salonId, sortOptions) => {
    const barbers = await Barber.find({ salonId, isDeleted: false }).sort(sortOptions);
 
-   return barbers
+   return barbers || [];
 }
 
 //TOTAL BARBER COUNT 

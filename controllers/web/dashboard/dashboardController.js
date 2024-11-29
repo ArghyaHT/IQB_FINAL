@@ -12,6 +12,7 @@ import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ADVERT_DELETE_SUCCESS, ADVERT_DRAG_SUCCESS, ADVERT_IMAGES_SUCCESS, ADVERT_NOT_FOUND, ADVERT_NOT_PRESENT_ERROR, ADVERT_UPDATE_SUCCESS, ADVERT_UPLOAD_SUCCESS } from "../../../constants/web/DashboardConstants.js";
 import { ALLOWED_IMAGE_EXTENSIONS, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 import { IMAGE_FILE_EXTENSION_ERROR, IMAGE_FILE_SIZE_ERROR } from "../../../constants/web/adminConstants.js";
+import { SALON_NOT_CREATED_ERROR } from "../../../constants/web/SalonConstants.js";
 
 // cloudinary.config({
 //   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -109,7 +110,7 @@ export const getAllAdvertisements = async (req, res, next) => {
     const { salonId } = req.body;
 
     if (Number(salonId) === 0) {
-      return ErrorHandler(ADVERT_NOT_FOUND, ERROR_STATUS_CODE, res)
+      return ErrorHandler(SALON_NOT_CREATED_ERROR, ERROR_STATUS_CODE, res)
     }
     else {
       // Find SalonSettings by salonId and retrieve only the advertisements field

@@ -36,20 +36,6 @@ export const getQueueListBySalonId = async (req, res, next) => {
             //To find the queueList according to salonId and sort it according to qposition
             const getSalon = await getSalonQlist(salonId)
 
-            // console.log(getSalon)
-
-            // if (getSalon.length > 0) {
-            //     // Access the sorted queueList array from the result
-            //     const sortedQueueList = getSalon[0].queueList;
-
-            //     return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQueueList })
-            // }
-            // else {
-            //     return SuccessHandler(RETRIVE_EMPTY_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: [] })
-            // }
-
-            // console.log("GET SALON ", getSalon)
-
             if (!getSalon ) {
                 return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res,)
 

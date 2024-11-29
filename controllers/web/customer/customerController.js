@@ -11,6 +11,7 @@ import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
 import { CHECK_EMAIL_SUCCESS, EMAIL_EXISTS_ERROR } from "../../../constants/web/CustomerConstants.js";
+import { SALON_EXISTS_ERROR, SALON_NOT_CREATED_ERROR } from "../../../constants/web/SalonConstants.js";
 
 // cloudinary.config({
 //     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -1024,11 +1025,7 @@ export const getAllCustomersForBarberBySalonId = async (req, res, next) => {
         const { salonId, name, isApproved, email, page = 1, limit = 10, sortField, sortOrder } = req.query
 
         if (Number(salonId) === 0) {
-            return res.status(200).json({
-                success: false,
-                message: "No customers is currently available to show.",
-                getAllCustomers: []
-            });
+            return ErrorHandler(SALON_NOT_CREATED_ERROR, ERROR_STATUS_CODE, res)
         }
         else if (isApproved === "false") {
             return res.status(200).json({
@@ -1041,10 +1038,7 @@ export const getAllCustomersForBarberBySalonId = async (req, res, next) => {
             // Check if the salon exists in the database
             const salonExists = await checkSalonExists(salonId); // Assuming checkSalonExists is a function that checks if the salon exists
             if (salonExists === null) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Salon does not exist.",
-                });
+                return ErrorHandler(SALON_EXISTS_ERROR, ERROR_STATUS_CODE, res)
             }
             let query = {}
 
@@ -1098,20 +1092,14 @@ export const getAllCustomers = async (req, res, next) => {
         const { salonId, name, email, page = 1, limit = 10, sortField, sortOrder } = req.query
 
         if (Number(salonId) === 0) {
-            res.status(200).json({
-                success: false,
-                message: "No customers is currently available to show.",
-                getAllCustomers: []
-            });
+            return ErrorHandler(SALON_NOT_CREATED_ERROR, ERROR_STATUS_CODE, res)
+
         }
         else {
             // Check if the salon exists in the database
             const salonExists = await checkSalonExists(salonId); // Assuming checkSalonExists is a function that checks if the salon exists
             if (salonExists === null) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Salon does not exist.",
-                });
+                return ErrorHandler(SALON_EXISTS_ERROR, ERROR_STATUS_CODE, res)
             }
             let query = {}
 
