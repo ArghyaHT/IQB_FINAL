@@ -20,7 +20,7 @@ export const getCustomerFavouriteSalon = async(favoriteSalons) => {
     const salons = await Salon.find({
       salonId: { $in: favoriteSalons },
       isDeleted: false,
-    }).select("salonName");
+    });
   
     return salons;
   } 
