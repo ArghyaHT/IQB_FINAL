@@ -148,7 +148,7 @@ export const changeBarberStatusAtSalonOffline = async (salonId) => {
 
 //GET ALL BARBERS BY SALONID
 export const getAllSalonBarbers = async (salonId, ) => {
-   const barbers = await Barber.find({ salonId, isDeleted: false });
+   const barbers = await Barber.find({ salonId, isDeleted: false, isApproved: true });
 
    return barbers
 }
