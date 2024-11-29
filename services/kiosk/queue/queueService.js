@@ -139,13 +139,6 @@ export const qListByBarberId = async(salonId, barberId) => {
     }
   ]);
 
-  if(qList.length > 0){
-    return qList
-  }else{
-    return [
-      {
-        queueList:[]
-      }
-    ]
-}
+  return qList.map(item => item.queueList);
+
 }

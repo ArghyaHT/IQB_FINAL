@@ -261,7 +261,7 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 export const getAllBarberbySalonIdKiosk = async (req, res, next) => {
     try {
         const { salonId, email } = req.query;
-        let query = {}; // Filter for isDeleted set to false
+        let query = {isApproved: true}; // Filter for isDeleted set to false
 
         const searchRegExpEmail = new RegExp('.*' + email + ".*", 'i');
 
