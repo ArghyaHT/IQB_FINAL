@@ -1604,7 +1604,7 @@ export const changeBarberClockInStatus = async (req, res, next) => {
 
                     const getQlistByBarber = await qListByBarberId(salonId, barberId);
                     const isOnline = false;
-                    if (getQlistByBarber.length === 0) {
+                    if (getQlistByBarber.length === 0  || []) {
                         await barberOnlineStatus(barberId, salonId, isOnline)
 
                         // Now, you can proceed with the logic after verifying the token
