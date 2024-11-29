@@ -30,7 +30,7 @@ export const sendMobileVerificationCode = async (number, verificationCode, body)
   let msgOptions = {
     from: twilioPhoneNumber,
     to: number,
-    body: `<#> Your verification code is ${verificationCode}. Don't Share.
+    body: `<#> Your verification code is ${verificationCode} Don't Share.
     `
 
   }
