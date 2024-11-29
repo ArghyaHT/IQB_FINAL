@@ -624,6 +624,7 @@ export const updateSalonImages = async (req, res, next) => {
       return ErrorHandler(IMAGE_FILE_SIZE_ERROR, ERROR_STATUS_CODE, res)
     }
 
+    
     // Generate a unique public_id based on the original file name
     const public_id = `${gallery.name.split(".")[0]}_${uuidv4()}`;
     const folderPath = `salon-gallery/salon-${salonId}`

@@ -1,5 +1,5 @@
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
-import { INTERVAL_MINUTES__ERROR, SALON_SETTINGS_ADD_SUCCESS, SALON_SETTINGS_NOT_FOUND_ERROR, SALON_SETTINGS_UPDATE_SUCCESS, START_END_TIME_EQUAL_ERROR, START_END_TIME_LATER_ERROR } from "../../../constants/web/SalonSettingsConstants.js";
+import { INTERVAL_MINUTES__ERROR, SALON_SETTINGS_ADD_SUCCESS, SALON_SETTINGS_EMPTY_ERROR, SALON_SETTINGS_ENDTIME_EMPTY_ERROR, SALON_SETTINGS_NOT_FOUND_ERROR, SALON_SETTINGS_STARTTIME_EMPTY_ERROR, SALON_SETTINGS_UPDATE_SUCCESS, START_END_TIME_EQUAL_ERROR, START_END_TIME_LATER_ERROR } from "../../../constants/web/SalonSettingsConstants.js";
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { findSalonSetingsBySalonId, saveNewSalonSettings } from "../../../services/web/salonSettings/salonSettingsService.js";
@@ -28,6 +28,21 @@ export const updateSalonSettings = async (req, res, next) => {
         const { salonId, appointmentSettings } = req.body;
         const { startTime, endTime, intervalInMinutes } = appointmentSettings;
 
+        if(!startTime && !endTime && !intervalInMinutes){
+        return ErrorHandler(SALON_SETTINGS_EMPTY_ERROR, ERROR_STATUS_CODE, res)
+
+        }
+
+        if(!startTime){
+            return ErrorHandler(SALON_SETTINGS_STARTTIME_EMPTY_ERROR, ERROR_STATUS_CODE, res)
+    
+        }
+
+        if(!endTime){
+            return ErrorHandler(SALON_SETTINGS_ENDTIME_EMPTY_ERROR, ERROR_STATUS_CODE, res)
+    
+        }
+        
         if(startTime === endTime){
         return ErrorHandler(START_END_TIME_EQUAL_ERROR, ERROR_STATUS_CODE, res)
 
