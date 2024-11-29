@@ -13,7 +13,7 @@ import { getAverageSalonRating } from "../../../services/web/ratings/ratingsServ
 import { validateEmail } from "../../../middlewares/validator.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
 import { ADMIN_NOT_EXIST_ERROR, EMAIL_NOT_FOUND_ERROR, IMAGE_FILE_EXTENSION_ERROR, IMAGE_FILE_SIZE_ERROR, INVALID_EMAIL_ERROR } from "../../../constants/web/adminConstants.js";
-import { SALON_ADDRESS_ERROR, SALON_BARBERS_FOUND_SUCCESS, SALON_CITY_ERROR, SALON_CONNECT_SUCCESS, SALON_CONTACT_TEL_ERROR, SALON_COORDINATES_ERROR, SALON_COUNTRY_ERROR, SALON_CREATE_SUCCESS, SALON_DELETE_SUCCESS, SALON_DESC_ERROR, SALON_DESCRIPTION_EMPTY_SUCCESS, SALON_DESCRIPTION_RETRIEVED_SUCCESS, SALON_DESCRIPTION_UPDATE_SUCCESS, SALON_EMAIL_NOT_PRESENT_ERROR, SALON_EXISTS_ERROR, SALON_GALLERY_DELETE_ERROR, SALON_GALLERY_EMPTY_ERROR, SALON_GALLERY_NOT_FOUND_ERROR, SALON_GALLERY_UPLOADED_ERROR, SALON_IMAGE_DELETE_SUCESS, SALON_IMAGE_RETRIEVED_SUCESS, SALON_IMAGES_UPLOAD_SUCESS, SALON_INVALID_EMAIL_ERROR, SALON_LOGO_DELETE_ERROR, SALON_LOGO_NOT_FOUND_ERROR, SALON_LOGO_UPLOAD_SUCCESS, SALON_NAME_ERROR, SALON_NOT_CREATED_ERROR, SALON_NOT_FOUND_ERROR, SALON_OFFLINE_SUCCESS, SALON_ONLINE_SUCCESS, SALON_POSTCODE_ERROR, SALON_SERVICES_ERROR, SALON_SERVICES_RETRIEVED_SUCESS, SALON_TIMEZONE_ERROR, SALON_UPDATE_SUCCESS, SALONID_EMPTY_ERROR, SALONS_RETRIEVED_SUCESS } from "../../../constants/web/SalonConstants.js";
+import { SALON_ADDRESS_ERROR, SALON_BARBERS_FOUND_SUCCESS, SALON_CITY_ERROR, SALON_CONNECT_SUCCESS, SALON_CONTACT_TEL_ERROR, SALON_COORDINATES_ERROR, SALON_COUNTRY_ERROR, SALON_CREATE_SUCCESS, SALON_DELETE_SUCCESS, SALON_DESC_ERROR, SALON_DESCRIPTION_EMPTY_SUCCESS, SALON_DESCRIPTION_RETRIEVED_SUCCESS, SALON_DESCRIPTION_UPDATE_SUCCESS, SALON_EMAIL_NOT_PRESENT_ERROR, SALON_EXISTS_ERROR, SALON_GALLERY_DELETE_ERROR, SALON_GALLERY_EMPTY_ERROR, SALON_GALLERY_NOT_FOUND_ERROR, SALON_GALLERY_UPLOADED_ERROR, SALON_IMAGE_DELETE_SUCESS, SALON_IMAGE_RETRIEVED_SUCESS, SALON_IMAGES_UPLOAD_SUCESS, SALON_INVALID_EMAIL_ERROR, SALON_LOGO_DELETE_ERROR, SALON_LOGO_NOT_FOUND_ERROR, SALON_LOGO_UPLOAD_SUCCESS, SALON_NAME_ERROR, SALON_NOT_CREATED_ERROR, SALON_NOT_FOUND_ERROR, SALON_OFFLINE_SUCCESS, SALON_ONLINE_SUCCESS, SALON_POSTCODE_ERROR, SALON_SERVICES_ERROR, SALON_SERVICES_RETRIEVED_SUCESS, SALON_TIMEZONE_ERROR, SALON_TYPE_ERROR, SALON_UPDATE_SUCCESS, SALONID_EMPTY_ERROR, SALONS_RETRIEVED_SUCESS, SERVICE_DESC_ERROR, SERVICE_NAME_ERROR } from "../../../constants/web/SalonConstants.js";
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js"
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ALLOWED_IMAGE_EXTENSIONS, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
@@ -46,25 +46,8 @@ export const createSalonByAdmin = async (req, res, next) => {
 
   try {
 
-
     if (!adminEmail) {
       return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-
-    // Validate email format
-    if (!validateEmail(adminEmail)) {
-      return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-
-    if (!salonEmail) {
-      return ErrorHandler(SALON_EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-    // Validate email format
-    if (!validateEmail(salonEmail)) {
-      return ErrorHandler(SALON_INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
     }
 
     if (!salonName) {
@@ -75,6 +58,29 @@ export const createSalonByAdmin = async (req, res, next) => {
     if (salonName && (salonName.length < 1 || salonName.length > 20)) {
       return ErrorHandler(SALON_NAME_ERROR, ERROR_STATUS_CODE, res)
     }
+
+
+    if (!salonEmail) {
+      return ErrorHandler(SALON_EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
+    }
+
+    if (!validateEmail(salonEmail)) {
+      return ErrorHandler(SALON_INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+    }
+    
+    if (salonDesc && (salonDesc.length < 1 || salonDesc.length > 35)) {
+      return ErrorHandler(SALON_DESC_ERROR, ERROR_STATUS_CODE, res)
+    }
+
+
+    if (address && (address.length < 1 || address.length > 100)) {
+      return ErrorHandler(SALON_ADDRESS_ERROR, ERROR_STATUS_CODE, res)
+    }
+
+    if (!location || !location.coordinates || location.coordinates.latitude === null || location.coordinates.longitude === null) {
+      return ErrorHandler(SALON_COORDINATES_ERROR, ERROR_STATUS_CODE, res)
+    }
+
 
     if (!country) {
       return ErrorHandler(SALON_COUNTRY_ERROR, ERROR_STATUS_CODE, res)
@@ -88,20 +94,24 @@ export const createSalonByAdmin = async (req, res, next) => {
       return ErrorHandler(SALON_TIMEZONE_ERROR, ERROR_STATUS_CODE, res)
     }
 
+    if (!timeZone) {
+      return ErrorHandler(SALON_TIMEZONE_ERROR, ERROR_STATUS_CODE, res)
+    }
+
+    if (postCode && !/^\d{1,8}$/.test(postCode)) {
+      return ErrorHandler(SALON_POSTCODE_ERROR, ERROR_STATUS_CODE, res)
+    }
+
+    if (!salonType) {
+      return ErrorHandler(SALON_TYPE_ERROR, ERROR_STATUS_CODE, res)
+    }
+
     if (!contactTel) {
       return ErrorHandler(SALON_CONTACT_TEL_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (address && (address.length < 1 || address.length > 100)) {
-      return ErrorHandler(SALON_ADDRESS_ERROR, ERROR_STATUS_CODE, res)
-    }
 
-    if (!location || !location.coordinates || location.coordinates.latitude === null || location.coordinates.longitude === null) {
-      return ErrorHandler(SALON_COORDINATES_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-
-
+ 
 
     // Convert mobile number to string only if it's a number
     let contactTelStr = typeof contactTel === 'number' ? contactTel.toString() : contactTel;
@@ -127,18 +137,13 @@ export const createSalonByAdmin = async (req, res, next) => {
     const formattedNumberAsNumber = parseInt(nationalNumber);
 
     // Validate the format and length of the contactTel
-    if (postCode && !/^\d{1,8}$/.test(postCode)) {
-      return ErrorHandler(SALON_POSTCODE_ERROR, ERROR_STATUS_CODE, res)
-    }
+  
 
     // Check if services array is empty
     if (!services || services.length === 0) {
       return ErrorHandler(SALON_SERVICES_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (salonDesc&& (salonDesc.length < 1 || salonDesc.length > 35)) {
-      return ErrorHandler(SALON_DESC_ERROR, ERROR_STATUS_CODE, res)
-    }
 
     //Find the Salon If exits 
     const existingSalon = await findSalonBySalonNameOrEmail(salonName, salonEmail)
@@ -156,22 +161,23 @@ export const createSalonByAdmin = async (req, res, next) => {
 
     const salonCode = firstTwoLetters + salonId;
 
-    const servicesData = services.map((s, i) => ({
 
-      //Service desc 50 characters needed
-      serviceId: `${salonId}${i + 1}`,
-      serviceCode: `${s.serviceName.slice(0, 2).toUpperCase()}${salonId}${i + 1}`,
-      serviceName: s.serviceName,
-      serviceIcon: {
-        public_id: s.serviceIcon.public_id,
-        url: s.serviceIcon.url,
-      },
-      serviceDesc: s.serviceDesc,
-      servicePrice: s.servicePrice,
-      serviceEWT: s.serviceEWT,
-      vipService: s.vipService
+    const servicesData = services.map((s, i) => {
 
-    }));
+      return {
+        serviceId: `${salonId}${i + 1}`,
+        serviceCode: `${s.serviceName.slice(0, 2).toUpperCase()}${salonId}${i + 1}`,
+        serviceName: s.serviceName,
+        serviceIcon: {
+          public_id: s.serviceIcon.public_id,
+          url: s.serviceIcon.url,
+        },
+        serviceDesc: s.serviceDesc,
+        servicePrice: s.servicePrice,
+        serviceEWT: s.serviceEWT,
+        vipService: s.vipService,
+      };
+    });
 
     //Save the Salon
     const salonData = {
@@ -229,6 +235,7 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
       salonId,
       adminEmail,
       address,
+      postCode,
       salonDesc,
       salonType,
       contactTel,
@@ -242,35 +249,34 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
     } = req.body
 
 
-    // Check if required fields are missing or empty
-    if (!salonId) {
-      return ErrorHandler(SALONID_EMPTY_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-    if (!services || services.length === 0) {
-      return ErrorHandler(SALON_SERVICES_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-    if (!adminEmail) {
+     if (!adminEmail) {
       return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
     }
 
-
-    // Validate email format
-    if (!validateEmail(adminEmail)) {
-      return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+    if (!salonName) {
+      return ErrorHandler(SALON_NAME_ERROR, ERROR_STATUS_CODE, res)
     }
+
 
     if (salonName && (salonName.length < 1 || salonName.length > 20)) {
       return ErrorHandler(SALON_NAME_ERROR, ERROR_STATUS_CODE, res)
     }
+    
+    if (salonDesc && (salonDesc.length < 1 || salonDesc.length > 35)) {
+      return ErrorHandler(SALON_DESC_ERROR, ERROR_STATUS_CODE, res)
+    }
+
 
     if (address && (address.length < 1 || address.length > 100)) {
       return ErrorHandler(SALON_ADDRESS_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (salonDesc&& (salonDesc.length < 1 || salonDesc.length > 35)) {
-      return ErrorHandler(SALON_DESC_ERROR, ERROR_STATUS_CODE, res)
+    if (postCode && !/^\d{1,8}$/.test(postCode)) {
+      return ErrorHandler(SALON_POSTCODE_ERROR, ERROR_STATUS_CODE, res)
+    }
+
+    if (!contactTel) {
+      return ErrorHandler(SALON_CONTACT_TEL_ERROR, ERROR_STATUS_CODE, res)
     }
 
     // Convert mobile number to string only if it's a number
@@ -305,11 +311,6 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
     }
 
     if (services && Array.isArray(services)) {
-
-      salon.services = salon.services.filter((existingService) =>
-        services.some((s) => s.serviceId === existingService.serviceId)
-      );
-
 
       // If services are provided, update the services
       const updatedServices = salon.services.map((existingService, i) => {
@@ -382,6 +383,7 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
       salonId,
       adminEmail,
       address,
+      postCode,
       salonDesc,
       salonType,
       contactTel: formattedNumberAsNumber,

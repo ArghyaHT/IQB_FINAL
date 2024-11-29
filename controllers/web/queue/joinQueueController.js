@@ -25,31 +25,33 @@ export const getQueueListBySalonId = async (req, res, next) => {
     try {
         const salonId = parseInt(req.query.salonId, 10);
 
-        // Check if the salon exists in the database
-        if (salonId) {
-            const salonExists = await checkSalonExists(salonId); // Assuming checkSalonExists is a function that checks if the salon exists
 
-            if (!salonExists) {
-                return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
-            }
-
-            //To find the queueList according to salonId and sort it according to qposition
-            const getSalon = await getSalonQlist(salonId)
-
-            if (!getSalon ) {
-                return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res,)
-
-            }
-            else{
-                const sortedQueueList = getSalon[0].queueList;
-
-                return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQueueList })
-    
-            }      
+        if (Number(salonId) === 0) {
+            return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res)
         }
+
+        const salonExists = await checkSalonExists(salonId); // Assuming checkSalonExists is a function that checks if the salon exists
+
+        if (!salonExists) {
+            return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        //To find the queueList according to salonId and sort it according to qposition
+        const getSalon = await getSalonQlist(salonId)
+
+        if (!getSalon) {
+            return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res)
+
+        }
+        else {
+            const sortedQueueList = getSalon[0].queueList;
+
+            return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQueueList })
+
+        }
+
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -823,7 +825,7 @@ export const getQlistbyBarberId = async (req, res, next) => {
             //     queueList: []
             // });
 
-        return ErrorHandler(QUEUELIST_BARBER_ERROR, ERROR_STATUS_CODE, res,)
+            return ErrorHandler(QUEUELIST_BARBER_ERROR, ERROR_STATUS_CODE, res,)
 
         }
 

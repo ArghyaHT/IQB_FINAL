@@ -663,11 +663,11 @@ export const createBarberByAdmin = async (req, res, next) => {
                 </div>
                 <h1 class="header">Your Login Details</h1>
                 <div class="details">
-                    <p>Dear ${name},</p>
+                    <p>Dear Barber,</p>
                     <p>Your auto-generated random password is provided below. Please log in with this password and reset it upon login.</p>
                     <ul>
                         <li>Salon Name: ${salonDetails.salonName}</li>
-                        <li>Barber Name: ${name}</li>
+                        <li>Email: ${email}</li>
                         <li>Password: ${randomPassword}</li>
                     </ul>
                 </div>
@@ -985,7 +985,6 @@ export const getAllBarberbySalonId = async (req, res, next) => {
             return ErrorHandler(SALON_NOT_CREATED_ERROR, ERROR_STATUS_CODE, res)
         }
         else {
-
             // Check if the salon exists in the database
             const salonExists = await checkSalonExists(salonId); // Assuming checkSalonExists is a function that checks if the salon exists
             if (salonExists === null) {
@@ -1154,6 +1153,64 @@ export const changeBarberWorkingStatus = async (req, res, next) => {
 
 }
 
+
+//Desc: Change Barber Clock In Status
+export const changeBarberClockInStatus = async (req, res, next) => {
+    try {
+        const { barberId, salonId, isClockedIn } = req.body;
+
+        const salon = await getSalonBySalonId(salonId);
+
+        if (salon.isOnline === false) {
+            return res.status(400).json({ success: false, message: 'Salon is offline' });
+        }
+
+        const getBarber = await getBarberByBarberId(barberId);
+
+        if (getBarber.isApproved === false) {
+            return ErrorHandler(BARBER_NOT_APPROVE_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        if (isClockedIn === true) {
+            // Now, you can proceed with the logic after verifying the token
+            const updatedBarber = await barberClockInStatus(barberId, salonId, isClockedIn);
+
+            if (!updatedBarber) {
+                return ErrorHandler(`Cant clockedIn as ${BARBER_NOT_EXIST_ERROR}`, ERROR_STATUS_CODE, res)
+            }
+            await barberLogInTime(updatedBarber.salonId, updatedBarber.barberId, updatedBarber.updatedAt);
+
+            return SuccessHandler(BARBER_CLOCKIN_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
+        }
+        else {
+
+            const getQlistByBarber = await qListByBarberId(salonId, barberId);
+            const isOnline = false;
+            if (getQlistByBarber.length === 0) {
+                await barberOnlineStatus(barberId, salonId, isOnline)
+
+                // Now, you can proceed with the logic after verifying the token
+                const updatedBarber = await barberClockInStatus(barberId, salonId, isClockedIn);
+
+                if (!updatedBarber) {
+                    return ErrorHandler(`Cant clockedIn as ${BARBER_NOT_EXIST_ERROR}`, ERROR_STATUS_CODE, res)
+                }
+
+                await barberLogOutTime(updatedBarber.salonId, updatedBarber.barberId, updatedBarber.updatedAt);
+
+                return SuccessHandler(BARBER_CLOCKOUT_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
+            }
+
+            else {
+                return ErrorHandler(CUSTOMERS_IN_QUEUE_ERROR, ERROR_STATUS_CODE, res)
+            }
+        }
+
+    } catch (error) {
+        next(error);
+    }
+};
+
 // Desc: Change BarberOnline Status
 export const changeBarberOnlineStatus = async (req, res, next) => {
     try {
@@ -1166,7 +1223,9 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
         }
         const getbarber = await getBarberByBarberId(barberId);
 
-
+        if (getbarber.isApproved === false) {
+            return ErrorHandler(BARBER_NOT_APPROVE_ERROR, ERROR_STATUS_CODE, res)
+        }
 
         if (getbarber.isClockedIn === false) {
             return ErrorHandler(BARBER_CLOCKIN_ERROR, ERROR_STATUS_CODE, res)
@@ -1308,62 +1367,7 @@ export const getBarberDetailsByEmail = async (req, res) => {
     }
 }
 
-//Desc: Change Barber Clock In Status
-export const changeBarberClockInStatus = async (req, res, next) => {
-    try {
-        const { barberId, salonId, isClockedIn } = req.body;
 
-        const salon = await getSalonBySalonId(salonId);
-
-        if (salon.isOnline === false) {
-            return res.status(400).json({ success: false, message: 'Salon is offline' });
-        }
-
-        const getBarber = await getBarberByBarberId(barberId);
-
-        if (getBarber.isApproved === false) {
-            return ErrorHandler(BARBER_NOT_APPROVE_ERROR, ERROR_STATUS_CODE, res)
-        }
-
-        if (isClockedIn === true) {
-            // Now, you can proceed with the logic after verifying the token
-            const updatedBarber = await barberClockInStatus(barberId, salonId, isClockedIn);
-
-            if (!updatedBarber) {
-                return ErrorHandler(`Cant clockedIn as ${BARBER_NOT_EXIST_ERROR}`, ERROR_STATUS_CODE, res)
-            }
-            await barberLogInTime(updatedBarber.salonId, updatedBarber.barberId, updatedBarber.updatedAt);
-
-            return SuccessHandler(BARBER_CLOCKIN_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
-        }
-        else {
-
-            const getQlistByBarber = await qListByBarberId(salonId, barberId);
-            const isOnline = false;
-            if (getQlistByBarber.length === 0) {
-                await barberOnlineStatus(barberId, salonId, isOnline)
-
-                // Now, you can proceed with the logic after verifying the token
-                const updatedBarber = await barberClockInStatus(barberId, salonId, isClockedIn);
-
-                if (!updatedBarber) {
-                    return ErrorHandler(`Cant clockedIn as ${BARBER_NOT_EXIST_ERROR}`, ERROR_STATUS_CODE, res)
-                }
-
-                await barberLogOutTime(updatedBarber.salonId, updatedBarber.barberId, updatedBarber.updatedAt);
-
-                return SuccessHandler(BARBER_CLOCKOUT_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
-            }
-
-            else {
-                return ErrorHandler(CUSTOMERS_IN_QUEUE_ERROR, ERROR_STATUS_CODE, res)
-            }
-        }
-
-    } catch (error) {
-        next(error);
-    }
-};
 
 
 //DESC:SEND ADMIN MOBILE NUMBER VERIFICATION CODE ============================

@@ -10,11 +10,15 @@ export const SALON_CONTACT_TEL_ERROR = "Invalid phone number"
 export const SALON_ADDRESS_ERROR = "Address must be between 1 to 100 characters"
 export const SALON_COORDINATES_ERROR = "Coordinates is not present"
 export const SALON_POSTCODE_ERROR = "Post code must be between 1 to 8 digits"
-export const SALON_SERVICES_ERROR = "Services is empty"
+export const SALON_SERVICES_ERROR = "Please provide a service"
 export const SALON_DESC_ERROR = "Salon description must be between 1 to 35 characters"
 export const SALON_EXISTS_ERROR = "Salon already exists"
 export const SALONID_EMPTY_ERROR = "SalonId not found"
-export const SALON_NOT_FOUND_ERROR = "Salon Not found"
+export const SALON_NOT_FOUND_ERROR = "Salon not found"
+export const SALON_TYPE_ERROR = "Please select salon type"
+export const SERVICE_NAME_ERROR = "Service name must be between 1 to 25 charecters"
+export const SERVICE_DESC_ERROR = "Service description must be between 1 to 50 charecters"
+
 
 export const SALON_NOT_CREATED_ERROR = "There is no salon available currently"
 
