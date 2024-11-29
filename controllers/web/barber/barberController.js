@@ -20,11 +20,11 @@ import { qListByBarberId } from "../../../services/web/queue/joinQueueService.js
 import { barberLogInTime, barberLogOutTime } from "../../../utils/attendence/barberAttendence.js";
 import { sendMobileVerificationCode } from "../../../utils/mobileMessageSender/mobileMessageSender.js";
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
-import { EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, EMAIL_VERIFIED_SUCCESS, EMAIL_VERIFY_CODE_ERROR, FILL_ALL_FIELDS_ERROR, FORGET_PASSWORD_SUCCESS, FORGOT_PASSWORD_EMAIL_ERROR, IMAGE_EMPTY_ERROR, INCORRECT_OLD_PASSWORD_ERROR, INVALID_EMAIL_ERROR, MOBILE_NUMBER_ERROR, MOBILE_VERIFIED_SUCCESS, MOBILE_VERIFY_CODE_ERROR, NAME_LENGTH_ERROR, NEW_PASSWORD_ERROR, OLD_AND_NEW_PASSWORD_DONOT_MATCH, OLD_PASSWORD_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, RESET_PASSWORD_SUCCESS, SEND_VERIFICATION_EMAIL_SUCCESS, SEND_VERIFICATION_MOBILE_SUCCESS, VERIFICATION_EMAIL_ERROR } from "../../../constants/web/adminConstants.js";
+import { EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, EMAIL_VERIFIED_SUCCESS, EMAIL_VERIFY_CODE_ERROR, FILL_ALL_FIELDS_ERROR, FORGET_PASSWORD_SUCCESS, FORGOT_PASSWORD_EMAIL_ERROR, IMAGE_EMPTY_ERROR, IMAGE_FILE_EXTENSION_ERROR, IMAGE_FILE_SIZE_ERROR, IMAGE_UPLOAD_SUCCESS, INCORRECT_OLD_PASSWORD_ERROR, INVALID_EMAIL_ERROR, MOBILE_NUMBER_ERROR, MOBILE_VERIFIED_SUCCESS, MOBILE_VERIFY_CODE_ERROR, NAME_LENGTH_ERROR, NEW_PASSWORD_ERROR, OLD_AND_NEW_PASSWORD_DONOT_MATCH, OLD_PASSWORD_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, RESET_PASSWORD_SUCCESS, SEND_VERIFICATION_EMAIL_SUCCESS, SEND_VERIFICATION_MOBILE_SUCCESS, VERIFICATION_EMAIL_ERROR } from "../../../constants/web/adminConstants.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
 import { BARBER_CLOCKIN_ERROR, BARBER_CLOCKIN_SUCCESS, BARBER_CLOCKOUT_SUCCESS, BARBER_CONNECT_SALON_SUCCESS, BARBER_DETAILS_SUCCESS, BARBER_EXISTS_ERROR, BARBER_NOT_APPROVE_ERROR, BARBER_NOT_EXIST_ERROR, BARBER_SERVICES_SUCCESS, CHANGE_BARBER_ONLINE_SUCCESS, CHANGE_PASSWORD_SUCCESS, CREATE_BARBER_SUCCESS, CUSTOMERS_IN_QUEUE_ERROR, EMPTY_SERVICE_ERROR, GET_ALL_BARBER_SUCCESS, LOGOUT_SUCCESS, NO_BARBER_SERVICEID_ERROR, NO_BARBERS_ERROR, SELECT_SERVICE_ERROR, SIGNIN_SUCCESS, SIGNUP_SUCCESS, UPDATE_BARBER_SUCCESS } from "../../../constants/web/BarberConstants.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
-import { ALLOWED_IMAGE_EXTENSIONS, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
+import { ALLOWED_IMAGE_EXTENSIONS, BARBER_IMAGE_EMPTY_ERROR, IMAGE_FAILED_DELETE, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 import { SALON_EXISTS_ERROR, SALON_NOT_CREATED_ERROR } from "../../../constants/web/SalonConstants.js";
 
 
@@ -784,93 +784,163 @@ export const updateBarberByAdmin = async (req, res, next) => {
 
 
 // Desc: Upload Barber Profile Pic
+// export const uploadBarberprofilePic = async (req, res, next) => {
+//     try {
+//         let profiles = req.files.profile;
+//         let email = req.body.email;
+
+//         if (!email) {
+//             return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
+//         }
+
+//         if (!profiles) {
+//             return ErrorHandler(IMAGE_EMPTY_ERROR, ERROR_STATUS_CODE, res)
+//         }
+
+//         // Ensure profiles is an array for single or multiple uploads
+//         if (!Array.isArray(profiles)) {
+//             profiles = [profiles];
+//         }
+
+//         // Allowed file extensions and maximum file size (2MB)
+//         const allowedExtensions = ALLOWED_IMAGE_EXTENSIONS;
+//         const maxFileSize = MAX_FILE_SIZE;
+
+//         // Find the existing barber by email
+//         const existingBarber = await findBarberByEmailAndRole(email);
+
+// // Validate files before uploading
+// for (let profile of profiles) {
+//     const extension = path.extname(profile.name).toLowerCase().slice(1);
+
+//     if (!allowedExtensions.includes(extension)) {
+//         return res.status(400).json({ success: false, message: "Invalid file extension. Allowed extensions are jpg, png, jfif, svg, jpeg, webp." });
+//     }
+
+//     if (profile.size > maxFileSize) {
+//         return res.status(400).json({ success: false, message: "File size must be lower than 2MB." });
+//     }
+// }
+
+//         // Delete the existing profile picture if it exists
+//         if (existingBarber && existingBarber.profile && Array.isArray(existingBarber.profile) && existingBarber.profile.length > 0) {
+//             const oldProfile = existingBarber.profile[0];
+//             if (oldProfile && oldProfile.public_id) {
+//                 try {
+//                     const result = await cloudinary.uploader.destroy(oldProfile.public_id);
+
+//                     if (result.result !== 'ok') {
+//                         return res.status(400).json({ success: false, message: 'Failed to delete old image.' });
+//                     }
+//                 } catch (err) {
+//                     return res.status(500).json({ success: false, message: 'Failed to delete old image.', error: err.message });
+//                 }
+//             } else {
+//                 console.log('No valid profile picture found or missing public_id for deletion');
+//             }
+//         } else {
+//             console.log('No existing profile picture or profile array is empty');
+//         }
+
+//         // Upload new profile image(s) to Cloudinary
+//         const uploadPromises = profiles.map(profile => {
+//             const public_id = `${profile.name.split('.')[0]}_${uuidv4()}`;
+//             const folderPath = `barbers`;
+
+//             return cloudinary.uploader.upload(profile.tempFilePath, {
+//                 public_id,
+//                 folder: folderPath,
+//             }).then(image => {
+//                 // Delete the temporary file after uploading
+//                 fs.unlink(profile.tempFilePath, err => {
+//                     if (err) console.error('Failed to delete temporary file:', err);
+//                 });
+//                 return { public_id: image.public_id, url: image.secure_url };
+//             });
+//         });
+
+//         const profileImg = await Promise.all(uploadPromises);
+
+//         // Update the barber profile picture in the database
+//         const barberImage = await uploadBarberProPic(email, profileImg);
+
+//         // Send the response
+//         res.status(200).json({
+//             success: true,
+//             message: "Files uploaded successfully",
+//             response: barberImage,
+//         });
+
+//     } catch (error) {
+//         next(error);
+//     }
+// };
+
+
 export const uploadBarberprofilePic = async (req, res, next) => {
     try {
+
         let profiles = req.files.profile;
-        let email = req.body.email;
+        const { email } = req.body;
 
         if (!email) {
-            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        if (!profiles) {
-            return ErrorHandler(IMAGE_EMPTY_ERROR, ERROR_STATUS_CODE, res)
+        if (!req.files || !req.files.profile) {
+            return ErrorHandler(BARBER_IMAGE_EMPTY_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        // Ensure profiles is an array for single or multiple uploads
         if (!Array.isArray(profiles)) {
-            profiles = [profiles];
+            profiles = [profiles]; // Ensure profiles is always an array
         }
 
-        // Allowed file extensions and maximum file size (2MB)
+        // Allowed file extensions
         const allowedExtensions = ALLOWED_IMAGE_EXTENSIONS;
         const maxFileSize = MAX_FILE_SIZE;
 
         // Find the existing barber by email
         const existingBarber = await findBarberByEmailAndRole(email);
 
-        // Validate files before uploading
-        for (let profile of profiles) {
-            const extension = path.extname(profile.name).toLowerCase().slice(1);
+        if (!existingBarber) {
+            return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
+        }
 
+        // Validate each profile image before uploading
+        for (const profile of profiles) {
+            const extension = path.extname(profile.name).toLowerCase().slice(1);
             if (!allowedExtensions.includes(extension)) {
-                return res.status(400).json({ success: false, message: "Invalid file extension. Allowed extensions are jpg, png, jfif, svg, jpeg, webp." });
+                return ErrorHandler(IMAGE_FILE_EXTENSION_ERROR, ERROR_STATUS_CODE, res)
             }
 
             if (profile.size > maxFileSize) {
-                return res.status(400).json({ success: false, message: "File size must be lower than 2MB." });
+                return ErrorHandler(IMAGE_FILE_SIZE_ERROR, ERROR_STATUS_CODE, res)
             }
         }
 
-        // Delete the existing profile picture if it exists
-        if (existingBarber && existingBarber.profile && Array.isArray(existingBarber.profile) && existingBarber.profile.length > 0) {
-            const oldProfile = existingBarber.profile[0];
-            if (oldProfile && oldProfile.public_id) {
-                try {
-                    const result = await cloudinary.uploader.destroy(oldProfile.public_id);
-
-                    if (result.result !== 'ok') {
-                        return res.status(400).json({ success: false, message: 'Failed to delete old image.' });
-                    }
-                } catch (err) {
-                    return res.status(500).json({ success: false, message: 'Failed to delete old image.', error: err.message });
-                }
-            } else {
-                console.log('No valid profile picture found or missing public_id for deletion');
-            }
-        } else {
-            console.log('No existing profile picture or profile array is empty');
-        }
-
-        // Upload new profile image(s) to Cloudinary
+        // Process the valid profile images and upload to Cloudinary
         const uploadPromises = profiles.map(profile => {
             const public_id = `${profile.name.split('.')[0]}_${uuidv4()}`;
             const folderPath = `barbers`;
 
-            return cloudinary.uploader.upload(profile.tempFilePath, {
-                public_id,
-                folder: folderPath,
-            }).then(image => {
-                // Delete the temporary file after uploading
-                fs.unlink(profile.tempFilePath, err => {
-                    if (err) console.error('Failed to delete temporary file:', err);
+            return cloudinary.uploader.upload(profile.tempFilePath, { public_id, folder: folderPath })
+                .then(image => {
+                    // Delete the temporary file after uploading
+                    fs.unlink(profile.tempFilePath, err => {
+                        if (err)
+                            return console.log(IMAGE_FAILED_DELETE, err)
+
+                    });
+
+                    return { public_id: image.public_id, url: image.secure_url };
                 });
-                return { public_id: image.public_id, url: image.secure_url };
-            });
         });
 
         const profileImg = await Promise.all(uploadPromises);
 
-        // Update the barber profile picture in the database
         const barberImage = await uploadBarberProPic(email, profileImg);
 
-        // Send the response
-        res.status(200).json({
-            success: true,
-            message: "Files uploaded successfully",
-            response: barberImage,
-        });
-
+        return SuccessHandler(IMAGE_UPLOAD_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barberImage });
     } catch (error) {
         next(error);
     }

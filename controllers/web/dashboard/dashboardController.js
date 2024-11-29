@@ -14,12 +14,6 @@ import { ALLOWED_IMAGE_EXTENSIONS, MAX_FILE_SIZE } from "../../../constants/web/
 import { IMAGE_FILE_EXTENSION_ERROR, IMAGE_FILE_SIZE_ERROR } from "../../../constants/web/adminConstants.js";
 import { SALON_NOT_CREATED_ERROR } from "../../../constants/web/SalonConstants.js";
 
-// cloudinary.config({
-//   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-//   api_key: process.env.CLOUDINARY_API_KEY,
-//   api_secret: process.env.CLOUDINARY_API_SECRET,
-// });
-
 //DESC: ADD ADVERTISEMENTS ====================
 export const addAdvertisements = async (req, res, next) => {
   try {
@@ -42,10 +36,7 @@ export const addAdvertisements = async (req, res, next) => {
     for (const advertisement of advertisements) {
       const extension = path.extname(advertisement.name).toLowerCase().slice(1);
       if (!allowedExtensions.includes(extension)) {
-        return res.status(400).json({
-          success: false,
-          message: `Invalid file extension for ${advertisement.name}. Allowed: ${allowedExtensions.join(', ')}`,
-        });
+        return ErrorHandler(IMAGE_FILE_EXTENSION_ERROR, ERROR_STATUS_CODE, res)
       }
 
       if (advertisement.size > maxFileSize) {

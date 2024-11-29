@@ -13,12 +13,6 @@ import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/C
 import { CHECK_EMAIL_SUCCESS, EMAIL_EXISTS_ERROR } from "../../../constants/web/CustomerConstants.js";
 import { SALON_EXISTS_ERROR, SALON_NOT_CREATED_ERROR } from "../../../constants/web/SalonConstants.js";
 
-// cloudinary.config({
-//     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-//     api_key: process.env.CLOUDINARY_API_KEY,
-//     api_secret: process.env.CLOUDINARY_API_SECRET,
-// });
-
 //DESC:CHECK WEATHER THE EMAIL ALREADY EXISTS IN THE DATABASE =======
 export const checkEmail = async (req, res, next) => {
     try {

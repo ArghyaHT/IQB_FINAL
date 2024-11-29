@@ -16,6 +16,7 @@ import { ADMIN_NOT_EXIST_ERROR, EMAIL_NOT_FOUND_ERROR, IMAGE_FILE_EXTENSION_ERRO
 import { SALON_ADDRESS_ERROR, SALON_BARBERS_FOUND_SUCCESS, SALON_CITY_ERROR, SALON_CONNECT_SUCCESS, SALON_CONTACT_TEL_ERROR, SALON_COORDINATES_ERROR, SALON_COUNTRY_ERROR, SALON_CREATE_SUCCESS, SALON_DELETE_SUCCESS, SALON_DESC_ERROR, SALON_DESCRIPTION_EMPTY_SUCCESS, SALON_DESCRIPTION_RETRIEVED_SUCCESS, SALON_DESCRIPTION_UPDATE_SUCCESS, SALON_EMAIL_NOT_PRESENT_ERROR, SALON_EXISTS_ERROR, SALON_GALLERY_DELETE_ERROR, SALON_GALLERY_EMPTY_ERROR, SALON_GALLERY_NOT_FOUND_ERROR, SALON_GALLERY_UPLOADED_ERROR, SALON_IMAGE_DELETE_SUCESS, SALON_IMAGE_RETRIEVED_SUCESS, SALON_IMAGES_UPLOAD_SUCESS, SALON_INVALID_EMAIL_ERROR, SALON_LOGO_DELETE_ERROR, SALON_LOGO_NOT_FOUND_ERROR, SALON_LOGO_UPLOAD_SUCCESS, SALON_NAME_ERROR, SALON_NOT_CREATED_ERROR, SALON_NOT_FOUND_ERROR, SALON_OFFLINE_SUCCESS, SALON_ONLINE_SUCCESS, SALON_POSTCODE_ERROR, SALON_SERVICES_ERROR, SALON_SERVICES_RETRIEVED_SUCESS, SALON_TIMEZONE_ERROR, SALON_UPDATE_SUCCESS, SALONID_EMPTY_ERROR, SALONS_RETRIEVED_SUCESS } from "../../../constants/web/SalonConstants.js";
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js"
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
+import { ALLOWED_IMAGE_EXTENSIONS, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 
 
 //DESC:CREATE SALON BY ADMIN============================
@@ -502,8 +503,8 @@ export const uploadMoreSalonGalleryImages = async (req, res, next) => {
     let galleries = req.files.gallery;
     let salonId = req.body.salonId;
 
-    const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', "svg"];
-    const maxFileSize = 2 * 1024 * 1024;
+    const allowedExtensions = ALLOWED_IMAGE_EXTENSIONS;
+    const maxFileSize = MAX_FILE_SIZE;
 
     // Ensure that profiles is an array, even for single uploads
     if (!Array.isArray(galleries)) {
@@ -514,8 +515,7 @@ export const uploadMoreSalonGalleryImages = async (req, res, next) => {
     for (const gallery of galleries) {
       const extension = path.extname(gallery.name).toLowerCase().slice(1);
       if (!allowedExtensions.includes(extension)) {
-        return ErrorHandler(IMAGE_FILE_EXTENSION_ERROR, ERROR_STATUS_CODE, res)
-      }
+        return ErrorHandler(IMAGE_FILE_EXTENSION_ERROR, ERROR_STATUS_CODE, res)      }
 
       if (gallery.size > maxFileSize) {
         return ErrorHandler(IMAGE_FILE_SIZE_ERROR, ERROR_STATUS_CODE, res)
@@ -586,8 +586,8 @@ export const updateSalonImages = async (req, res, next) => {
     const salonProfile = await findSalonProfileById(id)
 
     // Validate Image
-    const maxFileSize = 2 * 1024 * 1024;
-    const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', "svg"];
+    const allowedExtensions = ALLOWED_IMAGE_EXTENSIONS;
+    const maxFileSize = MAX_FILE_SIZE;
     const fileExt = gallery.name.split(".")[1];
 
     if (maxFileSize > 2048) {
@@ -654,25 +654,12 @@ export const deleteSalonImages = async (req, res, next) => {
 
 
     if (result.result !== 'ok') {
-      // return res.status(404).json({
-      //   success: false,
-      //   message: 'Failed to delete salon image'
-      // });
       return ErrorHandler(SALON_GALLERY_DELETE_ERROR, ERROR_STATUS_CODE, res)
     }
 
     if (updatedSalon) {
-      // res.status(200).json({
-      //   success: true,
-      //   message: "Salon image deleted successfully",
-      //   response: deletedImage
-      // })
       return SuccessHandler(SALON_IMAGE_DELETE_SUCESS, SUCCESS_STATUS_CODE, res, { response: deletedImage })
     } else {
-      // res.status(404).json({
-      //   success: false,
-      //   message: 'Image not found.'
-      // });
       return ErrorHandler(SALON_GALLERY_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
 
     }
@@ -699,20 +686,11 @@ export const getSalonImages = async (req, res, next) => {
     const salongallery = await getSalonGallery(salonId);
 
     if (!salongallery) {
-      // return res.status(201).json({
-      //   success: false,
-      //   message: "Salon not found"
-      // });
       return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
     }
     // Sort advertisements array in descending order
     const sortedSalonGallery = salongallery.gallery.reverse();
 
-    // res.status(200).json({
-    //   success: true,
-    //   message: 'Salon images retrieved successfully',
-    //   response: sortedSalonGallery
-    // });
     return SuccessHandler(SALON_IMAGE_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: sortedSalonGallery })
 
   } catch (error) {
@@ -951,10 +929,8 @@ export const uploadSalonLogo = async (req, res, next) => {
       return ErrorHandler(SALON_LOGO_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    // Allowed file extensions
-    const allowedExtensions = ["jpg", "png", "jfif", "svg", "jpeg", "webp"];
-    // Maximum file size in bytes (e.g., 2MB)
-    const maxFileSize = 2 * 1024 * 1024;
+    const allowedExtensions = ALLOWED_IMAGE_EXTENSIONS;
+    const maxFileSize = MAX_FILE_SIZE;
 
     // Ensure that salonLogo is an array, even for single uploads
     const salonLogos = Array.isArray(salonLogo) ? salonLogo : [salonLogo];

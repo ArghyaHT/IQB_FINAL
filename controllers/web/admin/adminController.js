@@ -22,6 +22,7 @@ import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ADMIN_EXISTS_ERROR, EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, FORGOT_PASSWORD_EMAIL_ERROR, INVALID_EMAIL_ERROR, MOBILE_NUMBER_ERROR, NAME_LENGTH_ERROR, NEW_PASSWORD_ERROR, OLD_PASSWORD_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, ADMIN_NOT_EXIST_ERROR, IMAGE_EMPTY_ERROR, IMAGE_FILE_SIZE_ERROR, IMAGE_FILE_EXTENSION_ERROR, VERIFICATION_EMAIL_ERROR, EMAIL_VERIFY_CODE_ERROR, MOBILE_VERIFY_CODE_ERROR, FILL_ALL_FIELDS_ERROR, OLD_AND_NEW_PASSWORD_DONOT_MATCH, INCORRECT_OLD_PASSWORD_ERROR, APPROVE_BARBER_SUCCESS, CHANGE_DEFAULT_SALON_SUCCESS, CHANGE_PASSWORD_SUCCESS, EMAIL_VERIFIED_SUCCESS, FORGET_PASSWORD_SUCCESS, GET_DEFAULT_SALON_SUCCESS, IMAGE_UPLOAD_SUCCESS, LOGOUT_SUCCESS, MOBILE_VERIFIED_SUCCESS, RESET_PASSWORD_SUCCESS, SALONS_RETRIEVE_SUCCESS, SEND_VERIFICATION_EMAIL_SUCCESS, SEND_VERIFICATION_MOBILE_SUCCESS, SIGNIN_SUCCESS, SIGNUP_SUCCESS, UPDATE_ADMIN_SUCCESS } from "../../../constants/web/adminConstants.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
+import { ALLOWED_IMAGE_EXTENSIONS, IMAGE_FAILED_DELETE, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 
 // Desc: Register Admin
 export const registerAdmin = async (req, res, next) => {
@@ -486,7 +487,7 @@ export const uploadAdminprofilePic = async (req, res, next) => {
         const { email } = req.body;
 
         if (!email) {
-            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!req.files || !req.files.profile) {
@@ -498,8 +499,8 @@ export const uploadAdminprofilePic = async (req, res, next) => {
         }
 
         // Allowed file extensions
-        const allowedExtensions = ["jpg", "png", "jfif", "svg", "jpeg", "webp"];
-        const maxFileSize = 2 * 1024 * 1024;
+        const allowedExtensions = ALLOWED_IMAGE_EXTENSIONS;
+        const maxFileSize = MAX_FILE_SIZE;
 
         // Find the existing admin by email and role
         const existingAdmin = await findAdminByEmailandRole(email);
@@ -529,7 +530,9 @@ export const uploadAdminprofilePic = async (req, res, next) => {
                 .then(image => {
                     // Delete the temporary file after uploading
                     fs.unlink(profile.tempFilePath, err => {
-                        if (err) console.error('Failed to delete temporary file:', err);
+                        if (err)
+                            return console.log(IMAGE_FAILED_DELETE, err)
+
                     });
 
                     return { public_id: image.public_id, url: image.secure_url };
@@ -538,7 +541,6 @@ export const uploadAdminprofilePic = async (req, res, next) => {
 
         const profileimg = await Promise.all(uploadPromises);
 
-        // Update the admin profile picture without deleting old image
         const adminImage = await uploadAdminProPic(email, profileimg);
 
         return SuccessHandler(IMAGE_UPLOAD_SUCCESS, SUCCESS_STATUS_CODE, res, { adminImage });
@@ -748,7 +750,7 @@ export const approveBarber = async (req, res, next) => {
 
         const barberApprovedStatus = await approveBarberByadmin(salonId, email, isApproved)
 
-        if(isApproved === false){
+        if (isApproved === false) {
             barberApprovedStatus.isClockedIn = false
             barberApprovedStatus.isOnline = false
 

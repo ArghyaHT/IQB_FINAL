@@ -14,7 +14,7 @@ export const MOBILE_NUMBER_ERROR = "Invalid Mobile Number"
 export const EMAIL_NOT_FOUND_ERROR = "Email does not exists"
 
 
-export const IMAGE_EMPTY_ERROR = "Admin profile image empty"
+export const IMAGE_EMPTY_ERROR = "Admin profile not present"
 export const IMAGE_FILE_EXTENSION_ERROR = "File extension must be jpg, png, jfif, svg, jpeg, webp"
 export const IMAGE_FILE_SIZE_ERROR = "File size must be lower than 2MB"
 
