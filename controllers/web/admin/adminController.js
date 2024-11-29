@@ -748,6 +748,13 @@ export const approveBarber = async (req, res, next) => {
 
         const barberApprovedStatus = await approveBarberByadmin(salonId, email, isApproved)
 
+        if(isApproved === false){
+            barberApprovedStatus.isClockedIn = false
+            barberApprovedStatus.isOnline = false
+
+            barberApprovedStatus.save()
+        }
+
         const salon = await getSalonBySalonId(salonId);
 
         // const formattedDate = moment(dateJoined, 'YYYY-MM-DD').format('DD-MM-YYYY');
