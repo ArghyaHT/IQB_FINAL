@@ -574,7 +574,7 @@ export const joinQueueKiosk = async (req, res, next) => {
                             <li>Service Type: ${newQueue.serviceType}</li>
                             <li>Barber Name: ${barberName}</li>
                             <li>Service Time: ${newQueue.serviceEWT} mins(approx.)</li>
-                            </li>Service Price: $${totalServicePrice}</li>
+                            </li>Service Price: ${salon.currency}${totalServicePrice}</li>
                             <li>Your Estimated Waiting time: ${customerEWT} mins</li>
                             <li>Queue Position: ${qPosition}</li>
                         </ul>
