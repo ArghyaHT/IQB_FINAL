@@ -1283,10 +1283,10 @@ export const customerFavoriteSalon = async (req, res, next) => {
 //DESC: GET CUSTOMER FAVORITE SALONS ================
 export const getAllCustomerFavoriteSalons = async (req, res, next) => {
     try {
-        const { email } = req.body; // Assuming customer's email is provided in the request body
+        const { customerEmail } = req.body; // Assuming customer's email is provided in the request body
 
         // Find the admin based on the email
-        const customer = await findCustomerByEmail(email);
+        const customer = await findCustomerByEmail(customerEmail);
 
         if (!customer) {
             return res.status(201).json({
