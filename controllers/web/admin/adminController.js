@@ -759,19 +759,20 @@ export const approveBarber = async (req, res, next) => {
                 return ErrorHandler(APPROVE_BARBER_ERROR, ERROR_STATUS_CODE, res)
             }
 
+        }else{
+
+            const barberApprovedStatus = await approveBarberByadmin(salonId, email, isApproved)
+
+            if (barberApprovedStatus.isApproved === false) {
+
+                barberApprovedStatus.isClockedIn = false
+                barberApprovedStatus.isOnline = false
+    
+                barberApprovedStatus.save()
+            }
+
         }
 
-
-
-        const barberApprovedStatus = await approveBarberByadmin(salonId, email, isApproved)
-
-        if (barberApprovedStatus.isApproved === false) {
-
-            barberApprovedStatus.isClockedIn = false
-            barberApprovedStatus.isOnline = false
-
-            barberApprovedStatus.save()
-        }
 
         const salon = await getSalonBySalonId(salonId);
 
