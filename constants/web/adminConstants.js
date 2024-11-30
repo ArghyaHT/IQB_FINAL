@@ -30,6 +30,10 @@ export const OLD_AND_NEW_PASSWORD_DONOT_MATCH ="Old and new password can't be sa
 export const INCORRECT_OLD_PASSWORD_ERROR = "Incorrect old password"
 
 
+export const APPROVE_BARBER_ERROR = "Cant disapprove barber as customers in queue"
+
+
+
 //SUCCESS
 export const SIGNIN_SUCCESS = "Admin logged in successfully"
 export const SIGNUP_SUCCESS = "Admin registered successfully"

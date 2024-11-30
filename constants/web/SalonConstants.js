@@ -35,6 +35,9 @@ export const SALON_LOGO_NOT_FOUND_ERROR = "Salon Logo not found"
 export const SALON_LOGO_DELETE_ERROR = "Failed to delete salon logo"
 
 
+export const SALON_QUEUELIST_ERROR = "Salon cant be offline as customers in queue"
+
+
 
 //SUCCESS
 export const SALON_CREATE_SUCCESS = "Salon created successfully"

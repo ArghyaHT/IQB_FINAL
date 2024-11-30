@@ -12,7 +12,7 @@ import { allSalonsByAdmin, getDefaultSalonDetailsByAdmin, getSalonBySalonId } fr
 import path from "path"
 import fs from "fs"
 import { v2 as cloudinary } from "cloudinary";
-import { approveBarberByadmin } from "../../../services/web/barber/barberService.js";
+import { approveBarberByadmin, findBarberByBarberEmailAndSalonId } from "../../../services/web/barber/barberService.js";
 import { validateEmail } from "../../../middlewares/validator.js";
 import { findSalonSetingsBySalonId } from "../../../services/web/salonSettings/salonSettingsService.js";
 import { v4 as uuidv4 } from 'uuid';
@@ -20,9 +20,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { sendMobileVerificationCode } from "../../../utils/mobileMessageSender/mobileMessageSender.js";
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
-import { ADMIN_EXISTS_ERROR, EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, FORGOT_PASSWORD_EMAIL_ERROR, INVALID_EMAIL_ERROR, MOBILE_NUMBER_ERROR, NAME_LENGTH_ERROR, NEW_PASSWORD_ERROR, OLD_PASSWORD_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, ADMIN_NOT_EXIST_ERROR, IMAGE_EMPTY_ERROR, IMAGE_FILE_SIZE_ERROR, IMAGE_FILE_EXTENSION_ERROR, VERIFICATION_EMAIL_ERROR, EMAIL_VERIFY_CODE_ERROR, MOBILE_VERIFY_CODE_ERROR, FILL_ALL_FIELDS_ERROR, OLD_AND_NEW_PASSWORD_DONOT_MATCH, INCORRECT_OLD_PASSWORD_ERROR, APPROVE_BARBER_SUCCESS, CHANGE_DEFAULT_SALON_SUCCESS, CHANGE_PASSWORD_SUCCESS, EMAIL_VERIFIED_SUCCESS, FORGET_PASSWORD_SUCCESS, GET_DEFAULT_SALON_SUCCESS, IMAGE_UPLOAD_SUCCESS, LOGOUT_SUCCESS, MOBILE_VERIFIED_SUCCESS, RESET_PASSWORD_SUCCESS, SALONS_RETRIEVE_SUCCESS, SEND_VERIFICATION_EMAIL_SUCCESS, SEND_VERIFICATION_MOBILE_SUCCESS, SIGNIN_SUCCESS, SIGNUP_SUCCESS, UPDATE_ADMIN_SUCCESS } from "../../../constants/web/adminConstants.js";
+import { ADMIN_EXISTS_ERROR, EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, FORGOT_PASSWORD_EMAIL_ERROR, INVALID_EMAIL_ERROR, MOBILE_NUMBER_ERROR, NAME_LENGTH_ERROR, NEW_PASSWORD_ERROR, OLD_PASSWORD_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, ADMIN_NOT_EXIST_ERROR, IMAGE_EMPTY_ERROR, IMAGE_FILE_SIZE_ERROR, IMAGE_FILE_EXTENSION_ERROR, VERIFICATION_EMAIL_ERROR, EMAIL_VERIFY_CODE_ERROR, MOBILE_VERIFY_CODE_ERROR, FILL_ALL_FIELDS_ERROR, OLD_AND_NEW_PASSWORD_DONOT_MATCH, INCORRECT_OLD_PASSWORD_ERROR, APPROVE_BARBER_SUCCESS, CHANGE_DEFAULT_SALON_SUCCESS, CHANGE_PASSWORD_SUCCESS, EMAIL_VERIFIED_SUCCESS, FORGET_PASSWORD_SUCCESS, GET_DEFAULT_SALON_SUCCESS, IMAGE_UPLOAD_SUCCESS, LOGOUT_SUCCESS, MOBILE_VERIFIED_SUCCESS, RESET_PASSWORD_SUCCESS, SALONS_RETRIEVE_SUCCESS, SEND_VERIFICATION_EMAIL_SUCCESS, SEND_VERIFICATION_MOBILE_SUCCESS, SIGNIN_SUCCESS, SIGNUP_SUCCESS, UPDATE_ADMIN_SUCCESS, APPROVE_BARBER_ERROR } from "../../../constants/web/adminConstants.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
 import { ALLOWED_IMAGE_EXTENSIONS, IMAGE_FAILED_DELETE, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
+import { qListByBarberId } from "../../../services/web/queue/joinQueueService.js";
 
 // Desc: Register Admin
 export const registerAdmin = async (req, res, next) => {
@@ -748,9 +749,24 @@ export const approveBarber = async (req, res, next) => {
 
         email = email.toLowerCase();
 
+
+        if(isApproved === false){
+            const barber = await findBarberByBarberEmailAndSalonId(email, salonId)
+
+            const getbarberQlist  = await qListByBarberId(salonId, barber.barberId)
+
+            if(getbarberQlist.length > 0){
+                return ErrorHandler(APPROVE_BARBER_ERROR, ERROR_STATUS_CODE, res)
+            }
+
+        }
+
+
+
         const barberApprovedStatus = await approveBarberByadmin(salonId, email, isApproved)
 
         if (isApproved === false) {
+
             barberApprovedStatus.isClockedIn = false
             barberApprovedStatus.isOnline = false
 
