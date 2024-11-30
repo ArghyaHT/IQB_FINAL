@@ -234,12 +234,18 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
     try {
         const { salonId, isOnline } = req.body;
 
+        // const salonQueueList = await SalonQueueListModel.findOne({ salonId });
+
+        // if (salonQueueList.queueList.length > 0 && isOnline === false) {
+    
+        //   return ErrorHandler(SALON_QUEUELIST_ERROR, ERROR_STATUS_CODE, res)
+    
+        // }
+
         const salonQueueList = await SalonQueueListModel.findOne({ salonId });
 
-        if (salonQueueList.queueList.length > 0 && isOnline === false) {
-    
-          return ErrorHandler(SALON_QUEUELIST_ERROR, ERROR_STATUS_CODE, res)
-    
+        if (salonQueueList?.queueList?.length > 0 && isOnline === false) {
+          return ErrorHandler(SALON_QUEUELIST_ERROR, ERROR_STATUS_CODE, res);
         }
        
         const updatedSalon = await salonOnlineStatus(salonId, isOnline);
