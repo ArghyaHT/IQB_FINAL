@@ -749,100 +749,176 @@ export const approveBarber = async (req, res, next) => {
 
         email = email.toLowerCase();
 
-
-        if(isApproved === false){
-            const barber = await findBarberByBarberEmailAndSalonId(email, salonId)
-
-            const getbarberQlist  = await qListByBarberId(salonId, barber.barberId)
-
-            if(getbarberQlist.length > 0){
-                return ErrorHandler(APPROVE_BARBER_ERROR, ERROR_STATUS_CODE, res)
+        if (isApproved === false) {
+            // Fetch barber details by email and salonId
+            const barber = await findBarberByBarberEmailAndSalonId(email, salonId);
+        
+            // Fetch barber's queue list
+            const barberQlist = await qListByBarberId(salonId, barber.barberId);
+        
+            // If queue list exists, return an error and stop further processing
+            if (barberQlist.length > 0) {
+                return ErrorHandler(APPROVE_BARBER_ERROR, ERROR_STATUS_CODE, res);
             }
+        
+            // If no queue exists, update the barber's clock-in and online status
+            const barberApprovedStatus = await approveBarberByadmin(salonId, email, isApproved);
+        
+            barberApprovedStatus.isClockedIn = false;
+            barberApprovedStatus.isOnline = false;
+        
+            // Save the updated status
+            await barberApprovedStatus.save();
 
-        }else{
-
-            const barberApprovedStatus = await approveBarberByadmin(salonId, email, isApproved)
-
-            if (barberApprovedStatus.isApproved === false) {
-
-                barberApprovedStatus.isClockedIn = false
-                barberApprovedStatus.isOnline = false
+            const salon = await getSalonBySalonId(salonId);
     
-                barberApprovedStatus.save()
-            }
-
-        }
-
-
-        const salon = await getSalonBySalonId(salonId);
-
-        // const formattedDate = moment(dateJoined, 'YYYY-MM-DD').format('DD-MM-YYYY');
-
-        const emailSubject = `${salon.salonName} Your Request has been approved`;
-        const emailBody = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Queue Position Changed</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    margin: 0;
-                    padding: 0;
-                }
-                .container {
-                    max-width: 600px;
-                    margin: 0 auto;
-                    padding: 20px;
-                }
-                .logo {
-                    text-align: center;
-                    margin-bottom: 20px;
-                }
-                .logo img {
-                    max-width: SUCCESS_STATUS_CODEpx;
-                }
-                .email-content {
-                    background-color: #f8f8f8;
-                    padding: 20px;
-                    border-radius: 10px;
-                }
-                ul {
-                    padding-left: 20px;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="email-content">
-                <div class="logo">
-                <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
-            </div>
-                    <h1 style="text-align: center;">Queue Position Changed</h1>
-                    <p>Dear ${barberApprovedStatus.name},</p>
-                    <p>Your request has been approved. Please reload the web page to see your dashboard.</p>
-                    <p>Please feel free to contact us if you have any questions or need further assistance.</p>
-                    <p>Best regards,</p>
-                    <p style="margin: 0; padding: 10px 0 5px;">
-                        ${salon.salonName}<br>
-                        Contact No.: +${salon.contactTel}<br>
-                        EmailId: ${salon.salonEmail}
-                    </p>
+            const emailSubject = `${salon.salonName} Your Request has been approved`;
+            const emailBody = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Queue Position Changed</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .container {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                    }
+                    .logo {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    .logo img {
+                        max-width: SUCCESS_STATUS_CODEpx;
+                    }
+                    .email-content {
+                        background-color: #f8f8f8;
+                        padding: 20px;
+                        border-radius: 10px;
+                    }
+                    ul {
+                        padding-left: 20px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="email-content">
+                    <div class="logo">
+                    <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
                 </div>
-            </div>
-        </body>
-        </html>
-    `;
+                        <h1 style="text-align: center;">Queue Position Changed</h1>
+                        <p>Dear ${barberApprovedStatus.name},</p>
+                        <p>Your request has been approved. Please reload the web page to see your dashboard.</p>
+                        <p>Please feel free to contact us if you have any questions or need further assistance.</p>
+                        <p>Best regards,</p>
+                        <p style="margin: 0; padding: 10px 0 5px;">
+                            ${salon.salonName}<br>
+                            Contact No.: +${salon.contactTel}<br>
+                            EmailId: ${salon.salonEmail}
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+    
+            try {
+                await barberApprovalStatus(email, emailSubject, emailBody);
+            } catch (error) {
+                console.error('Error sending email:', error);
+            }
+    
+            return SuccessHandler(APPROVE_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barberApprovedStatus })
 
-        try {
-            await barberApprovalStatus(email, emailSubject, emailBody);
-        } catch (error) {
-            console.error('Error sending email:', error);
+        } else if (isApproved === true) {
+            // Approve the barber
+            const barberApprovedStatus = await approveBarberByadmin(salonId, email, isApproved);
+        
+            // No additional checks needed; save the approved status
+            barberApprovedStatus.isApproved = true;
+        
+            // Save the updated status
+            await barberApprovedStatus.save();
+
+            const salon = await getSalonBySalonId(salonId);
+
+            // const formattedDate = moment(dateJoined, 'YYYY-MM-DD').format('DD-MM-YYYY');
+    
+            const emailSubject = `${salon.salonName} Your Request has been approved`;
+            const emailBody = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Queue Position Changed</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .container {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                    }
+                    .logo {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    .logo img {
+                        max-width: SUCCESS_STATUS_CODEpx;
+                    }
+                    .email-content {
+                        background-color: #f8f8f8;
+                        padding: 20px;
+                        border-radius: 10px;
+                    }
+                    ul {
+                        padding-left: 20px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="email-content">
+                    <div class="logo">
+                    <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
+                </div>
+                        <h1 style="text-align: center;">Queue Position Changed</h1>
+                        <p>Dear ${barberApprovedStatus.name},</p>
+                        <p>Your request has been approved. Please reload the web page to see your dashboard.</p>
+                        <p>Please feel free to contact us if you have any questions or need further assistance.</p>
+                        <p>Best regards,</p>
+                        <p style="margin: 0; padding: 10px 0 5px;">
+                            ${salon.salonName}<br>
+                            Contact No.: +${salon.contactTel}<br>
+                            EmailId: ${salon.salonEmail}
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+    
+            try {
+                await barberApprovalStatus(email, emailSubject, emailBody);
+            } catch (error) {
+                console.error('Error sending email:', error);
+            }
+    
+            return SuccessHandler(APPROVE_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barberApprovedStatus })
         }
 
-        return SuccessHandler(APPROVE_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barberApprovedStatus })
     }
     catch (error) {
         next(error);
