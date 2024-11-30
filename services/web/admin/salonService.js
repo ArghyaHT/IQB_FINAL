@@ -1,6 +1,7 @@
 import Salon from "../../../models/salonRegisterModel.js"
 import { getCurrencySymbol } from "../../../utils/currencySymbolMap/currencysymbolmap.js";
 import { findCountryByName } from "../../../services/web/countries/countryService.js";
+import SalonQueueListModel from "../../../models/salonQueueListModel.js";
 
 //FIND SALON BY SALON NAME
 export const findSalonBySalonNameOrEmail = async (salonName, salonEmail) => {
@@ -342,5 +343,11 @@ export const checkSalonExists = async (salonId) => {
     return salon = null;
   }
 
+}
+
+
+export const changeSalonService = async(salonId) => {
+  const salon = await SalonQueueListModel.findOne({ salonId });
+  return salon
 }
 

@@ -1,5 +1,5 @@
 import { findAdminByEmailandRole } from "../../../services/web/admin/adminService.js";
-import { addMoreSalonImages, allSalonServices, allSalons, createSalonId, deleteSalonImage, findSalonBySalonIdAndAdmin, findSalonLogoById, findSalonProfileById, findSalonsByLocation, getSalonsByNameAndCity, salonInfoDetails, salonOnlineStatus, saveSalon, toDeleteSalon, updateSalon, updateSalonImage, uploadSalonImages, updatedSalonLogo, getSalonLogoBySalonId, deletedSalonLogo, uploadedSalonLogo, findSalonBySalonNameOrEmail, findSalonBySalonId, getSalonGallery, getSalonBySalonId } from "../../../services/web/admin/salonService.js";
+import { addMoreSalonImages, allSalonServices, allSalons, createSalonId, deleteSalonImage, findSalonBySalonIdAndAdmin, findSalonLogoById, findSalonProfileById, findSalonsByLocation, getSalonsByNameAndCity, salonInfoDetails, salonOnlineStatus, saveSalon, toDeleteSalon, updateSalon, updateSalonImage, uploadSalonImages, updatedSalonLogo, getSalonLogoBySalonId, deletedSalonLogo, uploadedSalonLogo, findSalonBySalonNameOrEmail, findSalonBySalonId, getSalonGallery, getSalonBySalonId, changeSalonService } from "../../../services/web/admin/salonService.js";
 import { createSalonSettings } from "../../../services/web/salonSettings/salonSettingsService.js";
 import { v4 as uuidv4 } from 'uuid';
 import libphonenumber from 'google-libphonenumber';
@@ -18,6 +18,7 @@ import { ErrorHandler } from "../../../middlewares/ErrorHandler.js"
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ALLOWED_IMAGE_EXTENSIONS, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 import { getSalonQlist } from "../../../services/web/queue/joinQueueService.js";
+import SalonQueueListModel from "../../../models/salonQueueListModel.js";
 
 
 //DESC:CREATE SALON BY ADMIN============================
@@ -69,15 +70,15 @@ export const createSalonByAdmin = async (req, res, next) => {
       return ErrorHandler(SALON_INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if(!salonDesc){
+    if (!salonDesc) {
       return ErrorHandler(SALON_DESC_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
     }
-    
+
     if (salonDesc && (salonDesc.length < 1 || salonDesc.length > 35)) {
       return ErrorHandler(SALON_DESC_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if(!address){
+    if (!address) {
       return ErrorHandler(SALON_ADDRESS_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
     }
 
@@ -106,8 +107,8 @@ export const createSalonByAdmin = async (req, res, next) => {
     if (!timeZone) {
       return ErrorHandler(SALON_TIMEZONE_ERROR, ERROR_STATUS_CODE, res)
     }
-    
-    if(!postCode){
+
+    if (!postCode) {
       return ErrorHandler(SALON_POSTCODE_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
     }
 
@@ -124,7 +125,7 @@ export const createSalonByAdmin = async (req, res, next) => {
     }
 
 
- 
+
 
     // Convert mobile number to string only if it's a number
     let contactTelStr = typeof contactTel === 'number' ? contactTel.toString() : contactTel;
@@ -150,7 +151,7 @@ export const createSalonByAdmin = async (req, res, next) => {
     const formattedNumberAsNumber = parseInt(nationalNumber);
 
     // Validate the format and length of the contactTel
-  
+
 
     // Check if services array is empty
     if (!services || services.length === 0) {
@@ -262,7 +263,7 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
     } = req.body
 
 
-     if (!adminEmail) {
+    if (!adminEmail) {
       return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
     }
 
@@ -275,15 +276,15 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
       return ErrorHandler(SALON_NAME_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if(!salonDesc){
+    if (!salonDesc) {
       return ErrorHandler(SALON_DESC_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
     }
-    
+
     if (salonDesc && (salonDesc.length < 1 || salonDesc.length > 35)) {
       return ErrorHandler(SALON_DESC_ERROR, ERROR_STATUS_CODE, res)
     }
-    
-    if(!address){
+
+    if (!address) {
       return ErrorHandler(SALON_ADDRESS_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
     }
 
@@ -292,7 +293,7 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
       return ErrorHandler(SALON_ADDRESS_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if(!postCode){
+    if (!postCode) {
       return ErrorHandler(SALON_POSTCODE_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
     }
 
@@ -542,7 +543,8 @@ export const uploadMoreSalonGalleryImages = async (req, res, next) => {
     for (const gallery of galleries) {
       const extension = path.extname(gallery.name).toLowerCase().slice(1);
       if (!allowedExtensions.includes(extension)) {
-        return ErrorHandler(IMAGE_FILE_EXTENSION_ERROR, ERROR_STATUS_CODE, res)      }
+        return ErrorHandler(IMAGE_FILE_EXTENSION_ERROR, ERROR_STATUS_CODE, res)
+      }
 
       if (gallery.size > maxFileSize) {
         return ErrorHandler(IMAGE_FILE_SIZE_ERROR, ERROR_STATUS_CODE, res)
@@ -617,7 +619,7 @@ export const updateSalonImages = async (req, res, next) => {
     const maxFileSize = MAX_FILE_SIZE;
     const fileExt = gallery.name.split(".")[1];
 
-    if ( gallery.size> maxFileSize) {
+    if (gallery.size > maxFileSize) {
       return ErrorHandler(IMAGE_FILE_SIZE_ERROR, ERROR_STATUS_CODE, res)
     }
 
@@ -726,7 +728,7 @@ export const getAllSalons = async (req, res, next) => {
   try {
     const salons = await allSalons(); // Retrieve all salons from the database
 
-    if(salons == []){
+    if (salons == []) {
       return ErrorHandler(SALON_NOT_CREATED_ERROR, ERROR_STATUS_CODE, res)
 
     }
@@ -866,16 +868,15 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
   try {
     const { salonId, isOnline } = req.body;
-    
-    if(isOnline === false){
-      const salonQueueList = await getSalonQlist(salonId)
-      if(salonQueueList.length > 0){
 
-        return ErrorHandler(SALON_QUEUELIST_ERROR, ERROR_STATUS_CODE, res)
+    const salonQueueList = await SalonQueueListModel.findOne({ salonId });
 
-      }
+    if (salonQueueList.queueList.length > 0 && isOnline === false) {
+
+      return ErrorHandler(SALON_QUEUELIST_ERROR, ERROR_STATUS_CODE, res)
+
     }
-   
+
     const updatedSalon = await salonOnlineStatus(salonId, isOnline)
 
     if (!updatedSalon) {
