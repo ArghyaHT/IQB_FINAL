@@ -194,7 +194,7 @@ export const bulkEmail = (subject, message, recipientEmails) => {
     from: process.env.SENDER_EMAIL_ADDRESS, // Replace with your sender email address
     to: recipientEmails.join(', '),
     subject: `${subject}`,
-    html: `<p>${message}.</p>`
+    html: `<p>${message}</p><p>Thank you,<br>iQueueBarbers Team</p>`
     // Customize the email content as per your requirements
   };
 
