@@ -5,14 +5,13 @@ import { v4 as uuidv4 } from 'uuid';
 import libphonenumber from 'google-libphonenumber';
 
 //Upload Images
-import path from "path"
 import fs from "fs"
 import { v2 as cloudinary } from "cloudinary";
 import { changeBarberStatusAtSalonOffline, getbarbersBySalonId } from "../../../services/web/barber/barberService.js";
 import { getAverageSalonRating } from "../../../services/web/ratings/ratingsService.js";
 import { validateEmail } from "../../../middlewares/validator.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
-import { ADMIN_NOT_EXIST_ERROR, EMAIL_NOT_FOUND_ERROR, IMAGE_FILE_EXTENSION_ERROR, IMAGE_FILE_SIZE_ERROR, INVALID_EMAIL_ERROR } from "../../../constants/web/adminConstants.js";
+import { ADMIN_NOT_EXIST_ERROR, EMAIL_NOT_FOUND_ERROR, IMAGE_FILE_EXTENSION_ERROR, IMAGE_FILE_SIZE_ERROR, INVALID_EMAIL_ERROR, NAME_LENGTH_ERROR } from "../../../constants/web/adminConstants.js";
 import { SALON_ADDRESS_ERROR, SALON_ADDRESS_NOT_PRESENT_ERROR, SALON_BARBERS_FOUND_SUCCESS, SALON_CITY_ERROR, SALON_CONNECT_SUCCESS, SALON_CONTACT_TEL_ERROR, SALON_COORDINATES_ERROR, SALON_COUNTRY_ERROR, SALON_CREATE_SUCCESS, SALON_DELETE_SUCCESS, SALON_DESC_ERROR, SALON_DESC_NOT_PRESENT_ERROR, SALON_DESCRIPTION_EMPTY_SUCCESS, SALON_DESCRIPTION_RETRIEVED_SUCCESS, SALON_DESCRIPTION_UPDATE_SUCCESS, SALON_EMAIL_NOT_PRESENT_ERROR, SALON_EXISTS_ERROR, SALON_GALLERY_DELETE_ERROR, SALON_GALLERY_EMPTY_ERROR, SALON_GALLERY_NOT_FOUND_ERROR, SALON_GALLERY_UPLOADED_ERROR, SALON_IMAGE_DELETE_SUCESS, SALON_IMAGE_RETRIEVED_SUCESS, SALON_IMAGE_UPDATE_SUCESS, SALON_IMAGES_UPLOAD_SUCESS, SALON_INVALID_EMAIL_ERROR, SALON_LOGO_DELETE_ERROR, SALON_LOGO_NOT_FOUND_ERROR, SALON_LOGO_UPLOAD_SUCCESS, SALON_NAME_ERROR, SALON_NOT_CREATED_ERROR, SALON_NOT_FOUND_ERROR, SALON_OFFLINE_SUCCESS, SALON_ONLINE_SUCCESS, SALON_POSTCODE_ERROR, SALON_POSTCODE_NOT_PRESENT_ERROR, SALON_QUEUELIST_ERROR, SALON_SERVICES_ERROR, SALON_SERVICES_RETRIEVED_SUCESS, SALON_TIMEZONE_ERROR, SALON_TYPE_ERROR, SALON_UPDATE_SUCCESS, SALONID_EMPTY_ERROR, SALONS_RETRIEVED_SUCESS, SERVICE_DESC_ERROR, SERVICE_NAME_ERROR } from "../../../constants/web/SalonConstants.js";
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js"
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
@@ -58,7 +57,7 @@ export const createSalonByAdmin = async (req, res, next) => {
 
 
     if (salonName && (salonName.length < 1 || salonName.length > 20)) {
-      return ErrorHandler(SALON_NAME_ERROR, ERROR_STATUS_CODE, res)
+      return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE, res)
     }
 
 
@@ -273,7 +272,7 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
 
 
     if (salonName && (salonName.length < 1 || salonName.length > 20)) {
-      return ErrorHandler(SALON_NAME_ERROR, ERROR_STATUS_CODE, res)
+      return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE, res)
     }
 
     if (!salonDesc) {
