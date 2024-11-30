@@ -765,7 +765,7 @@ export const approveBarber = async (req, res, next) => {
 
         const barberApprovedStatus = await approveBarberByadmin(salonId, email, isApproved)
 
-        if (isApproved === false) {
+        if (barberApprovedStatus.isApproved === false) {
 
             barberApprovedStatus.isClockedIn = false
             barberApprovedStatus.isOnline = false
