@@ -3,6 +3,7 @@ import { addMoreSalonImages, allSalonServices, allSalons, createSalonId, deleteS
 import { createSalonSettings } from "../../../services/web/salonSettings/salonSettingsService.js";
 import { v4 as uuidv4 } from 'uuid';
 import libphonenumber from 'google-libphonenumber';
+import path from "path";
 
 //Upload Images
 import fs from "fs"
