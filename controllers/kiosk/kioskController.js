@@ -459,7 +459,7 @@ export const joinQueueKiosk = async (req, res, next) => {
             const availableBarber = await availableBarberAutoJoin(salonId, services.map(service => service.serviceId), totalServiceEWT);
 
             if (!availableBarber) {
-                return ErrorHandler(NO_BARBERS_AVAILABLE_ERROR, ERROR_STATUS_CODE_404, res)
+                return ErrorHandler(NO_BARBERS_AVAILABLE_QUEUE_ERROR, ERROR_STATUS_CODE_404, res)
             }
 
             if (availableBarber.isOnline === false || availableBarber.isClockedIn === false || availableBarber.isActive === false) {
