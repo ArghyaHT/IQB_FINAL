@@ -18,13 +18,15 @@ import moment from "moment";
 import { ADMIN_NOT_EXIST_ERROR, EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, INVALID_EMAIL_ERROR, NAME_LENGTH_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, SIGNIN_SUCCESS } from "../../constants/web/adminConstants.js";
 import { ERROR_STATUS_CODE, ERROR_STATUS_CODE_403, ERROR_STATUS_CODE_404, SUCCESS_STATUS_CODE } from "../../constants/kiosk/StatusCodeConstants.js";
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
-import { ADMIN_CONNECT_SUCCESS, BARBER_ATTENDENCE_ERROR, BARBER_ATTENDENCE_RETRIEVED_SUCCESS, BARBER_CLOCKIN_CLOCKOUT_SUCCESS, BARBER_CONNECT_SALON_ERROR, BARBER_NOT_FOUND_ERROR, BARBER_OFFLINE_ERROR, BARBER_RETRIEVED_SUCCESS, BARBER_SIGNIN_SUCCESS, BARBER_TOKEN_MISSING_ERROR, BARBERS_UNABLE_QUEUE_ERROR, DEFAULT_SALON_RETRIEVED_SUCESS, FORBIDDEN_BARBER_ERROR, JOIN_QUEUE_SUCCESS, LOGOUT_SUCCESS, MOBILE_BOOKING_AVAILABILITY_ERROR, MOBILE_BOOKING_OFFLINE_SUCCESS, MOBILE_BOOKING_ONLINE_SUCCESS, NO_BARBERS_AVAILABLE_ERROR, NO_BARBERS_AVAILABLE_SUCCESS, SALON_JOIN_QUEUE_ERROR, SALON_MOBILE_BOOKING_AVAILABILITY_ERROR, SALON_OFFLINE_ERROR, SALON_VALID_ERROR } from "../../constants/kiosk/KioskConstants.js";
+import { ADMIN_CONNECT_SUCCESS, BARBER_ATTENDENCE_ERROR, BARBER_ATTENDENCE_RETRIEVED_SUCCESS, BARBER_CLOCKIN_CLOCKOUT_SUCCESS, BARBER_CONNECT_SALON_ERROR, BARBER_NOT_FOUND_ERROR, BARBER_OFFLINE_ERROR, BARBER_RETRIEVED_SUCCESS, BARBER_SIGNIN_SUCCESS, BARBER_TOKEN_MISSING_ERROR, BARBERS_UNABLE_QUEUE_ERROR, DEFAULT_SALON_RETRIEVED_SUCESS, FORBIDDEN_BARBER_ERROR, JOIN_QUEUE_SUCCESS, LOGOUT_SUCCESS, MOBILE_BOOKING_AVAILABILITY_ERROR, MOBILE_BOOKING_OFFLINE_SUCCESS, MOBILE_BOOKING_ONLINE_SUCCESS, NO_BARBERS_AVAILABLE_ERROR, NO_BARBERS_AVAILABLE_QUEUE_ERROR, NO_BARBERS_AVAILABLE_SUCCESS, SALON_JOIN_QUEUE_ERROR, SALON_MOBILE_BOOKING_AVAILABILITY_ERROR, SALON_OFFLINE_ERROR, SALON_VALID_ERROR } from "../../constants/kiosk/KioskConstants.js";
 import { SALON_EXISTS_ERROR, SALON_NOT_FOUND_ERROR, SALON_OFFLINE_SUCCESS, SALON_ONLINE_SUCCESS, SALON_QUEUELIST_ERROR, SALONS_RETRIEVED_SUCESS } from "../../constants/web/SalonConstants.js";
 import { BARBER_CLOCKIN_ERROR, BARBER_CLOCKIN_SUCCESS, BARBER_CLOCKOUT_SUCCESS, BARBER_EXISTS_ERROR, BARBER_NOT_APPROVE_ERROR, BARBER_SERVICES_SUCCESS, CUSTOMERS_IN_QUEUE_ERROR, GET_ALL_BARBER_SUCCESS, SELECT_SERVICE_ERROR } from "../../constants/web/BarberConstants.js";
 
 import { ErrorHandler } from "../../middlewares/ErrorHandler.js";
 import { QUEUE_CANCEL_SUCCESS, QUEUE_NOT_FOUND_ERROR, QUEUE_SERVE_SUCCESS, RETRIVE_EMPTY_QUEUELIST_SUCCESS, RETRIVE_QUEUELIST_SUCCESS } from "../../constants/web/QueueConstants.js";
 import { ADVERT_IMAGES_SUCCESS } from "../../constants/web/DashboardConstants.js";
+
+import SalonQueueListModel from "../../models/salonQueueListModel.js";
 
 //DESC:LOGIN AN ADMIN =========================
 export const loginKiosk = async (req, res, next) => {
@@ -232,14 +234,13 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
     try {
         const { salonId, isOnline } = req.body;
 
-        if(isOnline === false){
-            const salonQueueList = await getSalonQlist(salonId)
-            if(salonQueueList.length > 0){
-      
-              return ErrorHandler(SALON_QUEUELIST_ERROR, ERROR_STATUS_CODE, res)
-      
-            }
-          }
+        const salonQueueList = await SalonQueueListModel.findOne({ salonId });
+
+        if (salonQueueList.queueList.length > 0 && isOnline === false) {
+    
+          return ErrorHandler(SALON_QUEUELIST_ERROR, ERROR_STATUS_CODE, res)
+    
+        }
        
         const updatedSalon = await salonOnlineStatus(salonId, isOnline);
 
@@ -827,7 +828,7 @@ export const getAvailableBarbersForQKiosk = async (req, res, next) => {
         const availableBarbers = await getBarbersForQ(salonId);
 
         if (availableBarbers.length === 0) {
-            return ErrorHandler(NO_BARBERS_AVAILABLE_ERROR, ERROR_STATUS_CODE_404, res)
+            return ErrorHandler(NO_BARBERS_AVAILABLE_QUEUE_ERROR, ERROR_STATUS_CODE_404, res)
         }
         else {
 

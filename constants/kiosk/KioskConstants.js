@@ -19,6 +19,8 @@ export const BARBER_ATTENDENCE_ERROR = "Attendence list not found"
 export const SALON_MOBILE_BOOKING_AVAILABILITY_ERROR= "Salon offline so mobile booking status cant be changed"
 export const MOBILE_BOOKING_AVAILABILITY_ERROR= "Mobile booking status cant be changed"
 
+export const NO_BARBERS_AVAILABLE_QUEUE_ERROR = "No barbers available for selected service"
+
 
 
 
