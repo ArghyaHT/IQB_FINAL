@@ -672,7 +672,7 @@ export const createBarberByAdmin = async (req, res, next) => {
                     </ul>
                 </div>
                 <div class="visit">
-                    <p><a href="http://localhost:5173/barbersignin?email=${encodeURIComponent(email)}">Click here to log in</a></p>
+                    <p><a href="https://iqb-final.onrender.com//barbersignin?email=${encodeURIComponent(email)}">Click here to log in</a></p>
                 </div>
                 <p>Please feel free to contact us if you need further assistance.</p>
                 <p>Best regards,<br>
