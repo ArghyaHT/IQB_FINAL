@@ -523,7 +523,7 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             const formattedDate = moment(newQueue.dateJoinedQ, 'YYYY-MM-DD').format('DD-MM-YYYY');
 
-            const emailSubject = `${salon.salonName}: ${formattedDate} - Your Queue Information`;
+            const emailSubject = `${salon.salonName}-Your Queue Information`;
             const emailBody = `
             <!DOCTYPE html>
             <html lang="en">
@@ -546,9 +546,13 @@ export const joinQueueKiosk = async (req, res, next) => {
                         text-align: center;
                         margin-bottom: 20px;
                     }
-                    .logo img {
-                        max-width: 200px;
-                    }
+                     .logo img {
+                                    max-width: 200px;
+                                    border-radius: 50%; /* Makes the shape circular */
+                                    width: 200px; /* Ensure the width and height are equal */
+                                    height: 200px; /* Ensure the width and height are equal */
+                                    object-fit: cover; /* Ensures the image fits nicely within the circular shape */
+                                    }
                     .email-content {
                         background-color: #f8f8f8;
                         padding: 20px;
@@ -676,7 +680,7 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             const formattedDate = moment(newQueue.dateJoinedQ, 'YYYY-MM-DD').format('DD-MM-YYYY');
 
-            const emailSubject = `${salon.salonName}: ${formattedDate} - Your Queue Information`;
+            const emailSubject = `${salon.salonName}-Your Queue Information`;
             const emailBody = `
        <!DOCTYPE html>
     <html lang="en">
@@ -699,9 +703,13 @@ export const joinQueueKiosk = async (req, res, next) => {
                 text-align: center;
                 margin-bottom: 20px;
             }
-            .logo img {
-                max-width: 200px;
-            }
+             .logo img {
+                                    max-width: 200px;
+                                    border-radius: 50%; /* Makes the shape circular */
+                                    width: 200px; /* Ensure the width and height are equal */
+                                    height: 200px; /* Ensure the width and height are equal */
+                                    object-fit: cover; /* Ensures the image fits nicely within the circular shape */
+                                    }
             .email-content {
                 background-color: #f8f8f8;
                 padding: 20px;
@@ -748,9 +756,14 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             try {
                 await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+
             } catch (error) {
                 console.error('Error sending email:', error);
                 // Handle error if email sending fails
+            }
+
+            if(mobileNumber){
+
             }
         }
 
@@ -1019,7 +1032,7 @@ export const barberServedQueueKiosk = async (req, res, next) => {
 
                     const salonDetails = await getSalonTimeZone(salonId);
                     // Construct email subject and body for the customer being served
-                    const servedEmailSubject = '🎉 Served Successfully! 🎉';
+                    const servedEmailSubject = `${salon.salonName}-🎉 Served Successfully! 🎉`;
                     const servedEmailBody = `
                     <!DOCTYPE html>
                     <html lang="en">
@@ -1067,8 +1080,12 @@ export const barberServedQueueKiosk = async (req, res, next) => {
                                 margin-bottom: 20px;
                             }
                             .logo img {
-                                max-width: 200px;
-                            }
+                                    max-width: 200px;
+                                    border-radius: 50%; /* Makes the shape circular */
+                                    width: 200px; /* Ensure the width and height are equal */
+                                    height: 200px; /* Ensure the width and height are equal */
+                                    object-fit: cover; /* Ensures the image fits nicely within the circular shape */
+                                    }
                         </style>
                     </head>
                     <body>
@@ -1143,7 +1160,7 @@ export const barberServedQueueKiosk = async (req, res, next) => {
 
                                 const totalServicePrice = services.reduce((total, service) => total + service.servicePrice, 0);
 
-                                const emailSubject = `${salon.salonName}: ${formattedDate} Queue Position Changed (${qPosition})`;
+                                const emailSubject = `${salon.salonName}-Queue Position Changed (${qPosition})`;
                                 const emailBody = `
                         <!DOCTYPE html>
                         <html lang="en">
@@ -1166,9 +1183,13 @@ export const barberServedQueueKiosk = async (req, res, next) => {
                                     text-align: center;
                                     margin-bottom: 20px;
                                 }
-                                .logo img {
+                               .logo img {
                                     max-width: 200px;
-                                }
+                                    border-radius: 50%; /* Makes the shape circular */
+                                    width: 200px; /* Ensure the width and height are equal */
+                                    height: 200px; /* Ensure the width and height are equal */
+                                    object-fit: cover; /* Ensures the image fits nicely within the circular shape */
+                                    }
                                 .email-content {
                                     background-color: #f8f8f8;
                                     padding: 20px;
@@ -1330,7 +1351,7 @@ export const cancelQueueKiosk = async (req, res, next) => {
         const salonDetails = await getSalonTimeZone(salonId);
 
         // Construct email subject and body for the customer being served
-        const servedEmailSubject = 'Sorry Your Queue Has Been Canceled 🚫';
+        const servedEmailSubject = `${salonDetails.salonName}-Sorry Your Queue Has Been Canceled 🚫`;
         const servedEmailBody = `
         <!DOCTYPE html>
         <html lang="en">
@@ -1378,8 +1399,12 @@ export const cancelQueueKiosk = async (req, res, next) => {
                     margin-bottom: 20px;
                 }
                 .logo img {
-                    max-width: 200px;
-                }
+                                    max-width: 200px;
+                                    border-radius: 50%; /* Makes the shape circular */
+                                    width: 200px; /* Ensure the width and height are equal */
+                                    height: 200px; /* Ensure the width and height are equal */
+                                    object-fit: cover; /* Ensures the image fits nicely within the circular shape */
+                                    }
             </style>
         </head>
         <body>
@@ -1433,7 +1458,7 @@ export const cancelQueueKiosk = async (req, res, next) => {
 
                         const totalServicePrice = services.reduce((total, service) => total + service.servicePrice, 0);
 
-                        const emailSubject = `${salon.salonName}: ${formattedDate} Queue Position Changed (${qPosition})`;
+                        const emailSubject = `${salon.salonName}-Queue Position Changed (${qPosition})`;
                         const emailBody = `
                         <!DOCTYPE html>
                         <html lang="en">
@@ -1458,7 +1483,11 @@ export const cancelQueueKiosk = async (req, res, next) => {
                                 }
                                 .logo img {
                                     max-width: 200px;
-                                }
+                                    border-radius: 50%; /* Makes the shape circular */
+                                    width: 200px; /* Ensure the width and height are equal */
+                                    height: 200px; /* Ensure the width and height are equal */
+                                    object-fit: cover; /* Ensures the image fits nicely within the circular shape */
+                                    }
                                 .email-content {
                                     background-color: #f8f8f8;
                                     padding: 20px;
@@ -1871,7 +1900,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
 
                         const salonDetails = await getSalonBySalonId(salonId);
                         // Construct email subject and body for the customer being served
-                        const servedEmailSubject = '🎉 Served Successfully! 🎉';
+                        const servedEmailSubject = `${salon.salonName}-🎉 Served Successfully! 🎉`;
                         const servedEmailBody = `
                         <!DOCTYPE html>
                         <html lang="en">
@@ -1918,9 +1947,13 @@ export const barberServedQueueTvApp = async (req, res, next) => {
                                     text-align: center;
                                     margin-bottom: 20px;
                                 }
-                                .logo img {
+                               .logo img {
                                     max-width: 200px;
-                                }
+                                    border-radius: 50%; /* Makes the shape circular */
+                                    width: 200px; /* Ensure the width and height are equal */
+                                    height: 200px; /* Ensure the width and height are equal */
+                                    object-fit: cover; /* Ensures the image fits nicely within the circular shape */
+                                    }
                             </style>
                         </head>
                         <body>
@@ -1995,7 +2028,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
 
                                     const totalServicePrice = services.reduce((total, service) => total + service.servicePrice, 0);
 
-                                    const emailSubject = `${salon.salonName}: ${formattedDate} Queue Position Changed (${qPosition})`;
+                                    const emailSubject = `${salon.salonName}-Queue Position Changed (${qPosition})`;
                                     const emailBody = `
                             <!DOCTYPE html>
                             <html lang="en">
@@ -2018,8 +2051,12 @@ export const barberServedQueueTvApp = async (req, res, next) => {
                                         text-align: center;
                                         margin-bottom: 20px;
                                     }
-                                    .logo img {
-                                        max-width: 200px;
+                                      .logo img {
+                                    max-width: 200px;
+                                    border-radius: 50%; /* Makes the shape circular */
+                                    width: 200px; /* Ensure the width and height are equal */
+                                    height: 200px; /* Ensure the width and height are equal */
+                                    object-fit: cover; /* Ensures the image fits nicely within the circular shape */
                                     }
                                     .email-content {
                                         background-color: #f8f8f8;
@@ -2184,7 +2221,7 @@ export const cancelQueueTvApp = async (req, res, next) => {
         const salonDetails = await getSalonTimeZone(salonId);
 
         // Construct email subject and body for the customer being served
-        const servedEmailSubject = 'Sorry Your Queue Has Been Canceled 🚫';
+        const servedEmailSubject = `${salonDetails.salonName}-Sorry Your Queue Has Been Canceled 🚫`;
         const servedEmailBody = `
         <!DOCTYPE html>
         <html lang="en">
@@ -2231,9 +2268,13 @@ export const cancelQueueTvApp = async (req, res, next) => {
                     text-align: center;
                     margin-bottom: 20px;
                 }
-                .logo img {
-                    max-width: 200px;
-                }
+               .logo img {
+                                    max-width: 200px;
+                                    border-radius: 50%; /* Makes the shape circular */
+                                    width: 200px; /* Ensure the width and height are equal */
+                                    height: 200px; /* Ensure the width and height are equal */
+                                    object-fit: cover; /* Ensures the image fits nicely within the circular shape */
+                                    }
             </style>
         </head>
         <body>
@@ -2289,7 +2330,7 @@ export const cancelQueueTvApp = async (req, res, next) => {
 
                         const totalServicePrice = services.reduce((total, service) => total + service.servicePrice, 0);
 
-                        const emailSubject = `${salon.salonName}: ${formattedDate} Queue Position Changed (${qPosition})`;
+                        const emailSubject = `${salon.salonName}-Queue Position Changed (${qPosition})`;
                         const emailBody = `
                         <!DOCTYPE html>
                         <html lang="en">
@@ -2314,7 +2355,11 @@ export const cancelQueueTvApp = async (req, res, next) => {
                                 }
                                 .logo img {
                                     max-width: 200px;
-                                }
+                                    border-radius: 50%; /* Makes the shape circular */
+                                    width: 200px; /* Ensure the width and height are equal */
+                                    height: 200px; /* Ensure the width and height are equal */
+                                    object-fit: cover; /* Ensures the image fits nicely within the circular shape */
+                                    }
                                 .email-content {
                                     background-color: #f8f8f8;
                                     padding: 20px;

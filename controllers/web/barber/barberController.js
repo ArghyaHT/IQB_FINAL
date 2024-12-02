@@ -595,7 +595,7 @@ export const createBarberByAdmin = async (req, res, next) => {
         //   }
 
         const salonDetails = await getSalonBySalonId(salonId);
-        const barberLoginSubject = 'Your login credentials';
+        const barberLoginSubject = `${salonDetails.salonName}-Your login credentials`;
         const servedEmailBody = `
         <!DOCTYPE html>
         <html lang="en">
@@ -643,9 +643,13 @@ export const createBarberByAdmin = async (req, res, next) => {
                     text-align: center;
                     margin-bottom: 20px;
                 }
-                .logo img {
-                    max-width: 200px;
-                }
+               .logo img {
+                                    max-width: 200px;
+                                    border-radius: 50%; /* Makes the shape circular */
+                                    width: 200px; /* Ensure the width and height are equal */
+                                    height: 200px; /* Ensure the width and height are equal */
+                                    object-fit: cover; /* Ensures the image fits nicely within the circular shape */
+                                    }
                 .visit {
                 text-align: center;
                 margin-top: 20px;
@@ -661,7 +665,7 @@ export const createBarberByAdmin = async (req, res, next) => {
                 <div class="logo">
                     <img src="${salonDetails?.salonLogo[0]?.url}" alt="Salon Logo">
                 </div>
-                <h1 class="header">Your Login Details</h1>
+                <h1 class="header">Your Login Credentials</h1>
                 <div class="details">
                     <p>Dear Barber,</p>
                     <p>Your auto-generated random password is provided below. Please log in with this password and reset it upon login.</p>

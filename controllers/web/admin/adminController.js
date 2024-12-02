@@ -772,7 +772,7 @@ export const approveBarber = async (req, res, next) => {
 
             const salon = await getSalonBySalonId(salonId);
     
-            const emailSubject = `${salon.salonName} Your Request has been approved`;
+            const emailSubject = `${salon.salonName}-Your Request has been approved`;
             const emailBody = `
             <!DOCTYPE html>
             <html lang="en">
@@ -795,9 +795,13 @@ export const approveBarber = async (req, res, next) => {
                         text-align: center;
                         margin-bottom: 20px;
                     }
-                    .logo img {
-                        max-width: SUCCESS_STATUS_CODEpx;
-                    }
+                     .logo img {
+                                    max-width: 200px;
+                                    border-radius: 50%; /* Makes the shape circular */
+                                    width: 200px; /* Ensure the width and height are equal */
+                                    height: 200px; /* Ensure the width and height are equal */
+                                    object-fit: cover; /* Ensures the image fits nicely within the circular shape */
+                                    }
                     .email-content {
                         background-color: #f8f8f8;
                         padding: 20px;
@@ -852,7 +856,7 @@ export const approveBarber = async (req, res, next) => {
 
             // const formattedDate = moment(dateJoined, 'YYYY-MM-DD').format('DD-MM-YYYY');
     
-            const emailSubject = `${salon.salonName} Your Request has been approved`;
+            const emailSubject = `${salon.salonName}-Your Request has been approved`;
             const emailBody = `
             <!DOCTYPE html>
             <html lang="en">
@@ -875,9 +879,13 @@ export const approveBarber = async (req, res, next) => {
                         text-align: center;
                         margin-bottom: 20px;
                     }
-                    .logo img {
-                        max-width: SUCCESS_STATUS_CODEpx;
-                    }
+                  .logo img {
+                                    max-width: 200px;
+                                    border-radius: 50%; /* Makes the shape circular */
+                                    width: 200px; /* Ensure the width and height are equal */
+                                    height: 200px; /* Ensure the width and height are equal */
+                                    object-fit: cover; /* Ensures the image fits nicely within the circular shape */
+                                    }
                     .email-content {
                         background-color: #f8f8f8;
                         padding: 20px;
