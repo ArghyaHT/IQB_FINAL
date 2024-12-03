@@ -1915,7 +1915,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
 
                         const salonDetails = await getSalonBySalonId(salonId);
                         // Construct email subject and body for the customer being served
-                        const servedEmailSubject = `${salon.salonName}-🎉 Served Successfully! 🎉`;
+                        const servedEmailSubject = `${salonDetails.salonName}-🎉 Served Successfully! 🎉`;
                         const servedEmailBody = `
                         <!DOCTYPE html>
                         <html lang="en">
