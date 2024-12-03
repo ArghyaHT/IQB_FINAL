@@ -841,6 +841,13 @@ export const getAvailableBarbersForQKiosk = async (req, res, next) => {
     try {
         const { salonId } = req.query;
 
+        const getSalon = await getSalonBySalonId(salonId)
+
+        if(getSalon.isOnline === false){
+            return ErrorHandler(SALON_OFFLINE_ERROR, ERROR_STATUS_CODE, res)
+
+        }
+
         const anybarberServices = await allSalonServices(salonId);
 
         //To find the available barbers for the queue
