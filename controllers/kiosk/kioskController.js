@@ -776,9 +776,17 @@ export const joinQueueKiosk = async (req, res, next) => {
 
 //DESC:GET ALL SALON SERVICES ======================
 export const getAllSalonServices = async (req, res, next) => {
-    const { salonId } = req.query;
     try {
+        const { salonId } = req.query;
+
         const salonServices = await allSalonServices(salonId)
+
+        const getSalon = await getSalonBySalonId(salonId)
+
+        if(getSalon.isOnline === false){
+            return ErrorHandler(SALON_OFFLINE_ERROR, ERROR_STATUS_CODE, res)
+
+        }
 
         return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: salonServices })
 
