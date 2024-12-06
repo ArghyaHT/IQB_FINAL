@@ -137,8 +137,6 @@ export const createSalonByAdmin = async (req, res, next) => {
 
     }
 
-    console.log(city)
-
     const retrievedCities = City.getAllCities().filter(cityName => {
       return cityName.countryCode === code && (city === cityName.name);
     });
@@ -241,7 +239,7 @@ export const createSalonByAdmin = async (req, res, next) => {
       servicesData
     };
 
-    // const savedSalon = await saveSalon(salonId, salonData);
+    const savedSalon = await saveSalon(salonId, salonData);
 
     const admin = await findAdminByEmailandRole(adminEmail);
 
