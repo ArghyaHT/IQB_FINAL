@@ -21,60 +21,84 @@ export const addNewQueue = async(salonId, newQueue) => {
 
 //Get salon queue list
 export const getSalonQlist = async(salonId) => {
-  const Qlist = await SalonQueueList.aggregate([
-      {
-        $match: { salonId } // Match the document based on salonId
-      },
-      {
-        $unwind: "$queueList" // Deconstruct queueList array
-      },
-      {
-        $sort: {
-          "queueList.qPosition": 1 // Sort by qPosition in ascending order (1)
-        }
-      },
-      {
-        $group: {
-          _id: "$_id", // Group by the document's _id field
-          queueList: { $push: "$queueList" } // Reconstruct the queueList array
-        }
-      },
-      //Changed for frontend 
-      {
-        $project: {
-          queueList: {
-            $map: {
-              input: "$queueList",
-              as: "list",
-              in: {
-                $mergeObjects: [
-                  "$$list",
-                  { "name": "$$list.customerName" } // Rename customerName to name
-                ]
-              }
-            }
-          }
-        }
-      },
-      {
-        $project: {
-          "queueList.customerName": 0 // Exclude the customerName field
-        }
-      }
-    ]);
 
-        // Fetch and append barber email for each queue item
-        for (const queue of Qlist) {
-          for (const queueItem of queue.queueList) {
-              const barberId = queueItem.barberId;
-              const barber = await getBarberByBarberId(barberId);
-              if (barber) {
-                  queueItem.barberEmail = barber.email;
-              }
-          }
-      }
+  const sortedQlist = await SalonQueueList.findOne({ salonId }).lean();
 
-    return Qlist;
+  if (!sortedQlist || !sortedQlist.queueList || sortedQlist.queueList.length === 0) {
+    return [];
+}
+
+  const updatedQueueList = await Promise.all(
+    sortedQlist.queueList.map(async (queue) => {
+        const barber = await getBarberByBarberId(queue.barberId);
+        return {
+            ...queue, // Spread the existing queue properties
+            barberEmail: barber ? barber.email : null, // Add barberEmail
+        };
+    })
+);
+
+console.log(updatedQueueList);
+return updatedQueueList;
+
+
+ 
+
+
+//   const Qlist = await SalonQueueList.aggregate([
+//       {
+//         $match: { salonId } // Match the document based on salonId
+//       },
+//       {
+//         $unwind: "$queueList" // Deconstruct queueList array
+//       },
+//       {
+//         $sort: {
+//           "queueList.qPosition": 1 // Sort by qPosition in ascending order (1)
+//         }
+//       },
+//       {
+//         $group: {
+//           _id: "$_id", // Group by the document's _id field
+//           queueList: { $push: "$queueList" } // Reconstruct the queueList array
+//         }
+//       },
+//       //Changed for frontend 
+//       {
+//         $project: {
+//           queueList: {
+//             $map: {
+//               input: "$queueList",
+//               as: "list",
+//               in: {
+//                 $mergeObjects: [
+//                   "$$list",
+//                   { "name": "$$list.customerName" } // Rename customerName to name
+//                 ]
+//               }
+//             }
+//           }
+//         }
+//       },
+//       {
+//         $project: {
+//           "queueList.customerName": 0 // Exclude the customerName field
+//         }
+//       }
+//     ]);
+
+//         // Fetch and append barber email for each queue item
+//         for (const queue of Qlist) {
+//           for (const queueItem of queue.queueList) {
+//               const barberId = queueItem.barberId;
+//               const barber = await getBarberByBarberId(barberId);
+//               if (barber) {
+//                   queueItem.barberEmail = barber.email;
+//               }
+//           }
+//       }
+
+//     return Qlist;
 }
 
 

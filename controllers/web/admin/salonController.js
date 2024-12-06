@@ -6,6 +6,7 @@ import libphonenumber from 'google-libphonenumber';
 import path from "path";
 
 //Upload Images
+
 import fs from "fs"
 import { v2 as cloudinary } from "cloudinary";
 import { changeBarberStatusAtSalonOffline, getbarbersBySalonId } from "../../../services/web/barber/barberService.js";
@@ -19,6 +20,9 @@ import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ALLOWED_IMAGE_EXTENSIONS, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 import { getSalonQlist } from "../../../services/web/queue/joinQueueService.js";
 import SalonQueueListModel from "../../../models/salonQueueListModel.js";
+import { findCountryByName } from "../../../services/web/countries/countryService.js";
+import { City } from "country-state-city";
+import { CITY_NOT_FOUND_ERROR, COUNTRY_NOT_FOUND_ERROR } from "../../../constants/web/CountriesConstants.js";
 
 
 //DESC:CREATE SALON BY ADMIN============================
@@ -34,6 +38,7 @@ export const createSalonByAdmin = async (req, res, next) => {
     timeZone,
     salonDesc,
     countryCode,
+    code,
     postCode,
     contactTel,
     webLink,
@@ -112,9 +117,10 @@ export const createSalonByAdmin = async (req, res, next) => {
       return ErrorHandler(SALON_POSTCODE_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (postCode && !/^\d{1,8}$/.test(postCode)) {
-      return ErrorHandler(SALON_POSTCODE_ERROR, ERROR_STATUS_CODE, res)
+    if (postCode && !/^[a-zA-Z0-9]{1,8}$/.test(postCode)) {
+      return ErrorHandler(SALON_POSTCODE_ERROR, ERROR_STATUS_CODE, res);
     }
+    
 
     if (!salonType) {
       return ErrorHandler(SALON_TYPE_ERROR, ERROR_STATUS_CODE, res)
@@ -124,6 +130,23 @@ export const createSalonByAdmin = async (req, res, next) => {
       return ErrorHandler(SALON_CONTACT_TEL_ERROR, ERROR_STATUS_CODE, res)
     }
 
+    const countryname = await findCountryByName(country)
+
+    if(countryname === null){
+      return ErrorHandler(COUNTRY_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
+
+    }
+
+    console.log(city)
+
+    const retrievedCities = City.getAllCities().filter(cityName => {
+      return cityName.countryCode === code && (city === cityName.name);
+    });
+
+    
+    if (retrievedCities.length === 0) {
+      return ErrorHandler(CITY_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res);
+    }
 
 
 
@@ -218,7 +241,7 @@ export const createSalonByAdmin = async (req, res, next) => {
       servicesData
     };
 
-    const savedSalon = await saveSalon(salonId, salonData);
+    // const savedSalon = await saveSalon(salonId, salonData);
 
     const admin = await findAdminByEmailandRole(adminEmail);
 
@@ -297,9 +320,10 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
       return ErrorHandler(SALON_POSTCODE_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (postCode && !/^\d{1,8}$/.test(postCode)) {
-      return ErrorHandler(SALON_POSTCODE_ERROR, ERROR_STATUS_CODE, res)
+    if (postCode && !/^[a-zA-Z0-9]{1,8}$/.test(postCode)) {
+      return ErrorHandler(SALON_POSTCODE_ERROR, ERROR_STATUS_CODE, res);
     }
+    
 
     if (!contactTel) {
       return ErrorHandler(SALON_CONTACT_TEL_ERROR, ERROR_STATUS_CODE, res)

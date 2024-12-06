@@ -317,8 +317,6 @@ export const googleBarberLogin = async (req, res, next) => {
     }
 }
 
-
-
 export const updateBarberInfo = async (req, res, next) => {
     try {
         let { email, name, countryCode, mobileNumber, gender, dateOfBirth } = req.body
@@ -1040,7 +1038,7 @@ export const updateBarberAccountDetails = async (req, res, next) => {
     try {
         const barberData = req.body;
 
-        let { name, email, nickName, countryCode, mobileNumber, dateOfBirth, gender } = barberData
+        let { name, email, nickName, countryCode, mobileNumber, dateOfBirth, gender, barberServices } = barberData
 
         if (name && (name.length < 1 || name.length > 20)) {
             return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE, res)

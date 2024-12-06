@@ -46,7 +46,7 @@ const salonQueueListSchema = new mongoose.Schema({
         },
         methodUsed: {
             type: String,
-            enum: ['Walk-In', 'Admin', 'App']
+            enum: ['Walk-In', ' ', 'App']
         },
         barberName: {
             type: String,

@@ -6,6 +6,13 @@ import { sendAppointmentsEmailAdmin, sendAppointmentsEmailBarber, sendAppointmen
 import moment from "moment";
 import { generateTimeSlots } from "../../../utils/timeSlots.js";
 import { findOrCreateAppointmentHistory } from "../../../services/web/appointments/appointmentHistoryService.js";
+import { RETRIEVE_TIMESLOT_SUCCESS, SELECT_BARBER_ERROR, SELECT_DATE_ERROR } from "../../../constants/web/AppointmentsConstants.js";
+
+import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
+import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
+import {SuccessHandler} from "../../../middlewares/SuccessHandler.js"
+import { SALON_NOT_FOUND_ERROR } from "../../../constants/web/SalonConstants.js";
+
 
 //DESC:CREATE APPOINTMENT ====================
 export const createAppointment = async (req, res, next) => {
@@ -293,12 +300,21 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
     try {
         const { salonId, barberId, date } = req.body;
 
-        if (!date || !barberId) {
-            // If the date value is null, send a response to choose the date
-            return res.status(400).json({
-                message: 'Please choose a Date and Barber to fetch time slots'
-            });
+        if(!barberId){
+            return ErrorHandler(SELECT_BARBER_ERROR, ERROR_STATUS_CODE, res)
         }
+
+        if(!date) {
+            return ErrorHandler(SELECT_DATE_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+
+        // if (!date || !barberId) {
+        //     // If the date value is null, send a response to choose the date
+        //     return res.status(400).json({
+        //         message: 'Please choose a Date and Barber to fetch time slots'
+        //     });
+        // }
 
         // Getting the appointments for a Specific Barber
         const appointments = await getAppointmentsByDateAndBarberId(salonId, date, barberId);
@@ -342,10 +358,13 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
                 });
             });
         }
-        res.status(200).json({
-            message: "Time slots retrieved and matched successfully",
-            timeSlots: timeSlots
-        });
+
+        return SuccessHandler(RETRIEVE_TIMESLOT_SUCCESS, SUCCESS_STATUS_CODE, res, {response: timeSlots})
+
+        // res.status(200).json({
+        //     message: "Time slots retrieved and matched successfully",
+        //     timeSlots: timeSlots
+        // });
     }catch (error) {
         //console.log(error);
         next(error);
@@ -357,6 +376,10 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
 export const getAllAppointmentsBySalonId = async (req, res, next) => {
     try {
         const { salonId } = req.body;
+
+        if(!salonId){
+            return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE,res)
+        }
 
         const appointments = await allAppointmentsBySalonId(salonId)
 

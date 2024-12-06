@@ -9,6 +9,7 @@ export const BARBER_NOT_APPROVE_ERROR = "Barber is not approved"
 export const CUSTOMERS_IN_QUEUE_ERROR = "Cant clock you out as you have customers in the queue"
 export const EMPTY_SERVICE_ERROR = "Please provide a service"
 
+
 //SUCCESS
 export const SIGNIN_SUCCESS = "Barber logged in successfully"
 export const SIGNUP_SUCCESS = "Barber registered successfully"

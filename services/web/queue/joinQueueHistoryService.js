@@ -219,3 +219,25 @@ export const getBarberServedQlist = async (salonId, barberId, fromDate, toDate) 
 
   return result;
 };
+
+export const getSalonQueueHistory = async(salonId) => {
+    const salonQueueListHistory = await JoinedQueueHistory.findOne({salonId})
+
+    if (!salonQueueListHistory || !salonQueueListHistory.queueList || salonQueueListHistory.queueList.length === 0) {
+        return [];
+    }
+
+      return salonQueueListHistory.queueList
+} 
+
+export const getQueueHistoryByBarber = async(salonId, barberId) => {
+    const barberQueuelisthistory = await JoinedQueueHistory.findOne({salonId});
+
+
+    if(barberQueuelisthistory){
+        const filteredQueueList = barberQueuelisthistory.queueList.filter(item => item.barberId === barberId);
+      
+        return filteredQueueList
+      }
+
+}

@@ -17,6 +17,7 @@ import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ADMIN_NOT_EXIST_ERROR, INVALID_EMAIL_ERROR } from "../../../constants/web/adminConstants.js";
 import { NO_SALON_CONNECTED_ERROR, QUEUE_CANCEL_SUCCESS, QUEUE_NOT_FOUND_BY_ID_ERROR, QUEUE_NOT_FOUND_ERROR, QUEUE_POSITION_ERROR, QUEUE_SERVE_SUCCESS, QUEUELIST_BARBER_ERROR, QUEUELIST_EMPTY_FOR_BARBER_SUCCESS, RETRIVE_EMPTY_QUEUELIST_SUCCESS, RETRIVE_QUEUELIST_SUCCESS } from "../../../constants/web/QueueConstants.js";
 import { BARBER_EXISTS_ERROR } from "../../../constants/web/BarberConstants.js";
+import SalonQueueList from "../../../models/salonQueueListModel.js";
 
 
 //DESC:GET SALON QUEUELIST ================
@@ -39,14 +40,20 @@ export const getQueueListBySalonId = async (req, res, next) => {
         //To find the queueList according to salonId and sort it according to qposition
         const getSalon = await getSalonQlist(salonId)
 
-        if (!getSalon) {
+        if (getSalon) {
+            getSalon.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+          }
+          
+          const sortedQlist = getSalon;
+
+
+        if (!sortedQlist) {
             return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res)
 
         }
         else {
-            const sortedQueueList = getSalon[0].queueList;
 
-            return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQueueList })
+            return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist })
 
         }
 
@@ -54,6 +61,11 @@ export const getQueueListBySalonId = async (req, res, next) => {
     catch (error) {
         next(error);
     }
+
+    // const salonId = parseInt(req.query.salonId, 10);
+
+    // const getSalon = await SalonQueueList.findOne({salonId})
+    // res.json(getSalon.queueList)
 }
 
 //DESC:BARBER SERVED API ================
@@ -830,7 +842,7 @@ export const getQlistbyBarberId = async (req, res, next) => {
     try {
         const { salonId, barberId } = req.body;
 
-        const qList = await qListByBarberId(salonId, barberId)
+        const qListByBarber = await qListByBarberId(salonId, barberId)
 
         const approvedBarber = await getBarberByBarberId(barberId);
 
@@ -846,7 +858,7 @@ export const getQlistbyBarberId = async (req, res, next) => {
         }
 
 
-        if (!qList || qList.length === 0) {
+        if (!qListByBarber || qListByBarber.length === 0) {
             // return res.status(201).json({
             //     success: false,
             //     message: 'Queue list not found for the specified barber',
@@ -863,7 +875,7 @@ export const getQlistbyBarberId = async (req, res, next) => {
         //     queueList: qList[0].queueList // Extracting the queue list from the result
         // });
 
-        return SuccessHandler(QUEUELIST_EMPTY_FOR_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { queueList: qList[0].queueList })
+        return SuccessHandler(QUEUELIST_EMPTY_FOR_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { queueList: qListByBarber })
 
     } catch (error) {
         next(error);

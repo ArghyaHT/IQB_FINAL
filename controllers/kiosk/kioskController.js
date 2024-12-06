@@ -801,6 +801,11 @@ export const getQueueListBySalonId = async (req, res, next) => {
     try {
         const salonId = parseInt(req.query.salonId, 10);
 
+        
+        if (Number(salonId) === 0) {
+            return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res)
+        }
+
         // Check if the salon exists in the database
         if (salonId) {
             const salonExists = await checkSalonExists(salonId); // Assuming checkSalonExists is a function that checks if the salon exists
@@ -812,7 +817,25 @@ export const getQueueListBySalonId = async (req, res, next) => {
         //To find the queueList according to salonId and sort it according to qposition
         const getSalon = await getSalonQlist(salonId)
 
-        // if (getSalon.length > 0) {
+    
+        if (getSalon) {
+            getSalon.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+          }
+          
+          const sortedQlist = getSalon;
+
+
+        if (!sortedQlist) {
+            return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res)
+
+        }
+        else {
+
+            return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist? sortedQlist: [] })
+
+        }
+
+         // if (getSalon.length > 0) {
         //     // Access the sorted queueList array from the result
         //     const sortedQueueList = getSalon[0].queueList;
 
@@ -828,15 +851,16 @@ export const getQueueListBySalonId = async (req, res, next) => {
         //         response: []
         //     });
         // }
-        if (getSalon.length > 0) {
-            // Access the sorted queueList array from the result
-            const sortedQueueList = getSalon[0].queueList;
+        // if (getSalon.length > 0) {
+        //     // Access the sorted queueList array from the result
+        //     const sortedQueueList = getSalon[0].queueList;
 
-            return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQueueList })
-        }
-        else {
-            return SuccessHandler(RETRIVE_EMPTY_QUEUELIST_SUCCESS, ERROR_STATUS_CODE_404, res, { response: [] })
-        }
+        //     return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQueueList })
+        // }
+        // else {
+        //     return SuccessHandler(RETRIVE_EMPTY_QUEUELIST_SUCCESS, ERROR_STATUS_CODE_404, res, { response: [] })
+        // }
+        
 
     }
     catch (error) {

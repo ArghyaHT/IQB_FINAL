@@ -21,8 +21,13 @@ export const RETRIVE_EMPTY_QUEUELIST_SUCCESS = "Queue list is empty"
 export const QUEUE_SERVE_SUCCESS = "Customer serve successfully"
 export const QUEUE_CANCEL_SUCCESS = "Customer cancel successfully"
 
-export const QUEUELIST_EMPTY_FOR_BARBER_SUCCESS ="Queue list not found for the specified barber"
+export const QUEUELIST_EMPTY_FOR_BARBER_SUCCESS ="Queue list found for the specified barber"
 export const QUEUELIST_RETRIEVED_FOR_BARBER_SUCCESS ="Queue list retrieved for the specified barber successfully"
+
+export const BARBER_QUEUE_HISTORY_SUCCESS ="Barber queue history retrieved successfully"
+export const SALON_QUEUE_HISTORY_SUCCESS ="Salon queue history retrieved successfully"
+
+
 
 
 

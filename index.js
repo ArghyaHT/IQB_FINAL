@@ -30,6 +30,7 @@ import countryRoutes from "./routes/web/countries/countryRoutes.js"
 import customerRoutesWeb from "./routes/web/customer/customerRoutes.js"
 import bulkMessageAndEmailsRoutes from "./routes/web/bulkMessagesAndEmailRoutes/bulkMesagesAndEmailRoutes.js"
 import reports from "./routes/web/reports/reportsRoutes.js"
+import queuehistoryRoutes from "./routes/web/queue/queueHistoryRoutes.js"
 
 // import { setupCronJobs } from "./triggers/cronJobs.js";
 // import { storeCountries } from "./utils/countries.js";
@@ -181,6 +182,7 @@ app.use("/api/icons", iconRoutes)
 app.use("/api/country", countryRoutes)
 app.use("/api/bulkMessageAndEmails", bulkMessageAndEmailsRoutes)
 app.use("/api/reports", reports)
+app.use("/api/queueHistory", queuehistoryRoutes)
 
 
 // Global Error Handler
