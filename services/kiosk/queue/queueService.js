@@ -34,11 +34,12 @@ export const getSalonQlist = async(salonId) => {
         return {
             ...queue, // Spread the existing queue properties
             barberEmail: barber ? barber.email : null, // Add barberEmail
+            name: queue.customerName
         };
     })
 );
 
-console.log(updatedQueueList);
+
 return updatedQueueList;
 
 

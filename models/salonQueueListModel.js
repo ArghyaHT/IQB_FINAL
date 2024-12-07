@@ -52,6 +52,7 @@ const salonQueueListSchema = new mongoose.Schema({
             type: String,
              default:""
         },
+        
         forceUpdate: {
             type: Boolean
         },

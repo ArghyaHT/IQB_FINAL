@@ -95,6 +95,10 @@ const joinqueueHistorySchema = new mongoose.Schema({
         serviceEWT: {
             type: Number
         },
+        serviceType:{
+            type: String,
+            default: "Regular"
+        },
         customerEWT: {
             type: Number
         },

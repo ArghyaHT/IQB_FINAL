@@ -22,7 +22,6 @@ import SalonQueueList from "../../../models/salonQueueListModel.js";
 
 //DESC:GET SALON QUEUELIST ================
 export const getQueueListBySalonId = async (req, res, next) => {
-
     try {
         const salonId = parseInt(req.query.salonId, 10);
 

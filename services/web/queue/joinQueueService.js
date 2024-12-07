@@ -1,109 +1,130 @@
 import SalonQueueList from "../../../models/salonQueueListModel.js"
 
 // Find existing SalonQueueList
-export const findSalonQueueList = async(salonId) => {
-const queueList = await SalonQueueList.findOne({ salonId: salonId });
+export const findSalonQueueList = async (salonId) => {
+  const queueList = await SalonQueueList.findOne({ salonId: salonId });
 
-return queueList;
+  return queueList;
 }
 
-  //Adding new queue document
-  export const addNewQueue = async(salonId, newQueue) => {
-    const newQueueData = new SalonQueueList({
-        salonId: salonId,
-        queueList: [newQueue],
-      });
-     await newQueueData.save();
-     return newQueueData;
-  }
+//Adding new queue document
+export const addNewQueue = async (salonId, newQueue) => {
+  const newQueueData = new SalonQueueList({
+    salonId: salonId,
+    queueList: [newQueue],
+  });
+  await newQueueData.save();
+  return newQueueData;
+}
 
 //Adding members in group join
-export const addGroupJoin = async(salonId) => {
-    const existingQueue = new SalonQueueList({
-        salonId: salonId,
-        queueList: [],
-      });
-      await existingQueue.save();
-      return existingQueue;
+export const addGroupJoin = async (salonId) => {
+  const existingQueue = new SalonQueueList({
+    salonId: salonId,
+    queueList: [],
+  });
+  await existingQueue.save();
+  return existingQueue;
 }
 
 //Get salon queue list
-export const getSalonQlist = async(salonId) => {
+// export const getSalonQlist = async (salonId) => {
 
-  const sortedQlist = await SalonQueueList.findOne({salonId});
+//   const sortedQlist = await SalonQueueList.findOne({ salonId });
 
-    // const sortedQlist = await SalonQueueList.aggregate([
-    //     {
-    //       $match: { salonId } // Match the document based on salonId
-    //     },
-    //     {
-    //       $unwind: "$queueList" // Deconstruct queueList array
-    //     },
-    //     {
-    //       $sort: {
-    //         "queueList.qPosition": 1 // Sort by qPosition in ascending order (1)
-    //       }
-    //     },
-    //     {
-    //       $group: {
-    //         _id: "$_id", // Group by the document's _id field
-    //         queueList: { $push: "$queueList" } // Reconstruct the queueList array
-    //       }
-    //     },
-    //     //Changed for frontend 
-    //     {
-    //       $project: {
-    //         queueList: {
-    //           $map: {
-    //             input: "$queueList",
-    //             as: "list",
-    //             in: {
-    //               $mergeObjects: [
-    //                 "$$list",
-    //                 { "name": "$$list.customerName" } // Rename customerName to name
-    //               ]
-    //             }
-    //           }
-    //         }
-    //       }
-    //     },
-    //     {
-    //       $project: {
-    //         "queueList.customerName": 0 // Exclude the customerName field
-    //       }
-    //     }
-    //   ]);
 
-      // if(sortedQlist.length > 0){
-      //   return sortedQlist
-      // }else{
-      //   return [
-      //     {
-      //       queueList:[]
-      //     }
-      //   ]
-      // }
+//   // const sortedQlist = await SalonQueueList.aggregate([
+//   //     {
+//   //       $match: { salonId } // Match the document based on salonId
+//   //     },
+//   //     {
+//   //       $unwind: "$queueList" // Deconstruct queueList array
+//   //     },
+//   //     {
+//   //       $sort: {
+//   //         "queueList.qPosition": 1 // Sort by qPosition in ascending order (1)
+//   //       }
+//   //     },
+//   //     {
+//   //       $group: {
+//   //         _id: "$_id", // Group by the document's _id field
+//   //         queueList: { $push: "$queueList" } // Reconstruct the queueList array
+//   //       }
+//   //     },
+//   //     //Changed for frontend 
+//   //     {
+//   //       $project: {
+//   //         queueList: {
+//   //           $map: {
+//   //             input: "$queueList",
+//   //             as: "list",
+//   //             in: {
+//   //               $mergeObjects: [
+//   //                 "$$list",
+//   //                 { "name": "$$list.customerName" } // Rename customerName to name
+//   //               ]
+//   //             }
+//   //           }
+//   //         }
+//   //       }
+//   //     },
+//   //     {
+//   //       $project: {
+//   //         "queueList.customerName": 0 // Exclude the customerName field
+//   //       }
+//   //     }
+//   //   ]);
 
-      //  if(sortedQlist.queueList.length > 0){
-      //   return sortedQlist.queueList
-      // }else{
-      //   return [
-      //     {
-      //       queueList:[]
-      //     }
-      //   ]
-      // }
+//   // if(sortedQlist.length > 0){
+//   //   return sortedQlist
+//   // }else{
+//   //   return [
+//   //     {
+//   //       queueList:[]
+//   //     }
+//   //   ]
+//   // }
 
-      if (!sortedQlist || !sortedQlist.queueList || sortedQlist.queueList.length === 0) {
-        return [];
-    }
+//   //  if(sortedQlist.queueList.length > 0){
+//   //   return sortedQlist.queueList
+//   // }else{
+//   //   return [
+//   //     {
+//   //       queueList:[]
+//   //     }
+//   //   ]
+//   // }
 
-      return sortedQlist.queueList
+//   // console.log(sortedQlist)
 
+//   if (!sortedQlist || !sortedQlist.queueList || sortedQlist.queueList.length === 0) {
+//     return [];
+//   }
+
+
+//   return sortedQlist.queueList
+
+// }
+
+export const getSalonQlist = async (salonId) => {
+  const sortedQlist = await SalonQueueList.findOne({ salonId }).lean();
+
+  if (!sortedQlist || !sortedQlist.queueList || sortedQlist.queueList.length === 0) {
+    return [];
+  }
+
+  const modifyQueuelist = sortedQlist.queueList.map((queue) => ({
+    ...queue, 
+    name: queue.customerName 
+  }));
+
+
+  return modifyQueuelist;  // Return the modified list, not the original one
 }
 
+
 //Find customers to send Mail for Q position change
-export const findCustomersToMail = async(salonId, barberId) => {
+export const findCustomersToMail = async (salonId, barberId) => {
   const customers = await SalonQueueList.find({ salonId, "queueList.barberId": barberId })
 
   return customers;
@@ -111,15 +132,20 @@ export const findCustomersToMail = async(salonId, barberId) => {
 
 
 //GET Q LIST BY BARBER ID
-export const qListByBarberId = async(salonId, barberId) => {
+export const qListByBarberId = async (salonId, barberId) => {
 
-  const qlist = await SalonQueueList.findOne({salonId})
+  const qlist = await SalonQueueList.findOne({ salonId }).lean()
 
- if(qlist){
-  const filteredQueueList = qlist.queueList.filter(item => item.barberId === barberId);
+  const modifyQueuelist = qlist.queueList.map((queue) => ({
+    ...queue, 
+    name: queue.customerName 
+  }));
 
-  return filteredQueueList
-}
+  if (modifyQueuelist) {
+    const filteredQueueList = modifyQueuelist.filter(item => item.barberId === barberId);
+
+    return filteredQueueList
+  }
 
   // const qList = await SalonQueueList.aggregate([
   //   {
