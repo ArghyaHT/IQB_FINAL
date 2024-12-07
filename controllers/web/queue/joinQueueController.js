@@ -41,9 +41,9 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
         if (getSalon) {
             getSalon.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
-          }
-          
-          const sortedQlist = getSalon;
+        }
+
+        const sortedQlist = getSalon;
 
 
         if (!sortedQlist) {
@@ -99,9 +99,12 @@ export const barberServedQueue = async (req, res, next) => {
 
             const updatedByBarberEmail = foundUser.email;
 
-            const updatedByBarberName = foundUser.name;
+            const servedBybarber = await findBarberByEmailAndRole(barberEmail)
+
+            const servedByBarberEmail = barberEmail
 
             const queue = await findSalonQueueList(salonId);
+
             let currentServiceEWT = 0;
             let updatedQueueList = [];
 
@@ -123,13 +126,14 @@ export const barberServedQueue = async (req, res, next) => {
                         const salon = await findSalonQueueListHistory(salonId);
 
                         if (!salon) {
-                            await addQueueHistory(salonId, element, updatedByBarberEmail, updatedByBarberName)
+                            await addQueueHistory(salonId, element, updatedByBarberEmail, servedByBarberEmail, servedBybarber.barberId, servedBybarber.name)
                         } else {
                             salon.queueList.push({
                                 ...element.toObject(), // Convert Mongoose document to plain object
+                                servedByBarberEmail: servedByBarberEmail,
                                 updatedByBarberEmail: updatedByBarberEmail,
-                                updatedByBarberName: updatedByBarberName,
-                                isAdmin: true
+                                barberName: servedBybarber.name,
+                                servedByBarberId: servedBybarber.barberId
                             });
                             await salon.save();
                         }
@@ -363,7 +367,9 @@ export const barberServedQueue = async (req, res, next) => {
 
             const updatedByBarberEmail = foundUser.email;
 
-            const updatedByBarberName = foundUser.name;
+            const servedBybarber = await findBarberByEmailAndRole(barberEmail)
+
+            const servedByBarberEmail = barberEmail
 
             const queue = await findSalonQueueList(salonId);
             let currentServiceEWT = 0;
@@ -387,12 +393,14 @@ export const barberServedQueue = async (req, res, next) => {
                         const salon = await findSalonQueueListHistory(salonId);
 
                         if (!salon) {
-                            await addQueueHistory(salonId, element, updatedByBarberEmail, updatedByBarberName)
+                            await addQueueHistory(salonId, element, updatedByBarberEmail, servedByBarberEmail, servedBybarber.barberId, servedBybarber.name)
                         } else {
                             salon.queueList.push({
                                 ...element.toObject(), // Convert Mongoose document to plain object
+                                servedByBarberEmail: servedByBarberEmail,
                                 updatedByBarberEmail: updatedByBarberEmail,
-                                updatedByBarberName: updatedByBarberName
+                                barberName: servedBybarber.name,
+                                servedByBarberId: servedBybarber.barberId
                             });
                             await salon.save();
                         }
@@ -645,7 +653,7 @@ export const cancelQueue = async (req, res, next) => {
             barberEmail = barberEmail.toLowerCase();
         }
 
-        let foundUser, updatedByBarberEmail, updatedByBarberName;
+        let foundUser, updatedByBarberEmail;
 
         if (adminEmail) {
             foundUser = await findAdminByEmailAndSalonId(adminEmail, salonId);
@@ -654,14 +662,13 @@ export const cancelQueue = async (req, res, next) => {
             }
 
             updatedByBarberEmail = foundUser.email;
-            updatedByBarberName = foundUser.name;
+            
         } else {
             foundUser = await findBarberByBarberEmailAndSalonId(barberEmail, salonId);
             if (!foundUser) {
                 return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE, res)
             }
             updatedByBarberEmail = foundUser.email;
-            updatedByBarberName = foundUser.name;
         }
 
         const updatedQueue = await findSalonQueueList(salonId);
@@ -696,7 +703,6 @@ export const cancelQueue = async (req, res, next) => {
             salon.queueList.push({
                 ...canceledQueue.toObject(),
                 updatedByBarberEmail,
-                updatedByBarberName,
                 isAdmin: !!adminEmail
             });
             await salon.save();

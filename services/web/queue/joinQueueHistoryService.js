@@ -7,12 +7,14 @@ export const findSalonQueueListHistory = async(salonId) => {
 }
 
 //ADD SERVED Q TO HISTORY
-export const addQueueHistory = async(salonId, element, updatedByBarberEmail, updatedByBarberName) => {
+export const addQueueHistory = async(salonId, element, updatedByBarberEmail,servedByBarberEmail, barberId, name) => {
 
   const newElement = {
     ...element.toObject(), // Convert Mongoose document to plain JavaScript object
-    updatedByBarberEmail,
-    updatedByBarberName
+    servedByBarberEmail: servedByBarberEmail,
+    updatedByBarberEmail: updatedByBarberEmail,
+    barberId: barberId,
+    barberName: name
 };
 
 const newSalonHistory = new JoinedQueueHistory({

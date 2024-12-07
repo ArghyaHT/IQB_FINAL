@@ -57,7 +57,8 @@ const salonQueueListSchema = new mongoose.Schema({
             type: Boolean
         },
         qgCode: {
-            type: String
+            type: String,
+            default: ""
         },
         qPosition: {
             type: Number

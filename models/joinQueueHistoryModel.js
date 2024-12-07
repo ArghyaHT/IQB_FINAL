@@ -61,7 +61,8 @@ const joinqueueHistorySchema = new mongoose.Schema({
             type: Boolean
         },
         qgCode: {
-            type: String
+            type: String,
+            default: ""
         },
         qPosition: {
             type: Number
@@ -106,6 +107,11 @@ const joinqueueHistorySchema = new mongoose.Schema({
         servedByBarberEmail: {
             type: String,
             default: ""
+        },
+        
+        servedByBarberId:{
+            type: Number,
+            default: 0
         },
 
         updatedByBarberEmail: {

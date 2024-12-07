@@ -10,10 +10,10 @@ export const addQueueHistoryWhenCanceled = async(salonId, canceledQueue) => {
 
     const newElement = {
       ...canceledQueue.toObject(), // Convert Mongoose document to plain JavaScript object
+      isCustomer:true
   };
   
-  
-     const salon = new JoinedQueueHistory({
+    const salon = new JoinedQueueHistory({
           salonId,
           queueList: [newElement],
         });

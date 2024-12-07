@@ -1031,6 +1031,8 @@ export const barberServedQueueKiosk = async (req, res, next) => {
             return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
         }
 
+        const servedBybarber = await findBarberByEmailAndRole(barberEmail)
+
         const servedByBarberEmail = barberEmail
 
         const updatedByBarberEmail = foundUser.email;
@@ -1047,8 +1049,6 @@ export const barberServedQueueKiosk = async (req, res, next) => {
                     return element.services.some(queueService => queueService.serviceId === requestedService.serviceId);
                 });
 
-                console.log(element._id)
-
                 if (
                     element.qPosition === 1 &&
                     allServicesMatch &&
@@ -1059,12 +1059,14 @@ export const barberServedQueueKiosk = async (req, res, next) => {
                     const salon = await findSalonQueueListHistory(salonId);
 
                     if (!salon) {
-                        await addQueueHistory(salonId, element, updatedByBarberEmail, servedByBarberEmail)
+                        await addQueueHistory(salonId, element, updatedByBarberEmail, servedByBarberEmail, servedBybarber.barberId, servedBybarber.name)
                     } else {
                         salon.queueList.push({
                             ...element.toObject(), // Convert Mongoose document to plain object
                             servedByBarberEmail: servedByBarberEmail,
                             updatedByBarberEmail: updatedByBarberEmail,
+                            barberName:servedBybarber.name,
+                            servedByBarberId:servedBybarber.barberId
                         });
                         await salon.save();
                     }
@@ -1863,13 +1865,10 @@ export const getAllBarberbySalonId = async (req, res, next) => {
     }
 };
 
-
-
 //DESC:BARBER SERVED API ================
 export const barberServedQueueTvApp = async (req, res, next) => {
     try {
         let { salonId, barberId, adminEmail, services, _id } = req.body;
-
 
         if (!adminEmail) {
             return res.status(400).json({
@@ -2167,7 +2166,6 @@ export const barberServedQueueTvApp = async (req, res, next) => {
         next(error);
     }
 };
-
 
 //DESC:CANCEL QUEUE ================
 export const cancelQueueTvApp = async (req, res, next) => {

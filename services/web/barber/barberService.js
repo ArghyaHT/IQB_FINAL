@@ -102,7 +102,7 @@ export const adminCreateBarber = async (email, hashedPassword, name, nickName, s
 }
 
 // Update Barber Services by Admin
-export const adminUpdateBarberServices = async (email, salonId, serviceId, serviceIcon, serviceName, serviceCode, servicePrice, vipService, barberServiceEWT) => {
+export const updateBarberServices = async (email, salonId, serviceId, serviceIcon, serviceName, serviceCode, servicePrice, vipService, barberServiceEWT) => {
    const service = await Barber.findOneAndUpdate(
        { email, salonId, 'barberServices.serviceId': serviceId },
        {

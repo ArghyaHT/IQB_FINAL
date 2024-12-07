@@ -4,7 +4,7 @@ import { getAllSalonServices, getAllSalons, getSalonInfo, getSalonsByLocation, g
 import { createAppointment, deleteAppointment, editAppointment, getAllAppointmentsByBarberId, getAllAppointmentsByBarberIdAndDate, getAllAppointmentsBySalonId, getAllAppointmentsBySalonIdAndDate, getEngageBarberTimeSlots } from "../../controllers/mobile/appointmentController.js";
 // import { verifyRefreshCustomerToken } from "../middlewares/VerifyRefreshCustomerToken.js";
 import { getAllBarberbySalonId } from "../../controllers/mobile/barberController.js";
-import { getAvailableBarbersForQ, getBarberByServices, getBarberServicesByBarberId, getQlistbyBarberId, getQueueListBySalonId, groupJoinQueue, singleJoinQueue } from "../../controllers/mobile/joinQueueController.js";
+import { cancelQueueByCustomer, getAvailableBarbersForQ, getBarberByServices, getBarberServicesByBarberId, getQlistbyBarberId, getQueueListBySalonId, groupJoinQueue, singleJoinQueue } from "../../controllers/mobile/joinQueueController.js";
 import { getAllAdvertisements } from "../../controllers/mobile/advertisementController.js";
 // import { getAllAdvertisements } from "../../controllers/dashboard/dashboardController.js";
 
@@ -52,6 +52,9 @@ router.route("/singleJoinQueue").post(singleJoinQueue)
 //Group Join
 router.route("/groupJoinQueue").post(groupJoinQueue)
 
+//Cancel Queue
+router.route("/cancelQueueByCustomer").post(cancelQueueByCustomer)
+
 //Get Available Barbers for Queue
 router.route("/getAvailableBarbersForQ").post(getAvailableBarbersForQ)
 
@@ -66,7 +69,6 @@ router.route("/getQlistByBarberId").post(getQlistbyBarberId)
 
 //Get Q list by Salon Id
 router.route("/getQlistBySalonId").get(getQueueListBySalonId)
-
 
 // //DESC:ADVERTISEMENT ROUTES ==============================
 

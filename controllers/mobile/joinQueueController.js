@@ -6,6 +6,8 @@ import moment from "moment";
 import { addCustomerToQueue } from "../../utils/queue/queueUtils.js";
 import { findCustomerByCustomerEmailAndSalonId } from "../../services/mobile/customerService.js";
 import { addQueueHistoryWhenCanceled, findSalonQueueListHistory, statusCancelQ } from "../../services/mobile/queueHistoryService.js";
+import { validateEmail } from "../../middlewares/validator.js";
+import { findCustomersToMail } from "../../services/web/queue/joinQueueService.js";
 
 //DESC:SINGLE JOIN QUEUE ================
 export const singleJoinQueue = async (req, res, next) => {
@@ -356,12 +358,23 @@ export const groupJoinQueue = async (req, res, next) => {
             existingQueue = await addGroupJoin(salonId)
         }
 
+        const generateGcCode = () => {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let gcCode = '';
+            for (let i = 0; i < 6; i++) {
+              const randomIndex = Math.floor(Math.random() * characters.length);
+              gcCode += characters[randomIndex];
+            }
+            return gcCode;
+          };
+
+        const gcCode = generateGcCode()
+
         // Iterate through each group member
         for (const member of groupInfo) {
             let totalServiceEWT = 0;
 
             const parshedMobileNumber = parseInt(groupInfo.mobileNumber)
-
             // Validate mobile number format (assuming it should be exactly 10 digits)
             if (parshedMobileNumber && !/^\d{10}$/.test(parshedMobileNumber)) {
                 return res.status(201).json({ success: false, message: "Invalid mobile number format. It should be 10 digits." });
@@ -400,9 +413,7 @@ export const groupJoinQueue = async (req, res, next) => {
             const adjustedTime = moment(time, 'HH:mm:ss').add(offsetHours, 'hours').add(offsetMinutes, 'minutes').format('HH:mm:ss');
 
 
-            // Generate a unique groupJoinCode by combining qPosition and barberId
-            const groupJoinCode = `${updatedBarber.queueCount}-${member.barberId}`;
-
+            console.log(gcCode)
             // Create queue entry data for the group member
             const newQueue = {
                 customerName: member.name,
@@ -423,7 +434,7 @@ export const groupJoinQueue = async (req, res, next) => {
                 serviceEWT: totalServiceEWT,
                 serviceType: isVipServiceRequested ? "VIP" : "Regular",
                 customerEWT: isVipServiceRequested ? 0 : (updatedBarber.barberEWT - totalServiceEWT),
-                qgCode: groupJoinCode,
+                qgCode: gcCode,
                 methodUsed: member.methodUsed, // Customize or set the method used as needed
                 dateJoinedQ: new Date(),
                 timeJoinedQ: adjustedTime
@@ -523,7 +534,7 @@ export const groupJoinQueue = async (req, res, next) => {
 };
 
 //DESC:CANCEL QUEUE ================
-export const cancelQueue = async (req, res, next) => {
+export const cancelQueueByCustomer = async (req, res, next) => {
     try {
         let { salonId, customerEmail, barberId, _id } = req.body;
 
@@ -544,29 +555,13 @@ export const cancelQueue = async (req, res, next) => {
             });
         }
 
-        // Validate password length
-        if (!password) {
-            return res.status(201).json({
-                success: false,
-                message: "Please enter a valid password with the required length."
-            });
-        }
-
-        // Validate password length
-        if (password.length < 8) {
-            return res.status(201).json({
-                success: false,
-                message: "Password must be at least 8 characters long"
-            });
-        }
-
 
         const foundUser = await findCustomerByCustomerEmailAndSalonId(customerEmail, salonId);
 
         if (!foundUser) {
             return res.status(201).json({
                 success: false,
-                message: 'Unauthorized Customer'
+                message: 'Customer not found'
             })
         }
 
@@ -614,6 +609,7 @@ export const cancelQueue = async (req, res, next) => {
         } else {
             salon.queueList.push({
                 ...canceledQueue.toObject(), // Convert Mongoose document to plain object
+                isCustomer: true
             });
             await salon.save();
         }
@@ -715,7 +711,6 @@ export const cancelQueue = async (req, res, next) => {
                 }
             }
         }
-
 
         return res.status(200).json({
             success: true,

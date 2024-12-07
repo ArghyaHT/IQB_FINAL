@@ -1,4 +1,4 @@
-import { adminAddNewBarberService, adminCreateBarber, adminUpdateBarber, adminUpdateBarberServices, barberClockInStatus, barberCode, barberOnlineStatus, changeBarberStatus, connectBarberSalon, createBarber, createBarberId, createGoogleBarber, deleteBarberProPic, deletedBarber, fetchedBarbers, findBarberByEmailAndRole, findBarberProfileById, getBarberByBarberId, getBarbersByServiceId, googleLoginBarber, resetBarberPassword, totalBarberCount, updateBarber, updateBarberProPic, uploadBarberProPic } from "../../../services/web/barber/barberService.js";
+import { adminAddNewBarberService, adminCreateBarber, adminUpdateBarber, updateBarberServices, barberClockInStatus, barberCode, barberOnlineStatus, changeBarberStatus, connectBarberSalon, createBarber, createBarberId, createGoogleBarber, deleteBarberProPic, deletedBarber, fetchedBarbers, findBarberByEmailAndRole, findBarberProfileById, getBarberByBarberId, getBarbersByServiceId, googleLoginBarber, resetBarberPassword, totalBarberCount, updateBarber, updateBarberProPic, uploadBarberProPic } from "../../../services/web/barber/barberService.js";
 import { createBarberFcmToken } from "../../../services/web/userTokenRegister/userTokenRegister.js";
 import jwt from "jsonwebtoken"
 import { OAuth2Client } from "google-auth-library";
@@ -756,7 +756,7 @@ export const updateBarberByAdmin = async (req, res, next) => {
             for (const service of barberServices) {
                 const { serviceId, serviceName, serviceIcon, serviceCode, servicePrice, vipService, barberServiceEWT } = service;
 
-                const updateService = await adminUpdateBarberServices(email, salonId, serviceId, serviceIcon, serviceName, serviceCode, servicePrice, vipService, barberServiceEWT);
+                const updateService = await updateBarberServices(email, salonId, serviceId, serviceIcon, serviceName, serviceCode, servicePrice, vipService, barberServiceEWT);
 
                 // If BarberServices Not Present
                 if (!updateService) {
@@ -1089,7 +1089,7 @@ export const updateBarberAccountDetails = async (req, res, next) => {
             for (const service of barberServices) {
                 const { serviceId, serviceName, serviceIcon, serviceCode, servicePrice, vipService, barberServiceEWT } = service;
 
-                const updateService = await adminUpdateBarberServices(email, getBarber.salonId, serviceId, serviceIcon, serviceName, serviceCode, servicePrice, vipService, barberServiceEWT);
+                const updateService = await updateBarberServices(email, getBarber.salonId, serviceId, serviceIcon, serviceName, serviceCode, servicePrice, vipService, barberServiceEWT);
 
                 // If BarberServices Not Present
                 if (!updateService) {
@@ -1401,9 +1401,6 @@ export const getBarberDetailsByEmail = async (req, res) => {
     }
 }
 
-
-
-
 //DESC:SEND ADMIN MOBILE NUMBER VERIFICATION CODE ============================
 export const sendVerificationCodeForBarberMobile = async (req, res, next) => {
     try {
@@ -1478,7 +1475,6 @@ export const changeBarberMobileVerifiedStatus = async (req, res, next) => {
         next(error);
     }
 }
-
 
 //DESC:CHANGE ADMIN PASSWORD ============================
 export const barberchangepassword = async (req, res, next) => {
