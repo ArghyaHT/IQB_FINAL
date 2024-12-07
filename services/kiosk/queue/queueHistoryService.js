@@ -8,12 +8,12 @@ export const findSalonQueueListHistory = async(salonId) => {
 }
 
 //ADD SERVED Q TO HISTORY
-export const addQueueHistory = async(salonId, element, updatedByBarberId, updatedByBarberName) => {
+export const addQueueHistory = async(salonId, element,updatedByBarberEmail, servedByBarberEmail) => {
 
   const newElement = {
     ...element.toObject(), // Convert Mongoose document to plain JavaScript object
-    updatedByBarberId,
-    updatedByBarberName
+   servedByBarberEmail: servedByBarberEmail,
+   updatedByBarberEmail: updatedByBarberEmail
 };
 
     const newSalonHistory = new JoinedQueueHistory({
@@ -32,12 +32,11 @@ export const updateServed = async(salonId, _id) => {
       return updatedValue;
 }
 
- export const addQueueHistoryWhenCanceled = async(salonId, canceledQueue, updatedByBarberId, updatedByBarberName) => {
+ export const addQueueHistoryWhenCanceled = async(salonId, canceledQueue, updatedByBarberId) => {
 
   const newElement = {
     ...canceledQueue.toObject(), // Convert Mongoose document to plain JavaScript object
     updatedByBarberId,
-    updatedByBarberName
 };
 
 

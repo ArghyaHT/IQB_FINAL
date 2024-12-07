@@ -120,8 +120,8 @@ export const decreaseBarberEWTWhenQCancel = async (salonId, barberId, canceledSe
 }
 
 
-export const findBarberByBarberEmailAndSalonId = async(barberEmail, salonId) =>{
-   const barber = Barber.findOne({ salonId: salonId, email: barberEmail }).exec();
+export const findBarberByBarberEmailAndSalonId = async(updatedByEmail, salonId) =>{
+   const barber = Barber.findOne({ salonId: salonId, email: updatedByEmail }).exec();
 
    return barber;
 }

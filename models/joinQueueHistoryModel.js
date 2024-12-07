@@ -16,16 +16,16 @@ const joinqueueHistorySchema = new mongoose.Schema({
         },
         customerName: {
             type: String,
-            default:""
+            default: ""
             // required: true
         },
         customerEmail: {
             type: String
         },
-        mobileCountryCode:{
+        mobileCountryCode: {
             type: Number
         },
-        mobileNumber:{
+        mobileNumber: {
             type: Number
         },
         joinedQ: {
@@ -38,11 +38,11 @@ const joinqueueHistorySchema = new mongoose.Schema({
         },
         dateJoinedQ: {
             type: Date,
-            default:""
+            default: ""
         },
         timeJoinedQ: {
             type: String,
-             default:""
+            default: ""
         },
         timePositionChanged: {
             type: String
@@ -85,7 +85,7 @@ const joinqueueHistorySchema = new mongoose.Schema({
             serviceName: {
                 type: String
             },
-            servicePrice:{
+            servicePrice: {
                 type: Number
             },
             vipService: {
@@ -95,30 +95,32 @@ const joinqueueHistorySchema = new mongoose.Schema({
         serviceEWT: {
             type: Number
         },
-        serviceType:{
+        serviceType: {
             type: String,
             default: "Regular"
         },
         customerEWT: {
             type: Number
         },
+
+        servedByBarberEmail: {
+            type: String,
+            default: ""
+        },
+
         updatedByBarberEmail: {
             type: String,
             default: ""
         },
-        updatedByBarberName: {
-            type: String,
-            default: ""
-        },
-        isAdmin:{
+        isAdmin: {
             type: Boolean,
             default: false
         },
-        isCustomer:{
+        isCustomer: {
             type: Boolean,
             default: false
         },
-        status:{
+        status: {
             type: String
         },
         localLineId: {

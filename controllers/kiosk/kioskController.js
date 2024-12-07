@@ -23,7 +23,7 @@ import { SALON_EXISTS_ERROR, SALON_NOT_FOUND_ERROR, SALON_OFFLINE_SUCCESS, SALON
 import { BARBER_CLOCKIN_ERROR, BARBER_CLOCKIN_SUCCESS, BARBER_CLOCKOUT_SUCCESS, BARBER_EXISTS_ERROR, BARBER_NOT_APPROVE_ERROR, BARBER_SERVICES_SUCCESS, CUSTOMERS_IN_QUEUE_ERROR, GET_ALL_BARBER_SUCCESS, SELECT_SERVICE_ERROR } from "../../constants/web/BarberConstants.js";
 
 import { ErrorHandler } from "../../middlewares/ErrorHandler.js";
-import { QUEUE_CANCEL_SUCCESS, QUEUE_NOT_FOUND_ERROR, QUEUE_SERVE_SUCCESS, RETRIVE_EMPTY_QUEUELIST_SUCCESS, RETRIVE_QUEUELIST_SUCCESS } from "../../constants/web/QueueConstants.js";
+import { QUEUE_CANCEL_SUCCESS, QUEUE_NOT_FOUND_ERROR, QUEUE_POSITION_ERROR, QUEUE_SERVE_SUCCESS, RETRIVE_EMPTY_QUEUELIST_SUCCESS, RETRIVE_QUEUELIST_SUCCESS } from "../../constants/web/QueueConstants.js";
 import { ADVERT_IMAGES_SUCCESS } from "../../constants/web/DashboardConstants.js";
 
 import SalonQueueListModel from "../../models/salonQueueListModel.js";
@@ -993,9 +993,9 @@ export const getBarberServicesByBarberIdKiosk = async (req, res, next) => {
 //DESC:BARBER SERVED API ================
 export const barberServedQueueKiosk = async (req, res, next) => {
     try {
-        let { salonId, barberId, barberEmail, password, services, _id } = req.body;
+        let { salonId, barberId, barberEmail, updatedByEmail, password, services, _id } = req.body;
 
-        if (!barberEmail && !password) {
+        if (!updatedByEmail && !password) {
             return ErrorHandler(EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
@@ -1017,7 +1017,9 @@ export const barberServedQueueKiosk = async (req, res, next) => {
 
         barberEmail = barberEmail.toLowerCase();
 
-        const foundUser = await findBarberByBarberEmailAndSalonId(barberEmail, salonId);
+        updatedByEmail = updatedByEmail.toLowerCase();
+
+        const foundUser = await findBarberByBarberEmailAndSalonId(updatedByEmail, salonId);
 
         if (!foundUser) {
             return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
@@ -1029,9 +1031,9 @@ export const barberServedQueueKiosk = async (req, res, next) => {
             return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        const updatedByBarberEmail = foundUser.email;
+        const servedByBarberEmail = barberEmail
 
-        const updatedByBarberName = foundUser.name;
+        const updatedByBarberEmail = foundUser.email;
 
         const queue = await findSalonQueueList(salonId);
         let currentServiceEWT = 0;
@@ -1057,12 +1059,12 @@ export const barberServedQueueKiosk = async (req, res, next) => {
                     const salon = await findSalonQueueListHistory(salonId);
 
                     if (!salon) {
-                        await addQueueHistory(salonId, element, updatedByBarberEmail, updatedByBarberName)
+                        await addQueueHistory(salonId, element, updatedByBarberEmail, servedByBarberEmail)
                     } else {
                         salon.queueList.push({
                             ...element.toObject(), // Convert Mongoose document to plain object
+                            servedByBarberEmail: servedByBarberEmail,
                             updatedByBarberEmail: updatedByBarberEmail,
-                            updatedByBarberName: updatedByBarberName
                         });
                         await salon.save();
                     }
@@ -1335,7 +1337,6 @@ export const cancelQueueKiosk = async (req, res, next) => {
         }
 
         const updatedByBarberEmail = foundUser.email;
-        const updatedByBarberName = foundUser.name;
 
         const updatedQueue = await findSalonQueueList(salonId);
 
@@ -1373,12 +1374,11 @@ export const cancelQueueKiosk = async (req, res, next) => {
         let salon = await findSalonQueueListHistory(salonId);
 
         if (!salon) {
-            salon = await addQueueHistoryWhenCanceled(salonId, canceledQueue, updatedByBarberEmail, updatedByBarberName);
+            salon = await addQueueHistoryWhenCanceled(salonId, canceledQueue, updatedByBarberEmail);
         } else {
             salon.queueList.push({
                 ...canceledQueue.toObject(), // Convert Mongoose document to plain object
                 updatedByBarberEmail: updatedByBarberEmail,
-                updatedByBarberName: updatedByBarberName,
                 isAdmin: false
             });
             await salon.save();
