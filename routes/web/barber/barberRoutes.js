@@ -1,7 +1,7 @@
 import express from "express";
 
 // import {  handleBarberProtectedRoute, handleProtectedRoute } from "../../middlewares/middlewares.js";
-import { barberchangepassword, changeBarberClockInStatus, changeBarberEmailVerifiedStatus, changeBarberMobileVerifiedStatus, changeBarberOnlineStatus, changeBarberWorkingStatus, connectBarberToSalon, createBarberByAdmin, deleteBarber, getAllBarberbySalonId, getAllBarbersByServiceId, getBarberDetailsByEmail, getBarberServicesByBarberId, googleBarberLogin, googleBarberSignup, handleForgetPassword, handleLogout, handleResetPassword, loginController, registerController, sendVerificationCodeForBarberEmail, sendVerificationCodeForBarberMobile, updateBarberAccountDetails, updateBarberByAdmin, updateBarberInfo, uploadBarberprofilePic } from "../../../controllers/web/barber/barberController.js";
+import { barberchangepassword, changeBarberClockInStatus, changeBarberEmailVerifiedStatus, changeBarberMobileVerifiedStatus, changeBarberOnlineStatus, changeBarberWorkingStatus, connectBarberToSalon, createBarberByAdmin, deleteBarber, getAllBarberbySalonId, getAllBarbersByServiceId, getAllSalonServicesForBarber, getBarberDetailsByEmail, getBarberServicesByBarberId, googleBarberLogin, googleBarberSignup, handleForgetPassword, handleLogout, handleResetPassword, loginController, registerController, sendVerificationCodeForBarberEmail, sendVerificationCodeForBarberMobile, updateBarberAccountDetails, updateBarberByAdmin, updateBarberInfo, uploadBarberprofilePic } from "../../../controllers/web/barber/barberController.js";
 import { BarberLoggedIn } from "../../../middlewares/web/middlewares.js";
 import { verifyRefreshTokenAdmin } from "../../../middlewares/web/VerifyRefreshTokenAdmin.js";
 import { getAllSalonServices, getAllSalons, getSalonInfoBySalonId, getSalonsByLocation } from "../../../controllers/web/admin/salonController.js";
@@ -94,8 +94,8 @@ router.route("/getAllSalons").get(verifyRefreshTokenBarber, getAllSalons)
 //Get Salon Info 
 router.route("/getSalonInfoBySalonId").post(verifyRefreshTokenBarber, getSalonInfoBySalonId)
 
+router.route("/getAllSalonServicesForBarber").get(verifyRefreshTokenBarber, getAllSalonServicesForBarber)
+
 export default router;
 
-//ALL PROTECTED ROUTES
-// router.route("/profile").get(handleProtectedRoute,profileController)
 
