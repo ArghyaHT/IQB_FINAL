@@ -1038,7 +1038,7 @@ export const updateBarberAccountDetails = async (req, res, next) => {
     try {
         const barberData = req.body;
 
-        let { name, email, nickName, countryCode, mobileNumber, dateOfBirth, gender, barberServices } = barberData
+        let { name, email, salonId, nickName, countryCode, mobileNumber, dateOfBirth, gender, barberServices } = barberData
 
         if (name && (name.length < 1 || name.length > 20)) {
             return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE, res)
@@ -1068,27 +1068,52 @@ export const updateBarberAccountDetails = async (req, res, next) => {
         // Convert formatted number back to a number for storage
         const formattedNumberAsNumber = parseInt(nationalNumber);
 
-
-        //Creating an object other than the password field 
-        let updateFields = {
-            name,
-            nickName,
-            gender,
-            mobileCountryCode: countryCode,
-            dateOfBirth,
-            mobileNumber: formattedNumberAsNumber,
-        };
-
-
         const getBarber = await findBarberByEmailAndRole(email);
 
         // Check if the mobile number has changed
         if (mobileNumber && getBarber.mobileNumber !== mobileNumber) {
-            updateFields.mobileVerified = false;
+            getBarber.mobileVerified = false;
         }
 
-        //Updating the Barber Document
-        const barber = await updateBarber(email, updateFields)
+
+        //If barberServices is present for updating
+        if (barberServices && barberServices.length > 0) {
+            //Update the services accordingly
+            for (const service of barberServices) {
+                const { serviceId, serviceName, serviceIcon, serviceCode, servicePrice, vipService, barberServiceEWT } = service;
+
+                const updateService = await adminUpdateBarberServices(email, getBarber.salonId, serviceId, serviceIcon, serviceName, serviceCode, servicePrice, vipService, barberServiceEWT);
+
+                // If BarberServices Not Present
+                if (!updateService) {
+                    const newService = {
+                        serviceId,
+                        serviceCode,
+                        serviceName,
+                        servicePrice,
+                        serviceIcon,
+                        vipService,
+                        barberServiceEWT: barberServiceEWT
+                    };
+                    await adminAddNewBarberService(email, getBarber.salonId, newService)
+                }
+            }
+        }
+        // //Creating an object other than the password field 
+        // let updateFields = {
+        //     name,
+        //     nickName,
+        //     gender,
+        //     mobileCountryCode: countryCode,
+        //     dateOfBirth,
+        //     mobileNumber: formattedNumberAsNumber,
+        // };
+
+
+        // //Updating the Barber Document
+        // const barber = await updateBarber(email, updateFields)
+
+        const barber = await updateBarber(email, name, nickName, countryCode, formattedNumberAsNumber, dateOfBirth, barberServices)
 
         // Generating the barberCode based on the updated name and existing barberId
         const firstTwoLetters = name.slice(0, 2).toUpperCase();

@@ -203,9 +203,17 @@ export const totalBarberCount = async (query) => {
    return totalCount;
 }
 
-//UPDATE BARBER ACCOUNT DETAILS
-export const updateBarber = async (email, updateFields) => {
-   const barber = await Barber.findOneAndUpdate({ email: email }, updateFields, { new: true }).select("-password");
+// //UPDATE BARBER ACCOUNT DETAILS
+// export const updateBarber = async (email, updateFields) => {
+//    const barber = await Barber.findOneAndUpdate({ email: email }, updateFields, { new: true }).select("-password");
+//    return barber;
+// }
+
+//ADMIN UPDATE BARBER 
+export const updateBarber = async (email, name, nickName,countryCode, mobileNumber, dateOfBirth, barberServices) => {
+   const barber = await Barber.findOneAndUpdate({ email },
+      { name, nickName, mobileNumber, mobileCountryCode: countryCode, dateOfBirth, barberServices: barberServices },
+      { new: true });
    return barber;
 }
 
