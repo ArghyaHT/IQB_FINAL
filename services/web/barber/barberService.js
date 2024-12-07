@@ -210,9 +210,9 @@ export const totalBarberCount = async (query) => {
 // }
 
 //ADMIN UPDATE BARBER 
-export const updateBarber = async (email, name, nickName,countryCode, mobileNumber, dateOfBirth, barberServices) => {
+export const updateBarber = async (email, name, nickName, gender, countryCode, mobileNumber, dateOfBirth, barberServices) => {
    const barber = await Barber.findOneAndUpdate({ email },
-      { name, nickName, mobileNumber, mobileCountryCode: countryCode, dateOfBirth, barberServices: barberServices },
+      { name, nickName,gender: gender, mobileNumber, mobileCountryCode: countryCode, dateOfBirth, barberServices: barberServices },
       { new: true });
    return barber;
 }

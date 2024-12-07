@@ -114,6 +114,10 @@ const joinqueueHistorySchema = new mongoose.Schema({
             type: Boolean,
             default: false
         },
+        isCustomer:{
+            type: Boolean,
+            default: false
+        },
         status:{
             type: String
         },

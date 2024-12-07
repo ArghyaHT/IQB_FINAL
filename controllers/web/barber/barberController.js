@@ -722,6 +722,10 @@ export const updateBarberByAdmin = async (req, res, next) => {
 
         email = email.toLowerCase();
 
+        if (barberServices.length === 0) {
+            return ErrorHandler(SELECT_SERVICE_ERROR, ERROR_STATUS_CODE, res)
+        }
+
         // Convert mobile number to string only if it's a number
         let mobileNumberStr = typeof mobileNumber === 'number' ? mobileNumber.toString() : mobileNumber;
 
@@ -1038,12 +1042,15 @@ export const updateBarberAccountDetails = async (req, res, next) => {
     try {
         const barberData = req.body;
 
-        let { name, email, salonId, nickName, countryCode, mobileNumber, dateOfBirth, gender, barberServices } = barberData
+        let { name, email, nickName, countryCode, mobileNumber, dateOfBirth, gender, barberServices } = barberData
 
         if (name && (name.length < 1 || name.length > 20)) {
             return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE, res)
         }
 
+        if (barberServices.length === 0) {
+            return ErrorHandler(SELECT_SERVICE_ERROR, ERROR_STATUS_CODE, res)
+        }
 
         // Convert mobile number to string only if it's a number
         let mobileNumberStr = typeof mobileNumber === 'number' ? mobileNumber.toString() : mobileNumber;
@@ -1113,7 +1120,7 @@ export const updateBarberAccountDetails = async (req, res, next) => {
         // //Updating the Barber Document
         // const barber = await updateBarber(email, updateFields)
 
-        const barber = await updateBarber(email, name, nickName, countryCode, formattedNumberAsNumber, dateOfBirth, barberServices)
+        const barber = await updateBarber(email, name, nickName, gender, countryCode, formattedNumberAsNumber, dateOfBirth, barberServices)
 
         // Generating the barberCode based on the updated name and existing barberId
         const firstTwoLetters = name.slice(0, 2).toUpperCase();
