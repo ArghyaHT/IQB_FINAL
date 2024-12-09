@@ -18,6 +18,7 @@ import { ADMIN_NOT_EXIST_ERROR, INVALID_EMAIL_ERROR } from "../../../constants/w
 import { NO_SALON_CONNECTED_ERROR, QUEUE_CANCEL_SUCCESS, QUEUE_NOT_FOUND_BY_ID_ERROR, QUEUE_NOT_FOUND_ERROR, QUEUE_POSITION_ERROR, QUEUE_SERVE_SUCCESS, QUEUELIST_BARBER_ERROR, QUEUELIST_EMPTY_FOR_BARBER_SUCCESS, RETRIVE_EMPTY_QUEUELIST_SUCCESS, RETRIVE_QUEUELIST_SUCCESS } from "../../../constants/web/QueueConstants.js";
 import { BARBER_EXISTS_ERROR } from "../../../constants/web/BarberConstants.js";
 import SalonQueueList from "../../../models/salonQueueListModel.js";
+import { findBarberByEmailAndRole } from "../../../services/kiosk/barber/barberService.js";
 
 
 //DESC:GET SALON QUEUELIST ================
@@ -70,7 +71,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
 //DESC:BARBER SERVED API ================
 export const barberServedQueue = async (req, res, next) => {
     try {
-        let { salonId, barberId, barberEmail, adminEmail, services, _id } = req.body;
+        let { salonId, barberId, servedByEmail, barberEmail, adminEmail, services, _id } = req.body;
 
 
         if (adminEmail && !validateEmail(adminEmail)) {
@@ -99,9 +100,9 @@ export const barberServedQueue = async (req, res, next) => {
 
             const updatedByBarberEmail = foundUser.email;
 
-            const servedBybarber = await findBarberByEmailAndRole(barberEmail)
+            const servedBybarber = await findBarberByEmailAndRole(servedByEmail)
 
-            const servedByBarberEmail = barberEmail
+            const servedByBarberEmail = servedByEmail
 
             const queue = await findSalonQueueList(salonId);
 
@@ -126,14 +127,15 @@ export const barberServedQueue = async (req, res, next) => {
                         const salon = await findSalonQueueListHistory(salonId);
 
                         if (!salon) {
-                            await addQueueHistory(salonId, element, updatedByBarberEmail, servedByBarberEmail, servedBybarber.barberId, servedBybarber.name)
+                            await addQueueHistory(salonId, element, updatedByBarberEmail, servedByBarberEmail, servedBybarber.barberId, servedBybarber.name, true)
                         } else {
                             salon.queueList.push({
                                 ...element.toObject(), // Convert Mongoose document to plain object
                                 servedByBarberEmail: servedByBarberEmail,
                                 updatedByBarberEmail: updatedByBarberEmail,
                                 barberName: servedBybarber.name,
-                                servedByBarberId: servedBybarber.barberId
+                                barberId: servedBybarber.barberId,
+                                isAdmin: true
                             });
                             await salon.save();
                         }
@@ -229,7 +231,9 @@ export const barberServedQueue = async (req, res, next) => {
 
                         // Send email to the customer who is getting served
                         try {
-                            await sendQueuePositionEmail(element.customerEmail, servedEmailSubject, servedEmailBody);
+                            if(element.customerEmail){
+                                await sendQueuePositionEmail(element.customerEmail, servedEmailSubject, servedEmailBody);
+                            }      
                         } catch (error) {
                             console.error('Error sending email to the served customer:', error);
                             // Handle error if email sending fails
@@ -342,7 +346,9 @@ export const barberServedQueue = async (req, res, next) => {
                         `;
 
                                     try {
-                                        await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                                        if(customerEmail){
+                                            await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                                        }
                                     } catch (error) {
                                         console.error('Error sending email:', error);
                                         // Handle error if email sending fails
@@ -367,9 +373,9 @@ export const barberServedQueue = async (req, res, next) => {
 
             const updatedByBarberEmail = foundUser.email;
 
-            const servedBybarber = await findBarberByEmailAndRole(barberEmail)
+            const servedBybarber = await findBarberByEmailAndRole(servedByEmail)
 
-            const servedByBarberEmail = barberEmail
+            const servedByBarberEmail = servedByEmail
 
             const queue = await findSalonQueueList(salonId);
             let currentServiceEWT = 0;
@@ -393,14 +399,15 @@ export const barberServedQueue = async (req, res, next) => {
                         const salon = await findSalonQueueListHistory(salonId);
 
                         if (!salon) {
-                            await addQueueHistory(salonId, element, updatedByBarberEmail, servedByBarberEmail, servedBybarber.barberId, servedBybarber.name)
+                            await addQueueHistory(salonId, element, updatedByBarberEmail, servedByBarberEmail, servedBybarber.barberId, servedBybarber.name, false)
                         } else {
                             salon.queueList.push({
                                 ...element.toObject(), // Convert Mongoose document to plain object
                                 servedByBarberEmail: servedByBarberEmail,
                                 updatedByBarberEmail: updatedByBarberEmail,
                                 barberName: servedBybarber.name,
-                                servedByBarberId: servedBybarber.barberId
+                                barberId: servedBybarber.barberId
+                            
                             });
                             await salon.save();
                         }
@@ -496,7 +503,9 @@ export const barberServedQueue = async (req, res, next) => {
 
                         // Send email to the customer who is getting served
                         try {
-                            await sendQueuePositionEmail(element.customerEmail, servedEmailSubject, servedEmailBody);
+                            if(element.customerEmail){
+                                await sendQueuePositionEmail(element.customerEmail, servedEmailSubject, servedEmailBody);
+                            }
                         } catch (error) {
                             console.error('Error sending email to the served customer:', error);
                             // Handle error if email sending fails
@@ -609,7 +618,9 @@ export const barberServedQueue = async (req, res, next) => {
                         `;
 
                                     try {
+                                        if(customerEmail){
                                         await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                                        }
                                     } catch (error) {
                                         console.error('Error sending email:', error);
                                         // Handle error if email sending fails
@@ -662,7 +673,7 @@ export const cancelQueue = async (req, res, next) => {
             }
 
             updatedByBarberEmail = foundUser.email;
-            
+
         } else {
             foundUser = await findBarberByBarberEmailAndSalonId(barberEmail, salonId);
             if (!foundUser) {
@@ -698,7 +709,7 @@ export const cancelQueue = async (req, res, next) => {
 
         let salon = await findSalonQueueListHistory(salonId);
         if (!salon) {
-            salon = await addQueueHistoryWhenCanceled(salonId, canceledQueue, updatedByBarberEmail, updatedByBarberName);
+            salon = await addQueueHistoryWhenCanceled(salonId, canceledQueue, updatedByBarberEmail);
         } else {
             salon.queueList.push({
                 ...canceledQueue.toObject(),
@@ -761,7 +772,9 @@ export const cancelQueue = async (req, res, next) => {
         `;
 
         try {
+            if(canceledQueue.customerEmail){
             await sendQueuePositionEmail(canceledQueue.customerEmail, servedEmailSubject, servedEmailBody);
+            }
         } catch (error) {
             console.error('Error sending email to the served customer:', error);
         }
@@ -826,7 +839,9 @@ export const cancelQueue = async (req, res, next) => {
                         `;
 
                         try {
-                            await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                            if(customerEmail){
+                             await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                            }
                         } catch (error) {
                             console.error('Error sending email to the customer:', error);
                         }
@@ -886,7 +901,6 @@ export const getQlistbyBarberId = async (req, res, next) => {
         next(error);
     }
 };
-
 
 //DESC:GET Q HISTORY BY CUSTOMER EMAIL ================
 export const getQhistoryByCustomerEmail = async (req, res) => {

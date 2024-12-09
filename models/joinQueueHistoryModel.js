@@ -109,10 +109,10 @@ const joinqueueHistorySchema = new mongoose.Schema({
             default: ""
         },
         
-        servedByBarberId:{
-            type: Number,
-            default: 0
-        },
+        // servedByBarberId:{
+        //     type: Number,
+        //     default: 0
+        // },
 
         updatedByBarberEmail: {
             type: String,
