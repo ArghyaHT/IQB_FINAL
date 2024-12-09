@@ -27,31 +27,34 @@ import { CITY_NOT_FOUND_ERROR, COUNTRY_NOT_FOUND_ERROR } from "../../../constant
 
 //DESC:CREATE SALON BY ADMIN============================
 export const createSalonByAdmin = async (req, res, next) => {
-  let {
-    salonName,
-    salonLogo,
-    salonType,
-    address,
-    city,
-    location,
-    country,
-    timeZone,
-    salonDesc,
-    countryCode,
-    code,
-    postCode,
-    contactTel,
-    webLink,
-    salonEmail,
-    fbLink,
-    twitterLink,
-    instraLink,
-    tiktokLink,
-    services,
-    adminEmail
-  } = req.body
 
   try {
+
+    let {
+      salonName,
+      salonLogo,
+      salonType,
+      address,
+      city,
+      location,
+      country,
+      timeZone,
+      salonDesc,
+      countryCode,
+      code,
+      postCode,
+      contactTel,
+      webLink,
+      salonEmail,
+      fbLink,
+      twitterLink,
+      instraLink,
+      tiktokLink,
+      services,
+      adminEmail
+    } = req.body
+
+    console.log(city)
 
     if (!adminEmail) {
       return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
@@ -117,7 +120,7 @@ export const createSalonByAdmin = async (req, res, next) => {
       return ErrorHandler(SALON_POSTCODE_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (postCode && !/^[a-zA-Z0-9]{1,8}$/.test(postCode)) {
+    if (postCode && !/^[a-zA-Z0-9]{1,10}$/.test(postCode)) {
       return ErrorHandler(SALON_POSTCODE_ERROR, ERROR_STATUS_CODE, res);
     }
     
@@ -318,7 +321,7 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
       return ErrorHandler(SALON_POSTCODE_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (postCode && !/^[a-zA-Z0-9]{1,8}$/.test(postCode)) {
+    if (postCode && !/^[a-zA-Z0-9]{1,10}$/.test(postCode)) {
       return ErrorHandler(SALON_POSTCODE_ERROR, ERROR_STATUS_CODE, res);
     }
     

@@ -879,7 +879,6 @@ export const uploadCustomerprofilePic = async (req, res, next) => {
         let profiles = req.files.profile;
         let email = req.body.email;
 
-
             // Convert email to lowercase
             email = email.toLowerCase();
 
