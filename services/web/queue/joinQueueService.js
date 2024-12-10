@@ -1,4 +1,5 @@
 import SalonQueueList from "../../../models/salonQueueListModel.js"
+import { getBarberByBarberId } from "../barber/barberService.js";
 
 // Find existing SalonQueueList
 export const findSalonQueueList = async (salonId) => {
@@ -113,12 +114,16 @@ export const getSalonQlist = async (salonId) => {
     return [];
   }
 
-  const modifyQueuelist = sortedQlist.queueList.map((queue) => ({
-    ...queue, 
-    name: queue.customerName 
-  }));
-
-
+  const modifyQueuelist = await Promise.all(
+    sortedQlist.queueList.map(async (queue) => {
+        const barber = await getBarberByBarberId(queue.barberId);
+        return {
+            ...queue, // Spread the existing queue properties
+            barberEmail: barber ? barber.email : null, // Add barberEmail
+            name: queue.customerName
+        };
+      })
+    )
   return modifyQueuelist;  // Return the modified list, not the original one
 }
 

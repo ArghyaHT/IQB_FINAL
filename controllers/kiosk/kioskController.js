@@ -374,7 +374,6 @@ export const barberLoginKiosk = async (req, res, next) => {
     }
 };
 
-
 //DESC:CHANGE BARBER ONLINE STATUS ===========================
 export const changeBarberOnlineStatus = async (req, res, next) => {
     try {
