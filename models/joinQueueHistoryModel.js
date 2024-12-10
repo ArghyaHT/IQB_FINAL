@@ -62,7 +62,7 @@ const joinqueueHistorySchema = new mongoose.Schema({
         },
         qgCode: {
             type: String,
-            default: ""
+            default: "-"
         },
         qPosition: {
             type: Number

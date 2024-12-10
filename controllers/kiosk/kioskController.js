@@ -824,16 +824,8 @@ export const getQueueListBySalonId = async (req, res, next) => {
           
           const sortedQlist = getSalon;
 
-
-        if (!sortedQlist) {
-            return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res)
-
-        }
-        else {
-
             return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist? sortedQlist: [] })
 
-        }
 
          // if (getSalon.length > 0) {
         //     // Access the sorted queueList array from the result

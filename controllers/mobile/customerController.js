@@ -879,13 +879,17 @@ export const uploadCustomerprofilePic = async (req, res, next) => {
         let profiles = req.files.profile;
         let email = req.body.email;
 
+        console.log(profiles)
+
             // Convert email to lowercase
-            email = email.toLowerCase();
+        email = email.toLowerCase();
 
         // Ensure that profiles is an array, even for single uploads
         if (!Array.isArray(profiles)) {
             profiles = [profiles];
         }
+
+        // console.log(profiles)
 
         const uploadPromises = [];
 
@@ -921,8 +925,7 @@ export const uploadCustomerprofilePic = async (req, res, next) => {
 
         Promise.all(uploadPromises)
             .then(async (profileimg) => {
-                console.log(profileimg);
-
+                // console.log(profileimg);
                 const customerImage = await uploadCustomerProPic(email, profileimg)
 
                 res.status(200).json({

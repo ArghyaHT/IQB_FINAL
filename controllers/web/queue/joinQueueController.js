@@ -47,15 +47,13 @@ export const getQueueListBySalonId = async (req, res, next) => {
         const sortedQlist = getSalon;
 
 
-        if (!sortedQlist) {
-            return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res)
+        // if (!sortedQlist) {
+        //     return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res)
 
-        }
-        else {
+        // }
+        // else {
 
             return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist })
-
-        }
 
     }
     catch (error) {
@@ -868,32 +866,9 @@ export const getQlistbyBarberId = async (req, res, next) => {
 
         if (approvedBarber.isApproved === false) {
 
-            // return res.status(201).json({
-            //     success: false,
-            //     message: 'Queue list not found for the specified barber and salon ID',
-            //     queueList: []
-            // });
             return ErrorHandler(QUEUELIST_BARBER_ERROR, ERROR_STATUS_CODE, res,)
 
         }
-
-
-        if (!qListByBarber || qListByBarber.length === 0) {
-            // return res.status(201).json({
-            //     success: false,
-            //     message: 'Queue list not found for the specified barber',
-            //     queueList: []
-            // });
-
-            return ErrorHandler(QUEUELIST_BARBER_ERROR, ERROR_STATUS_CODE, res,)
-
-        }
-
-        // return res.status(200).json({
-        //     success: true,
-        //     message: 'Queue list retrieved successfully for the specified barber',
-        //     queueList: qList[0].queueList // Extracting the queue list from the result
-        // });
 
         return SuccessHandler(QUEUELIST_EMPTY_FOR_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { queueList: qListByBarber })
 
