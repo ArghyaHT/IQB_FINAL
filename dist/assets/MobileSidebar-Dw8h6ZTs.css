@@ -1,1 +1,0 @@
-.mobile_content{display:none}@media screen and (min-width: 0px) and (max-width: 1140px){.mobile_content{display:block;height:100svh;color:var(--primary-text-light-color2);padding-inline:1rem;font-weight:500;background-color:#ebf5ff}.mobile_content>div>div:nth-child(2){height:calc(100svh - 6rem);width:100%}}
