@@ -917,7 +917,6 @@ export const getAvailableBarbersForQKiosk = async (req, res, next) => {
     }
 }
 
-
 //DESC:GET AVAILABLE BARBERS By MULTIPLE SERVICE IDS ================
 export const getBarberByServicesKiosk = async (req, res, next) => {
     try {
@@ -1829,7 +1828,7 @@ export const salonAccountLogin = async (req, res, next) => {
 // DESC: GET ALL BARBERS BY SALONID =================
 export const getAllBarberbySalonId = async (req, res, next) => {
     try {
-        const { salonId } = req.query;
+        const { salonId, email } = req.query;
 
         if (Number(salonId) === 0) {
         return SuccessHandler(NO_BARBERS_AVAILABLE_SUCCESS, SUCCESS_STATUS_CODE, res, {
@@ -1845,7 +1844,7 @@ export const getAllBarberbySalonId = async (req, res, next) => {
         }
 
         // Fetch all barbers for the salonId
-        const getAllBarbers = await getAllSalonBarbers(salonId);
+        const getAllBarbers = await getAllSalonBarbers(salonId, email);
 
         if (getAllBarbers && getAllBarbers.length > 0) {
         return SuccessHandler(BARBER_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, {

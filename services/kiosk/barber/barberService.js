@@ -147,8 +147,26 @@ export const changeBarberStatusAtSalonOffline = async (salonId) => {
 };
 
 //GET ALL BARBERS BY SALONID
-export const getAllSalonBarbers = async (salonId, ) => {
-   const barbers = await Barber.find({ salonId, isDeleted: false, isApproved: true });
+export const getAllSalonBarbers = async (salonId, email ) => {
+   // const barbers = await Barber.find({ salonId, isDeleted: false, isApproved: true, isClockedIn: true });
 
-   return barbers
+   const query = {
+      salonId,
+      isDeleted: false,
+      isApproved: true,
+      isClockedIn: true,
+  };
+
+  const searchRegExpEmail = new RegExp('.*' + email + ".*", 'i');
+
+    // Add email to query if provided
+    if (email) {
+      query.$or = [
+         { email: { $regex: searchRegExpEmail } },
+     ]; // Case-insensitive partial match
+  }
+
+  const barbers = await Barber.find(query);
+  return barbers;
+
 }
