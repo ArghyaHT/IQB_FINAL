@@ -26,6 +26,7 @@ import { BARBER_CLOCKIN_ERROR, BARBER_CLOCKIN_SUCCESS, BARBER_CLOCKOUT_SUCCESS, 
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ALLOWED_IMAGE_EXTENSIONS, BARBER_IMAGE_EMPTY_ERROR, IMAGE_FAILED_DELETE, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 import { SALON_EXISTS_ERROR, SALON_NOT_CREATED_ERROR, SALON_NOT_FOUND_ERROR, SALON_SERVICES_RETRIEVED_SUCESS } from "../../../constants/web/SalonConstants.js";
+import { NO_SALON_CONNECTED_ERROR } from "../../../constants/web/QueueConstants.js";
 
 
 // Desc: Register
@@ -1565,10 +1566,9 @@ export const getAllSalonServicesForBarber = async (req, res, next) => {
   
       const { salonId } = req.query;
   
-      if (salonId === 0) {
-        return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
-  
-      }
+      if (Number(salonId) === 0) {
+        return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res)
+    }
   
       const salon = await getSalonBySalonId(salonId)
 
@@ -1577,7 +1577,8 @@ export const getAllSalonServicesForBarber = async (req, res, next) => {
   
       return SuccessHandler(SALON_SERVICES_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: {
         services,
-        currency, }
+        currency, 
+    }
     })
     }
     catch (error) {

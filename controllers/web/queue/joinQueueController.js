@@ -860,6 +860,10 @@ export const getQlistbyBarberId = async (req, res, next) => {
     try {
         const { salonId, barberId } = req.body;
 
+        if (Number(salonId) === 0) {
+            return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res)
+        }
+
         const qListByBarber = await qListByBarberId(salonId, barberId)
 
         const approvedBarber = await getBarberByBarberId(barberId);
