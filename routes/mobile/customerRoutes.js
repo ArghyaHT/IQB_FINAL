@@ -93,7 +93,7 @@ router.route("/customerFavouriteSalon").post(customerFavoriteSalon)
 router.route("/getCustomerFavouriteSalon").post(getAllCustomerFavoriteSalons)
 
 //Delete Customer Favourite Salon 
-router.route("/deleteCustomerFavouriteSalon").delete(deleteCustomerFavoriteSalon)
+router.route("/deleteCustomerFavouriteSalon").post(deleteCustomerFavoriteSalon)
 
 
 
