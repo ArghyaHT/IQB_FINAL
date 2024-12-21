@@ -1,5 +1,5 @@
 import express from "express";
-import { changeDefaultSalonIdOfCustomer, checkEmail, customerConnectSalon, customerDashboard, customerDisconnectSalon, customerFavoriteSalon, deleteCustomerFavoriteSalon, deleteCustomerProfilePicture, deleteSingleCustomer, forgetPassword, getAllAppointmentsByCustomer, getAllCustomerFavoriteSalons, getAllCustomers, getAllSalonsByCustomer, getCustomerDetails, matchVerificationCode, resetPassword, sendBulkEmailToCustomers, sendMailToCustomer, signIn, signUp, updateCustomer, updateCustomerProfilePic, uploadCustomerprofilePic, verifyPasswordResetCode } from "../../controllers/mobile/customerController.js";
+import { changeDefaultSalonIdOfCustomer, checkEmail, customerConnectSalon, customerDashboard, customerDisconnectSalon, customerFavoriteSalon, deleteCustomerFavoriteSalon, deleteCustomerProfilePicture, deleteSingleCustomer, forgetPassword, getAllAppointmentsByCustomer, getAllCustomerFavoriteSalons, getAllCustomers, getAllSalonsByCustomer, getCustomerDetails, googleCustomerLogin, googleCustomerSignup, matchVerificationCode, resetPassword, sendBulkEmailToCustomers, sendMailToCustomer, signIn, signUp, updateCustomer, updateCustomerProfilePic, uploadCustomerprofilePic, verifyPasswordResetCode } from "../../controllers/mobile/customerController.js";
 // import { CustomerLoggedIn } from "../middlewares/loggedInMiddlewares.js";
 // import { verifyRefreshCustomerToken } from "../middlewares/VerifyRefreshCustomerToken.js";
 
@@ -24,6 +24,12 @@ router.route("/verifyPasswordResetCode").post(verifyPasswordResetCode)
 
 //ResetPassword
 router.route("/resetPassword").post(resetPassword)
+
+//Google Signup
+router.route("/googleCustomerSignup").post(googleCustomerSignup)
+
+//Google SignIn
+router.route("/googleCustomerSignIn").post(googleCustomerLogin)
 
 
 // // //Save Password

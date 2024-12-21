@@ -1,4 +1,4 @@
-import { deleteCustomer, deleteCustomerProPic, fetchedCustomers, findCustomerByEmail, findCustomerProfileById, saveCustomer, totalCustomerCount, updateCustomerDetails, updateCustomerProPic, uploadCustomerProPic } from "../../services/mobile/customerService.js";
+import { createGoogleCustomer, deleteCustomer, deleteCustomerProPic, fetchedCustomers, findCustomerByEmail, findCustomerProfileById, googleLoginCustomer, saveCustomer, totalCustomerCount, updateCustomerDetails, updateCustomerProPic, uploadCustomerProPic } from "../../services/mobile/customerService.js";
 
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
@@ -338,120 +338,122 @@ export const signIn = async (req, res, next) => {
     }
 };
 
-// //GOOGLE SIGNIN ===================================
-// const googleAdminSignup = async (req, res, next) => {
-//     try {
-//         const CLIENT_ID = '508224318018-quta6u0n38vml0up7snscdrtl64555l1.apps.googleusercontent.com'
+//GOOGLE SIGNIN ===================================
+export const googleCustomerSignup = async (req, res, next) => {
+    try {
+        const CLIENT_ID = process.env.CLIENT_ID;
 
-//         const token = req.query.token;
+        const token = req.query.token;
 
-//         console.log(token)
+        console.log(token)
 
-//         if (!token) {
-//             return res.status(201).json({
-//                 success: false,
-//                 message: "UnAuthorized Admin or Token not present"
-//             })
-//         }
+        if (!token) {
+            return res.status(201).json({
+                success: false,
+                message: "UnAuthorized Customer or Token not present"
+            })
+        }
 
-//         const client = new OAuth2Client(CLIENT_ID);
+        const client = new OAuth2Client(CLIENT_ID);
 
-//         // Call the verifyIdToken to
-//         // varify and decode it
-//         const ticket = await client.verifyIdToken({
-//             idToken: token,
-//             audience: CLIENT_ID,
-//         });
+        // Call the verifyIdToken to
+        // varify and decode it
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: CLIENT_ID,
+        });
 
-//         // Get the JSON with all the user info
-//         const payload = ticket.getPayload();
+        // Get the JSON with all the user info
+        const payload = ticket.getPayload();
 
-//         console.log("Google payload ", payload)
+        console.log("Google payload ", payload)
 
-//         // Check if the email is already registered
-//         const existingUser = await findCustomerByEmail(payload.email);
+        // Check if the email is already registered
+        const existingUser = await findCustomerByEmail(payload.email);
 
-//         if (existingUser) {
-//             return res.status(201).json({ success: false, message: 'Customer Email already exists' })
-//         }
+        if (existingUser) {
+            return res.status(201).json({ success: false, message: 'Customer Email already exists' })
+        }
 
-//         // Create a new user
-//         const newUser = new Admin({
-//             email: payload.email,
-//             role: "Admin",
-//             AuthType: "google"
-//         })
+          // Create a new user
+          const newUser = await createGoogleCustomer(payload.email)
 
-//         await newUser.save()
+        //   return SuccessHandler(SIGNUP_SUCCESS, SUCCESS_STATUS_CODE, res, { newUser })
 
-//         res.status(200).json({ success: true, message: 'Customer registered successfully', newUser })
+        // // Create a new user
+        // const newUser = new Customer({
+        //     email: payload.email,
+        //     AuthType: "google"
+        // })
 
-//     }
-//     catch (error) {
-//         //console.log(error);
-//         next(error);
-//     }
-// }
+        // await newUser.save()
 
+        res.status(200).json({ success: true, message: 'Customer registered successfully', response: newUser })
 
-// const googleAdminLogin = async (req, res, next) => {
-//     try {
-//         const CLIENT_ID = '508224318018-quta6u0n38vml0up7snscdrtl64555l1.apps.googleusercontent.com'
-
-//         const token = req.query.token;
-
-//         if (!token) {
-//             return res.status(201).json({ success: false, message: "UnAuthorized Customer or Token not present" })
-//         }
-
-//         const client = new OAuth2Client(CLIENT_ID);
-
-//         // Call the verifyIdToken to
-//         // varify and decode it
-//         const ticket = await client.verifyIdToken({
-//             idToken: token,
-//             audience: CLIENT_ID,
-//         });
-
-//         // Get the JSON with all the user info
-//         const payload = ticket.getPayload();
-
-//         console.log("Google Login payload ", payload)
-
-//         const foundUser = await Customer.findOne({ email: payload.email}).exec()
-
-//         if (!foundUser) {
-//             return res.status(401).json({ success: false, message: 'Unauthorized Admin' })
-//         }
-
-//         const accessToken = jwt.sign(
-//             {
-
-//                 "email": foundUser.email,
-//                 "role": foundUser.role,
-//             },
-//             JWT_ACCESS_SECRET,
-//             { expiresIn: '1d' }
-//         )
+    }
+    catch (error) {
+        next(error);
+    }
+}
 
 
-//         // Create secure cookie with refresh token 
-//         res.cookie('AdminToken', accessToken, {
-//             httpOnly: true, //accessible only by web server 
-//             secure: true, //https
-//             sameSite: 'None', //cross-site cookie 
-//             maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
-//         })
-//         res.status(201).json({
-//             success: true,
-//             message: "Admin Logged In Successfully",
-//             accessToken,
-//             foundUser
-//         })
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }
+export const googleCustomerLogin = async (req, res, next) => {
+    try {
+        const CLIENT_ID = process.env.CLIENT_ID;
+
+        const token = req.query.token;
+
+        if (!token) {
+            return res.status(201).json({ success: false, message: "UnAuthorized Customer or Token not present" })
+        }
+
+        const client = new OAuth2Client(CLIENT_ID);
+
+        // Call the verifyIdToken to
+        // varify and decode it
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: CLIENT_ID,
+        });
+
+        // Get the JSON with all the user info
+        const payload = ticket.getPayload();
+
+        console.log("Google Login payload ", payload)
+
+        // const foundUser = await Customer.findOne({ email: payload.email}).exec()
+
+        const foundUser = await googleLoginCustomer(payload.email)
+        if (!foundUser) {
+            return res.status(201).json({ success: false, message: 'Unauthorized Customer' })
+        }
+
+        // const accessToken = jwt.sign(
+        //     {
+        //         "email": foundUser.email,
+        //     },
+        //     JWT_ACCESS_SECRET,
+        //     { expiresIn: '1d' }
+        // )
+
+
+        // // Create secure cookie with refresh token 
+        // res.cookie('AdminToken', accessToken, {
+        //     httpOnly: true, //accessible only by web server 
+        //     secure: true, //https
+        //     sameSite: 'None', //cross-site cookie 
+        //     maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
+        // })
+        res.status(201).json({
+            success: true,
+            message: "Customer Logged In Successfully",
+            accessToken,
+            response: foundUser
+        })
+    } catch (error) {
+        next(error);
+    }
+}
 
 //DESC:LOGOUT A USER ========================
 // export const handleLogout = async (req, res, next) => {
