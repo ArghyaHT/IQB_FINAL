@@ -16,6 +16,10 @@ import { getCustomerAppointments } from "../../services/mobile/appointmentServic
 import { findBarbersBySalonIdforCustomerDashboard } from "../../services/mobile/barberService.js";
 import { getSalonQlist } from "../../services/mobile/joinQueueService.js";
 import { sendMobileVerificationCode } from "../../utils/mobileMessageSender/mobileMessageSender.js";
+import { EMAIL_EXISTS_ERROR } from "../../constants/mobile/CustomerConstants.js";
+import { EMAIL_NOT_PRESENT_ERROR, INVALID_EMAIL_ERROR } from "../../constants/web/adminConstants.js";
+import { ERROR_STATUS_CODE_201 } from "../../constants/mobile/StatusCodeConstants.js";
+import {ErrorHandler} from "../../middlewares/ErrorHandler.js"
 
 
 //DESC:CHECK WEATHER THE EMAIL ALREADY EXISTS IN THE DATABASE =======
@@ -23,31 +27,40 @@ export const checkEmail = async (req, res, next) => {
     try {
         let { email } = req.body;
 
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        if (!validateEmail(email)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
         email = email.toLowerCase();
 
-        if (!email || !validateEmail(email)) {
-            return res.status(201).json({
-                success: false,
-                message: "Invalid Email "
-            });
-        }
+        // if (!email || !validateEmail(email)) {
+        //     return res.status(201).json({
+        //         success: false,
+        //         message: "Invalid Email "
+        //     });
+        // }
 
         //Find existing email for a particular customer
         const existingCustomer = await findCustomerByEmail(email)
 
         if (existingCustomer) {
-            res.status(201).json({
-                success: false,
-                message: "This emailid already exists",
-            });
+            // res.status(201).json({
+            //     success: false,
+            //     message: "This emailid already exists",
+            // });
+            return ErrorHandler(EMAIL_EXISTS_ERROR, ERROR_STATUS_CODE_201, res)
         }
 
         else {
-            res.status(200).json({
-                success: true,
-                message: "The email is available for signup",
-                response: email,
-            });
+            // res.status(200).json({
+            //     success: true,
+            //     message: "The email is available for signup",
+            //     response: email,
+            // });
         }
     }
     catch (error) {
