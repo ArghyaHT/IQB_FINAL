@@ -1,1 +1,3 @@
 export const ERROR_STATUS_CODE_201 = 201
+
+export const SUCCESS_STATUS_CODE = 200

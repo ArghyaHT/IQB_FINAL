@@ -180,7 +180,6 @@ if (customerName.length < 1 || customerName.length > 20) {
     }
 
   } catch (error) {
-    //console.log(error);
     next(error);
   }
 };

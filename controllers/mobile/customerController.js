@@ -16,10 +16,14 @@ import { getCustomerAppointments } from "../../services/mobile/appointmentServic
 import { findBarbersBySalonIdforCustomerDashboard } from "../../services/mobile/barberService.js";
 import { getSalonQlist } from "../../services/mobile/joinQueueService.js";
 import { sendMobileVerificationCode } from "../../utils/mobileMessageSender/mobileMessageSender.js";
-import { EMAIL_EXISTS_ERROR } from "../../constants/mobile/CustomerConstants.js";
-import { EMAIL_NOT_PRESENT_ERROR, INVALID_EMAIL_ERROR } from "../../constants/web/adminConstants.js";
-import { ERROR_STATUS_CODE_201 } from "../../constants/mobile/StatusCodeConstants.js";
-import {ErrorHandler} from "../../middlewares/ErrorHandler.js"
+import { CUSTOMER_CONNECT_SALON_SUCCESS, CUSTOMER_DISCONNECT_SALON_SUCCESS, CUSTOMER_FAVOURITE_SALON_DELETE_SUCCESS, CUSTOMER_FAVOURITE_SALON_ERROR, CUSTOMER_FAVOURITE_SALON_NOT_FOUND_ERROR, CUSTOMER_FAVOURITE_SALON_SUCCESS, CUSTOMER_NOT_FOUND_ERROR, CUSTOMER_RETRIEVE_SUCCESS, CUSTOMER_SIGNIN_SUCCESS, CUSTOMER_SIGNUP_ERROR, CUSTOMER_SIGNUP_SUCCESS, CUSTOMER_UPDATE_SUCCESS, CUSTOMER_VERIFICATION_ERROR, CUSTOMER_VERIFICATION_SUCCESS, EMAIL_CHECK_SUCCESS, EMAIL_EXISTS_ERROR, FORGET_PASSWORD_SUCCESS, PASSWORD_RESET_SUCCESS } from "../../constants/mobile/CustomerConstants.js";
+import { EMAIL_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, IMAGE_FILE_EXTENSION_ERROR, IMAGE_FILE_SIZE_ERROR, IMAGE_UPLOAD_SUCCESS, INVALID_EMAIL_ERROR, NAME_LENGTH_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR } from "../../constants/web/adminConstants.js";
+import { ERROR_STATUS_CODE_201, SUCCESS_STATUS_CODE } from "../../constants/mobile/StatusCodeConstants.js";
+import { ErrorHandler } from "../../middlewares/ErrorHandler.js"
+import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
+import { SALON_NOT_FOUND_ERROR, SALONS_RETRIEVED_SUCESS } from "../../constants/web/SalonConstants.js";
+import { CUSTOMER_CHANGE_DEFAULT_SALON_SUCCESS, CUSTOMER_DASHBOARD_SUCCESS } from "../../constants/mobile/SalonConstants.js";
+import { ALLOWED_IMAGE_EXTENSIONS, CUSTOMER_IMAGE_EMPTY_ERROR, IMAGE_FAILED_DELETE, IMAGE_UPLOAD_FAILED_ERROR, MAX_FILE_SIZE } from "../../constants/web/Common/ImageConstant.js";
 
 
 //DESC:CHECK WEATHER THE EMAIL ALREADY EXISTS IN THE DATABASE =======
@@ -27,44 +31,46 @@ export const checkEmail = async (req, res, next) => {
     try {
         let { email } = req.body;
 
-        // if (!email) {
-        //     return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE_201, res)
-        // }
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE_201, res)
+        }
 
-        // if (!validateEmail(email)) {
-        //     return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE_201, res)
-        // }
+        if (!validateEmail(email)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE_201, res)
+        }
 
         email = email.toLowerCase();
 
-        if (!email || !validateEmail(email)) {
-            return res.status(201).json({
-                success: false,
-                message: "Invalid Email "
-            });
-        }
+        // if (!email || !validateEmail(email)) {
+        //     return res.status(201).json({
+        //         success: false,
+        //         message: "Invalid Email "
+        //     });
+        // }
 
         //Find existing email for a particular customer
         const existingCustomer = await findCustomerByEmail(email)
 
         if (existingCustomer) {
-            res.status(201).json({
-                success: false,
-                message: "This emailid already exists",
-            });
-            // return ErrorHandler(EMAIL_EXISTS_ERROR, ERROR_STATUS_CODE_201, res)
+            // res.status(201).json({
+            //     success: false,
+            //     message: "This emailid already exists",
+            // });
+            return ErrorHandler(EMAIL_EXISTS_ERROR, ERROR_STATUS_CODE_201, res)
         }
 
         else {
-            res.status(200).json({
-                success: true,
-                message: "The email is available for signup",
-                response: email,
-            });
+            // res.status(200).json({
+            //     success: true,
+            //     message: "The email is available for signup",
+            //     response: email,
+            // }); 
+
+            return SuccessHandler(EMAIL_CHECK_SUCCESS, SUCCESS_STATUS_CODE, res, { response: email });
+
         }
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -84,26 +90,48 @@ export const signUp = async (req, res, next) => {
             password,
         } = req.body;
 
+
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        if (!validateEmail(email)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        if (!password) {
+            return ErrorHandler(PASSWORD_NOT_PRESENT_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        if (password.length < 8) {
+            return ErrorHandler(PASSWORD_LENGTH_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
         // Convert email to lowercase
         email = email.toLowerCase();
 
-        if (!email || !validateEmail(email)) {
-            return res.status(201).json({
-                success: false,
-                message: "Invalid Email "
-            });
+        // if (!email || !validateEmail(email)) {
+        //     return res.status(201).json({
+        //         success: false,
+        //         message: "Invalid Email "
+        //     });
+        // }
+
+        // // Validate password length
+        // if (!password || password.length < 8) {
+        //     return res.status(201).json({
+        //         success: false,
+        //         message: "Password must be at least 8 characters long"
+        //     });
+        // }
+        // if (name.length < 1 || name.length > 20) {
+        //     return res.status(400).json({ success: false, message: "Please enter a name that is between 1 and 20 characters in length." });
+        // }
+
+        if (name && (name.length < 1 || name.length > 20)) {
+            return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE_201, res)
         }
 
-        // Validate password length
-        if (!password || password.length < 8) {
-            return res.status(201).json({
-                success: false,
-                message: "Password must be at least 8 characters long"
-            });
-        }
-        if (name.length < 1 || name.length > 20) {
-            return res.status(400).json({ success: false, message: "Please enter a name that is between 1 and 20 characters in length." });
-        }
         // Validate mobile number format if parsed successfully
         if (mobileNumber == null || mobileNumber == undefined || mobileNumber.length !== 10) {
             return res.status(201).json({ success: false, message: "Mobile number should be 10 digit" });
@@ -112,11 +140,13 @@ export const signUp = async (req, res, next) => {
         const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
 
         const existingCustomer = await findCustomerByEmail(email)
+
         if (existingCustomer) {
-            return res.status(201).json({
-                success: false,
-                message: "Customer with the email already exists",
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: "Customer with the email already exists",
+            // });
+            return ErrorHandler(EMAIL_EXISTS_ERROR, ERROR_STATUS_CODE_201, res)
         }
 
         //Hashing the Password
@@ -140,10 +170,10 @@ export const signUp = async (req, res, next) => {
         //Saving the Customer
         const savedCustomer = await saveCustomer(newCustomer)
 
-         // Format the mobile number with the country code
+        // Format the mobile number with the country code
 
-         const formattedNumber = `+${mobileCountryCode}${String(mobileNumber)}`;
-         console.log(formattedNumber)
+        const formattedNumber = `+${mobileCountryCode}${String(mobileNumber)}`;
+        console.log(formattedNumber)
 
         //Sending the verification Code to Customer Registered Email
         if (savedCustomer.verificationCode) {
@@ -153,16 +183,20 @@ export const signUp = async (req, res, next) => {
             } catch (error) {
                 next(error);
             }
-            
-            return res.status(200).json({
-                success: true,
-                message: 'Customer saved successfully and verification code sent successfully',
-            });
+
+            // return res.status(200).json({
+            //     success: true,
+            //     message: 'Customer saved successfully and verification code sent successfully',
+            // });
+            return SuccessHandler(CUSTOMER_SIGNUP_SUCCESS, SUCCESS_STATUS_CODE, res);
+
         } else {
-            return res.status(201).json({
-                success: false,
-                message: 'Failed to add customer. Verification code cannot be sent',
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: 'Failed to add customer. Verification code cannot be sent',
+            // });
+            return ErrorHandler(CUSTOMER_SIGNUP_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
     } catch (error) {
         next(error);
@@ -174,8 +208,8 @@ export const matchVerificationCode = async (req, res, next) => {
     try {
         let { email, verificationCode, webFcmToken, androidFcmToken, iosFcmToken } = req.body;
 
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         // FIND THE CUSTOMER 
         const customer = await findCustomerByEmail(email)
@@ -221,17 +255,21 @@ export const matchVerificationCode = async (req, res, next) => {
             // }
 
 
-            return res.status(200).json({
-                success: true,
-                response: customer,
-            });
+            // return res.status(200).json({
+            //     success: true,
+            //     response: customer,
+            // });
+            return SuccessHandler(CUSTOMER_VERIFICATION_SUCCESS, SUCCESS_STATUS_CODE, res, { response: customer });
+
         }
 
         // If verification code doesn't match or customer not found
-        return res.status(201).json({
-            success: false,
-            message: "Verification code didn't match. Please enter a valid verification code",
-        });
+        // return res.status(201).json({
+        //     success: false,
+        //     message: "Verification code didn't match",
+        // });
+        return ErrorHandler(CUSTOMER_VERIFICATION_ERROR, ERROR_STATUS_CODE_201, res)
+
     } catch (error) {
         next(error);
     }
@@ -242,39 +280,61 @@ export const signIn = async (req, res, next) => {
     try {
         let { email, password, webFcmToken, androidFcmToken, iosFcmToken } = req.body
 
-                // Convert email to lowercase
-                email = email.toLowerCase();
 
-        if (!email || !validateEmail(email)) {
-            return res.status(201).json({
-                success: false,
-                message: "Invalid Email "
-            });
+        // if (!email || !validateEmail(email)) {
+        //     return res.status(201).json({
+        //         success: false,
+        //         message: "Invalid Email "
+        //     });
+        // }
+
+        // // Validate password length
+        // if (!password || password.length < 8) {
+        //     return res.status(201).json({
+        //         success: false,
+        //         message: "Password must be at least 8 characters long"
+        //     });
+        // }
+
+
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE_201, res)
         }
 
-        // Validate password length
-        if (!password || password.length < 8) {
-            return res.status(201).json({
-                success: false,
-                message: "Password must be at least 8 characters long"
-            });
+        if (!validateEmail(email)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE_201, res)
         }
+
+        if (!password) {
+            return ErrorHandler(PASSWORD_NOT_PRESENT_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        if (password.length < 8) {
+            return ErrorHandler(PASSWORD_LENGTH_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         const foundUser = await findCustomerByEmail(email)
 
         if (!foundUser) {
-            return res.status(201).json({
-                success: false,
-                message: 'Unauthorized User'
-            })
+            // return res.status(201).json({
+            //     success: false,
+            //     message: 'Unauthorized User'
+            // })
+            return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE_201, res)
         }
 
         const match = await bcrypt.compare(password, foundUser.password)
 
-        if (!match) return res.status(201).json({
-            success: false,
-            message: 'Unauthorized. User password didnot match.'
-        })
+        if (!match) {
+            // return res.status(201).json({
+            //     success: false,
+            //     message: 'Unauthorized. User password didnot match.'
+            // })
+            return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE_201, res)
+        }
 
         //    // Save FCM Tokens based on the switch-case logic
         // let tokenType, tokenValue;
@@ -330,12 +390,14 @@ export const signIn = async (req, res, next) => {
         // })
 
         // Send accessToken containing username and roles 
-        res.status(200).json({
-            success: true,
-            message: "Customer Logged In Successfully",
-            // accessToken,
-            response: foundUser
-        })
+        // res.status(200).json({
+        //     success: true,
+        //     message: "Customer Logged In Successfully",
+        //     // accessToken,
+        //     response: foundUser
+        // })
+        return SuccessHandler(CUSTOMER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, { response: foundUser });
+
     }
     catch (error) {
         next(error);
@@ -343,7 +405,7 @@ export const signIn = async (req, res, next) => {
 };
 
 // //GOOGLE SIGNIN ===================================
-// const googleAdminSignup = async (req, res, next) => {
+// const googleCustomerSignup = async (req, res, next) => {
 //     try {
 //         const CLIENT_ID = '508224318018-quta6u0n38vml0up7snscdrtl64555l1.apps.googleusercontent.com'
 
@@ -388,7 +450,7 @@ export const signIn = async (req, res, next) => {
 
 //         await newUser.save()
 
-//         res.status(200).json({ success: true, message: 'Customer registered successfully', newUser })
+//         res.status(200).json({ success: true, message: 'Customer registered successfully', response:newUser })
 
 //     }
 //     catch (error) {
@@ -398,7 +460,7 @@ export const signIn = async (req, res, next) => {
 // }
 
 
-// const googleAdminLogin = async (req, res, next) => {
+// const googleCustomerLogin = async (req, res, next) => {
 //     try {
 //         const CLIENT_ID = '508224318018-quta6u0n38vml0up7snscdrtl64555l1.apps.googleusercontent.com'
 
@@ -450,7 +512,7 @@ export const signIn = async (req, res, next) => {
 //             success: true,
 //             message: "Admin Logged In Successfully",
 //             accessToken,
-//             foundUser
+//             response:foundUser
 //         })
 //     } catch (error) {
 //         console.log(error)
@@ -491,15 +553,17 @@ export const forgetPassword = async (req, res, next) => {
     try {
         let { email } = req.body;
 
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         const user = await findCustomerByEmail(email)
         if (!user) {
-            return res.status(201).json({
-                success: false,
-                message: "User with this email does not exist. Please register first",
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: "User with this email does not exist. Please register first",
+            // });
+            return ErrorHandler(CUSTOMER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
         const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
@@ -512,11 +576,13 @@ export const forgetPassword = async (req, res, next) => {
         } catch (error) {
             next(error);
         }
-        return res.status(200).json({
-            success: true,
-            message: `Please check your email (${email}) for resetting the password`,
-            // verificationCode: verificationCode
-        });
+        // return res.status(200).json({
+        //     success: true,
+        //     message: `Please check your email (${email}) for resetting the password`,
+        //     // verificationCode: verificationCode
+        // });
+        return SuccessHandler(FORGET_PASSWORD_SUCCESS, SUCCESS_STATUS_CODE, res);
+
     } catch (error) {
         next(error);
     }
@@ -527,16 +593,18 @@ export const verifyPasswordResetCode = async (req, res, next) => {
     try {
         let { email, verificationCode, } = req.body;
 
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         const user = await findCustomerByEmail(email);
 
         if (!user) {
-            return res.status(201).json({
-                success: false,
-                message: "User not found",
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: "User not found",
+            // });
+            return ErrorHandler(CUSTOMER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
         if (user.verificationCode === verificationCode) {
@@ -544,17 +612,21 @@ export const verifyPasswordResetCode = async (req, res, next) => {
             // customer.VerificationCode = ''; // Clear the verification code
             await user.save();
 
-            res.status(200).json({
-                success: true,
-                message: "Verification Code successfully matched",
-                response: email,
-            });
+            // res.status(200).json({
+            //     success: true,
+            //     message: "Verification Code successfully matched",
+            //     response: email,
+            // });
+            return SuccessHandler(CUSTOMER_VERIFICATION_SUCCESS, SUCCESS_STATUS_CODE, res, { response: email });
+
         } else {
             // Verification code doesn't match
-            return res.status(201).json({
-                success: false,
-                message: "Invalid verification code",
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: "Invalid verification code",
+            // });
+            return ErrorHandler(CUSTOMER_VERIFICATION_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
     } catch (error) {
         next(error);
@@ -566,17 +638,19 @@ export const resetPassword = async (req, res, next) => {
     try {
         let { email, newPassword } = req.body;
 
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         // Find the user by email (assuming Customer is your Mongoose model for users)
         const user = await findCustomerByEmail(email)
 
         if (!user) {
-            return res.status(201).json({
-                success: false,
-                message: "User with this email does not exist",
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: "User with this email does not exist",
+            // });
+            return ErrorHandler(CUSTOMER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
         // Hash the new password
@@ -588,10 +662,12 @@ export const resetPassword = async (req, res, next) => {
         // Save the updated user in the database
         await user.save();
 
-        return res.status(200).json({
-            success: true,
-            message: 'Password reset successfully',
-        });
+        // return res.status(200).json({
+        //     success: true,
+        //     message: 'Password reset successfully',
+        // });
+        return SuccessHandler(PASSWORD_RESET_SUCCESS, SUCCESS_STATUS_CODE, res);
+
 
     } catch (error) {
         next(error);
@@ -603,18 +679,19 @@ export const customerConnectSalon = async (req, res, next) => {
     try {
         let { email, salonId } = req.body;
 
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         // Find the Customer by emailId
         const customer = await findCustomerByEmail(email)
 
         // If customer is not found
         if (!customer) {
-            return res.status(201).json({
-                success: false,
-                message: "Customer not found",
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: "Customer not found",
+            // });
+            return ErrorHandler(CUSTOMER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
         }
 
         // Check if the salonId is already present in the connectedSalon array
@@ -631,11 +708,13 @@ export const customerConnectSalon = async (req, res, next) => {
         // Save the changes
         await customer.save();
 
-        res.status(200).json({
-            success: true,
-            message: "Customer is added to the salon successfully.",
-            response: customer,
-        });
+        // res.status(200).json({
+        //     success: true,
+        //     message: "Customer is added to the salon successfully.",
+        //     response: customer,
+        // });
+        return SuccessHandler(CUSTOMER_CONNECT_SALON_SUCCESS, SUCCESS_STATUS_CODE, res, { response: customer });
+
     } catch (error) {
         //console.log(error);
         next(error);
@@ -655,10 +734,12 @@ export const customerDisconnectSalon = async (req, res, next) => {
 
         // If customer is not found
         if (!customer) {
-            return res.status(201).json({
-                success: false,
-                message: "Customer not found",
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: "Customer not found",
+            // });
+            return ErrorHandler(CUSTOMER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
         // Check if the salonId is already present in the connectedSalon array
@@ -667,11 +748,13 @@ export const customerDisconnectSalon = async (req, res, next) => {
         // Save the changes
         await customer.save();
 
-        res.status(200).json({
-            success: true,
-            message: "Customer disconnected from the salon successfully.",
-            response: customer,
-        });
+        // res.status(200).json({
+        //     success: true,
+        //     message: "Customer disconnected from the salon successfully.",
+        //     response: customer,
+        // });
+        return SuccessHandler(CUSTOMER_DISCONNECT_SALON_SUCCESS, SUCCESS_STATUS_CODE, res, { response: customer });
+
     } catch (error) {
         //console.log(error);
         next(error);
@@ -683,8 +766,8 @@ export const getAllSalonsByCustomer = async (req, res, next) => {
     try {
         let { customerEmail } = req.body; // Assuming customer's email is provided in the request body
 
-                // Convert email to lowercase
-                customerEmail = customerEmail.toLowerCase();
+        // Convert email to lowercase
+        customerEmail = customerEmail.toLowerCase();
 
         // const email = customerEmail
 
@@ -692,22 +775,24 @@ export const getAllSalonsByCustomer = async (req, res, next) => {
         const customer = await findCustomerByEmail(customerEmail);
 
         if (!customer) {
-            return res.status(201).json({
-                success: false,
-                message: 'Customer not found',
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: 'Customer not found',
+            // });
+            return ErrorHandler(CUSTOMER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
         }
 
         // Fetch all salons associated with the admin from registeredSalons array
         const salons = await getCustomerConnectedSalons(customer.connectedSalon)
 
-        res.status(200).json({
-            success: true,
-            message: 'Salons retrieved successfully',
-            response: salons,
-        });
+        // res.status(200).json({
+        //     success: true,
+        //     message: 'Salons retrieved successfully',
+        //     response: salons,
+        // });
+        return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: salons });
+
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -717,30 +802,32 @@ export const changeDefaultSalonIdOfCustomer = async (req, res, next) => {
     try {
         let { customerEmail, salonId } = req.body; // Assuming admin's email and new salonId are provided in the request body
 
-             // Convert email to lowercase
-                customerEmail = customerEmail.toLowerCase();
+        // Convert email to lowercase
+        customerEmail = customerEmail.toLowerCase();
 
         // Find the admin based on the provided email
         const customer = await findCustomerByEmail(customerEmail);
 
         if (!customer) {
-            return res.status(201).json({
-                success: false,
-                message: 'Customer not found',
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: 'Customer not found',
+            // });
+            return ErrorHandler(CUSTOMER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
         }
 
         // Update the default salonId of the admin
         customer.salonId = salonId;
         await customer.save();
 
-        res.status(200).json({
-            success: true,
-            message: 'Default salon ID of admin updated successfully',
-            response: customer,
-        });
+        // res.status(200).json({
+        //     success: true,
+        //     message: 'Default salon ID of admin updated successfully',
+        //     response: customer,
+        // });
+        return SuccessHandler(CUSTOMER_CHANGE_DEFAULT_SALON_SUCCESS, SUCCESS_STATUS_CODE, res, { response: customer });
+
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };
@@ -752,8 +839,8 @@ export const getAllCustomers = async (req, res, next) => {
         let { salonId, name, email, page = 1, limit = 3, sortField, sortOrder } = req.query
 
 
-              // Convert email to lowercase
-              email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         let query = {}
 
@@ -816,24 +903,45 @@ export const updateCustomer = async (req, res, next) => {
             mobileNumber,
         } = req.body;
 
-        
 
-        if (!email || !validateEmail(email)) {
-            return res.status(201).json({
-                success: false,
-                message: "Invalid Email "
-            });
-        }
-            // Convert email to lowercase
-            email = email.toLowerCase();
 
-        // Validate password length
-        if (!password || password.length < 8) {
-            return res.status(201).json({
-                success: false,
-                message: "Password must be at least 8 characters long"
-            });
+        // if (!email || !validateEmail(email)) {
+        //     return res.status(201).json({
+        //         success: false,
+        //         message: "Invalid Email "
+        //     });
+        // }
+
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE_201, res)
         }
+
+        if (!validateEmail(email)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        if (!password) {
+            return ErrorHandler(PASSWORD_NOT_PRESENT_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        if (password.length < 8) {
+            return ErrorHandler(PASSWORD_LENGTH_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        if (name && (name.length < 1 || name.length > 20)) {
+            return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        // Convert email to lowercase
+        email = email.toLowerCase();
+
+        // // Validate password length
+        // if (!password || password.length < 8) {
+        //     return res.status(201).json({
+        //         success: false,
+        //         message: "Password must be at least 8 characters long"
+        //     });
+        // }
 
         //Hashing the Password
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -851,25 +959,26 @@ export const updateCustomer = async (req, res, next) => {
         }
 
         const customer = await updateCustomerDetails(customerData)
-        res.status(200).json({
-            success: true,
-            message: "Customer updated successfully",
-            response: customer
-        })
+        // res.status(200).json({
+        //     success: true,
+        //     message: "Customer updated successfully",
+        //     response: customer
+        // })
+        return SuccessHandler(CUSTOMER_UPDATE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: customer });
+
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
 //DESC: DELETE CUSTOMER PROFILE ================
 export const deleteSingleCustomer = async (req, res, next) => {
     let { email } = req.body;
-    
+
     try {
 
-            // Convert email to lowercase
-            email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
         const customer = await findCustomerByEmail(email)
         // Check if customer exists
         if (!customer) {
@@ -900,21 +1009,35 @@ export const uploadCustomerprofilePic = async (req, res, next) => {
         let profiles = req.files.profile;
         let email = req.body.email;
 
-        console.log(profiles)
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+        }
 
-            // Convert email to lowercase
-        email = email.toLowerCase();
+        if (!req.files || !req.files.profile) {
+            return ErrorHandler(CUSTOMER_IMAGE_EMPTY_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
 
         // Ensure that profiles is an array, even for single uploads
         if (!Array.isArray(profiles)) {
             profiles = [profiles];
         }
 
-        // console.log(profiles)
+        // Allowed file extensions
+        const allowedExtensions = ALLOWED_IMAGE_EXTENSIONS;
+        const maxFileSize = MAX_FILE_SIZE;
 
         const uploadPromises = [];
 
         for (const profile of profiles) {
+            const extension = path.extname(profile.name).toLowerCase().slice(1);
+            if (!allowedExtensions.includes(extension)) {
+                return ErrorHandler(IMAGE_FILE_EXTENSION_ERROR, ERROR_STATUS_CODE_201, res)
+            }
+
+            if (profile.size > maxFileSize) {
+                return ErrorHandler(IMAGE_FILE_SIZE_ERROR, ERROR_STATUS_CODE_201, res)
+            }
             uploadPromises.push(
                 new Promise((resolve, reject) => {
                     const public_id = `${profile.name.split(".")[0]}`;
@@ -936,7 +1059,9 @@ export const uploadCustomerprofilePic = async (req, res, next) => {
                             // Delete the temporary file after uploading
                             fs.unlink(profile.tempFilePath, (unlinkError) => {
                                 if (unlinkError) {
-                                    console.error('Failed to delete temporary file:', unlinkError);
+                                    // console.error('Failed to delete temporary file:', unlinkError);
+                                    return console.log(IMAGE_FAILED_DELETE, unlinkError)
+
                                 }
                             });
                         });
@@ -949,21 +1074,24 @@ export const uploadCustomerprofilePic = async (req, res, next) => {
                 // console.log(profileimg);
                 const customerImage = await uploadCustomerProPic(email, profileimg)
 
-                res.status(200).json({
-                    success: true,
-                    message: "Files Uploaded successfully",
-                    response: customerImage
-                });
+                // res.status(200).json({
+                //     success: true,
+                //     message: "Files Uploaded successfully",
+                //     response: customerImage
+                // });
+                return SuccessHandler(IMAGE_UPLOAD_SUCCESS, SUCCESS_STATUS_CODE, res, { response: customerImage });
+
             })
             .catch((err) => {
                 console.error(err);
-                res.status(201).json({
-                    success: false,
-                    message: "Image upload failed",
-                });
+                // res.status(201).json({
+                //     success: false,
+                //     message: "Image upload failed",
+                // });
+                return ErrorHandler(IMAGE_UPLOAD_FAILED_ERROR, ERROR_STATUS_CODE_201, res)
+
             });
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1082,8 +1210,8 @@ export const sendMailToCustomer = async (req, res, next) => {
     let { email, subject, text } = req.body;
     try {
 
-            // Convert email to lowercase
-            email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         const customer = await findCustomerByEmail(email);
         if (!customer) {
@@ -1112,23 +1240,26 @@ export const getCustomerDetails = async (req, res, next) => {
     try {
         let { email } = req.body;
 
-            // Convert email to lowercase
-            email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
         const customer = await findCustomerByEmail(email);
         if (!customer) {
-            return res.status(201).json({
-                success: false,
-                message: "Customer not found",
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: "Customer not found",
+            // });
+            return ErrorHandler(CUSTOMER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
-        res.status(200).json({
-            success: true,
-            message: "Customer details found successfully",
-            response: customer,
-        });
+        // res.status(200).json({
+        //     success: true,
+        //     message: "Customer details found successfully",
+        //     response: customer,
+        // });
+        return SuccessHandler(CUSTOMER_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: customer });
+
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1203,10 +1334,12 @@ export const customerDashboard = async (req, res, next) => {
         const salonInfo = await findSalonBySalonId(salonId);
 
         if (!salonInfo) {
-            res.status(201).json({
-                success: false,
-                message: 'No salons found for the particular SalonId.',
-            });
+            // res.status(201).json({
+            //     success: false,
+            //     message: 'No salons found for the particular SalonId.',
+            // });
+            return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
         // Find associated barbers using salonId
@@ -1242,19 +1375,33 @@ export const customerDashboard = async (req, res, next) => {
             totalQueueCount += queue.queueList.length;
         });
 
-        res.status(200).json({
-            success: true,
-            message: 'Salon and barbers found successfully.',
-            response: {
-                salonInfo: salonInfo,
-                barbers: barbers,
-                barberOnDuty: barberCount,
-                totalQueueCount: totalQueueCount,
-                leastQueueCount: minQueueCountAsInteger
-            },
-        });
+        // res.status(200).json({
+        //     success: true,
+        //     message: 'Salon and barbers found successfully.',
+        //     response: {
+        //         salonInfo: salonInfo,
+        //         barbers: barbers,
+        //         barberOnDuty: barberCount,
+        //         totalQueueCount: totalQueueCount,
+        //         leastQueueCount: minQueueCountAsInteger
+        //     },
+        // });
+
+        return SuccessHandler(
+            CUSTOMER_DASHBOARD_SUCCESS, 
+            SUCCESS_STATUS_CODE, 
+            res, 
+            { 
+                response: {
+                    salonInfo: salonInfo,
+                    barbers: barbers,
+                    barberOnDuty: barberCount,
+                    totalQueueCount: totalQueueCount,
+                    leastQueueCount: minQueueCountAsInteger
+                }
+            }
+        );
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1269,10 +1416,12 @@ export const customerFavoriteSalon = async (req, res, next) => {
 
         // If customer is not found
         if (!customer) {
-            return res.status(201).json({
-                success: false,
-                message: "Customer not found",
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: "Customer not found",
+            // });
+            return ErrorHandler(CUSTOMER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
         // Check if the salonId is already present in the connectedSalon array
@@ -1284,21 +1433,24 @@ export const customerFavoriteSalon = async (req, res, next) => {
 
             // Save the changes
             await customer.save();
-            res.status(200).json({
-                success: true,
-                message: "Your favourite salon is added successfully",
-                response: customer,
-            });
+            // res.status(200).json({
+            //     success: true,
+            //     message: "Your favourite salon is added successfully",
+            //     response: customer,
+            // });
+            return SuccessHandler(CUSTOMER_FAVOURITE_SALON_SUCCESS, SUCCESS_STATUS_CODE, res, { response: customer });
+
         }
         else {
-            res.status(201).json({
-                success: false,
-                message: "Your favourite salon is already added",
-            });
+            // res.status(201).json({
+            //     success: false,
+            //     message: "Your favourite salon is already added",
+            // });
+            return ErrorHandler(CUSTOMER_FAVOURITE_SALON_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1312,22 +1464,25 @@ export const getAllCustomerFavoriteSalons = async (req, res, next) => {
         const customer = await findCustomerByEmail(customerEmail);
 
         if (!customer) {
-            return res.status(201).json({
-                success: false,
-                message: 'Customer not found',
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: 'Customer not found',
+            // });
+            return ErrorHandler(CUSTOMER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
         // Fetch all salons associated with the admin from registeredSalons array
         const salons = await getCustomerFavouriteSalon(customer.favoriteSalons)
 
-        res.status(200).json({
-            success: true,
-            message: 'Salons retrieved successfully',
-            response: salons,
-        });
+        // res.status(200).json({
+        //     success: true,
+        //     message: 'Salons retrieved successfully',
+        //     response: salons,
+        // });
+        return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: salons });
+
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -1342,21 +1497,25 @@ export const deleteCustomerFavoriteSalon = async (req, res, next) => {
 
         // If customer is not found
         if (!customer) {
-            return res.status(201).json({
-                success: false,
-                message: "Customer not found",
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: "Customer not found",
+            // });
+            return ErrorHandler(CUSTOMER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
         // Check if the salonId is already present in the favoriteSalons array
         const salonExists = customer.favoriteSalons.includes(salonId);
 
         if (!salonExists) {
-            // If salonId is not present, respond accordingly
-            res.status(201).json({
-                success: false,
-                message: "The salon is not in your favorites.",
-            });
+            // // If salonId is not present, respond accordingly
+            // res.status(201).json({
+            //     success: false,
+            //     message: "The salon is not in your favorites.",
+            // });
+            return ErrorHandler(CUSTOMER_FAVOURITE_SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+
         } else {
             // If salonId is present, remove it from the favoriteSalons array
             customer.favoriteSalons.pull(salonId);
@@ -1364,14 +1523,15 @@ export const deleteCustomerFavoriteSalon = async (req, res, next) => {
             // Save the changes
             await customer.save();
 
-            res.status(200).json({
-                success: true,
-                message: "The salon has been removed from your favorites successfully.",
-                response: customer,
-            });
+            // res.status(200).json({
+            //     success: true,
+            //     message: "The salon has been removed from your favorites successfully.",
+            //     response: customer,
+            // });
+            return SuccessHandler(CUSTOMER_FAVOURITE_SALON_DELETE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: customer });
+
         }
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };
