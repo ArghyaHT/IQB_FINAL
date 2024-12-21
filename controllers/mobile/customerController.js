@@ -79,6 +79,8 @@ export const signUp = async (req, res, next) => {
             dateOfBirth,
             mobileCountryCode,
             mobileNumber,
+            countryFlag,
+            countryCca2,
             password,
         } = req.body;
 
@@ -126,6 +128,8 @@ export const signUp = async (req, res, next) => {
             name,
             gender,
             mobileCountryCode: mobileCountryCode,
+            countryFlag,
+            countryCca2,
             dateOfBirth,
             mobileNumber,
             hashedPassword,
@@ -806,12 +810,13 @@ export const updateCustomer = async (req, res, next) => {
             gender,
             dateOfBirth,
             mobileCountryCode,
+            countryFlag,
+            countryCca2,
             password,
             mobileNumber,
         } = req.body;
 
-            // Convert email to lowercase
-            email = email.toLowerCase();
+        
 
         if (!email || !validateEmail(email)) {
             return res.status(201).json({
@@ -819,6 +824,8 @@ export const updateCustomer = async (req, res, next) => {
                 message: "Invalid Email "
             });
         }
+            // Convert email to lowercase
+            email = email.toLowerCase();
 
         // Validate password length
         if (!password || password.length < 8) {
@@ -837,6 +844,8 @@ export const updateCustomer = async (req, res, next) => {
             gender,
             dateOfBirth,
             mobileCountryCode,
+            countryFlag,
+            countryCca2,
             hashedPassword,
             mobileNumber,
         }
@@ -858,7 +867,6 @@ export const deleteSingleCustomer = async (req, res, next) => {
     let { email } = req.body;
     
     try {
-
 
             // Convert email to lowercase
             email = email.toLowerCase();

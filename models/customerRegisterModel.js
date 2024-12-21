@@ -49,6 +49,12 @@ const customerSchema = new mongoose.Schema({
     mobileCountryCode:{
         type: Number,
     },
+    countryFlag:{
+        type: String,
+    },
+    countryCca2:{
+        type: String,
+    },
     mobileNumber: {
         type: Number,
         // required: true,
