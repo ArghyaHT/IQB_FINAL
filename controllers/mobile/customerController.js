@@ -27,40 +27,40 @@ export const checkEmail = async (req, res, next) => {
     try {
         let { email } = req.body;
 
-        if (!email) {
-            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE_201, res)
-        }
+        // if (!email) {
+        //     return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE_201, res)
+        // }
 
-        if (!validateEmail(email)) {
-            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE_201, res)
-        }
+        // if (!validateEmail(email)) {
+        //     return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE_201, res)
+        // }
 
         email = email.toLowerCase();
 
-        // if (!email || !validateEmail(email)) {
-        //     return res.status(201).json({
-        //         success: false,
-        //         message: "Invalid Email "
-        //     });
-        // }
+        if (!email || !validateEmail(email)) {
+            return res.status(201).json({
+                success: false,
+                message: "Invalid Email "
+            });
+        }
 
         //Find existing email for a particular customer
         const existingCustomer = await findCustomerByEmail(email)
 
         if (existingCustomer) {
-            // res.status(201).json({
-            //     success: false,
-            //     message: "This emailid already exists",
-            // });
-            return ErrorHandler(EMAIL_EXISTS_ERROR, ERROR_STATUS_CODE_201, res)
+            res.status(201).json({
+                success: false,
+                message: "This emailid already exists",
+            });
+            // return ErrorHandler(EMAIL_EXISTS_ERROR, ERROR_STATUS_CODE_201, res)
         }
 
         else {
-            // res.status(200).json({
-            //     success: true,
-            //     message: "The email is available for signup",
-            //     response: email,
-            // });
+            res.status(200).json({
+                success: true,
+                message: "The email is available for signup",
+                response: email,
+            });
         }
     }
     catch (error) {
