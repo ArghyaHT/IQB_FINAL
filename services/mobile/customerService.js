@@ -41,6 +41,22 @@ export const saveCustomer = async(newCustomer) => {
       return savedCustomer;
 }
 
+export const createGoogleCustomer = async (email) => {
+    const user = new Customer({
+       email: email,
+       AuthType: "google"
+    })
+ 
+    await user.save();
+ 
+    return user;
+ }
+
+ export const googleLoginCustomer = async (email) => {
+    const user = await Customer.findOne({ email: email, AuthType: "google" });
+    return user;
+ }
+
 //GET ALL CUSTOMERS BY SALONID
 export const fetchedCustomers = async (query, sortOptions, skip, limit) => {
     const customers = await Customer.find(query).sort(sortOptions).skip(skip).limit(Number(limit));
