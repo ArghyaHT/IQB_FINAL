@@ -19,7 +19,7 @@ const customerSchema = new mongoose.Schema({
     email: {
         type: String,
     },
-    emailVerified:{
+    emailVerified: {
         type: Boolean,
         default: false
     },
@@ -40,26 +40,26 @@ const customerSchema = new mongoose.Schema({
     },
     gender: {
         type: String,
-        default:"Male"
+        default: "Male"
     },
 
     dateOfBirth: {
         type: Date,
     },
-    mobileCountryCode:{
+    mobileCountryCode: {
         type: Number,
     },
-    countryFlag:{
+    countryFlag: {
         type: String,
     },
-    countryCca2:{
+    countryCca2: {
         type: String,
     },
     mobileNumber: {
         type: Number,
         // required: true,
     },
-    mobileVerified:{
+    mobileVerified: {
         type: Boolean,
         default: false
     },
@@ -78,6 +78,10 @@ const customerSchema = new mongoose.Schema({
             }
         }],
         default: [{}]  // Ensure default value is an array with an object
+    },
+    cancellationCount: {
+        type: Number,
+        default: 0
     },
     fcmToken: {
         type: String

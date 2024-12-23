@@ -12,7 +12,7 @@ import { findCustomersToMail } from "../../services/web/queue/joinQueueService.j
 //DESC:SINGLE JOIN QUEUE ================
 export const singleJoinQueue = async (req, res, next) => {
     try {
-        const { salonId, name, customerEmail, joinedQType, mobileNumber,mobileCountryCode, methodUsed, barberName, barberId, services } = req.body;
+        const { salonId, name, customerEmail, joinedQType, mobileNumber, mobileCountryCode, methodUsed, barberName, barberId, services } = req.body;
 
         const salon = await getSalonBySalonId(salonId);
 
@@ -62,8 +62,6 @@ export const singleJoinQueue = async (req, res, next) => {
 
             const time = moment().local().format('HH:mm:ss');
 
-            console.log(time)
-
             const salon = await getSalonBySalonId(salonId);
 
             const timeZoneData = salon.timeZone;
@@ -89,7 +87,7 @@ export const singleJoinQueue = async (req, res, next) => {
                 // qPosition: isVipServiceRequested ? 1 : availableBarber.queueCount,
                 dateJoinedQ: new Date(),
                 timeJoinedQ: adjustedTime,
-                methodUsed,
+                methodUsed: methodUsed,
                 mobileCountryCode,
                 mobileNumber: parsedMobileNumber,
                 barberName: availableBarber.name,
@@ -362,11 +360,11 @@ export const groupJoinQueue = async (req, res, next) => {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let gcCode = '';
             for (let i = 0; i < 6; i++) {
-              const randomIndex = Math.floor(Math.random() * characters.length);
-              gcCode += characters[randomIndex];
+                const randomIndex = Math.floor(Math.random() * characters.length);
+                gcCode += characters[randomIndex];
             }
             return gcCode;
-          };
+        };
 
         const gcCode = generateGcCode()
 
@@ -565,6 +563,13 @@ export const cancelQueueByCustomer = async (req, res, next) => {
             })
         }
 
+        if (foundUser.cancellationCount >= 1 && moment(foundUser.updatedAt).isSame(moment(), 'day')) {
+            return res.status(201).json({
+                success: false,
+                message: 'Cant cancel queue anymore for today'
+            })
+        }
+
         const updatedQueue = await findSalonQueueList(salonId)
 
         if (!updatedQueue) {
@@ -601,6 +606,11 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         //Updating the barber
         const updatedBarber = decreaseBarberEWTWhenQCancel(salonId, barberId, canceledServiceEWT);
 
+        // Increment the cancellation count
+        foundUser.cancellationCount += 1;
+
+        foundUser.save();
+
         //Adding the cancelled queue to the joinqueuehistory with status cancelled
         let salon = await findSalonQueueListHistory(salonId);
 
@@ -618,19 +628,18 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         // Update the status to "cancelled" for the canceled queue in JoinedQueueHistory
         salon = await statusCancelQ(salonId, _id)
-      
+
         const customers = await findCustomersToMail(salonId, barberId)
 
         if (customers && customers.length > 0) {
             for (const customer of customers) {
                 if (customer.queueList && Array.isArray(customer.queueList)) {
                     for (const queueItem of customer.queueList) {
-                        console.log('Queue Item:', queueItem);
 
                         const salon = await getSalonBySalonId(salonId);
 
                         const { customerEmail, qPosition, customerName, barberName, serviceEWT, customerEWT, services, dateJoinedQ } = queueItem;
-                        
+
                         const formattedDate = moment(dateJoinedQ, 'YYYY-MM-DD').format('DD-MM-YYYY');
 
                         const emailSubject = `${salon.salonName}: ${formattedDate} Queue Position Changed (${qPosition})`;

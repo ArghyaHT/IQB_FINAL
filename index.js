@@ -40,6 +40,7 @@ import loggerRoutes from "./routes/loggerRoutes.js"
 import logger from "./utils/logger/logger.js";
 import { GlobalErrorHandler } from "./middlewares/GlobalErrorHandler.js";
 import { logMiddleware } from "./controllers/loggerController.js";
+import { updateCustomers } from "./triggers/cronjobs.js";
 
 dotenv.config()
 
@@ -197,6 +198,8 @@ app.get('*', (req, res) =>
 );
 
 const PORT = 8001;
+
+updateCustomers()
 
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);

@@ -1,17 +1,21 @@
 import cron from 'node-cron';
-import { updateBarberExp } from '../services/barber/barberService.js';
+import { updateCustomerCancelCount } from '../services/mobile/customerService.js';
 
-
-export const setupCronJobs = () => {
+// Function to update customer records
+export const updateCustomers = (next) => {
     const timezones = ['America/New_York', 'Europe/London', 'Asia/Kolkata'];
 
+    // For each timezone, schedule a cron job that runs at midnight
     timezones.forEach((timezone) => {
-        cron.schedule('0 0 1 * *', async () => {
-            console.log(`Running updateBarberExp function at the beginning of every month for timezone: ${timezone}`);
-            await updateBarberExp();
+        cron.schedule('0 0 * * *', async () => {
+            try {
+                await updateCustomerCancelCount()
+            } catch (error) {
+                next(error);
+            }
         }, {
             scheduled: true,
-            timezone: timezone,
+            timezone: timezone  // Set the timezone for the cron job
         });
     });
 };
