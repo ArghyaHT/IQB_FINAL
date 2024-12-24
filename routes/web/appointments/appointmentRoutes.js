@@ -22,8 +22,6 @@ router.route("/getAllAppointmentsBySalonId").post(verifyRefreshTokenAdmin ,getAl
 router.route("/getAllAppointmentsBySalonIdAndDate").post(verifyRefreshTokenAdmin ,getAllAppointmentsBySalonIdAndDate)
 
 
-
-
 router.route("/getAllAppointmentsByBarberId").post(verifyRefreshTokenBarber ,getAllAppointmentsByBarberId)
 
 router.route("/getAllAppointmentsByBarberIdAndDate").post(verifyRefreshTokenBarber ,getAllAppointmentsByBarberIdAndDate)

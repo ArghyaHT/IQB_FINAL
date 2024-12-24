@@ -193,7 +193,6 @@ export const createAppointment = async (req, res, next) => {
         }
     
       } catch (error) {
-        //console.log(error);
         next(error);
       }
 };
@@ -253,7 +252,7 @@ export const editAppointment = async (req, res, next) => {
         const existingAppointment = await updateAppointmentById(salonId, appointmentId, updateFields)
 
         if (!existingAppointment) {
-            return res.status(404).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Appointment not found',
             });
@@ -279,7 +278,7 @@ export const deleteAppointment = async (req, res, next) => {
         const deletedAppointment = await deleteAppointmentById(salonId, appointmentId)
 
         if (!deletedAppointment) {
-            return res.status(404).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Appointment not found',
             });
@@ -290,7 +289,6 @@ export const deleteAppointment = async (req, res, next) => {
             message: 'Appointment deleted successfully',
         });
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };
@@ -366,11 +364,9 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
         //     timeSlots: timeSlots
         // });
     }catch (error) {
-        //console.log(error);
         next(error);
     }
 };
-
 
 //DESC:GET ALL APPOINTMENTS BY SALON ID ====================
 export const getAllAppointmentsBySalonId = async (req, res, next) => {
@@ -397,11 +393,9 @@ export const getAllAppointmentsBySalonId = async (req, res, next) => {
             response: appointments.map(appointment => appointment.appointmentList),
         });
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };
-
 
 //DESC:GET ALL APPOINTMENTS BY SALON ID AND DATE ====================
 export const getAllAppointmentsBySalonIdAndDate = async (req, res, next) => {
@@ -486,7 +480,7 @@ export const barberServedAppointment = async (req, res, next) => {
         const appointment = await findAppointmentById(_id, serviceId, barberId, appointmentDate, salonId);
 
         if (!appointment) {
-            return res.status(404).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Appointment not found.',
             });
@@ -503,7 +497,6 @@ export const barberServedAppointment = async (req, res, next) => {
             message: 'Appointment served successfully.',
         });
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };
