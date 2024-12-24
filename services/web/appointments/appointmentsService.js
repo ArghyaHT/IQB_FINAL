@@ -248,6 +248,7 @@ return appointments;
                     barberId: 1,
                     appointmentNotes: 1,
                     appointmentDate: 1,
+                    services: 1,
                     startTime: 1,
                     endTime: 1,
                     timeSlots: 1,
