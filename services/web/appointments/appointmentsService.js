@@ -489,35 +489,32 @@ return appointments;
  }
 
 
- export const findAppointmentById = async (_id, serviceId, barberId, appointmentDate, salonId) => {
-    const appointment = await Appointment.findOne({
-        salonId,
-        appointmentList: {
-            $elemMatch: { 
-                _id: _id,
-                barberId: barberId,
-                appointmentDate: new Date(appointmentDate),
-                services: {
-                    $elemMatch: {
-                        serviceId: serviceId,
-                    },
+ export const findAppointmentById = async (_id, barberId, appointmentDate, salonId) => {
+    const appointment = await Appointment.findOne(
+        {
+            salonId,
+            appointmentList: {
+                $elemMatch: { 
+                    _id: _id,
+                    barberId: barberId,
+                    appointmentDate: new Date(appointmentDate),
                 },
             },
         },
-    });
+        { "appointmentList.$": 1 } // Project only the matching element
+    );
 
     return appointment;
 };
 
  //PULL SERVED APPOINTMENT 
- export const servedAppointment = async(_id, serviceId, barberId, appointmentDate, salonId) =>{
+ export const servedAppointment = async(_id, barberId, appointmentDate, salonId) =>{
     const appointment = await Appointment.findOneAndUpdate(
         { salonId },
         {
             $pull: {
                 'appointmentList': {
                     _id: _id,
-                    serviceId: serviceId,
                     barberId: barberId,
                     appointmentDate: appointmentDate,
                 },

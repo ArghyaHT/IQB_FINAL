@@ -474,10 +474,10 @@ export const getAllAppointmentsByBarberIdAndDate = async (req, res, next) => {
 //DESC:BARBER SERVED APPOINTMENT API ====================
 export const barberServedAppointment = async (req, res, next) => {
     try {
-        const { salonId, barberId, serviceId, _id, appointmentDate } = req.body;
+        const { salonId, barberId, _id, appointmentDate } = req.body;
 
         // Find the appointment to be served
-        const appointment = await findAppointmentById(_id, serviceId, barberId, appointmentDate, salonId);
+        const appointment = await findAppointmentById(_id, barberId, appointmentDate, salonId);
 
         if (!appointment) {
             return res.status(400).json({
@@ -490,7 +490,7 @@ export const barberServedAppointment = async (req, res, next) => {
           const historyEntry = await findOrCreateAppointmentHistory(salonId, appointment);
 
         // Remove the served appointment from the Appointment table
-        await servedAppointment(_id, serviceId, barberId, appointmentDate, salonId);
+        await servedAppointment(_id, barberId, appointmentDate, salonId);
 
         return res.status(200).json({
             success: true,
