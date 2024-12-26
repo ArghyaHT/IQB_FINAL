@@ -73,6 +73,16 @@ export const mobileBookingAvailabilityStatus = async(salonId, mobileBookingAvail
  return salon;
 }
 
+//CHANGE MOBILE BOOKING AVAILABILITY STATUS 
+export const kioskAvailabilityStatus = async(salonId, kioskAvailability) => {
+  const salon = await Salon.findOneAndUpdate(
+    { salonId: salonId },
+    { kioskAvailability:kioskAvailability }, // Update the isOnline field in the database
+    { new: true }
+ );
+ return salon;
+}
+
 // Function to get all salon IDs
 export const getAllSalonIds = async () => {
   try {
