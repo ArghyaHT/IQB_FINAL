@@ -125,6 +125,8 @@ return appointments;
                 "appointmentList.appointmentNotes": 1,
                 "appointmentList.startTime": 1,
                 "appointmentList.endTime": 1,
+                "appointmentList.customerEmail": 1,
+                "appointmentList.customerName": 1,
                 "appointmentList.timeSlots": 1,
                 "appointmentList.barberName": 1
                 // Include other fields if needed
