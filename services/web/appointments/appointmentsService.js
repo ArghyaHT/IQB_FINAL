@@ -508,7 +508,7 @@ return appointments;
 };
 
  //PULL SERVED APPOINTMENT 
- export const servedAppointment = async(_id, barberId, appointmentDate, salonId) =>{
+ export const servedOrcancelAppointment = async(_id, barberId, appointmentDate, salonId) =>{
     const appointment = await Appointment.findOneAndUpdate(
         { salonId },
         {

@@ -1,11 +1,11 @@
 import { findAdminByEmailandRole } from "../../../services/web/admin/adminService.js";
-import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppointmentsBySalonId, allAppointmentsBySalonIdAndDate, createNewAppointment, deleteAppointmentById, findAppointmentById, getAppointmentbySalonId, getAppointmentsByDateAndBarberId, servedAppointment, updateAppointmentById } from "../../../services/web/appointments/appointmentsService.js";
+import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppointmentsBySalonId, allAppointmentsBySalonIdAndDate, createNewAppointment, deleteAppointmentById, findAppointmentById, getAppointmentbySalonId, getAppointmentsByDateAndBarberId, servedOrcancelAppointment, updateAppointmentById } from "../../../services/web/appointments/appointmentsService.js";
 import { getBarberbyId } from "../../../services/web/barber/barberService.js";
 import { getSalonSettings } from "../../../services/web/salonSettings/salonSettingsService.js";
 import { sendAppointmentsEmailAdmin, sendAppointmentsEmailBarber, sendAppointmentsEmailCustomer } from "../../../utils/emailSender/emailSender.js";
 import moment from "moment";
 import { generateTimeSlots } from "../../../utils/timeSlots.js";
-import { findOrCreateAppointmentHistory } from "../../../services/web/appointments/appointmentHistoryService.js";
+import { addCancelAppointmentHistory, findOrCreateAppointmentHistory } from "../../../services/web/appointments/appointmentHistoryService.js";
 import { RETRIEVE_TIMESLOT_SUCCESS, SELECT_BARBER_ERROR, SELECT_DATE_ERROR } from "../../../constants/web/AppointmentsConstants.js";
 
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
@@ -490,11 +490,42 @@ export const barberServedAppointment = async (req, res, next) => {
           const historyEntry = await findOrCreateAppointmentHistory(salonId, appointment);
 
         // Remove the served appointment from the Appointment table
-        await servedAppointment(_id, barberId, appointmentDate, salonId);
+        await servedOrcancelAppointment(_id, barberId, appointmentDate, salonId);
 
         return res.status(200).json({
             success: true,
             message: 'Appointment served successfully.',
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+//DESC:BARBER SERVED APPOINTMENT API ====================
+export const customerCancelledAppointment = async (req, res, next) => {
+    try {
+        const { salonId, barberId, _id, appointmentDate } = req.body;
+
+        // Find the appointment to be served
+        const appointment = await findAppointmentById(_id, barberId, appointmentDate, salonId);
+
+        if (!appointment) {
+            return res.status(400).json({
+                success: false,
+                message: 'Appointment not found.',
+            });
+        }
+
+          // Find or create the AppointmentHistory document for the salonId
+          const historyEntry = await addCancelAppointmentHistory(salonId, appointment);
+
+        // Remove the served appointment from the Appointment table
+        await servedOrcancelAppointment(_id, barberId, appointmentDate, salonId);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Appointment cancelled successfully.',
         });
     } catch (error) {
         next(error);
