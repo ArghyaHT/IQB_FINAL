@@ -2,15 +2,11 @@ import AppointmentHistory from "../../models/appointmentHistoryModel.js";
 
 export const getAppointmentsByCustomerEmail = async(salonId, customerEmail) => {
 
+    const getCustomerBookingBySalonId = await AppointmentHistory.findOne({salonId}) 
 
-    console.log(salonId, customerEmail)
+    const filteredAppointmentList = getCustomerBookingBySalonId.appointmentList.filter(item => item.customerEmail === customerEmail);
+    
+    console.log(filteredAppointmentList)
 
-    const getCustomerBookingHistory = await AppointmentHistory.findOne(
-        { salonId, "appointmentList.customerEmail": customerEmail },
-        { "appointmentList.$": 1 } // This will return only the matching appointments
-      );
-
-      console.log(getCustomerBookingHistory)
-
-      return getCustomerBookingHistory
+     return filteredAppointmentList
 }

@@ -6,9 +6,7 @@ export const getAppointmentHistorybyCustomerEmail = async (req, res, next) => {
 
 
         // Query the AppointmentHistory collection and use $elemMatch to get only the matching appointments
-        const history = getAppointmentsByCustomerEmail(salonId, customerEmail)
-
-        console.log()
+        const history = await getAppointmentsByCustomerEmail(salonId, customerEmail)
 
         if (!history) {
             return res.status(201).json({
