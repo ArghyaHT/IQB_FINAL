@@ -33,6 +33,8 @@ return barberDayOff;
 }
 
 
-// export const approveBarberDayOff = async(salonId,barber) => {
-//     const approveDayOff = await 
+// export const approveBarberDayOff = async(salonId,barberId) => {
+//     const barber = await BarberDayOff.findOne({salonId, barberId})
+
+
 // }

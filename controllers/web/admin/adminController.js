@@ -243,44 +243,45 @@ export const handleResetPasswordAdmin = async (req, res, next) => {
 }
 
 // Desc: Google Signup
-export const googleAdminSignup = async (req, res, next) => {
-    try {
-        const CLIENT_ID = process.env.CLIENT_ID;
+// export const googleAdminSignup = async (req, res, next) => {
+//     try {
+//         const CLIENT_ID = process.env.CLIENT_ID;
 
-        const token = req.query.token;
+//         const token = req.query.token;
 
-        if (!token) {
-            return res.status(404).json({
-                success: false,
-                message: "Admin token not found"
-            })
-        }
+//         if (!token) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Admin token not found"
+//             })
+//         }
 
-        const client = new OAuth2Client(CLIENT_ID);
+//         const client = new OAuth2Client(CLIENT_ID);
 
-        const ticket = await client.verifyIdToken({
-            idToken: token,
-            audience: CLIENT_ID,
-        });
+//         const ticket = await client.verifyIdToken({
+//             idToken: token,
+//             audience: CLIENT_ID,
+//         });
 
-        const payload = ticket.getPayload();
+//         const payload = ticket.getPayload();
 
-        const existingUser = await findAdminByEmailandRole(payload.email)
+//         const existingUser = await findAdminByEmailandRole(payload.email)
 
-        if (existingUser) {
-            return ErrorHandler(ADMIN_EXISTS_ERROR, ERROR_STATUS_CODE, res)
-        }
+//         if (existingUser) {
+//             return ErrorHandler(ADMIN_EXISTS_ERROR, ERROR_STATUS_CODE, res)
+//         }
 
-        // Create a new user
-        const newUser = await createGoogleAdmin(payload.email)
+//         // Create a new user
+//         const newUser = await createGoogleAdmin(payload.email)
 
-        return SuccessHandler(SIGNUP_SUCCESS, SUCCESS_STATUS_CODE, res, { newUser })
+//         return SuccessHandler(SIGNUP_SUCCESS, SUCCESS_STATUS_CODE, res, { newUser })
 
-    }
-    catch (error) {
-        next(error);
-    }
-}
+//     }
+//     catch (error) {
+//         next(error);
+//     }
+// }
+
 
 // Desc: Google Signin
 // export const googleAdminLogin = async (req, res, next) => {
@@ -340,26 +341,6 @@ export const googleAdminSignup = async (req, res, next) => {
 
 export const googleAdminLogin = async (req, res, next) => {
     try {
-        // const CLIENT_ID = process.env.CLIENT_ID;
-
-        // const token = req.query.token;
-
-        // if (!token) {
-        //     return res.status(404).json({ success: false, message: "Admin token not found" })
-        // }
-
-        // const client = new OAuth2Client(CLIENT_ID);
-
-        // const ticket = await client.verifyIdToken({
-        //     idToken: token,
-        //     audience: CLIENT_ID,
-        // });
-
-
-        // const payload = ticket.getPayload();
-
-        // const foundUser = await googleLoginAdmin(payload.email)
-
         const email = req.body.email
 
         const foundUser = await googleLoginAdmin(email)
@@ -393,6 +374,28 @@ export const googleAdminLogin = async (req, res, next) => {
             foundUser
         })
     } catch (error) {
+        next(error);
+    }
+}
+
+export const googleAdminSignup = async (req, res, next) => {
+    try {
+       
+        const email = req.body.email
+
+        const existingUser = await findAdminByEmailandRole(email)
+
+        if (existingUser) {
+            return ErrorHandler(ADMIN_EXISTS_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        // Create a new user
+        const newUser = await createGoogleAdmin(email)
+
+        return SuccessHandler(SIGNUP_SUCCESS, SUCCESS_STATUS_CODE, res, { newUser })
+
+    }
+    catch (error) {
         next(error);
     }
 }
