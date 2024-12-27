@@ -92,9 +92,6 @@ const allowedOrigins = [
   "http://127.0.0.1:5173",
   "https://iqb-kiosk.netlify.app",
   "https://iqb-final.onrender.com",
-  "https://accounts.google.com",
-  "https://www.googleapis.com",
-  "https://play.google.com"
 ];
 
 // //Use Multiple Cors
