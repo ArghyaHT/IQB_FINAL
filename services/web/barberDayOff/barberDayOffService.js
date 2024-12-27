@@ -33,8 +33,12 @@ return barberDayOff;
 }
 
 
-// export const approveBarberDayOff = async(salonId,barberId) => {
-//     const barber = await BarberDayOff.findOne({salonId, barberId})
+export const approveBarberDayOff = async(salonId,barberId, date) => {
+    const barber = await BarberDayOff.findOneAndUpdate(
+        { salonId, barberId, "dayoff.date": date }, // Match the document and specific date
+        { $set: { "dayoff.$.isApproved": true } }, // Update the specific dayoff entry
+        { new: true }
+    );
 
-
-// }
+return barber
+}

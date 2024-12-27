@@ -7,6 +7,7 @@ export const FORBIDDEN_BARBER_ERROR = "Access forbidden for barber"
 
 
 export const SALON_JOIN_QUEUE_ERROR = "Cant join queue as salon offline"
+export const SALON_KIOSK_ERROR = "Cant join queue as kiosk offline"
 export const NO_BARBERS_AVAILABLE_ERROR = "No barbers available"
 export const BARBERS_UNABLE_QUEUE_ERROR = "The Barber is unable to take queue"
 export const BARBER_OFFLINE_ERROR = "The Barber is unable to take queue"
