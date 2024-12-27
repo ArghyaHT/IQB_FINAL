@@ -42,3 +42,18 @@ export const approveBarberDayOff = async(salonId,barberId, date) => {
 
 return barber
 }
+
+export const getAllBarberDayoffRequests = async(salonId) => {
+
+            // Fetch all records with matching salonId
+            const barberDayOffRequests = await BarberDayOff.find({ salonId });
+
+            // Filter dayoff entries where isApproved is false
+            const filteredRequests = barberDayOffRequests.map((barber) => ({
+                salonId: barber.salonId,
+                barberId: barber.barberId,
+                dayoffRequests: barber.dayoff.filter((dayoff) => !dayoff.isApproved),
+            })).filter((barber) => barber.dayoffRequests.length > 0); // Exclude barbers with no pending day-offs
+    
+            return filteredRequests;
+}

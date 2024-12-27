@@ -3,6 +3,8 @@ import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppoint
 import { getBarberbyId } from "../../services/mobile/barberService.js";
 import { getSalonSettings } from "../../services/mobile/salonSettingsService.js";
 import { generateTimeSlots } from "../../utils/timeSlots.js";
+import { getSalonBySalonId } from "../../services/web/admin/salonService.js"
+
 
 import moment from "moment";
 
@@ -11,6 +13,7 @@ export const createAppointment = async (req, res, next) => {
   try {
     const { salonId, barberId, serviceId, appointmentDate, appointmentNotes, startTime, customerEmail, customerName, customerType, methodUsed } = req.body;
 
+
 // Check if salonId is missing
 if (!salonId) {
   return res.status(201).json({
@@ -18,7 +21,6 @@ if (!salonId) {
     message: 'Please provide the salon ID.',
   });
 }
-
 // Check if barberId is missing
 if (!barberId) {
   return res.status(201).json({
@@ -76,6 +78,17 @@ if (customerName.length < 1 || customerName.length > 20) {
         message: "Invalid Email "
       });
     }
+
+    const salon = await getSalonBySalonId(salonId)
+
+    if(salon.isOnline === false){
+      return res.status(201).json({
+        success: false,
+        message: "The salon is currently offine"
+      });
+    }
+
+    // const barberOnLeave = await
 
     // Fetch barber information
     const barber = await getBarberbyId(barberId);
