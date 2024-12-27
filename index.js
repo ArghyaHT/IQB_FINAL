@@ -31,6 +31,7 @@ import customerRoutesWeb from "./routes/web/customer/customerRoutes.js"
 import bulkMessageAndEmailsRoutes from "./routes/web/bulkMessagesAndEmailRoutes/bulkMesagesAndEmailRoutes.js"
 import reports from "./routes/web/reports/reportsRoutes.js"
 import queuehistoryRoutes from "./routes/web/queue/queueHistoryRoutes.js"
+import barberDayOffRoutes from "./routes/web/barberDayOff/barberDayoffRoutes.js"
 
 // import { setupCronJobs } from "./triggers/cronJobs.js";
 // import { storeCountries } from "./utils/countries.js";
@@ -91,6 +92,9 @@ const allowedOrigins = [
   "http://127.0.0.1:5173",
   "https://iqb-kiosk.netlify.app",
   "https://iqb-final.onrender.com",
+  "https://accounts.google.com",
+  "https://www.googleapis.com",
+  "https://play.google.com"
 ];
 
 // //Use Multiple Cors
@@ -184,6 +188,7 @@ app.use("/api/country", countryRoutes)
 app.use("/api/bulkMessageAndEmails", bulkMessageAndEmailsRoutes)
 app.use("/api/reports", reports)
 app.use("/api/queueHistory", queuehistoryRoutes)
+app.use("/api/barberDayOff", barberDayOffRoutes)
 
 
 // Global Error Handler
