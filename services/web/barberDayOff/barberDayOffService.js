@@ -43,6 +43,7 @@ export const approveBarberDayOff = async(salonId,barberId, date) => {
 return barber
 }
 
+
 export const getAllBarberDayoffRequests = async(salonId) => {
 
             // Fetch all records with matching salonId
