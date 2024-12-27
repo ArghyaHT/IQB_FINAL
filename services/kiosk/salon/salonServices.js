@@ -56,6 +56,12 @@ export const getbokingAvailabilystatus = async(salonId) => {
   return salon?.mobileBookingAvailability ?? false;
 }
 
+export const getKioskAvailabilystatus = async(salonId) => {
+  const salon = await Salon.findOne({salonId}).select("kioskAvailability").lean();
+
+  return salon?.kioskAvailability ?? false;
+}
+
 //GET SALON TIMEZONE 
 export const getSalonTimeZone = async(salonId) => {
   const salonTimeZone = await Salon.findOne({salonId})

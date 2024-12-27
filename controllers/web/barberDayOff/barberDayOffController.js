@@ -1,6 +1,6 @@
 import { getBarberByBarberId } from "../../../services/web/barber/barberService.js"
 import { approveBarberDayOff, createBarberDayOff } from "../../../services/web/barberDayOff/barberDayOffService.js"
-import { barberApprovalStatus } from "../../../utils/emailSender/emailSender.js"
+import { barberLeaveApproval } from "../../../utils/emailSender/emailSender.js"
 
 export const barberDayOff = async(req, res, next) => {
     try{
@@ -123,7 +123,7 @@ export const barberDayOffApprovalByAdmin = async(req, res, next) => {
         `;
     
             try {
-                await barberApprovalStatus(barber.email, emailSubject, emailBody);
+                await barberLeaveApproval(barber.email, emailSubject, emailBody);
             } catch (error) {
                 console.error('Error sending email:', error);
             }
