@@ -31,3 +31,8 @@ export const createBarberDayOff = async(salonId, barberId, date, reason) => {
 
 return barberDayOff;
 }
+
+
+// export const approveBarberDayOff = async(salonId,barber) => {
+//     const approveDayOff = await 
+// }

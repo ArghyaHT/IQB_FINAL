@@ -26,9 +26,22 @@ export const barberDayOff = async(req, res, next) => {
             })
         }
 
-    }catch (error) {
+    }
+    catch (error) {
         next(error);
     }
 }
 
-// export const barberDayOffApprovalByAdmin
+// export const barberDayOffApprovalByAdmin = async(req, res, next) => {
+//     try{
+
+//         const {salonId, barberId} = req.body;
+
+//         const barberDayoffApproved = await 
+
+
+//     }  
+//     catch (error) {
+//         next(error);
+//     }
+// }

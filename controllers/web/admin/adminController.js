@@ -283,27 +283,86 @@ export const googleAdminSignup = async (req, res, next) => {
 }
 
 // Desc: Google Signin
+// export const googleAdminLogin = async (req, res, next) => {
+//     try {
+//         const CLIENT_ID = process.env.CLIENT_ID;
+
+//         const token = req.query.token;
+
+//         if (!token) {
+//             return res.status(404).json({ success: false, message: "Admin token not found" })
+//         }
+
+//         const client = new OAuth2Client(CLIENT_ID);
+
+//         const ticket = await client.verifyIdToken({
+//             idToken: token,
+//             audience: CLIENT_ID,
+//         });
+
+
+//         const payload = ticket.getPayload();
+
+//         const foundUser = await googleLoginAdmin(payload.email)
+
+//         if (!foundUser) {
+//             return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
+//         }
+
+//         const accessToken = jwt.sign(
+//             {
+
+//                 "email": foundUser.email,
+//                 "role": foundUser.role,
+//             },
+//             process.env.JWT_ADMIN_ACCESS_SECRET,
+//             { expiresIn: '1d' }
+//         )
+
+
+//         res.cookie('AdminToken', accessToken, {
+//             httpOnly: true, //accessible only by web server 
+//             secure: true, //https
+//             sameSite: 'None', //cross-site cookie 
+//             maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
+//         })
+
+//         console.log(accessToken)
+
+//         return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+//             accessToken,
+//             foundUser
+//         })
+//     } catch (error) {
+//         next(error);
+//     }
+// }
+
 export const googleAdminLogin = async (req, res, next) => {
     try {
-        const CLIENT_ID = process.env.CLIENT_ID;
+        // const CLIENT_ID = process.env.CLIENT_ID;
 
-        const token = req.query.token;
+        // const token = req.query.token;
 
-        if (!token) {
-            return res.status(404).json({ success: false, message: "Admin token not found" })
-        }
+        // if (!token) {
+        //     return res.status(404).json({ success: false, message: "Admin token not found" })
+        // }
 
-        const client = new OAuth2Client(CLIENT_ID);
+        // const client = new OAuth2Client(CLIENT_ID);
 
-        const ticket = await client.verifyIdToken({
-            idToken: token,
-            audience: CLIENT_ID,
-        });
+        // const ticket = await client.verifyIdToken({
+        //     idToken: token,
+        //     audience: CLIENT_ID,
+        // });
 
 
-        const payload = ticket.getPayload();
+        // const payload = ticket.getPayload();
 
-        const foundUser = await googleLoginAdmin(payload.email)
+        // const foundUser = await googleLoginAdmin(payload.email)
+
+        const email = req.body.email
+
+        const foundUser = await googleLoginAdmin(email)
 
         if (!foundUser) {
             return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
