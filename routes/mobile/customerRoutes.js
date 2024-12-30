@@ -1,5 +1,5 @@
 import express from "express";
-import { changeDefaultSalonIdOfCustomer, checkEmail, customerConnectSalon, customerDashboard, customerDisconnectSalon, customerFavoriteSalon, deleteCustomerFavoriteSalon, deleteCustomerProfilePicture, deleteSingleCustomer, forgetPassword, getAllAppointmentsByCustomer, getAllCustomerFavoriteSalons, getAllCustomers, getAllSalonsByCustomer, getCustomerDetails, googleCustomerLogin, googleCustomerSignup, matchVerificationCode, resetPassword, sendBulkEmailToCustomers, sendMailToCustomer, signIn, signUp, updateCustomer, updateCustomerProfilePic, uploadCustomerprofilePic, verifyPasswordResetCode } from "../../controllers/mobile/customerController.js";
+import { changeCustomerEmailVerifiedStatus, changeCustomerMobileVerifiedStatus, changeDefaultSalonIdOfCustomer, checkEmail, customerConnectSalon, customerDashboard, customerDisconnectSalon, customerFavoriteSalon, deleteCustomerFavoriteSalon, deleteCustomerProfilePicture, deleteSingleCustomer, forgetPassword, getAllAppointmentsByCustomer, getAllCustomerFavoriteSalons, getAllCustomers, getAllSalonsByCustomer, getCustomerDetails, googleCustomerLogin, googleCustomerSignup, matchVerificationCode, resetPassword, sendBulkEmailToCustomers, sendMailToCustomer, sendVerificationCodeForCustomerEmail, sendVerificationCodeForCustomerMobile, signIn, signUp, updateCustomer, updateCustomerProfilePic, uploadCustomerprofilePic, verifyPasswordResetCode } from "../../controllers/mobile/customerController.js";
 // import { CustomerLoggedIn } from "../middlewares/loggedInMiddlewares.js";
 // import { verifyRefreshCustomerToken } from "../middlewares/VerifyRefreshCustomerToken.js";
 
@@ -30,6 +30,19 @@ router.route("/googleCustomerSignup").post(googleCustomerSignup)
 
 //Google SignIn
 router.route("/googleCustomerSignIn").post(googleCustomerLogin)
+
+//Send Mail to Admin for Verification
+router.route("/sendVerificationCodeForCustomerEmail").post(sendVerificationCodeForCustomerEmail)
+
+//Change EmailVerifiedStatus
+router.route("/changeCustomerEmailVerifiedStatus").post(changeCustomerEmailVerifiedStatus)
+
+//Send Message to Admin for Verification
+router.route("/sendVerificationCodeForCustomerMobile").post(sendVerificationCodeForCustomerMobile)
+
+//Change MobileVerifiedStatus
+router.route("/changeCustomerMobileVerifiedStatus").post(changeCustomerMobileVerifiedStatus)
+
 
 
 // // //Save Password

@@ -260,6 +260,7 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
         else {
 
             updatedSalon.mobileBookingAvailability = false;
+            updatedSalon.kioskAvailability = false
             await updatedSalon.save();
 
             await changeBarberStatusAtSalonOffline(salonId);
