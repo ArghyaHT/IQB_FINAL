@@ -9,14 +9,11 @@ const barberDayoffSchema = new mongoose.Schema({
         type: Number,
     },
     dayoff: [{
-        date:{
-            type: Date
+        fromDate: {
+            type: Date,
         },
-        isApproved:{
-            type: Boolean,
-        },
-        reason:{
-            type: String,
+        toDate: {
+            type: Date,
         }
     }]
 

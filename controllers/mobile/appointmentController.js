@@ -7,6 +7,8 @@ import { getSalonBySalonId } from "../../services/web/admin/salonService.js"
 
 
 import moment from "moment";
+import { checkAppointmentDate } from "../../services/web/barberDayOff/barberDayOffService.js";
+import { getAppointmentbySalonId } from "../../services/web/appointments/appointmentsService.js";
 
 //Creating Appointment
 export const createAppointment = async (req, res, next) => {
@@ -88,11 +90,21 @@ if (customerName.length < 1 || customerName.length > 20) {
       });
     }
 
+    const checkAppointments = await checkAppointmentDate(salonId, barberId, appointmentDate) 
+
+    if(checkAppointments){
+      res.status(201).json({
+        success: true,
+        message: "The barber is off duty"
+      });
+
+    }
+
     // const barberOnLeave = await
 
     // Fetch barber information
     const barber = await getBarberbyId(barberId);
-
+    
     // Calculate total barberServiceEWT for all provided serviceIds
     let totalServiceEWT = 0;
     let serviceIds = [];
@@ -129,7 +141,7 @@ if (customerName.length < 1 || customerName.length > 20) {
     const endTimeMoment = startTimeMoment.clone().add(hours, 'hours').add(minutes, 'minutes');
     const endTime = endTimeMoment.format('HH:mm');
 
-    const existingAppointmentList = await getAppointmentbyId(salonId);// make this call in appointmentService
+    const existingAppointmentList = await getAppointmentbySalonId(salonId);// make this call in appointmentService
     console.log(existingAppointmentList, "appointment list")
     const newAppointment = {
       barberId,
@@ -159,41 +171,94 @@ if (customerName.length < 1 || customerName.length > 20) {
         response: existingAppointmentList,
       });
 
-      // const admin = await getAdminByEmail(salonId)
-      // console.log(admin.email)
-      // const adminEmail = admin.email;
+    //   const adminEmail = await Admin.findOne({ salonId }).select("email")
 
-      // // Send email for admin, barber, and customer
-      // await sendAppointmentsEmailAdmin(adminEmail, startTime, customerName)
+    //   // Prepare email data for admin, barber, and customer
+    //   const adminEmailData = {
+    //     email: adminEmail, // Replace with the admin's email address
+    //     subject: 'New Appointment Created',
+    //     html: `
+    //     <h2>Hello Admin!</h2>
+    //     <p>A new appointment has been created at ${startTime} by ${customerName}.</p>
+    //     <!-- Add more details here -->
+    //   `,
+    //   };
 
-      // await sendAppointmentsEmailBarber(barber.email, barber.name, startTime)
+    //   const barberEmailData = {
+    //     email: barber.email, // Replace with the barber's email address
+    //     subject: 'New Appointment Created',
+    //     html: `
+    //     <h2>Hello ${barber.name}!</h2>
+    //     <p>You have a new appointment scheduled at ${startTime}.</p>
+    //     <!-- Add more details here -->
+    //   `,
+    //   };
 
-      // await sendAppointmentsEmailCustomer(customerEmail, customerName, startTime)
+    //   const customerEmailData = {
+    //     email: customerEmail, // Replace with the customer's email address
+    //     subject: 'Appointment Confirmation',
+    //     html: `
+    //     <h2>Hello ${customerName}!</h2>
+    //     <p>Your appointment has been confirmed at ${startTime}.</p>
+    //     <!-- Add more details here -->
+    //   `,
+    //   };
 
+    //   // Combine email data objects into an array
+    //   const emailDataArray = [adminEmailData, barberEmailData, customerEmailData];
+
+    //   // Send emails to admin, barber, and customer
+    //   sendAppointmentsEmail(emailDataArray);
     } else {
-      const newAppointmentData = await createNewAppointment(salonId, newAppointment);
-
+      const newAppointmentData = await createNewAppointment(salonId, newAppointment)
       const savedAppointment = await newAppointmentData.save();
       res.status(200).json({
         success: true,
         message: "Appointment Confirmed",
         response: savedAppointment,
       });
-      // const admin = await getAdminByEmail(salonId)
-      // console.log(admin.email)
-      // const adminEmail = admin.email;
+    //   const adminEmail = await Admin.findOne({ salonId }).select("email")
 
-      //  // Send email for admin, barber, and customer
-      //  await sendAppointmentsEmailAdmin(adminEmail, startTime, customerName);
 
-      //  await sendAppointmentsEmailBarber(barber.email, barber.name, startTime);
+    //   // Prepare email data for admin, barber, and customer
+    //   const adminEmailData = {
+    //     email: adminEmail, // Replace with the admin's email address
+    //     subject: 'New Appointment Created',
+    //     html: `
+    //           <h2>Hello Admin!</h2>
+    //           <p>A new appointment has been created at ${startTime} by ${customerName}.</p>
+    //           <!-- Add more details here -->
+    //         `,
+    //   };
 
-      //  await sendAppointmentsEmailCustomer(customerEmail, customerName, startTime);
+    //   const barberEmailData = {
+    //     email: barber.email, // Replace with the barber's email address
+    //     subject: 'New Appointment Created',
+    //     html: `
+    //     <h2>Hello ${barber.name}!</h2>
+    //           <p>You have a new appointment scheduled at ${startTime}.</p>
+    //           <!-- Add more details here -->
+    //         `,
+    //   };
+
+    //   const customerEmailData = {
+    //     email: customerEmail, // Replace with the customer's email address
+    //     subject: 'Appointment Confirmation',
+    //     html: `
+    //     <h2>Hello ${customerName}!</h2>
+    //           <p>Your appointment has been confirmed at ${startTime}.</p>
+    //           <!-- Add more details here -->
+    //         `,
+    //   };
+    //   // Combine email data objects into an array
+    //   const emailDataArray = [adminEmailData, barberEmailData, customerEmailData];
+
+    //   // Send emails to admin, barber, and customer
+    //   sendAppointmentsEmail(emailDataArray);
 
     }
 
   } catch (error) {
-    //console.log(error);
     next(error);
   }
 };

@@ -12,6 +12,7 @@ import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/C
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import {SuccessHandler} from "../../../middlewares/SuccessHandler.js"
 import { SALON_NOT_FOUND_ERROR } from "../../../constants/web/SalonConstants.js";
+import { checkAppointmentDate } from "../../../services/web/barberDayOff/barberDayOffService.js";
 
 
 //DESC:CREATE APPOINTMENT ====================
@@ -35,6 +36,15 @@ export const createAppointment = async (req, res, next) => {
         //     message: "Invalid Email "
         //   });
         // }
+
+        const checkAppointments = await checkAppointmentDate(salonId, barberId, appointmentDate) 
+
+        if(checkAppointments){
+          return res.status(201).json({
+            success: true,
+            message: "The barber is off duty"
+          });
+        }
     
         // Fetch barber information
         const barber = await getBarberbyId(barberId);
@@ -76,7 +86,6 @@ export const createAppointment = async (req, res, next) => {
         const endTime = endTimeMoment.format('HH:mm');
     
         const existingAppointmentList = await getAppointmentbySalonId(salonId);// make this call in appointmentService
-        console.log(existingAppointmentList, "appointment list")
         const newAppointment = {
           barberId,
           services: serviceIds.map((id, index) => ({
@@ -99,7 +108,7 @@ export const createAppointment = async (req, res, next) => {
         if (existingAppointmentList) {
           existingAppointmentList.appointmentList.push(newAppointment);
           await existingAppointmentList.save();
-          res.status(200).json({
+          return res.status(200).json({
             success: true,
             message: "Appointment Confirmed",
             response: existingAppointmentList,
