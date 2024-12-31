@@ -93,7 +93,7 @@ if (customerName.length < 1 || customerName.length > 20) {
     const checkAppointments = await checkAppointmentDate(salonId, barberId, appointmentDate) 
 
     if(checkAppointments){
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: "The barber is off duty"
       });
@@ -165,7 +165,7 @@ if (customerName.length < 1 || customerName.length > 20) {
     if (existingAppointmentList) {
       existingAppointmentList.appointmentList.push(newAppointment);
       await existingAppointmentList.save();
-      res.status(200).json({
+     return res.status(200).json({
         success: true,
         message: "Appointment Confirmed",
         response: existingAppointmentList,
@@ -212,7 +212,7 @@ if (customerName.length < 1 || customerName.length > 20) {
     } else {
       const newAppointmentData = await createNewAppointment(salonId, newAppointment)
       const savedAppointment = await newAppointmentData.save();
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         message: "Appointment Confirmed",
         response: savedAppointment,
