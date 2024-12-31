@@ -94,10 +94,9 @@ if (customerName.length < 1 || customerName.length > 20) {
 
     if(checkAppointments){
       return res.status(201).json({
-        success: true,
+        success: false,
         message: "The barber is off duty"
       });
-
     }
 
     // const barberOnLeave = await
@@ -273,6 +272,15 @@ export const editAppointment = async (req, res, next) => {
       return res.status(201).json({
         success: false,
         message: 'Please fill all the fields',
+      });
+    }
+
+    const checkAppointments = await checkAppointmentDate(salonId, barberId, appointmentDate) 
+
+    if(checkAppointments){
+      return res.status(201).json({
+        success: false,
+        message: "The barber is off duty"
       });
     }
 
