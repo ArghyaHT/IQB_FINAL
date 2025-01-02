@@ -70,6 +70,7 @@ export const loginKiosk = async (req, res, next) => {
                 return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
             }
 
+            
             const adminKioskToken = jwt.sign(
                 {
                     "email": foundUser.email,

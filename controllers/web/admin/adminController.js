@@ -117,15 +117,15 @@ export const loginAdmin = async (req, res, next) => {
                 "role": foundUser.role
             },
             process.env.JWT_ADMIN_ACCESS_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '1m' }
         )
 
-        res.cookie('AdminToken', accessToken, {
-            httpOnly: true, //accessible only by web server 
-            secure: true, //https
-            sameSite: 'None', //cross-site cookie 
-            maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
-        })
+        // res.cookie('AdminToken', accessToken, {
+        //     httpOnly: true, //accessible only by web server 
+        //     secure: true, //https
+        //     sameSite: 'None', //cross-site cookie 
+        //     maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
+        // })
 
         return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
             accessToken,
@@ -141,21 +141,30 @@ export const loginAdmin = async (req, res, next) => {
 // Desc: Logout Admin
 export const handleLogoutAdmin = async (req, res, next) => {
     try {
-        const cookies = req.cookies
+        // const cookies = req.cookies
 
-        if (!cookies?.AdminToken) {
-            return res.status(404).json({
-                success: false,
-                message: "Unauthorize Admin"
-            })
-        }
+        // if (!cookies?.AdminToken) {
+        //     return res.status(404).json({
+        //         success: false,
+        //         message: "Unauthorize Admin"
+        //     })
+        // }
 
 
-        res.clearCookie('AdminToken', {
-            httpOnly: true,
-            sameSite: 'None',
-            secure: true
-        })
+        // res.clearCookie('AdminToken', {
+        //     httpOnly: true,
+        //     sameSite: 'None',
+        //     secure: true
+        // })
+
+         // Check if adminToken is present in request body
+         const token = req.body.token;
+
+         // Clear adminToken from request body if present
+         if (token) {
+             delete req.body.token; // Remove adminToken from request body
+             // Perform any additional action if needed (e.g., logging out from another system)
+         }
 
         return SuccessHandler(LOGOUT_SUCCESS, SUCCESS_STATUS_CODE, res)
 
@@ -470,15 +479,15 @@ export const updateAdminInfo = async (req, res, next) => {
                 "role": foundUser.role,
             },
             process.env.JWT_ADMIN_ACCESS_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '1m' }
         )
 
-        res.cookie('AdminToken', accessToken, {
-            httpOnly: true, //accessible only by web server 
-            secure: true, //https
-            sameSite: 'None', //cross-site cookie 
-            maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
-        })
+        // res.cookie('AdminToken', accessToken, {
+        //     httpOnly: true, //accessible only by web server 
+        //     secure: true, //https
+        //     sameSite: 'None', //cross-site cookie 
+        //     maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
+        // })
 
 
         return SuccessHandler(UPDATE_ADMIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
@@ -490,7 +499,6 @@ export const updateAdminInfo = async (req, res, next) => {
         next(error);
     }
 }
-
 
 
 // Desc: Update Account Details

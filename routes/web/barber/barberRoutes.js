@@ -14,7 +14,7 @@ const router = express.Router();
 router.route("/register").post(registerController)
 router.route("/login").post(loginController)
 router.route('/logout').post(handleLogout)
-router.route("/barberloggedin").get(BarberLoggedIn)
+router.route("/barberloggedin").get(verifyRefreshTokenBarber,BarberLoggedIn)
 router.route("/updateBarberInfo").put(updateBarberInfo)
 
 router.route("/googleBarberSignUp").post(googleBarberSignup)

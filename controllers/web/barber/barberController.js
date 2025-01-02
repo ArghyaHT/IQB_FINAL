@@ -139,15 +139,15 @@ export const loginController = async (req, res, next) => {
                 "role": foundUser.role
             },
             process.env.JWT_BARBER_ACCESS_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '1m' }
         )
 
-        res.cookie('BarberToken', accessToken, {
-            httpOnly: true, //accessible only by web server 
-            secure: true, //https
-            sameSite: 'None', //cross-site cookie 
-            maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
-        })
+        // res.cookie('BarberToken', accessToken, {
+        //     httpOnly: true, //accessible only by web server 
+        //     secure: true, //https
+        //     sameSite: 'None', //cross-site cookie 
+        //     maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
+        // })
 
         return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
             accessToken,
@@ -492,15 +492,15 @@ export const updateBarberInfo = async (req, res, next) => {
                 "role": foundUser.role,
             },
             process.env.JWT_BARBER_ACCESS_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '1m' }
         )
 
-        res.cookie('BarberToken', accessToken, {
-            httpOnly: true, //accessible only by web server 
-            secure: true, //https
-            sameSite: 'None', //cross-site cookie 
-            maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
-        })
+        // res.cookie('BarberToken', accessToken, {
+        //     httpOnly: true, //accessible only by web server 
+        //     secure: true, //https
+        //     sameSite: 'None', //cross-site cookie 
+        //     maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
+        // })
 
 
         return SuccessHandler(UPDATE_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, {

@@ -104,7 +104,7 @@ app.use(cors({
       callback(new Error("Not allowed by CORS")); // Deny the request
     }
   },
-  credentials: true
+  // credentials: true
 }));
 
 // // Initialize Firebase Admin SDK
