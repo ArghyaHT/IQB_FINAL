@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken"
 import { findAdminByEmailandRole } from "../../services/web/admin/adminService.js";
 import { findBarberByEmailAndRole } from "../../services/web/barber/barberService.js";
+import { getSalonBySalonId } from "../../services/web/admin/salonService.js";
 
 //COMMON MIDDLEWARES FOR ALL ==========================
 export const handleProtectedRoute = async (req, res, next) => {
@@ -87,9 +88,12 @@ export const BarberLoggedIn = async (req, res, next) => {
 
         const loggedinUser = await findBarberByEmailAndRole(barberEmail)
 
+        const salon = await getSalonBySalonId(loggedinUser.salonId)
+
         return res.status(201).json({
           success: true,
-          user: [loggedinUser]
+          user: [loggedinUser],
+          currency: salon.currency
         })
 
       }
