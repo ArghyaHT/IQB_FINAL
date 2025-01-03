@@ -139,7 +139,7 @@ export const loginController = async (req, res, next) => {
                 "role": foundUser.role
             },
             process.env.JWT_BARBER_ACCESS_SECRET,
-            { expiresIn: '1m' }
+            { expiresIn: '1d' }
         )
 
         // res.cookie('BarberToken', accessToken, {
@@ -492,7 +492,7 @@ export const updateBarberInfo = async (req, res, next) => {
                 "role": foundUser.role,
             },
             process.env.JWT_BARBER_ACCESS_SECRET,
-            { expiresIn: '1m' }
+            { expiresIn: '1d' }
         )
 
         // res.cookie('BarberToken', accessToken, {

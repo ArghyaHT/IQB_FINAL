@@ -42,16 +42,28 @@ export const verifyRefreshTokenAdmin = (req, res, next) => {
     // // accessToken aschena atar dutoi way ache either user page refresh koreche tai access token uregech or
     // // refresh token expire kore geche tai access token generate hochena
     try {
-        const accessToken = req.body.accessToken;
+        // const accessToken = req.body.accessToken;
 
-        if (!accessToken) {
+        // if (!accessToken) {
+        //     return res.status(401).json({
+        //         success: false,
+        //         message: "UnAuthorized Admin"
+        //     })
+        // }
+
+        // const decoded = jwtDecode(accessToken);
+
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({
                 success: false,
-                message: "UnAuthorized Admin"
-            })
+                message: 'Unauthorized Admin: Missing or Invalid Authorization Header',
+            });
         }
 
-        const decoded = jwtDecode(accessToken);
+        // Extract the token from the header
+        const accessToken = authHeader.split(' ')[1];
 
         // console.log("JWT DECODED TOKEN ", decoded)
         // here decode the token using jwt-decode . after decoding you will get role 

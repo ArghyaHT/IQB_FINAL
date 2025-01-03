@@ -117,7 +117,7 @@ export const loginAdmin = async (req, res, next) => {
                 "role": foundUser.role
             },
             process.env.JWT_ADMIN_ACCESS_SECRET,
-            { expiresIn: '1m' }
+            { expiresIn: '1d' }
         )
 
         // res.cookie('AdminToken', accessToken, {
@@ -479,7 +479,7 @@ export const updateAdminInfo = async (req, res, next) => {
                 "role": foundUser.role,
             },
             process.env.JWT_ADMIN_ACCESS_SECRET,
-            { expiresIn: '1m' }
+            { expiresIn: '1d' }
         )
 
         // res.cookie('AdminToken', accessToken, {

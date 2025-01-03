@@ -37,16 +37,29 @@ import { jwtDecode } from "jwt-decode";
 
 export const verifyRefreshTokenBarber = (req, res, next) => {
     try {
-        const accessToken = req.body.accessToken;
+        // const accessToken = req.body.accessToken;
 
-        if (!accessToken) {
+        // if (!accessToken) {
+        //     return res.status(401).json({
+        //         success: false,
+        //         message: "UnAuthorized Barber"
+        //     })
+        // }
+
+        // const decoded = jwtDecode(accessToken);
+
+
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({
                 success: false,
-                message: "UnAuthorized Barber"
-            })
+                message: 'Unauthorized Barber: Missing or Invalid Authorization Header',
+            });
         }
 
-        const decoded = jwtDecode(accessToken);
+        // Extract the token from the header
+        const accessToken = authHeader.split(' ')[1];
 
         // console.log("JWT DECODED TOKEN ", decoded)
 
