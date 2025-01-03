@@ -98,14 +98,16 @@ export const findSalonSetingsBySalonId = async(salonId) => {
 }
 
 
-export const saveNewSalonSettings = async (salonId, startTime, endTime, intervalInMinutes) => {
+export const saveNewSalonSettings = async (salonId, startTime, endTime, intervalInMinutes,salonOffDays,appointmentAdvanceDays) => {
   const salonSettings = await SalonSettings.create({
       salonId,
       appointmentSettings: {
           appointmentStartTime: startTime,
           appointmentEndTime: endTime,
-          intervalInMinutes: intervalInMinutes
-      }
+          intervalInMinutes: intervalInMinutes,
+      },
+      salonOffDays: salonOffDays,
+      appointmentAdvanceDays: appointmentAdvanceDays
   });
   await salonSettings.save();
   
@@ -125,5 +127,14 @@ export const setDragAdvertisemnts = async(salonId, advertisements) => {
 
     // Return the updated document
     return updatedSalonSettings;
+}
+
+export const matchSalonOffDays = async(salonId, day) =>{
+  // Find a record where the day matches the appointmentDays array
+  const record = await SalonSettings.findOne({
+      salonId,
+      salonOffDays: { $in: [day] }, 
+      });
+  return record;
 }
 

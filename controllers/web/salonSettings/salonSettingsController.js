@@ -1,5 +1,5 @@
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
-import { INTERVAL_MINUTES__ERROR, SALON_SETTINGS_ADD_SUCCESS, SALON_SETTINGS_EMPTY_ERROR, SALON_SETTINGS_ENDTIME_EMPTY_ERROR, SALON_SETTINGS_NOT_FOUND_ERROR, SALON_SETTINGS_STARTTIME_EMPTY_ERROR, SALON_SETTINGS_UPDATE_SUCCESS, START_END_TIME_EQUAL_ERROR, START_END_TIME_LATER_ERROR } from "../../../constants/web/SalonSettingsConstants.js";
+import { APPOINTMENT_ADVANCE_DAYS_ERROR, INTERVAL_MINUTES__ERROR, SALON_DAYOFFS_ERROR, SALON_SETTINGS_ADD_SUCCESS, SALON_SETTINGS_EMPTY_ERROR, SALON_SETTINGS_ENDTIME_EMPTY_ERROR, SALON_SETTINGS_NOT_FOUND_ERROR, SALON_SETTINGS_STARTTIME_EMPTY_ERROR, SALON_SETTINGS_UPDATE_SUCCESS, START_END_TIME_EQUAL_ERROR, START_END_TIME_LATER_ERROR } from "../../../constants/web/SalonSettingsConstants.js";
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { findSalonSetingsBySalonId, saveNewSalonSettings } from "../../../services/web/salonSettings/salonSettingsService.js";
@@ -25,7 +25,7 @@ export const getSalonSettingsBySalonId = async (req, res, next) => {
 //DESC: UPDATE SALON SETTINGS BY SALON ID ================
 export const updateSalonSettings = async (req, res, next) => {
     try {
-        const { salonId, appointmentSettings } = req.body;
+        const { salonId, appointmentSettings, salonOffDays, appointmentAdvanceDays } = req.body;
         const { startTime, endTime, intervalInMinutes } = appointmentSettings;
 
         if(!startTime && !endTime && !intervalInMinutes){
@@ -41,6 +41,16 @@ export const updateSalonSettings = async (req, res, next) => {
         if(!endTime){
             return ErrorHandler(SALON_SETTINGS_ENDTIME_EMPTY_ERROR, ERROR_STATUS_CODE, res)
     
+        }
+
+        if(!salonOffDays){
+            return ErrorHandler(SALON_DAYOFFS_ERROR, ERROR_STATUS_CODE, res)
+
+        }
+
+        if(!appointmentAdvanceDays){
+            return ErrorHandler(APPOINTMENT_ADVANCE_DAYS_ERROR, ERROR_STATUS_CODE, res)
+
         }
         
         if(startTime === endTime){
@@ -67,6 +77,8 @@ export const updateSalonSettings = async (req, res, next) => {
                     existingSalonSettings.appointmentSettings.appointmentStartTime = startTime;
                     existingSalonSettings.appointmentSettings.appointmentEndTime = endTime;
                     existingSalonSettings.appointmentSettings.intervalInMinutes = intervalInMinutes;
+                    existingSalonSettings.salonOffDays = salonOffDays;
+                    existingSalonSettings.appointmentAdvanceDays = appointmentAdvanceDays
                 }
 
                 // Save the updated SalonSettings to the database
@@ -76,7 +88,7 @@ export const updateSalonSettings = async (req, res, next) => {
 
             }
             else {
-                const newSalonSettings = await saveNewSalonSettings(salonId, startTime, endTime, intervalInMinutes);
+                const newSalonSettings = await saveNewSalonSettings(salonId, startTime, endTime, intervalInMinutes, salonOffDays, appointmentAdvanceDays);
 
                 return SuccessHandler(SALON_SETTINGS_ADD_SUCCESS, SUCCESS_STATUS_CODE, res, {response: newSalonSettings})
 

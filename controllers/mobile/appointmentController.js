@@ -10,6 +10,7 @@ import moment from "moment";
 import { checkAppointmentDate } from "../../services/web/barberDayOff/barberDayOffService.js";
 import { getAppointmentbySalonId } from "../../services/web/appointments/appointmentsService.js";
 import { matchAppointmentDays } from "../../services/web/barberAppointmentDays/barberAppointmentDaysService.js";
+import { matchSalonOffDays } from "../../services/web/salonSettings/salonSettingsService.js";
 
 //Creating Appointment
 export const createAppointment = async (req, res, next) => {
@@ -101,6 +102,17 @@ export const createAppointment = async (req, res, next) => {
     // }
 
     const day = moment(appointmentDate).format('dddd');
+
+    const salonDayOff = await matchSalonOffDays(salonId, day)
+
+    if(salonDayOff){
+      return res.status(201).json({
+        success: false,
+        message: "Salon closed today",
+      });
+    }
+
+
     const match = await matchAppointmentDays(salonId, barberId, day);
 
     if (match) {
@@ -293,6 +305,16 @@ export const editAppointment = async (req, res, next) => {
     // }
 
     const day = moment(appointmentDate).format('dddd');
+
+    const salonDayOff = await matchSalonOffDays(salonId, day)
+
+    if(salonDayOff){
+      return res.status(201).json({
+        success: false,
+        message: "Salon closed today",
+      });
+    }
+    
     const match = await matchAppointmentDays(salonId, barberId, day);
 
     if (match) {
