@@ -242,6 +242,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       products: products,
     };
 
+    console.log("Working A")
     // Convert amount based on currency
     if (session.currency !== 'jpy' && session.currency !== 'krw') {
       paymentData.amount = paymentData.amount / 100; // Convert to main currency unit
@@ -275,6 +276,8 @@ app.use(bodyParser.raw({ type: "application/json" })); // For Stripe webhooks
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
     const productsArray = req.body.products;
+
+    console.log("Working B")
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"], // Types of card (Visa, MasterCard, etc.)
