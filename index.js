@@ -104,8 +104,72 @@ app.use(cors({
   // credentials: true
 }));
 
-app.use(express.json());
-app.use(bodyParser.raw({ type: "application/json" }));
+
+//============================================Stripe=========================================//
+const stripe = Stripe("sk_test_51QdUcgJJY2GyQI9MG1P9ZNELM63wZn7fEpDw2x8BfnSLsjUA7amARck1wCu63ZbX4s02hfKOS7iB0KTt49MY3m8w00wi9WMXMi")
+
+const endpointSecret = "whsec_DHdgxBkr9Q3LxPngNylgMs00eTyZXxqi"; // Replace with your actual webhook secret
+
+app.post('/api/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
+  const sig = request.headers['stripe-signature'];
+  let event;
+
+  try {
+    // Construct the event using the raw body and the signature header
+    event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err.message);
+    return response.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+
+    const products = lineItems.data.map((item) => ({
+      name: item.description,
+      quantity: item.quantity,
+      price: item.amount_total / 100, // Amount in dollars (converted from cents)
+      currency: session.currency,
+    }));
+
+    // Save payment details to MongoDB
+    const paymentData = {
+      customerEmail: session.customer_details.email,
+      customerName: session.customer_details.name,
+      amount: session.amount_total, // Convert from cents to dollars
+      currency: session.currency,
+      paymentIntentId: session.payment_intent,
+      status: session.payment_status,
+      products: products,
+    };
+
+    console.log("Working A")
+    // Convert amount based on currency
+    if (session.currency !== 'jpy' && session.currency !== 'krw') {
+      paymentData.amount = paymentData.amount / 100; // Convert to main currency unit
+    } else {
+      // For JPY, KRW or other currencies that don't need division by 100
+      paymentData.amount = paymentData.amount; // Keep it as is
+    }
+
+    SalonPayments.create(paymentData)
+      .then(() => console.log("Payment saved to database"))
+      .catch((err) => console.error("Error saving payment to database:", err));
+
+  }
+
+  if (event.type === 'payment_intent.payment_failed') {
+    const paymentIntent = event.data.object;
+    console.log("Payment Failed ", paymentIntent)
+    // It can happen example:
+    // If user card has insufficient balance.
+    // Here i can send a email to the user that he/she has insufficient balance for that the payment is not completed.
+  }
+  response.status(200).json({ received: true });
+});
+
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -202,74 +266,11 @@ app.use("/api/barberAppointmentDays", barberAppointmentDays)
 // app.use('/api/salonPayments', salonPaymentRoutes);
 
 
-//============================================Stripe=========================================//
-const stripe = Stripe("sk_test_51QdUcgJJY2GyQI9MG1P9ZNELM63wZn7fEpDw2x8BfnSLsjUA7amARck1wCu63ZbX4s02hfKOS7iB0KTt49MY3m8w00wi9WMXMi")
-
-const endpointSecret = "whsec_DHdgxBkr9Q3LxPngNylgMs00eTyZXxqi"; // Replace with your actual webhook secret
-
-app.post('/api/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
-  const sig = request.headers['stripe-signature'];
-  let event;
-
-  try {
-    // Construct the event using the raw body and the signature header
-    event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
-  } catch (err) {
-    console.error('Webhook signature verification failed:', err.message);
-    return response.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object;
-
-    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-
-    const products = lineItems.data.map((item) => ({
-      name: item.description,
-      quantity: item.quantity,
-      price: item.amount_total / 100, // Amount in dollars (converted from cents)
-      currency: session.currency,
-    }));
-
-    // Save payment details to MongoDB
-    const paymentData = {
-      customerEmail: session.customer_details.email,
-      customerName: session.customer_details.name,
-      amount: session.amount_total, // Convert from cents to dollars
-      currency: session.currency,
-      paymentIntentId: session.payment_intent,
-      status: session.payment_status,
-      products: products,
-    };
-
-    console.log("Working A")
-    // Convert amount based on currency
-    if (session.currency !== 'jpy' && session.currency !== 'krw') {
-      paymentData.amount = paymentData.amount / 100; // Convert to main currency unit
-    } else {
-      // For JPY, KRW or other currencies that don't need division by 100
-      paymentData.amount = paymentData.amount; // Keep it as is
-    }
-
-    SalonPayments.create(paymentData)
-      .then(() => console.log("Payment saved to database"))
-      .catch((err) => console.error("Error saving payment to database:", err));
-
-  }
-
-  if (event.type === 'payment_intent.payment_failed') {
-    const paymentIntent = event.data.object;
-    console.log("Payment Failed ", paymentIntent)
-    // It can happen example:
-    // If user card has insufficient balance.
-    // Here i can send a email to the user that he/she has insufficient balance for that the payment is not completed.
-  }
-  response.status(200).json({ received: true });
-});
 
 
-app.use(express.json());
-app.use(bodyParser.raw({ type: "application/json" })); // For Stripe webhooks
+
+// app.use(express.json());
+// app.use(bodyParser.raw({ type: "application/json" })); // For Stripe webhooks
 
 
 // Create Checkout Session Endpoint
