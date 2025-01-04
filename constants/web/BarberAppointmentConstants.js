@@ -8,3 +8,6 @@ export const BARBER_APPOINTMENT_DAYS_UPDATE_SUCCESS = "Appointment days updated 
 
 export const BARBER_APPOINTMENT_DAYS_ADD_SUCCESS = "Appointment days added successfully."
 
+export const BARBER_APPOINTMENT_RETRIEVE_SUCCESS = "Appointment days retrieved successfully."
+
+

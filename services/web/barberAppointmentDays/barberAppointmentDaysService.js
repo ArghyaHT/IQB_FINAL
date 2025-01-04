@@ -29,3 +29,10 @@ export const matchAppointmentDays = async(salonId, barberId, day) =>{
     return record;
 }
 
+export const barberAppointmentDays = async(salonId, barberId) => {
+    const record = await BarberAppointmentDays.findOne({
+        salonId, barberId
+    })
+    return record;
+}
+

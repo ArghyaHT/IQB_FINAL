@@ -314,7 +314,7 @@ export const editAppointment = async (req, res, next) => {
         message: "Salon closed today",
       });
     }
-    
+
     const match = await matchAppointmentDays(salonId, barberId, day);
 
     if (match) {
@@ -419,7 +419,6 @@ export const deleteAppointment = async (req, res, next) => {
       message: 'Appointment deleted successfully',
     });
   } catch (error) {
-    //console.log(error);
     next(error);
   }
 };
