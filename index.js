@@ -289,8 +289,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
         },
         quantity: item.unit,
       })),
-      success_url: "productstripe.netlify.app/success",
-      cancel_url: "productstripe.netlify.app/cancel",
+      success_url: "https://productstripe.netlify.app/success",
+      cancel_url: "https://productstripe.netlify.app/cancel",
     });
 
     res.status(200).json({
