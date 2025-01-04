@@ -39,7 +39,6 @@ export const getBarberAppointmentDays = async (req, res, next) => {
 
         const getbarberAppointmentDays = await barberAppointmentDays(salonId, barberId)
 
-        console.log(getbarberAppointmentDays)
         return SuccessHandler(BARBER_APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: getbarberAppointmentDays })
 
     }
