@@ -410,7 +410,7 @@ export const googleCustomerSignup = async (req, res, next) => {
 
         const token = req.query.token;
 
-        console.log(token)
+        // console.log(token)
 
         if (!token) {
             return res.status(201).json({

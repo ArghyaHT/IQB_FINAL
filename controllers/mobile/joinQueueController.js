@@ -8,6 +8,17 @@ import { findCustomerByCustomerEmailAndSalonId } from "../../services/mobile/cus
 import { addQueueHistoryWhenCanceled, findSalonQueueListHistory, statusCancelQ } from "../../services/mobile/queueHistoryService.js";
 import { validateEmail } from "../../middlewares/validator.js";
 import { findCustomersToMail } from "../../services/web/queue/joinQueueService.js";
+import { ErrorHandler } from "../../middlewares/ErrorHandler.js";
+import { BARBER_NOT_FOUND_ERROR, BARBER_OFFLINE_ERROR, BARBER_RETRIEVED_SUCCESS, BARBERS_UNABLE_QUEUE_ERROR, JOIN_QUEUE_SUCCESS, NO_BARBERS_AVAILABLE_ERROR, NO_BARBERS_AVAILABLE_QUEUE_ERROR, SALON_JOIN_QUEUE_ERROR, SALON_OFFLINE_ERROR } from "../../constants/kiosk/KioskConstants.js";
+import { ERROR_STATUS_CODE_201, SUCCESS_STATUS_CODE } from "../../constants/mobile/StatusCodeConstants.js";
+import { MOBILE_BOOKING_AVAILABILITY_ERROR, QUEUE_CANCEL_ERROR, QUEUE_NOT_FOUND_ERROR, QUEUELIST_RETRIEVE_SUCCESS } from "../../constants/mobile/QueueConstants.js";
+import { EMAIL_NOT_PRESENT_ERROR, INVALID_EMAIL_ERROR, MOBILE_NUMBER_ERROR } from "../../constants/web/adminConstants.js";
+import { findBaberByBarberId } from "../../services/kiosk/barber/barberService.js";
+import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
+import { CUSTOMER_NOT_FOUND_ERROR } from "../../constants/mobile/CustomerConstants.js";
+import { QUEUE_CANCEL_SUCCESS, QUEUELIST_RETRIEVED_FOR_BARBER_SUCCESS } from "../../constants/web/QueueConstants.js";
+import { SALON_NOT_FOUND_ERROR } from "../../constants/web/SalonConstants.js";
+import { BARBER_SERVICES_SUCCESS, SELECT_SERVICE_ERROR } from "../../constants/web/BarberConstants.js";
 
 //DESC:SINGLE JOIN QUEUE ================
 export const singleJoinQueue = async (req, res, next) => {
@@ -16,12 +27,22 @@ export const singleJoinQueue = async (req, res, next) => {
 
         const salon = await getSalonBySalonId(salonId);
 
+        // if (salon.isOnline === false) {
+        //     return res.status(201).json({ success: false, message: "Please make the salonOnline to join queue" });
+        // }
+
         if (salon.isOnline === false) {
-            return res.status(201).json({ success: false, message: "Please make the salonOnline to join queue" });
+            return ErrorHandler(SALON_JOIN_QUEUE_ERROR, ERROR_STATUS_CODE_201, res)
         }
 
+        // if (salon.mobileBookingAvailability === false && methodUsed === "App") {
+        //     return res.status(201).json({ success: false, message: "Cant Join the queue from App at this moment" });
+        // }
+
         if (salon.mobileBookingAvailability === false && methodUsed === "App") {
-            return res.status(201).json({ success: false, message: "Cant Join the queue from App at this moment" });
+            // return res.status(201).json({ success: false, message: "Cant Join the queue from App at this moment" });
+            return ErrorHandler(MOBILE_BOOKING_AVAILABILITY_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
         // Parse the mobileNumber if it's provided
@@ -33,8 +54,9 @@ export const singleJoinQueue = async (req, res, next) => {
         }
 
         // Validate mobile number format if parsed successfully
-        if (parsedMobileNumber !== null && parsedMobileNumber.toString().length !== 10) {
-            return res.status(201).json({ success: false, message: "Invalid mobile number format" });
+        if (parsedMobileNumber !== null) {
+            // return res.status(201).json({ success: false, message: "Invalid mobile number format" });
+            return ErrorHandler(MOBILE_NUMBER_ERROR, ERROR_STATUS_CODE_201, res)
         }
 
 
@@ -51,11 +73,18 @@ export const singleJoinQueue = async (req, res, next) => {
             // Handle auto-join logic for any barber
             const availableBarber = await availableBarberAutoJoin(salonId, services.map(service => service.serviceId), totalServiceEWT);
 
+            // if (!availableBarber) {
+            //     return res.status(201).json({
+            //         success: false,
+            //         message: 'No single barber provides the services.',
+            //     });
+            // }
             if (!availableBarber) {
-                return res.status(201).json({
-                    success: false,
-                    message: 'No single barber provides the services.',
-                });
+                return ErrorHandler(NO_BARBERS_AVAILABLE_QUEUE_ERROR, ERROR_STATUS_CODE_201, res)
+            }
+
+            if (availableBarber.isOnline === false || availableBarber.isClockedIn === false || availableBarber.isActive === false) {
+                return ErrorHandler(BARBERS_UNABLE_QUEUE_ERROR, ERROR_STATUS_CODE_201, res)
             }
 
             existingQueue = await findSalonQueueList(salonId);
@@ -70,8 +99,6 @@ export const singleJoinQueue = async (req, res, next) => {
 
             // Extracting the data after '+'
             const offset = timeZoneParts[1];
-
-            console.log(offset)
 
             // Parse offset into hours and minutes
             const [offsetHours, offsetMinutes] = offset.split(':').map(Number);
@@ -175,21 +202,32 @@ export const singleJoinQueue = async (req, res, next) => {
 
             try {
                 await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
-                console.log('Email sent successfully.');
             } catch (error) {
                 console.error('Error sending email:', error);
                 // Handle error if email sending fails
             }
 
         } else {
+
+            const getBarber = await findBaberByBarberId(barberId);
+
+            if (getBarber.isClockedIn === false) {
+                return ErrorHandler(BARBERS_UNABLE_QUEUE_ERROR, ERROR_STATUS_CODE_201, res)
+            }
+
             // Handle when a specific barber is provided
             const updatedBarber = await updateBarberEWT(salonId, barberId, totalServiceEWT);
 
+            // if (!updatedBarber) {
+            //     return res.status(201).json({
+            //         success: false,
+            //         message: "The barber is not online",
+            //     });
+            // }
+
             if (!updatedBarber) {
-                return res.status(201).json({
-                    success: false,
-                    message: "The barber is not online",
-                });
+                return ErrorHandler(BARBER_OFFLINE_ERROR, ERROR_STATUS_CODE_201, res)
+
             }
 
             existingQueue = await findSalonQueueList(salonId);
@@ -309,22 +347,20 @@ export const singleJoinQueue = async (req, res, next) => {
 
             try {
                 await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
-                console.log('Email sent successfully.');
             } catch (error) {
                 console.error('Error sending email:', error);
                 // Handle error if email sending fails
             }
         }
 
-        res.status(200).json({
-            success: true,
-            message: "Joined Queue successfully ",
-            response: existingQueue,
-        });
+        // res.status(200).json({
+        //     success: true,
+        //     message: "Joined Queue successfully ",
+        //     response: existingQueue,
+        // });
+        return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingQueue })
     }
-
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -338,11 +374,13 @@ export const groupJoinQueue = async (req, res, next) => {
         const salon = await getSalonBySalonId(salonId);
 
         if (salon.isOnline === false) {
-            return res.status(201).json({ success: false, message: "The salon is offline." });
+            // return res.status(201).json({ success: false, message: "The salon is offline." });
+            return ErrorHandler(SALON_JOIN_QUEUE_ERROR, ERROR_STATUS_CODE_201, res)
         }
 
         if (!salon.mobileBookingAvailability && groupInfo.some(group => group.methodUsed === "App")) {
-            return res.status(201).json({ success: false, message: "Can't join the queue from app at this moment" });
+            // return res.status(201).json({ success: false, message: "Can't join the queue from app at this moment" });
+            return ErrorHandler(MOBILE_BOOKING_AVAILABILITY_ERROR, ERROR_STATUS_CODE_201, res)
         }
 
         // Initialize existingQueue as null
@@ -374,9 +412,15 @@ export const groupJoinQueue = async (req, res, next) => {
 
             const parshedMobileNumber = parseInt(groupInfo.mobileNumber)
             // Validate mobile number format (assuming it should be exactly 10 digits)
-            if (parshedMobileNumber && !/^\d{10}$/.test(parshedMobileNumber)) {
-                return res.status(201).json({ success: false, message: "Invalid mobile number format. It should be 10 digits." });
-            }
+            // if (s && !/^\d{10}$/.test(parshedMobileNumber)) {
+            //     return res.status(201).json({ success: false, message: "Invalid mobile number format. It should be 10 digits." });
+            // }
+
+              // Validate mobile number format if parsed successfully
+        if (parshedMobileNumber !== null) {
+            // return res.status(201).json({ success: false, message: "Invalid mobile number format" });
+            return ErrorHandler(MOBILE_NUMBER_ERROR, ERROR_STATUS_CODE_201, res)
+        }
             for (const service of member.services) {
                 totalServiceEWT += service.barberServiceEWT || service.serviceEWT;
             }
@@ -385,11 +429,15 @@ export const groupJoinQueue = async (req, res, next) => {
 
             // Update the barberEWT and queueCount for the Barber
             const updatedBarber = await updateBarberEWT(salonId, member.barberId, totalServiceEWT)
+            // if (!updatedBarber) {
+            //     res.status(201).json({
+            //         success: false,
+            //         message: "The barber Is not online",
+            //     });
+            // }
             if (!updatedBarber) {
-                res.status(201).json({
-                    success: false,
-                    message: "The barber Is not online",
-                });
+                return ErrorHandler(BARBER_OFFLINE_ERROR, ERROR_STATUS_CODE_201, res)
+
             }
 
             const time = moment().local().format('HH:mm:ss');
@@ -512,19 +560,18 @@ export const groupJoinQueue = async (req, res, next) => {
 
             try {
                 await sendQueuePositionEmail(member.customerEmail, emailSubject, emailBody);
-                console.log('Email sent successfully.');
             } catch (error) {
                 console.error('Error sending email:', error);
                 // Handle error if email sending fails
             }
         }
 
-        res.status(200).json({
-            success: true,
-            message: "Group Joined Queue",
-            response: existingQueue,
-        });
-
+        // res.status(200).json({
+        //     success: true,
+        //     message: "Group Joined Queue",
+        //     response: existingQueue,
+        // });
+        return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingQueue })
     } catch (error) {
         //console.log(error);
         next(error);
@@ -540,52 +587,65 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         customerEmail = customerEmail.toLowerCase();
 
         if (!customerEmail) {
-            return res.status(201).json({
-                success: false,
-                message: "Please ensure the email field is filled correctly."
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: "Please ensure the email field is filled correctly."
+            // });
+
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
         if (!validateEmail(customerEmail)) {
-            return res.status(201).json({
-                success: false,
-                message: "Invalid Email "
-            });
-        }
+            // return res.status(201).json({
+            //     success: false,
+            //     message: "Invalid Email "
+            // });
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE_201, res)
 
+        }
 
         const foundUser = await findCustomerByCustomerEmailAndSalonId(customerEmail, salonId);
 
         if (!foundUser) {
-            return res.status(201).json({
-                success: false,
-                message: 'Customer not found'
-            })
+            // return res.status(201).json({
+            //     success: false,
+            //     message: 'Customer not found'
+            // })
+
+            return ErrorHandler(CUSTOMER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
         if (foundUser.cancellationCount >= 1 && moment(foundUser.updatedAt).isSame(moment(), 'day')) {
-            return res.status(201).json({
-                success: false,
-                message: 'Cant cancel queue anymore for today'
-            })
+            // return res.status(201).json({
+            //     success: false,
+            //     message: 'Cant cancel queue anymore for today'
+            // })
+            return ErrorHandler(QUEUE_CANCEL_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
         const updatedQueue = await findSalonQueueList(salonId)
 
         if (!updatedQueue) {
-            return res.status(201).json({
-                success: false,
-                message: 'Queue not found for the given salon ID',
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: 'Queue not found for the given salon ID',
+            // });
+            return ErrorHandler(QUEUE_CANCEL_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
         const canceledQueueIndex = updatedQueue.queueList.findIndex(queue => queue._id.toString() === _id);
 
         if (canceledQueueIndex === -1) {
-            return res.status(201).json({
-                success: false,
-                message: 'Queue not found with the given _id',
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: 'Queue not found with the given _id',
+            // });
+            return ErrorHandler(QUEUE_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
         const canceledServiceEWT = updatedQueue.queueList[canceledQueueIndex].serviceEWT;
@@ -711,7 +771,6 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
                         try {
                             await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
-                            console.log('Email sent successfully.');
                         } catch (error) {
                             console.error('Error sending email:', error);
                             // Handle error if email sending fails
@@ -721,18 +780,19 @@ export const cancelQueueByCustomer = async (req, res, next) => {
             }
         }
 
-        return res.status(200).json({
-            success: true,
-            message: 'Queue canceled successfully',
-            updatedQueueList: updatedQueue.queueList,
-        });
+        // return res.status(200).json({
+        //     success: true,
+        //     message: 'Queue canceled successfully',
+        //     response: updatedQueue.queueList,
+        // });
+
+        return SuccessHandler(QUEUE_CANCEL_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedQueue.queueList })
+
 
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 };
-
 
 //DESC:GET SALON QUEUELIST ================
 export const getQueueListBySalonId = async (req, res, next) => {
@@ -746,21 +806,22 @@ export const getQueueListBySalonId = async (req, res, next) => {
             // Access the sorted queueList array from the result
             const sortedQueueList = getSalon[0].queueList;
 
-            res.status(200).json({
-                success: true,
-                message: "Queue list of the salon retrieved successfully.",
-                response: sortedQueueList,
-            });
-        } else {
-            res.status(201).json({
-                success: false,
-                message: "Salon not found",
-            });
-        }
+            // res.status(200).json({
+            //     success: true,
+            //     message: "Queue list of the salon retrieved successfully.",
+            //     response: sortedQueueList,
+            // });
 
+            return SuccessHandler(QUEUELIST_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQueueList })
+        } else {
+            // res.status(201).json({
+            //     success: false,
+            //     message: "Salon not found",
+            // });
+            return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+        }
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -770,16 +831,24 @@ export const getAvailableBarbersForQ = async (req, res, next) => {
     try {
         const { salonId } = req.query;
 
+        const getSalon = await getSalonBySalonId(salonId)
+
+        if(getSalon.isOnline === false){
+            return ErrorHandler(SALON_OFFLINE_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
         const anybarberServices = await allSalonServices(salonId);
 
         //To find the available barbers for the queue
         const availableBarbers = await getBarbersForQ(salonId);
 
         if (availableBarbers.length === 0) {
-            res.status(201).json({
-                success: false,
-                message: 'No available Barbers found at this moment.'
-            });
+            // res.status(201).json({
+            //     success: false,
+            //     message: 'No available Barbers found at this moment.'
+            // });
+            return ErrorHandler(NO_BARBERS_AVAILABLE_QUEUE_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
         else {
 
@@ -812,15 +881,16 @@ export const getAvailableBarbersForQ = async (req, res, next) => {
             // Insert anybarber at the beginning of availableBarbers array
             availableBarbers.unshift(anybarber);
 
-            res.status(200).json({
-                success: true,
-                message: 'All Barbers retrieved successfully',
-                response: availableBarbers
-            });
+            // res.status(200).json({
+            //     success: true,
+            //     message: 'All Barbers retrieved successfully',
+            //     response: availableBarbers
+            // });
+            return SuccessHandler(BARBER_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: availableBarbers })
+
         }
     }
     catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -832,23 +902,28 @@ export const getBarberByServices = async (req, res, next) => {
         const { salonId, serviceIds } = req.body; // Assuming serviceIds are passed as query parameters, e.g., /barbers?serviceIds=1,2,3
 
         if (!serviceIds || !Array.isArray(serviceIds) || serviceIds.length === 0) {
-            return res.status(201).json({ success: false, message: 'Please ensure that the request includes valid service IDs.' });
+            // return res.status(201).json({ success: false, message: 'Please ensure that the request includes valid service IDs.' });
+            return ErrorHandler(SELECT_SERVICE_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
         const barbers = await getBarbersWithMulServices(salonId, serviceIds);
 
         if (!barbers || barbers.length === 0) {
-            return res.status(201).json({
-                success: false,
-                message: 'No barbers were found for the services specified in the request.'
-            });
+            // return res.status(201).json({
+            //     success: false,
+            //     message: 'No barbers were found for the services specified in the request.'
+            // });
+            return ErrorHandler(NO_BARBERS_AVAILABLE_ERROR, ERROR_STATUS_CODE_201, res)
+
         }
 
-        return res.status(200).json({
-            success: true,
-            message: "Barbers retrieved for the particular Services",
-            response: barbers
-        });
+        // return res.status(200).json({
+        //     success: true,
+        //     message: "Barbers retrieved for the particular Services",
+        //     response: barbers
+        // });
+        return SuccessHandler(BARBER_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barbers })
 
     } catch (error) {
         //console.log(error);
@@ -872,18 +947,21 @@ export const getBarberServicesByBarberId = async (req, res, next) => {
             barberServices = barbers.barberServices;
 
             if (!barbers) {
-                return res.status(201).json({
-                    success: false,
-                    message: "No barbers found for the geiven BarberId"
-                });
+                // return res.status(201).json({
+                //     success: false,
+                //     message: "No barbers found for the geiven BarberId"
+                // });
+                return ErrorHandler(BARBER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+
             }
         }
 
-        return res.status(200).json({
-            success: true,
-            message: "Barber services retrieved",
-            response: barberServices
-        });
+        // return res.status(200).json({
+        //     success: true,
+        //     message: "Barber services retrieved",
+        //     response: barberServices
+        // });
+        return SuccessHandler(BARBER_SERVICES_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barberServices })
     }
     catch (error) {
         next(error);

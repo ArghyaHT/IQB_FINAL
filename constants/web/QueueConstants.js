@@ -19,7 +19,7 @@ export const QUEUELIST_BARBER_ERROR= "Queue list not found for the specified bar
 export const RETRIVE_QUEUELIST_SUCCESS = "Queue list retrived sucessfully"
 export const RETRIVE_EMPTY_QUEUELIST_SUCCESS = "Queue list is empty"
 export const QUEUE_SERVE_SUCCESS = "Customer serve successfully"
-export const QUEUE_CANCEL_SUCCESS = "Customer cancel successfully"
+export const QUEUE_CANCEL_SUCCESS = "Customer cancel queue successfully"
 
 export const QUEUELIST_EMPTY_FOR_BARBER_SUCCESS ="Queue list found for the specified barber"
 export const QUEUELIST_RETRIEVED_FOR_BARBER_SUCCESS ="Queue list retrieved for the specified barber successfully"
