@@ -20,7 +20,6 @@ router.route("/updateBarberInfo").put(updateBarberInfo)
 router.route("/googleBarberSignUp").post(googleBarberSignup)
 router.route("/googleBarberLogin").post(googleBarberLogin)
 
-
 router.route('/forget-password').post(handleForgetPassword)
 router.route('/reset-password/:token').post(handleResetPassword)
 

@@ -102,12 +102,10 @@ export const getAllSalonIds = async () => {
 
 export const checkSalonExists = async (salonId) => {
   let salon = await Salon.findOne({ salonId })
-
   if (salon) {
     return salon;
   }
   else {
     return salon = null;
   }
-
 }

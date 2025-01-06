@@ -37,7 +37,6 @@ export const createGoogleBarber = async(email, barberId) => {
       barberId: barberId,
       // barberCode: barberCode
     })
-
     await barber.save();
 
     return barber;
