@@ -20,14 +20,14 @@ export const createAppointment = async (req, res, next) => {
 
     // Check if salonId is missing
     if (!salonId) {
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: 'Please provide the salon ID.',
       });
     }
     // Check if barberId is missing
     if (!barberId) {
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: 'Please provide the barber ID.',
       });
@@ -35,7 +35,7 @@ export const createAppointment = async (req, res, next) => {
 
     // Check if serviceId is missing
     if (!serviceId) {
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: 'Please provide the service ID.',
       });
@@ -43,7 +43,7 @@ export const createAppointment = async (req, res, next) => {
 
     // Check if appointmentDate is missing
     if (!appointmentDate) {
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: 'Please provide the appointment date.',
       });
@@ -51,7 +51,7 @@ export const createAppointment = async (req, res, next) => {
 
     // Check if startTime is missing
     if (!startTime) {
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: 'Please provide the start time.',
       });
@@ -59,7 +59,7 @@ export const createAppointment = async (req, res, next) => {
 
     // Check if customerName is missing
     if (!customerName || customerName.length < 1 || customerName.length > 20) {
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: 'Please provide the customer name.',
       });
@@ -67,7 +67,7 @@ export const createAppointment = async (req, res, next) => {
 
     // Check if customerName length less than 1 or more than 20
     if (customerName.length < 1 || customerName.length > 20) {
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: 'Please enter a name that is between 1 and 20 characters in length.',
       });
@@ -77,7 +77,7 @@ export const createAppointment = async (req, res, next) => {
 
     // Validate email format
     if (!email || !validateEmail(email)) {
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: "Invalid Email "
       });
@@ -86,7 +86,7 @@ export const createAppointment = async (req, res, next) => {
     const salon = await getSalonBySalonId(salonId)
 
     if (salon.isOnline === false) {
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: "The salon is currently offine"
       });
@@ -106,7 +106,7 @@ export const createAppointment = async (req, res, next) => {
     const salonDayOff = await matchSalonOffDays(salonId, day)
 
     if(salonDayOff){
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: "Salon closed today",
       });
@@ -272,7 +272,7 @@ export const createAppointment = async (req, res, next) => {
       }
     }
     else {
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: "Barber can't take appointment today",
       });
@@ -289,7 +289,7 @@ export const editAppointment = async (req, res, next) => {
 
     // Check if required fields are missing
     if (!barberId || !serviceId || !appointmentDate || !startTime) {
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: 'Please fill all the fields',
       });
@@ -309,7 +309,7 @@ export const editAppointment = async (req, res, next) => {
     const salonDayOff = await matchSalonOffDays(salonId, day)
 
     if(salonDayOff){
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: "Salon closed today",
       });
@@ -376,7 +376,7 @@ export const editAppointment = async (req, res, next) => {
       const existingAppointment = await updateAppointment(salonId, appointmentId, newData)
 
       if (!existingAppointment) {
-        return res.status(201).json({
+        return res.status(400).json({
           success: false,
           message: 'Appointment not found',
         });
@@ -389,7 +389,7 @@ export const editAppointment = async (req, res, next) => {
       });
     }
     else {
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: "Barber can't take appointment today",
       });
