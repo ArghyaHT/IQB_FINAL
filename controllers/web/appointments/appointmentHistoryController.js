@@ -14,6 +14,7 @@ export const getAppointmentHistorybyCustomerEmail = async (req, res, next) => {
                 message: "Appointment history not found for the given customer."
             });
         }
+        
 
         // Return the found history
         res.status(200).json({

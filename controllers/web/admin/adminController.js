@@ -609,6 +609,7 @@ export const uploadAdminprofilePic = async (req, res, next) => {
                     return { public_id: image.public_id, url: image.secure_url };
                 });
         });
+        
 
         const profileimg = await Promise.all(uploadPromises);
 
