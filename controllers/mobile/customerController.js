@@ -24,7 +24,6 @@ import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 import { SALON_NOT_FOUND_ERROR, SALONS_RETRIEVED_SUCESS } from "../../constants/web/SalonConstants.js";
 import { CUSTOMER_CHANGE_DEFAULT_SALON_SUCCESS, CUSTOMER_DASHBOARD_SUCCESS } from "../../constants/mobile/SalonConstants.js";
 import { ALLOWED_IMAGE_EXTENSIONS, CUSTOMER_IMAGE_EMPTY_ERROR, IMAGE_FAILED_DELETE, IMAGE_UPLOAD_FAILED_ERROR, MAX_FILE_SIZE } from "../../constants/web/Common/ImageConstant.js";
-import { SUCCESS_STATUS_CODE } from "../../constants/web/Common/StatusCodeConstant.js";
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 
 
