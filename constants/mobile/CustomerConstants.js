@@ -10,10 +10,6 @@ export const CUSTOMER_FAVOURITE_SALON_NOT_FOUND_ERROR = "Salon not in your favor
 
 
 
-
-
-
-
 //SUCCESS
 export const EMAIL_CHECK_SUCCESS = "The email is available for signup"
 export const CUSTOMER_SIGNUP_SUCCESS = "Customer saved successfully and verification code sent successfully"

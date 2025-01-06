@@ -1,5 +1,6 @@
 //ERROR
 export const GET_SALON_SERVICES_ERROR = "Salon services not found"
+export const SALON_CLOSE_ERROR = "Salon closed today"
 
 
 

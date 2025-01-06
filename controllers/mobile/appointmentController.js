@@ -11,6 +11,14 @@ import { checkAppointmentDate } from "../../services/web/barberDayOff/barberDayO
 import { getAppointmentbySalonId } from "../../services/web/appointments/appointmentsService.js";
 import { matchAppointmentDays } from "../../services/web/barberAppointmentDays/barberAppointmentDaysService.js";
 import { matchSalonOffDays } from "../../services/web/salonSettings/salonSettingsService.js";
+import { ErrorHandler } from "../../middlewares/ErrorHandler.js";
+import { SALON_NOT_FOUND_ERROR } from "../../constants/web/SalonConstants.js";
+import { ERROR_STATUS_CODE_201, SUCCESS_STATUS_CODE } from "../../constants/mobile/StatusCodeConstants.js";
+import { BARBER_NOT_FOUND_ERROR, SALON_OFFLINE_ERROR } from "../../constants/kiosk/KioskConstants.js";
+import { APPOINTMENT_CONFIRMED_SUCCESS, APPOINTMENT_DATE_NOT_PROVIDED_ERROR, APPOINTMENT_NOT_FOUND_ERROR, APPOINTMENT_RETRIEVE_SUCCESS, APPOINTMENT_UPDATE_SUCCESS, APPOINTMENTS_NOT_FOUND_ERROR, BARBER_APPOINTMENT_ERROR, BARBER_TIMESLOTS_ERROR, BARBER_TIMESLOTS_SUCCESS, CUSTOMER_NAME_NOT_PROVIDED_ERROR, SERVICE_NOT_PROVIDED_ERROR, START_TIME_NOT_PROVIDED_ERROR } from "../../constants/mobile/AppointmentConstants.js";
+import { EMAIL_NOT_PRESENT_ERROR, INVALID_EMAIL_ERROR, NAME_LENGTH_ERROR } from "../../constants/web/adminConstants.js";
+import { SALON_CLOSE_ERROR } from "../../constants/mobile/SalonConstants.js";
+import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 
 //Creating Appointment
 export const createAppointment = async (req, res, next) => {
@@ -20,76 +28,54 @@ export const createAppointment = async (req, res, next) => {
 
     // Check if salonId is missing
     if (!salonId) {
-      return res.status(201).json({
-        success: false,
-        message: 'Please provide the salon ID.',
-      });
+      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
     }
+
     // Check if barberId is missing
     if (!barberId) {
-      return res.status(201).json({
-        success: false,
-        message: 'Please provide the barber ID.',
-      });
+      return ErrorHandler(BARBER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
     }
 
     // Check if serviceId is missing
     if (!serviceId) {
-      return res.status(201).json({
-        success: false,
-        message: 'Please provide the service ID.',
-      });
+      return ErrorHandler(SERVICE_NOT_PROVIDED_ERROR, ERROR_STATUS_CODE_201, res)
     }
 
     // Check if appointmentDate is missing
     if (!appointmentDate) {
-      return res.status(201).json({
-        success: false,
-        message: 'Please provide the appointment date.',
-      });
+      return ErrorHandler(APPOINTMENT_DATE_NOT_PROVIDED_ERROR, ERROR_STATUS_CODE_201, res)
     }
 
     // Check if startTime is missing
     if (!startTime) {
-      return res.status(201).json({
-        success: false,
-        message: 'Please provide the start time.',
-      });
+      return ErrorHandler(START_TIME_NOT_PROVIDED_ERROR, ERROR_STATUS_CODE_201, res)
     }
 
     // Check if customerName is missing
     if (!customerName || customerName.length < 1 || customerName.length > 20) {
-      return res.status(201).json({
-        success: false,
-        message: 'Please provide the customer name.',
-      });
+      return ErrorHandler(CUSTOMER_NAME_NOT_PROVIDED_ERROR, ERROR_STATUS_CODE_201, res)
     }
 
     // Check if customerName length less than 1 or more than 20
     if (customerName.length < 1 || customerName.length > 20) {
-      return res.status(201).json({
-        success: false,
-        message: 'Please enter a name that is between 1 and 20 characters in length.',
-      });
+      return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE_201, res)
     }
 
     const email = customerEmail;
 
-    // Validate email format
-    if (!email || !validateEmail(email)) {
-      return res.status(201).json({
-        success: false,
-        message: "Invalid Email "
-      });
-    }
+
+    if (!email) {
+      return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE_201, res)
+  }
+
+  if (!validateEmail(email)) {
+      return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE_201, res)
+  }
 
     const salon = await getSalonBySalonId(salonId)
 
     if (salon.isOnline === false) {
-      return res.status(201).json({
-        success: false,
-        message: "The salon is currently offine"
-      });
+      return ErrorHandler(SALON_OFFLINE_ERROR, ERROR_STATUS_CODE_201, res)
     }
 
     // const checkAppointments = await checkAppointmentDate(salonId, barberId, appointmentDate) 
@@ -106,10 +92,7 @@ export const createAppointment = async (req, res, next) => {
     const salonDayOff = await matchSalonOffDays(salonId, day)
 
     if(salonDayOff){
-      return res.status(201).json({
-        success: false,
-        message: "Salon closed today",
-      });
+      return ErrorHandler(SALON_CLOSE_ERROR, ERROR_STATUS_CODE_201, res)
     }
 
 
@@ -178,11 +161,13 @@ export const createAppointment = async (req, res, next) => {
       if (existingAppointmentList) {
         existingAppointmentList.appointmentList.push(newAppointment);
         await existingAppointmentList.save();
-        return res.status(200).json({
-          success: true,
-          message: "Appointment Confirmed",
-          response: existingAppointmentList,
-        });
+        // return res.status(200).json({
+        //   success: true,
+        //   message: "Appointment Confirmed",
+        //   response: existingAppointmentList,
+        // });
+        return SuccessHandler(APPOINTMENT_CONFIRMED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingAppointmentList })
+
 
         //   const adminEmail = await Admin.findOne({ salonId }).select("email")
 
@@ -225,11 +210,13 @@ export const createAppointment = async (req, res, next) => {
       } else {
         const newAppointmentData = await createNewAppointment(salonId, newAppointment)
         const savedAppointment = await newAppointmentData.save();
-        return res.status(200).json({
-          success: true,
-          message: "Appointment Confirmed",
-          response: savedAppointment,
-        });
+        // return res.status(200).json({
+        //   success: true,
+        //   message: "Appointment Confirmed",
+        //   response: savedAppointment,
+        // });
+        return SuccessHandler(APPOINTMENT_CONFIRMED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: savedAppointment })
+
         //   const adminEmail = await Admin.findOne({ salonId }).select("email")
 
 
@@ -272,10 +259,11 @@ export const createAppointment = async (req, res, next) => {
       }
     }
     else {
-      return res.status(201).json({
-        success: false,
-        message: "Barber can't take appointment today",
-      });
+      // return res.status(201).json({
+      //   success: false,
+      //   message: "Barber can't take appointment today",
+      // });
+      return ErrorHandler(BARBER_APPOINTMENT_ERROR, ERROR_STATUS_CODE_201, res)
     }
   } catch (error) {
     next(error);
@@ -287,13 +275,33 @@ export const editAppointment = async (req, res, next) => {
   try {
     const { appointmentId, salonId, barberId, serviceId, appointmentDate, appointmentNotes, startTime } = req.body; // Assuming appointmentId is passed as a parameter
 
-    // Check if required fields are missing
-    if (!barberId || !serviceId || !appointmentDate || !startTime) {
-      return res.status(201).json({
-        success: false,
-        message: 'Please fill all the fields',
-      });
-    }
+    // // Check if required fields are missing
+    // if (!barberId || !serviceId || !appointmentDate || !startTime) {
+    //   return res.status(201).json({
+    //     success: false,
+    //     message: 'Please fill all the fields',
+    //   });
+    // }
+
+        // Check if barberId is missing
+        if (!barberId) {
+          return ErrorHandler(BARBER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+    
+        // Check if serviceId is missing
+        if (!serviceId) {
+          return ErrorHandler(SERVICE_NOT_PROVIDED_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+    
+        // Check if appointmentDate is missing
+        if (!appointmentDate) {
+          return ErrorHandler(APPOINTMENT_DATE_NOT_PROVIDED_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+    
+        // Check if startTime is missing
+        if (!startTime) {
+          return ErrorHandler(START_TIME_NOT_PROVIDED_ERROR, ERROR_STATUS_CODE_201, res)
+        }
 
     // const checkAppointments = await checkAppointmentDate(salonId, barberId, appointmentDate)
 
@@ -309,10 +317,12 @@ export const editAppointment = async (req, res, next) => {
     const salonDayOff = await matchSalonOffDays(salonId, day)
 
     if(salonDayOff){
-      return res.status(201).json({
-        success: false,
-        message: "Salon closed today",
-      });
+      // return res.status(201).json({
+      //   success: false,
+      //   message: "Salon closed today",
+      // });
+      return ErrorHandler(SALON_CLOSE_ERROR, ERROR_STATUS_CODE_201, res)
+
     }
 
     const match = await matchAppointmentDays(salonId, barberId, day);
@@ -376,23 +386,28 @@ export const editAppointment = async (req, res, next) => {
       const existingAppointment = await updateAppointment(salonId, appointmentId, newData)
 
       if (!existingAppointment) {
-        return res.status(201).json({
-          success: false,
-          message: 'Appointment not found',
-        });
+        // return res.status(201).json({
+        //   success: false,
+        //   message: 'Appointment not found',
+        // });
+        return ErrorHandler(APPOINTMENT_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
       }
 
-      res.status(200).json({
-        success: true,
-        message: 'Appointment updated successfully',
-        response: existingAppointment,
-      });
+      // res.status(200).json({
+      //   success: true,
+      //   message: 'Appointment updated successfully',
+      //   response: existingAppointment,
+      // });
+      return SuccessHandler(APPOINTMENT_UPDATE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingAppointment })
+
     }
     else {
-      return res.status(201).json({
-        success: false,
-        message: "Barber can't take appointment today",
-      });
+      // return res.status(201).json({
+      //   success: false,
+      //   message: "Barber can't take appointment today",
+      // });
+      return ErrorHandler(BARBER_APPOINTMENT_ERROR, ERROR_STATUS_CODE_201, res)
+
     }
   } catch (error) {
     next(error);
@@ -429,11 +444,12 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
     const { salonId, barberId, date } = req.body;
 
     if (!date || !barberId) {
-      // If the date value is null, send a response to choose the date
-      return res.status(201).json({
-        success: false,
-        message: 'Please choose a Date and Barber to fetch time slots'
-      });
+      // // If the date value is null, send a response to choose the date
+      // return res.status(201).json({
+      //   success: false,
+      //   message: 'Please choose a Date and Barber to fetch time slots'
+      // });
+      return ErrorHandler(BARBER_TIMESLOTS_ERROR, ERROR_STATUS_CODE_201, res)
     }
 
     // Getting the appointments for a Specific Barber
@@ -478,13 +494,13 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
         });
       });
     }
-    res.status(200).json({
-      success: true,
-      message: "Time slots retrieved and matched successfully",
-      response: timeSlots
-    });
+    // res.status(200).json({
+    //   success: true,
+    //   message: "Time slots retrieved and matched successfully",
+    //   response: timeSlots
+    // });
+    return SuccessHandler(BARBER_TIMESLOTS_SUCCESS, SUCCESS_STATUS_CODE, res, { response: timeSlots })
   } catch (error) {
-    //console.log(error);
     next(error);
   }
 };
@@ -498,19 +514,20 @@ export const getAllAppointmentsBySalonId = async (req, res, next) => {
     const appointments = await allAppointmentsBySalonId(salonId)
 
     if (!appointments || appointments.length === 0) {
-      return res.status(201).json({
-        success: false,
-        message: 'No appointments found for the provided salon ID',
-      });
+      // return res.status(201).json({
+      //   success: false,
+      //   message: 'No appointments found for the provided salon',
+      // });
+      return ErrorHandler(APPOINTMENTS_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
     }
 
-    res.status(200).json({
-      success: true,
-      message: 'Appointments retrieved successfully',
-      response: appointments.map(appointment => appointment.appointmentList),
-    });
+    // res.status(200).json({
+    //   success: true,
+    //   message: 'Appointments retrieved successfully',
+    //   response: appointments.map(appointment => appointment.appointmentList),
+    // });
+    return SuccessHandler(APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: appointments.map(appointment => appointment.appointmentList) })
   } catch (error) {
-    //console.log(error);
     next(error);
   }
 };
@@ -525,13 +542,13 @@ export const getAllAppointmentsBySalonIdAndDate = async (req, res, next) => {
 
     const appointments = await allAppointmentsBySalonIdAndDate(salonId, appointmentDate)
 
-    res.status(200).json({
-      success: true,
-      message: 'Appointments retrieved successfully',
-      response: appointments
-    });
+    // res.status(200).json({
+    //   success: true,
+    //   message: 'Appointments retrieved successfully',
+    //   response: appointments
+    // });
+    return SuccessHandler(APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: appointments})
   } catch (error) {
-    //console.log(error);
     next(error);
   }
 };
