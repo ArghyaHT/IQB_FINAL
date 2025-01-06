@@ -125,6 +125,8 @@ return appointments;
                 "appointmentList.appointmentNotes": 1,
                 "appointmentList.startTime": 1,
                 "appointmentList.endTime": 1,
+                "appointmentList.customerEmail": 1,
+                "appointmentList.customerName": 1,
                 "appointmentList.timeSlots": 1,
                 "appointmentList.barberName": 1
                 // Include other fields if needed
@@ -137,6 +139,44 @@ return appointments;
 
   // GET ALL APPOINTMENTS BY SALON ID AND DATE
  export const allAppointmentsBySalonIdAndDate = async(salonId, appointmentDate ) => {
+
+    // const appointments = await Appointment.findOne({ salonId }).lean();
+
+    // if (appointments) {
+    //     // Modify the appointment list structure if needed
+    //     const modifyAppointmentList = appointments.appointmentList.map((appointment) => ({
+    //         // barberName: appointment.barberName,
+    //         appointments: [
+    //             {
+    //                 barberId: appointment.barberId,
+    //                 // serviceId: appointment.serviceId,
+    //                 appointmentNotes: appointment.appointmentNotes,
+    //                 appointmentDate: appointment.appointmentDate,
+    //                 startTime: appointment.startTime,
+    //                 endTime: appointment.endTime,
+    //                 timeSlots: `${appointment.startTime}-${appointment.endTime}`,
+    //                 customerEmail: appointment.customerEmail,
+    //                 customerName: appointment.customerName,
+    //                 customerType: appointment.customerType,
+    //                 methodUsed: appointment.methodUsed,
+    //                 _id: appointment._id,
+    //                 background: appointment.background || "#FFFFFF" // Default background color
+    //             }
+    //         ]
+    //     }));
+    
+    //     if (modifyAppointmentList) {
+    //         const filteredAppointmentList = modifyAppointmentList.filter(item => item.appointments.a === appointmentDate);
+        
+    //         return filteredAppointmentList
+    //       }
+
+    //     console.log(modifyAppointmentList)
+    
+    //     // return filteredAppointmentList;
+    // }
+
+    
     const appointments = await Appointment.aggregate([
         {
             $match: {
@@ -165,10 +205,27 @@ return appointments;
             }
         },
         {
+            $lookup: {
+                from: "customers", // Replace with your customers collection name
+                localField: "appointmentList.customerEmail",
+                foreignField: "email", // Adjust to the field in customers that matches customerEmail
+                as: "customerInfo"
+            }
+        },
+        {
             $addFields: {
                 "appointmentList.barberName": {
                     $arrayElemAt: ["$barberInfo.name", 0]
                 },
+                "appointmentList.barberProfile": {
+                $arrayElemAt: ["$barberInfo.profile", 0]
+            },
+            "appointmentList.barberId": {
+                $arrayElemAt: ["$barberInfo.barberId", 0]
+            },
+            "appointmentList.customerProfile": {
+                $arrayElemAt: ["$customerInfo.profile", 0] // Assuming `profile` exists in customers collection
+            },
                 "appointmentList.background": "#FFFFFF", // Set your default color here
                 "appointmentList.startTime": "$appointmentList.startTime",
                 "appointmentList.endTime": "$appointmentList.endTime"
@@ -178,13 +235,33 @@ return appointments;
             $group: {
                 _id: "$appointmentList.barberId",
                 barbername: { $first: "$appointmentList.barberName" },
+                barberProfile:{$first: "$appointmentList.barberProfile"},
+                barberId:{$first: "$appointmentList.barberId"},
+                customerProfile:{$first: "$appointmentList.customerProfile"},
                 appointments: { $push: "$appointmentList" }
             }
         },
         {
             $project: {
                 barbername: 1,
-                appointments: 1,
+                barberProfile: 1,
+                barberId: 1,
+                appointments: {
+                    barberId: 1,
+                    appointmentNotes: 1,
+                    appointmentDate: 1,
+                    services: 1,
+                    startTime: 1,
+                    endTime: 1,
+                    timeSlots: 1,
+                    customerEmail: 1,
+                    customerName: 1,
+                    customerProfile: 1,
+                    customerType: 1,
+                    methodUsed: 1,
+                    _id: 1,
+                    background: 1
+                },
                 _id: 0
             }
         },
@@ -411,27 +488,33 @@ return appointments;
     }
  }
 
- //GET APPOINTMENTS BY SALON ID 
- export const findAppointmentById = async(_id, serviceId, barberId, appointmentDate, salonId) => {
-    const appointment = await Appointment.findOne({
-        salonId,
-        'appointmentList._id': _id,
-        'appointmentList.serviceId': serviceId,
-        'appointmentList.barberId': barberId,
-        'appointmentList.appointmentDate': appointmentDate,
-    });
+
+ export const findAppointmentById = async (_id, barberId, appointmentDate, salonId) => {
+    const appointment = await Appointment.findOne(
+        {
+            salonId,
+            appointmentList: {
+                $elemMatch: { 
+                    _id: _id,
+                    barberId: barberId,
+                    appointmentDate: new Date(appointmentDate),
+                },
+            },
+        },
+        { "appointmentList.$": 1 } // Project only the matching element
+    );
+
     return appointment;
- }
+};
 
  //PULL SERVED APPOINTMENT 
- export const servedAppointment = async(_id, serviceId, barberId, appointmentDate, salonId) =>{
+ export const servedOrcancelAppointment = async(_id, barberId, appointmentDate, salonId) =>{
     const appointment = await Appointment.findOneAndUpdate(
         { salonId },
         {
             $pull: {
                 'appointmentList': {
                     _id: _id,
-                    serviceId: serviceId,
                     barberId: barberId,
                     appointmentDate: appointmentDate,
                 },

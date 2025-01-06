@@ -6,6 +6,7 @@ import { createAppointment, deleteAppointment, editAppointment, getAllAppointmen
 import { getAllBarberbySalonId } from "../../controllers/mobile/barberController.js";
 import { cancelQueueByCustomer, getAvailableBarbersForQ, getBarberByServices, getBarberServicesByBarberId, getQlistbyBarberId, getQueueListBySalonId, groupJoinQueue, singleJoinQueue } from "../../controllers/mobile/joinQueueController.js";
 import { getAllAdvertisements } from "../../controllers/mobile/advertisementController.js";
+import { getAppointmentHistorybyCustomerEmail } from "../../controllers/web/appointments/appointmentHistoryController.js";
 // import { getAllAdvertisements } from "../../controllers/dashboard/dashboardController.js";
 
 const router = express.Router();
@@ -42,6 +43,8 @@ router.route("/getAllAppointmentsBySalonIdAndDate").post(getAllAppointmentsBySal
 router.route("/getAllAppointmentsByBarberId").post(getAllAppointmentsByBarberId)
 
 router.route("/getAllAppointmentsByBarberIdAndDate").post(getAllAppointmentsByBarberIdAndDate)
+
+router.route("/getAppointmentHistory").post(getAppointmentHistorybyCustomerEmail)
 
 
 // //DESC:QUEUE ROUTES ==============================

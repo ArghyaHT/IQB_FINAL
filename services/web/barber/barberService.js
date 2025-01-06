@@ -29,13 +29,13 @@ export const createBarber = async (email, hashedPassword, barberId) => {
 }
 
 //BARBER GOOGLE SIGNUP
-export const createGoogleBarber = async(email, barberId, barberCode) => {
+export const createGoogleBarber = async(email, barberId) => {
    const barber =  new Barber({
       email: email,
       role: "Barber",
       AuthType: "google",
       barberId: barberId,
-      barberCode: barberCode
+      // barberCode: barberCode
     })
 
     await barber.save();

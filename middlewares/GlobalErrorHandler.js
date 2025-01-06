@@ -1,5 +1,5 @@
 export const GlobalErrorHandler = (err, req, res, next) => {
-  const errStatus = 500;
+  const errStatus = err.status || res.statusCode || 500;
   const errMsg = err.message || 'Something went wrong';
   res.status(errStatus).json({
       success: false,

@@ -12,10 +12,11 @@ const router = express.Router();
 router.route("/register").post(registerAdmin)
 router.route("/login").post(loginAdmin)
 router.route('/logout').post(handleLogoutAdmin)
-router.route("/adminloggedin").get(AdminLoggedIn)
+router.route("/adminloggedin").get(verifyRefreshTokenAdmin, AdminLoggedIn)
 router.route("/updateadminInfo").put(updateAdminInfo)
 router.route('/forget-password').post(handleForgetPasswordAdmin)
 router.route('/reset-password/:token').post(handleResetPasswordAdmin)
+
 
 router.route("/googleAdminSignUp").post(googleAdminSignup)
 router.route("/googleAdminLogin").post(googleAdminLogin)

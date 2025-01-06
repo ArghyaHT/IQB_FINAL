@@ -56,6 +56,12 @@ export const getbokingAvailabilystatus = async(salonId) => {
   return salon?.mobileBookingAvailability ?? false;
 }
 
+export const getKioskAvailabilystatus = async(salonId) => {
+  const salon = await Salon.findOne({salonId}).select("kioskAvailability").lean();
+
+  return salon?.kioskAvailability ?? false;
+}
+
 //GET SALON TIMEZONE 
 export const getSalonTimeZone = async(salonId) => {
   const salonTimeZone = await Salon.findOne({salonId})
@@ -68,6 +74,16 @@ export const mobileBookingAvailabilityStatus = async(salonId, mobileBookingAvail
   const salon = await Salon.findOneAndUpdate(
     { salonId: salonId },
     { mobileBookingAvailability: mobileBookingAvailability }, // Update the isOnline field in the database
+    { new: true }
+ );
+ return salon;
+}
+
+//CHANGE MOBILE BOOKING AVAILABILITY STATUS 
+export const kioskAvailabilityStatus = async(salonId, kioskAvailability) => {
+  const salon = await Salon.findOneAndUpdate(
+    { salonId: salonId },
+    { kioskAvailability:kioskAvailability }, // Update the isOnline field in the database
     { new: true }
  );
  return salon;

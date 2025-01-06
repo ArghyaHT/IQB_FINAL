@@ -191,6 +191,10 @@ const salonsSchema = new mongoose.Schema({
         type:Boolean,
         default: false
     },
+    kioskAvailability:{
+        type: Boolean,
+        default: false
+    },
     gallery: [
         {
             public_id: {

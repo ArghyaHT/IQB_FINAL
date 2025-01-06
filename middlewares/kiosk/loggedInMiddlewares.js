@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken"
 
 import { findAdminByEmailandRole } from "../../services/kiosk/admin/adminServices.js"
 import { findBarberByEmailAndRole } from "../../services/kiosk/barber/barberService.js"
-import { getSalonBySalonId, getSalonOnlineStatus, getbokingAvailabilystatus } from "../../services/kiosk/salon/salonServices.js"
+import { getKioskAvailabilystatus, getSalonBySalonId, getSalonOnlineStatus, getbokingAvailabilystatus, kioskAvailabilityStatus } from "../../services/kiosk/salon/salonServices.js"
 import { getAdvertisements } from "../../services/kiosk/advertisements/advertisementService.js"
 
 export const loggedIn = async (req, res, next) => {
@@ -17,6 +17,9 @@ export const loggedIn = async (req, res, next) => {
 
             const bookingAvailabilityStatus = await getbokingAvailabilystatus(loggedinAdmin.salonId)
 
+            const kioskAvailabilityStatus = await getKioskAvailabilystatus(loggedinAdmin.salonId)
+
+
             res.status(201).json({
                 message: "Yes i am admin Logged in",
                 email,
@@ -25,7 +28,8 @@ export const loggedIn = async (req, res, next) => {
                 user: {
                     ...loggedinAdmin.toObject(), // Convert Mongoose document to plain object
                     isSalonOnline: salonOnlineStatus,
-                    mobileBookingAvailability: bookingAvailabilityStatus
+                    mobileBookingAvailability: bookingAvailabilityStatus,
+                    kioskAvailability: kioskAvailabilityStatus
                 }
             })
         }

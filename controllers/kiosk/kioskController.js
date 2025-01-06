@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken"
 
 import { connectAdminKiosk, findAdminByEmailandRole, findAdminByEmailandSalonId } from "../../services/kiosk/admin/adminServices.js";
 import { availableBarberAutoJoin, barberClockInStatus, barberOnlineStatus, changeBarberStatusAtSalonOffline, decreaseBarberEWT, decreaseBarberEWTWhenQCancel, fetchedBarbers, findBaberByBarberId, findBarberByBarberEmailAndSalonId, findBarberByEmailAndRole, findBarberByEmailAndSalonId, getAllSalonBarbers, getBarberByBarberId, getBarbersForQ, getBarbersWithMulServices, updateBarberEWT } from "../../services/kiosk/barber/barberService.js";
-import { allSalonsByAdmin, allSalonServices, checkSalonExists, getDefaultSalonDetailsEmail, getSalonBySalonId, getSalonOnlineStatus, getSalonTimeZone, mobileBookingAvailabilityStatus, salonOnlineStatus } from "../../services/kiosk/salon/salonServices.js";
+import { allSalonsByAdmin, allSalonServices, checkSalonExists, getDefaultSalonDetailsEmail, getSalonBySalonId, getSalonOnlineStatus, getSalonTimeZone, kioskAvailabilityStatus, mobileBookingAvailabilityStatus, salonOnlineStatus } from "../../services/kiosk/salon/salonServices.js";
 import { findCustomersToMail, findSalonQueueList, getSalonQlist, qListByBarberId } from "../../services/kiosk/queue/queueService.js";
 import { addCustomerToQueue } from "../../utils/queue/queueUtils.js";
 import { sendQueuePositionEmail } from "../../utils/emailSender/emailSender.js";
@@ -18,7 +18,7 @@ import moment from "moment";
 import { ADMIN_NOT_EXIST_ERROR, EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, INVALID_EMAIL_ERROR, NAME_LENGTH_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, SIGNIN_SUCCESS } from "../../constants/web/adminConstants.js";
 import { ERROR_STATUS_CODE, ERROR_STATUS_CODE_403, ERROR_STATUS_CODE_404, SUCCESS_STATUS_CODE } from "../../constants/kiosk/StatusCodeConstants.js";
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
-import { ADMIN_CONNECT_SUCCESS, BARBER_ATTENDENCE_ERROR, BARBER_ATTENDENCE_RETRIEVED_SUCCESS, BARBER_CLOCKIN_CLOCKOUT_SUCCESS, BARBER_CONNECT_SALON_ERROR, BARBER_NOT_FOUND_ERROR, BARBER_OFFLINE_ERROR, BARBER_RETRIEVED_SUCCESS, BARBER_SIGNIN_SUCCESS, BARBER_TOKEN_MISSING_ERROR, BARBERS_UNABLE_QUEUE_ERROR, DEFAULT_SALON_RETRIEVED_SUCESS, FORBIDDEN_BARBER_ERROR, JOIN_QUEUE_SUCCESS, LOGOUT_SUCCESS, MOBILE_BOOKING_AVAILABILITY_ERROR, MOBILE_BOOKING_OFFLINE_SUCCESS, MOBILE_BOOKING_ONLINE_SUCCESS, NO_BARBERS_AVAILABLE_ERROR, NO_BARBERS_AVAILABLE_QUEUE_ERROR, NO_BARBERS_AVAILABLE_SUCCESS, SALON_JOIN_QUEUE_ERROR, SALON_MOBILE_BOOKING_AVAILABILITY_ERROR, SALON_OFFLINE_ERROR, SALON_VALID_ERROR } from "../../constants/kiosk/KioskConstants.js";
+import { ADMIN_CONNECT_SUCCESS, BARBER_ATTENDENCE_ERROR, BARBER_ATTENDENCE_RETRIEVED_SUCCESS, BARBER_CLOCKIN_CLOCKOUT_SUCCESS, BARBER_CONNECT_SALON_ERROR, BARBER_NOT_FOUND_ERROR, BARBER_OFFLINE_ERROR, BARBER_RETRIEVED_SUCCESS, BARBER_SIGNIN_SUCCESS, BARBER_TOKEN_MISSING_ERROR, BARBERS_UNABLE_QUEUE_ERROR, DEFAULT_SALON_RETRIEVED_SUCESS, FORBIDDEN_BARBER_ERROR, JOIN_QUEUE_SUCCESS, KIOSK_AVAILABILITY_ERROR, KIOSK_OFFLINE_SUCCESS, KIOSK_ONLINE_SUCCESS, LOGOUT_SUCCESS, MOBILE_BOOKING_AVAILABILITY_ERROR, MOBILE_BOOKING_OFFLINE_SUCCESS, MOBILE_BOOKING_ONLINE_SUCCESS, NO_BARBERS_AVAILABLE_ERROR, NO_BARBERS_AVAILABLE_QUEUE_ERROR, NO_BARBERS_AVAILABLE_SUCCESS, SALON_JOIN_QUEUE_ERROR, SALON_KIOSK_AVAILABILITY_ERROR, SALON_KIOSK_ERROR, SALON_MOBILE_BOOKING_AVAILABILITY_ERROR, SALON_OFFLINE_ERROR, SALON_VALID_ERROR } from "../../constants/kiosk/KioskConstants.js";
 import { SALON_EXISTS_ERROR, SALON_NOT_FOUND_ERROR, SALON_OFFLINE_SUCCESS, SALON_ONLINE_SUCCESS, SALON_QUEUELIST_ERROR, SALONS_RETRIEVED_SUCESS } from "../../constants/web/SalonConstants.js";
 import { BARBER_CLOCKIN_ERROR, BARBER_CLOCKIN_SUCCESS, BARBER_CLOCKOUT_SUCCESS, BARBER_EXISTS_ERROR, BARBER_NOT_APPROVE_ERROR, BARBER_SERVICES_SUCCESS, CUSTOMERS_IN_QUEUE_ERROR, GET_ALL_BARBER_SUCCESS, SELECT_SERVICE_ERROR } from "../../constants/web/BarberConstants.js";
 
@@ -70,6 +70,7 @@ export const loginKiosk = async (req, res, next) => {
                 return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
             }
 
+            
             const adminKioskToken = jwt.sign(
                 {
                     "email": foundUser.email,
@@ -260,6 +261,7 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
         else {
 
             updatedSalon.mobileBookingAvailability = false;
+            updatedSalon.kioskAvailability = false
             await updatedSalon.save();
 
             await changeBarberStatusAtSalonOffline(salonId);
@@ -434,6 +436,10 @@ export const joinQueueKiosk = async (req, res, next) => {
 
         if (salon.isOnline === false) {
             return ErrorHandler(SALON_JOIN_QUEUE_ERROR, ERROR_STATUS_CODE_404, res)
+        }
+
+        if(salon.kioskAvailability === false){
+            return ErrorHandler(SALON_KIOSK_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (name.length < 1 || name.length > 20) {
@@ -1740,6 +1746,42 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
         }
         else {
             return SuccessHandler(MOBILE_BOOKING_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
+        }
+
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+//DESC:CHANGE BARBER CLOCKIN STATUS ===========================
+export const changeSalonKioskStatus = async (req, res, next) => {
+    try {
+        const { salonId, kioskAvailability } = req.body;
+
+        if (!salonId) {
+            return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        const salon = await getSalonBySalonId(salonId)
+
+        if (salon.isOnline === false) {
+            return ErrorHandler(SALON_KIOSK_AVAILABILITY_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        // Now, you can proceed with the logic after verifying the token
+        const updatedSalon = await kioskAvailabilityStatus(salonId, kioskAvailability);
+
+        if (!updatedSalon) {
+            return ErrorHandler(KIOSK_AVAILABILITY_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        if ( kioskAvailability === true) {
+            return SuccessHandler(KIOSK_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
+
+        }
+        else {
+            return SuccessHandler(KIOSK_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
         }
 
 

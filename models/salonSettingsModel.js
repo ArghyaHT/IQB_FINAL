@@ -5,6 +5,18 @@ const salonSettingsSchema  = new mongoose.Schema({
         type: Number,
         default:0
     },
+    salonOffDays: {
+        type: [String], // Directly store an array of strings
+        enum: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ],
+    },
     advertisements: [
         {
             public_id: {
@@ -28,6 +40,10 @@ const salonSettingsSchema  = new mongoose.Schema({
             type: Number,
              default:0
         }
+    },
+    appointmentAdvanceDays:{
+        type: Number,
+        default:0
     }
 },{timestamps: true})
 

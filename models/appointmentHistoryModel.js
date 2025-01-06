@@ -9,12 +9,16 @@ const appointmentHistorySchema = new mongoose.Schema({
             type: Number
         },
         services: [{
-            serviceId: {
+            services: [{
+        serviceId: {
                 type: Number
             },
-            serviceName: {
-                type: String
-            },
+            serviceName:  {
+            type: Number
+        },
+        serviceName: {
+                    type: String
+                },
             servicePrice:{
                 type: Number
             },
@@ -23,7 +27,14 @@ const appointmentHistorySchema = new mongoose.Schema({
             }
         }],
         
-        appointmentNotes:{
+            servicePrice:{
+            type: Number
+        },
+        barberServiceEWT: {
+            type: Number
+        }
+    }],
+    appointmentNotes:{
             type: String
         },
         appointmentDate:{
@@ -48,7 +59,7 @@ const appointmentHistorySchema = new mongoose.Schema({
             type: String
         },
         methodUsed:{
-            type: String
+            type:String
         }
     }]
     },{timestamps:true})

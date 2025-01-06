@@ -3,6 +3,10 @@
 export const SALON_SETTINGS_EMPTY_ERROR = "Please fill all the fields"
 export const SALON_SETTINGS_STARTTIME_EMPTY_ERROR = "Please choose start time"
 export const SALON_SETTINGS_ENDTIME_EMPTY_ERROR = "Please choose end time"
+export const SALON_DAYOFFS_ERROR = "Please choose salon dayoffs"
+export const APPOINTMENT_ADVANCE_DAYS_ERROR = "Please choose appointment advance days"
+
+
 
 
 export const SALON_SETTINGS_NOT_FOUND_ERROR = "Salon settings not found"
@@ -13,7 +17,7 @@ export const INTERVAL_MINUTES__ERROR = "Interval miniutes can't be 0."
 
 
 //SUCCESS
-export const SALON_SETTINGS_UPDATE_SUCCESS = "Salon settings updated successfully"
+export const SALON_SETTINGS_UPDATE_SUCCESS = "Salon settings retrieved successfully"
 export const SALON_SETTINGS_ADD_SUCCESS = "New salon settings added successfully"
 
 

@@ -27,6 +27,7 @@ import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ALLOWED_IMAGE_EXTENSIONS, BARBER_IMAGE_EMPTY_ERROR, IMAGE_FAILED_DELETE, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 import { SALON_EXISTS_ERROR, SALON_NOT_CREATED_ERROR, SALON_NOT_FOUND_ERROR, SALON_SERVICES_RETRIEVED_SUCESS } from "../../../constants/web/SalonConstants.js";
 import { NO_SALON_CONNECTED_ERROR } from "../../../constants/web/QueueConstants.js";
+import { addBarberForDayOff } from "../../../services/web/barberDayOff/barberDayOffService.js";
 
 
 // Desc: Register
@@ -141,12 +142,12 @@ export const loginController = async (req, res, next) => {
             { expiresIn: '1d' }
         )
 
-        res.cookie('BarberToken', accessToken, {
-            httpOnly: true, //accessible only by web server 
-            secure: true, //https
-            sameSite: 'None', //cross-site cookie 
-            maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
-        })
+        // res.cookie('BarberToken', accessToken, {
+        //     httpOnly: true, //accessible only by web server 
+        //     secure: true, //https
+        //     sameSite: 'None', //cross-site cookie 
+        //     maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
+        // })
 
         return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
             accessToken,
@@ -156,7 +157,6 @@ export const loginController = async (req, res, next) => {
         next(error);
     }
 };
-
 
 // Desc: Barber Logout
 export const handleLogout = async (req, res, next) => {
@@ -179,31 +179,152 @@ export const handleLogout = async (req, res, next) => {
     }
 }
 
+// // Desc: Google Signup
+// export const googleBarberSignup = async (req, res, next) => {
+//     try {
+//         const CLIENT_ID = process.env.CLIENT_ID
+
+//         const token = req.query.token;
+//         const { webFcmToken, androidFcmToken, iosFcmToken } = req.query;
+
+//         if (!token) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: "Barber token not found"
+//             })
+//         }
+
+//         const client = new OAuth2Client(CLIENT_ID);
+
+//         const ticket = await client.verifyIdToken({
+//             idToken: token,
+//             audience: CLIENT_ID,
+//         });
+
+//         const payload = ticket.getPayload();
+
+//         const existingUser = await findBarberByEmailAndRole(payload.email)
+
+//         if (existingUser) {
+//             return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE, res)
+//         }
+
+
+//         const barberId = await createBarberId();
+//         const firstTwoLetters = payload.name.slice(0, 2).toUpperCase();
+//         const barberCode = firstTwoLetters + barberId;
+
+//         // Create a new user
+//         const newUser = await createGoogleBarber(payload.email, barberId, barberCode)
+
+
+//         //   let tokenType, tokenValue;
+//         //   if (webFcmToken) {
+//         //     tokenType = 'webFcmToken';
+//         //     tokenValue = webFcmToken;
+//         //   } else if (androidFcmToken) {
+//         //     tokenType = 'androidFcmToken';
+//         //     tokenValue = androidFcmToken;
+//         //   } else if (iosFcmToken) {
+//         //     tokenType = 'iosFcmToken';
+//         //     tokenValue = iosFcmToken;
+//         //   }
+
+//         //   if (tokenType && tokenValue) {
+//         //     await UserTokenTable.findOneAndUpdate(
+//         //       { email: payload.email },
+//         //       { [tokenType]: tokenValue, type: "barber" },
+//         //       { upsert: true, new: true }
+//         //     );
+//         //   }
+
+//         return SuccessHandler(SIGNUP_SUCCESS, SUCCESS_STATUS_CODE, res, { newUser })
+//     }
+//     catch (error) {
+//         next(error);
+//     }
+// }
+
+// // Desc: Google Signin
+// export const googleBarberLogin = async (req, res, next) => {
+//     try {
+//         const CLIENT_ID = process.env.CLIENT_ID
+
+//         const token = req.query.token;
+//         const { webFcmToken, androidFcmToken, iosFcmToken } = req.query;
+
+//         if (!token) {
+//             return res.status(404).json({ success: false, message: "Barber token not found" })
+//         }
+
+//         const client = new OAuth2Client(CLIENT_ID);
+
+//         // Call the verifyIdToken to
+//         // varify and decode it
+//         const ticket = await client.verifyIdToken({
+//             idToken: token,
+//             audience: CLIENT_ID,
+//         });
+
+//         // Get the JSON with all the user info
+//         const payload = ticket.getPayload();
+
+//         const foundUser = await googleLoginBarber(payload.email)
+
+//         if (!foundUser) {
+//             return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
+//         }
+
+//         const accessToken = jwt.sign(
+//             {
+
+//                 "email": foundUser.email,
+//                 "role": foundUser.role,
+//             },
+//             process.env.JWT_BARBER_ACCESS_SECRET,
+//             { expiresIn: '1d' }
+//         )
+
+//         let tokenType, tokenValue;
+//         if (webFcmToken) {
+//             tokenType = 'webFcmToken';
+//             tokenValue = webFcmToken;
+//         } else if (androidFcmToken) {
+//             tokenType = 'androidFcmToken';
+//             tokenValue = androidFcmToken;
+//         } else if (iosFcmToken) {
+//             tokenType = 'iosFcmToken';
+//             tokenValue = iosFcmToken;
+//         }
+
+//         if (tokenType && tokenValue) {
+//             await createBarberFcmToken(email, tokenType, tokenValue)
+//         }
+
+//         // Create secure cookie with refresh token 
+//         res.cookie('BarberToken', accessToken, {
+//             httpOnly: true, //accessible only by web server 
+//             secure: true, //https
+//             sameSite: 'None', //cross-site cookie 
+//             maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
+//         })
+
+//         return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+//             accessToken,
+//             foundUser
+//         })
+//     } catch (error) {
+//         next(error);
+//     }
+// }
+
+
 // Desc: Google Signup
 export const googleBarberSignup = async (req, res, next) => {
     try {
-        const CLIENT_ID = process.env.CLIENT_ID
+        const email = req.body.email
 
-        const token = req.query.token;
-        const { webFcmToken, androidFcmToken, iosFcmToken } = req.query;
-
-        if (!token) {
-            return res.status(404).json({
-                success: false,
-                message: "Barber token not found"
-            })
-        }
-
-        const client = new OAuth2Client(CLIENT_ID);
-
-        const ticket = await client.verifyIdToken({
-            idToken: token,
-            audience: CLIENT_ID,
-        });
-
-        const payload = ticket.getPayload();
-
-        const existingUser = await findBarberByEmailAndRole(payload.email)
+        const existingUser = await findBarberByEmailAndRole(email)
 
         if (existingUser) {
             return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE, res)
@@ -211,11 +332,11 @@ export const googleBarberSignup = async (req, res, next) => {
 
 
         const barberId = await createBarberId();
-        const firstTwoLetters = payload.name.slice(0, 2).toUpperCase();
-        const barberCode = firstTwoLetters + barberId;
+        // const firstTwoLetters = payload.name.slice(0, 2).toUpperCase();
+        // const barberCode = firstTwoLetters + barberId;
 
         // Create a new user
-        const newUser = await createGoogleBarber(payload.email, barberId, barberCode)
+        const newUser = await createGoogleBarber(email, barberId)
 
 
         //   let tokenType, tokenValue;
@@ -248,28 +369,9 @@ export const googleBarberSignup = async (req, res, next) => {
 // Desc: Google Signin
 export const googleBarberLogin = async (req, res, next) => {
     try {
-        const CLIENT_ID = process.env.CLIENT_ID
+        const email = req.body.email
 
-        const token = req.query.token;
-        const { webFcmToken, androidFcmToken, iosFcmToken } = req.query;
-
-        if (!token) {
-            return res.status(404).json({ success: false, message: "Barber token not found" })
-        }
-
-        const client = new OAuth2Client(CLIENT_ID);
-
-        // Call the verifyIdToken to
-        // varify and decode it
-        const ticket = await client.verifyIdToken({
-            idToken: token,
-            audience: CLIENT_ID,
-        });
-
-        // Get the JSON with all the user info
-        const payload = ticket.getPayload();
-
-        const foundUser = await googleLoginBarber(payload.email)
+        const foundUser = await googleLoginBarber(email)
 
         if (!foundUser) {
             return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
@@ -285,21 +387,21 @@ export const googleBarberLogin = async (req, res, next) => {
             { expiresIn: '1d' }
         )
 
-        let tokenType, tokenValue;
-        if (webFcmToken) {
-            tokenType = 'webFcmToken';
-            tokenValue = webFcmToken;
-        } else if (androidFcmToken) {
-            tokenType = 'androidFcmToken';
-            tokenValue = androidFcmToken;
-        } else if (iosFcmToken) {
-            tokenType = 'iosFcmToken';
-            tokenValue = iosFcmToken;
-        }
+        // let tokenType, tokenValue;
+        // if (webFcmToken) {
+        //     tokenType = 'webFcmToken';
+        //     tokenValue = webFcmToken;
+        // } else if (androidFcmToken) {
+        //     tokenType = 'androidFcmToken';
+        //     tokenValue = androidFcmToken;
+        // } else if (iosFcmToken) {
+        //     tokenType = 'iosFcmToken';
+        //     tokenValue = iosFcmToken;
+        // }
 
-        if (tokenType && tokenValue) {
-            await createBarberFcmToken(email, tokenType, tokenValue)
-        }
+        // if (tokenType && tokenValue) {
+        //     await createBarberFcmToken(email, tokenType, tokenValue)
+        // }
 
         // Create secure cookie with refresh token 
         res.cookie('BarberToken', accessToken, {
@@ -393,12 +495,12 @@ export const updateBarberInfo = async (req, res, next) => {
             { expiresIn: '1d' }
         )
 
-        res.cookie('BarberToken', accessToken, {
-            httpOnly: true, //accessible only by web server 
-            secure: true, //https
-            sameSite: 'None', //cross-site cookie 
-            maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
-        })
+        // res.cookie('BarberToken', accessToken, {
+        //     httpOnly: true, //accessible only by web server 
+        //     secure: true, //https
+        //     sameSite: 'None', //cross-site cookie 
+        //     maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
+        // })
 
 
         return SuccessHandler(UPDATE_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, {
@@ -565,6 +667,8 @@ export const createBarberByAdmin = async (req, res, next) => {
 
         // Save the new barber to the database
         const savedBarber = await adminCreateBarber(email, hashedPassword, name, nickName, salonId, countryCode, formattedNumberAsNumber, dateOfBirth, barberCode, barberId, barberExp, barberServices);
+
+        await addBarberForDayOff(salonId, barberId)
 
         //   // Save FCM Tokens based on the switch-case logic
         //   let tokenType, tokenValue;
@@ -968,6 +1072,9 @@ export const connectBarberToSalon = async (req, res, next) => {
         }
 
         const barber = await connectBarberSalon(email, salonId, barberServices, approvePendingMessage)
+
+        await addBarberForDayOff(salonId, barber.barberId)
+
 
         //If barber not found
         if (!barber) {

@@ -11,6 +11,7 @@ import morgan from "morgan";
 import jsonFile from "jsonfile"
 import path from "path"
 import { v2 as cloudinary } from "cloudinary";
+import bodyParser from "body-parser";
 
 import kioskRoutes from "./routes/kiosk/kioskRouter.js"
 import customerRoutes from "./routes/mobile/customerRoutes.js"
@@ -31,6 +32,9 @@ import customerRoutesWeb from "./routes/web/customer/customerRoutes.js"
 import bulkMessageAndEmailsRoutes from "./routes/web/bulkMessagesAndEmailRoutes/bulkMesagesAndEmailRoutes.js"
 import reports from "./routes/web/reports/reportsRoutes.js"
 import queuehistoryRoutes from "./routes/web/queue/queueHistoryRoutes.js"
+import barberDayOffRoutes from "./routes/web/barberDayOff/barberDayoffRoutes.js"
+import barberAppointmentDays from "./routes/web/barberAppointmentDays/barberAppointmentDaysRoutes.js"
+// import salonPaymentRoutes from "./routes/web/salonPayment/salonPaymentGatewayRoutes.js"
 
 // import { setupCronJobs } from "./triggers/cronJobs.js";
 // import { storeCountries } from "./utils/countries.js";
@@ -40,6 +44,9 @@ import loggerRoutes from "./routes/loggerRoutes.js"
 import logger from "./utils/logger/logger.js";
 import { GlobalErrorHandler } from "./middlewares/GlobalErrorHandler.js";
 import { logMiddleware } from "./controllers/loggerController.js";
+import { updateCustomers } from "./triggers/cronjobs.js";
+import Stripe from "stripe";
+import SalonPayments from "./models/paymentGatewayModel.js";
 
 dotenv.config()
 
@@ -74,22 +81,14 @@ connectDB()
 // Writing the cors for for both dev and prod
 const app = express()
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-
-// app.use(helmet()); 
-
-app.use(cookieParser())
 
 const allowedOrigins = [
+  "https://productstripe.netlify.app",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "https://iqb-kiosk.netlify.app",
   "https://iqb-final.onrender.com",
+  "https://iqb-final.netlify.app"
 ];
 
 // //Use Multiple Cors
@@ -102,8 +101,87 @@ app.use(cors({
       callback(new Error("Not allowed by CORS")); // Deny the request
     }
   },
-  credentials: true
+  // credentials: true
 }));
+
+
+//============================================Stripe=========================================//
+const stripe = Stripe("sk_test_51QdUcgJJY2GyQI9MG1P9ZNELM63wZn7fEpDw2x8BfnSLsjUA7amARck1wCu63ZbX4s02hfKOS7iB0KTt49MY3m8w00wi9WMXMi")
+
+const endpointSecret = "whsec_DHdgxBkr9Q3LxPngNylgMs00eTyZXxqi"; // Replace with your actual webhook secret
+
+app.post('/api/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
+  const sig = request.headers['stripe-signature'];
+  let event;
+
+  try {
+    // Construct the event using the raw body and the signature header
+    event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err.message);
+    return response.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+
+    const products = lineItems.data.map((item) => ({
+      name: item.description,
+      quantity: item.quantity,
+      price: item.amount_total / 100, // Amount in dollars (converted from cents)
+      currency: session.currency,
+    }));
+
+    // Save payment details to MongoDB
+    const paymentData = {
+      customerEmail: session.customer_details.email,
+      customerName: session.customer_details.name,
+      amount: session.amount_total, // Convert from cents to dollars
+      currency: session.currency,
+      paymentIntentId: session.payment_intent,
+      status: session.payment_status,
+      products: products,
+    };
+
+    console.log("Working A")
+    // Convert amount based on currency
+    if (session.currency !== 'jpy' && session.currency !== 'krw') {
+      paymentData.amount = paymentData.amount / 100; // Convert to main currency unit
+    } else {
+      // For JPY, KRW or other currencies that don't need division by 100
+      paymentData.amount = paymentData.amount; // Keep it as is
+    }
+
+    SalonPayments.create(paymentData)
+      .then(() => console.log("Payment saved to database"))
+      .catch((err) => console.error("Error saving payment to database:", err));
+
+  }
+
+  if (event.type === 'payment_intent.payment_failed') {
+    const paymentIntent = event.data.object;
+    console.log("Payment Failed ", paymentIntent)
+    // It can happen example:
+    // If user card has insufficient balance.
+    // Here i can send a email to the user that he/she has insufficient balance for that the payment is not completed.
+  }
+  response.status(200).json({ received: true });
+});
+
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+
+// app.use(helmet()); 
+
+
+
 
 // // Initialize Firebase Admin SDK
 const serviceAccount = jsonFile.readFileSync('./notification_push_service_key.json');
@@ -183,8 +261,52 @@ app.use("/api/country", countryRoutes)
 app.use("/api/bulkMessageAndEmails", bulkMessageAndEmailsRoutes)
 app.use("/api/reports", reports)
 app.use("/api/queueHistory", queuehistoryRoutes)
+app.use("/api/barberDayOff", barberDayOffRoutes)
+app.use("/api/barberAppointmentDays", barberAppointmentDays)
+// app.use('/api/salonPayments', salonPaymentRoutes);
 
 
+
+
+
+// app.use(express.json());
+// app.use(bodyParser.raw({ type: "application/json" })); // For Stripe webhooks
+
+
+// Create Checkout Session Endpoint
+app.post("/api/create-checkout-session", async (req, res) => {
+  try {
+    const productsArray = req.body.products;
+
+    console.log("Working B")
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"], // Types of card (Visa, MasterCard, etc.)
+      mode: "payment",
+      line_items: productsArray.map((item) => ({
+        price_data: {
+          currency: item.currency,
+          product_data: {
+            name: item.name,
+          },
+          unit_amount: item.price * 100, // Amount in cents
+        },
+        quantity: item.unit,
+      })),
+      success_url: "https://productstripe.netlify.app/success",
+      cancel_url: "https://productstripe.netlify.app/cancel",
+    });
+
+    res.status(200).json({
+      success: true,
+      session,
+    });
+  } catch (error) {
+    console.log("Payment Check-Out Failed ", error)
+  }
+});
+
+//////////////////////////////////////////
 // Global Error Handler
 app.use(GlobalErrorHandler)
 
@@ -197,6 +319,8 @@ app.get('*', (req, res) =>
 );
 
 const PORT = 8001;
+
+updateCustomers()
 
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);

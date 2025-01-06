@@ -16,14 +16,16 @@ import { getCustomerAppointments } from "../../services/mobile/appointmentServic
 import { findBarbersBySalonIdforCustomerDashboard } from "../../services/mobile/barberService.js";
 import { getSalonQlist } from "../../services/mobile/joinQueueService.js";
 import { sendMobileVerificationCode } from "../../utils/mobileMessageSender/mobileMessageSender.js";
-import { CUSTOMER_CONNECT_SALON_SUCCESS, CUSTOMER_DISCONNECT_SALON_SUCCESS, CUSTOMER_FAVOURITE_SALON_DELETE_SUCCESS, CUSTOMER_FAVOURITE_SALON_ERROR, CUSTOMER_FAVOURITE_SALON_NOT_FOUND_ERROR, CUSTOMER_FAVOURITE_SALON_SUCCESS, CUSTOMER_NOT_FOUND_ERROR, CUSTOMER_RETRIEVE_SUCCESS, CUSTOMER_SIGNIN_SUCCESS, CUSTOMER_SIGNUP_ERROR, CUSTOMER_SIGNUP_SUCCESS, CUSTOMER_UPDATE_SUCCESS, CUSTOMER_VERIFICATION_ERROR, CUSTOMER_VERIFICATION_SUCCESS, EMAIL_CHECK_SUCCESS, EMAIL_EXISTS_ERROR, FORGET_PASSWORD_SUCCESS, PASSWORD_RESET_SUCCESS } from "../../constants/mobile/CustomerConstants.js";
-import { EMAIL_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, IMAGE_FILE_EXTENSION_ERROR, IMAGE_FILE_SIZE_ERROR, IMAGE_UPLOAD_SUCCESS, INVALID_EMAIL_ERROR, NAME_LENGTH_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR } from "../../constants/web/adminConstants.js";
+import { CUSTOMER_NOT_EXIST_ERROR, CUSTOMER_CONNECT_SALON_SUCCESS, CUSTOMER_DISCONNECT_SALON_SUCCESS, CUSTOMER_FAVOURITE_SALON_DELETE_SUCCESS, CUSTOMER_FAVOURITE_SALON_ERROR, CUSTOMER_FAVOURITE_SALON_NOT_FOUND_ERROR, CUSTOMER_FAVOURITE_SALON_SUCCESS, CUSTOMER_NOT_FOUND_ERROR, CUSTOMER_RETRIEVE_SUCCESS, CUSTOMER_SIGNIN_SUCCESS, CUSTOMER_SIGNUP_ERROR, CUSTOMER_SIGNUP_SUCCESS, CUSTOMER_UPDATE_SUCCESS, CUSTOMER_VERIFICATION_ERROR, CUSTOMER_VERIFICATION_SUCCESS, EMAIL_CHECK_SUCCESS, EMAIL_EXISTS_ERROR, FORGET_PASSWORD_SUCCESS, PASSWORD_RESET_SUCCESS } from "../../constants/mobile/CustomerConstants.js";
+import { EMAIL_NOT_FOUND_ERROR, EMAIL_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, IMAGE_FILE_EXTENSION_ERROR, IMAGE_FILE_SIZE_ERROR, IMAGE_UPLOAD_SUCCESS, EMAIL_VERIFIED_SUCCESS, EMAIL_VERIFY_CODE_ERROR, INVALID_EMAIL_ERROR, NAME_LENGTH_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, MOBILE_VERIFIED_SUCCESS, MOBILE_VERIFY_CODE_ERROR, SEND_VERIFICATION_EMAIL_SUCCESS, SEND_VERIFICATION_MOBILE_SUCCESS, VERIFICATION_EMAIL_ERROR } from "../../constants/web/adminConstants.js";
 import { ERROR_STATUS_CODE_201, SUCCESS_STATUS_CODE } from "../../constants/mobile/StatusCodeConstants.js";
 import { ErrorHandler } from "../../middlewares/ErrorHandler.js"
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 import { SALON_NOT_FOUND_ERROR, SALONS_RETRIEVED_SUCESS } from "../../constants/web/SalonConstants.js";
 import { CUSTOMER_CHANGE_DEFAULT_SALON_SUCCESS, CUSTOMER_DASHBOARD_SUCCESS } from "../../constants/mobile/SalonConstants.js";
 import { ALLOWED_IMAGE_EXTENSIONS, CUSTOMER_IMAGE_EMPTY_ERROR, IMAGE_FAILED_DELETE, IMAGE_UPLOAD_FAILED_ERROR, MAX_FILE_SIZE } from "../../constants/web/Common/ImageConstant.js";
+import { SUCCESS_STATUS_CODE } from "../../constants/web/Common/StatusCodeConstant.js";
+import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 
 
 //DESC:CHECK WEATHER THE EMAIL ALREADY EXISTS IN THE DATABASE =======
@@ -178,7 +180,6 @@ export const signUp = async (req, res, next) => {
         //Sending the verification Code to Customer Registered Email
         if (savedCustomer.verificationCode) {
             try {
-                await sendVerificationCode(email, name, verificationCode);
                 await sendMobileVerificationCode(formattedNumber, verificationCode);
             } catch (error) {
                 next(error);
@@ -215,8 +216,6 @@ export const matchVerificationCode = async (req, res, next) => {
         const customer = await findCustomerByEmail(email)
 
         if (customer && customer.verificationCode === verificationCode) {
-
-            customer.emailVerified = true;
             customer.mobileVerified = true;
 
             // If verification code matches, clear it from the database
@@ -961,13 +960,11 @@ export const updateCustomer = async (req, res, next) => {
         }
 
         const customer = await updateCustomerDetails(customerData)
-        // res.status(200).json({
-        //     success: true,
-        //     message: "Customer updated successfully",
-        //     response: customer
-        // })
-        return SuccessHandler(CUSTOMER_UPDATE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: customer });
-
+        res.status(200).json({
+            success: true,
+            message: "Customer updated successfully",
+            response: customer
+        })
     }
     catch (error) {
         next(error);
@@ -976,11 +973,11 @@ export const updateCustomer = async (req, res, next) => {
 //DESC: DELETE CUSTOMER PROFILE ================
 export const deleteSingleCustomer = async (req, res, next) => {
     let { email } = req.body;
-
+    
     try {
 
-        // Convert email to lowercase
-        email = email.toLowerCase();
+            // Convert email to lowercase
+            email = email.toLowerCase();
         const customer = await findCustomerByEmail(email)
         // Check if customer exists
         if (!customer) {
@@ -1537,4 +1534,143 @@ export const deleteCustomerFavoriteSalon = async (req, res, next) => {
         next(error);
     }
 };
+
+// Desc: Send Verification Code
+export const sendVerificationCodeForCustomerMobile = async (req, res, next) => {
+    try {
+        let { email } = req.body;
+
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        if (!validateEmail(email)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        email = email.toLowerCase();
+
+        const user = await findCustomerByEmail(email);
+
+        if (!user) {
+            return ErrorHandler(CUSTOMER_NOT_EXIST_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+
+        user.verificationCode = verificationCode;
+
+        await user.save();
+
+        // Format the mobile number with the country code
+        const formattedNumber = `+${user.mobileCountryCode}${String(user.mobileNumber)}`;
+
+        try {
+            await sendMobileVerificationCode(formattedNumber, verificationCode);
+        } catch (error) {
+            next(error);
+        }
+
+        return SuccessHandler(SEND_VERIFICATION_MOBILE_SUCCESS, SUCCESS_STATUS_CODE, res)
+    } catch (error) {
+        next(error);
+    }
+}
+
+// Desc: Change Mobile Verified Status
+export const changeCustomerMobileVerifiedStatus = async (req, res, next) => {
+    try {
+        let { email, verificationCode } = req.body;
+
+
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        if (!validateEmail(email)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        email = email.toLowerCase();
+
+        const customer = await findCustomerByEmail(email);
+
+        if (customer && customer.verificationCode === verificationCode) {
+            customer.verificationCode = '';
+            customer.mobileVerified = true;
+            await customer.save();
+
+            return SuccessHandler(MOBILE_VERIFIED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: customer })
+        }
+        else {
+            return ErrorHandler(MOBILE_VERIFY_CODE_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+
+// Desc: Customer Send Verification Code
+export const sendVerificationCodeForCustomerEmail = async (req, res, next) => {
+    try {
+        let { email } = req.body;
+
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        const user = await findCustomerByEmail(email);
+
+        if (!user) {
+            return ErrorHandler(CUSTOMER_NOT_EXIST_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+
+        user.verificationCode = verificationCode;
+        await user.save();
+
+        try {
+            await sendVerificationCode(email, user.name, verificationCode);
+        } catch (error) {
+            return ErrorHandler(VERIFICATION_EMAIL_ERROR, ERROR_STATUS_CODE_201, res)
+        }
+
+        return SuccessHandler(SEND_VERIFICATION_EMAIL_SUCCESS, SUCCESS_STATUS_CODE, res);
+
+    } catch (error) {
+        next(error);
+    }
+}
+
+// Desc: Change Customer Email Verifiied Status
+export const changeCustomerEmailVerifiedStatus = async (req, res, next) => {
+    try {
+        let { email, verificationCode } = req.body;
+
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_COD_201, res)
+        }
+
+        email = email.toLowerCase();
+
+        const customer = await findCustomerByEmail(email);
+
+        if (customer && customer.verificationCode === verificationCode) {
+            customer.verificationCode = '';
+            customer.emailVerified = true;
+            await customer.save();
+
+            return SuccessHandler(EMAIL_VERIFIED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: customer });
+        }
+
+        return ErrorHandler(EMAIL_VERIFY_CODE_ERROR, ERROR_STATUS_CODE_201, res)
+
+    } catch (error) {
+        next(error);
+    }
+}
+
 

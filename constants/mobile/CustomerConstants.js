@@ -44,3 +44,4 @@ export const CUSTOMER_FAVOURITE_SALON_DELETE_SUCCESS = "Salon removed from your 
 
 
 
+export const CUSTOMER_NOT_EXIST_ERROR = "Customer does not exist"
