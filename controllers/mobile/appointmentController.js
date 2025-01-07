@@ -274,7 +274,7 @@ export const createAppointment = async (req, res, next) => {
     else {
       return res.status(400).json({
         success: false,
-        message: "Barber can't take appointment today",
+        message: "Barber can't take appointment in that day",
       });
     }
   } catch (error) {
@@ -391,7 +391,7 @@ export const editAppointment = async (req, res, next) => {
     else {
       return res.status(400).json({
         success: false,
-        message: "Barber can't take appointment today",
+        message: "Barber can't take appointment in that day",
       });
     }
   } catch (error) {
