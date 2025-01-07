@@ -218,17 +218,17 @@ return appointments;
                     $arrayElemAt: ["$barberInfo.name", 0]
                 },
                 "appointmentList.barberProfile": {
-                // $arrayElemAt: ["$barberInfo.profile", 0]
-                      $ifNull: [
-                    { $arrayElemAt: ["$customerInfo.profile", 0] },
-                    "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg" // Default image URL
-                ]
+                $arrayElemAt: ["$barberInfo.profile", 0]
             },
             "appointmentList.barberId": {
                 $arrayElemAt: ["$barberInfo.barberId", 0]
             },
             "appointmentList.customerProfile": {
-                $arrayElemAt: ["$customerInfo.profile", 0] // Assuming `profile` exists in customers collection
+                // $arrayElemAt: ["$customerInfo.profile", 0] // Assuming `profile` exists in customers collection
+                  $ifNull: [
+                    { $arrayElemAt: ["$customerInfo.profile", 0] },
+                    "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg" // Default image URL
+                ]
             },
                 "appointmentList.background": "#FFFFFF", // Set your default color here
                 "appointmentList.startTime": "$appointmentList.startTime",
