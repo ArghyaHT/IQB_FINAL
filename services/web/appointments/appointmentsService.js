@@ -178,6 +178,7 @@ return appointments;
 
     
     const appointments = await Appointment.aggregate([
+        // Match appointments based on salonId and appointmentDate
         {
             $match: {
                 salonId: salonId,
@@ -186,9 +187,11 @@ return appointments;
                 }
             }
         },
+        // Unwind the appointmentList array for individual processing
         {
             $unwind: "$appointmentList"
         },
+        // Match again to filter based on appointmentDate
         {
             $match: {
                 "appointmentList.appointmentDate": {
@@ -196,6 +199,7 @@ return appointments;
                 }
             }
         },
+        // Lookup barber information
         {
             $lookup: {
                 from: "barbers",
@@ -204,6 +208,7 @@ return appointments;
                 as: "barberInfo"
             }
         },
+        // Lookup customer information
         {
             $lookup: {
                 from: "customers", // Replace with your customers collection name
@@ -212,33 +217,62 @@ return appointments;
                 as: "customerInfo"
             }
         },
-        // {
-        //     $lookup: {
-        //         from: "salons",
-        //         localField: "appointmentList.barberId",
-        //         foreignField: "barberId",
-        //         as: "barberInfo"
-        //     }
-        // },
+        // Lookup salon information
+        {
+            $lookup: {
+                from: "salons",
+                localField: "salonId",
+                foreignField: "salonId",
+                as: "salonInfo"
+            }
+        },
+        // Add necessary fields and map services with service icons
         {
             $addFields: {
                 "appointmentList.barberName": {
                     $arrayElemAt: ["$barberInfo.name", 0]
                 },
                 "appointmentList.barberProfile": {
-                $arrayElemAt: ["$barberInfo.profile", 0]
-            },
-            "appointmentList.barberId": {
-                $arrayElemAt: ["$barberInfo.barberId", 0]
-            },
-            "appointmentList.customerProfile": {
-                // $arrayElemAt: ["$customerInfo.profile", 0] // Assuming `profile` exists in customers collection
-                  $ifNull: [
-                    { $arrayElemAt: ["$customerInfo.profile", 0] },
-                    "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg" // Default image URL
-                ]
-            },
-                "appointmentList.background": "#FFFFFF", // Set your default color here
+                    $arrayElemAt: ["$barberInfo.profile", 0]
+                },
+                "appointmentList.customerProfile": {
+                    $ifNull: [
+                        { $arrayElemAt: ["$customerInfo.profile", 0] },
+                        "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg" // Default image URL
+                    ]
+                },
+                // Map services to include service icons
+                "appointmentList.services": {
+                    $map: {
+                        input: "$appointmentList.services",
+                        as: "service",
+                        in: {
+                            serviceId: "$$service.serviceId",
+                            serviceName: "$$service.serviceName",
+                            servicePrice: "$$service.servicePrice",
+                            barberServiceEWT: "$$service.barberServiceEWT",
+                            serviceIcon: {
+                                $arrayElemAt: [
+                                    {
+                                        $map: {
+                                            input: {
+                                                $filter: {
+                                                    input: { $arrayElemAt: ["$salonInfo.services", 0] },
+                                                    as: "salonService",
+                                                    cond: { $eq: ["$$salonService.serviceId", "$$service.serviceId"] }
+                                                }
+                                            },
+                                            as: "matchedService",
+                                            in: "$$matchedService.serviceIcon"
+                                        }
+                                    },
+                                    0
+                                ]
+                            }
+                        }
+                    }
+                },
+                "appointmentList.background": "#FFFFFF", // Default background color
                 "appointmentList.startTime": "$appointmentList.startTime",
                 "appointmentList.endTime": "$appointmentList.endTime",
                 "appointmentList.appointmentDate": {
@@ -246,19 +280,20 @@ return appointments;
                         format: "%Y-%m-%d",
                         date: "$appointmentList.appointmentDate"
                     }
+                }
             }
-        }
         },
+        // Group by barberId
         {
             $group: {
                 _id: "$appointmentList.barberId",
                 barbername: { $first: "$appointmentList.barberName" },
-                barberProfile:{$first: "$appointmentList.barberProfile"},
-                barberId:{$first: "$appointmentList.barberId"},
-                customerProfile:{$first: "$appointmentList.customerProfile"},
+                barberProfile: { $first: "$appointmentList.barberProfile" },
+                barberId: { $first: "$appointmentList.barberId" },
                 appointments: { $push: "$appointmentList" }
             }
         },
+        // Project the final output
         {
             $project: {
                 barbername: 1,
@@ -283,14 +318,15 @@ return appointments;
                 _id: 0
             }
         },
+        // Sort by barbername in ascending order
         {
             $sort: {
-                barbername: 1 // Sort by barberName in ascending order
+                barbername: 1
             }
         }
     ]);
     return appointments;
- }
+ }    
 
 
   // GET ALL APPOINTMENTS BY BARBER ID
