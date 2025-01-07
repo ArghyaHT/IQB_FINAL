@@ -189,7 +189,10 @@ export const allAppointmentsBySalonIdAndDate = async (salonId, appointmentDate) 
                 },
                 "appointmentList.background": "#FFFFFF", // Set your default color here
                 "appointmentList.startTime": "$appointmentList.startTime",
-                "appointmentList.endTime": "$appointmentList.endTime"
+                "appointmentList.endTime": "$appointmentList.endTime",
+                "appointmentList.appointmentDate": {
+                    $dateToString: { format: "%Y-%m-%d", date: "$appointmentList.appointmentDate" }
+                }
             }
         },
         {
