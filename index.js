@@ -177,11 +177,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-
 // app.use(helmet()); 
-
-
-
 
 // // Initialize Firebase Admin SDK
 const serviceAccount = jsonFile.readFileSync('./notification_push_service_key.json');

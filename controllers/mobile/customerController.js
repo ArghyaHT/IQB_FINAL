@@ -24,6 +24,7 @@ import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 import { SALON_NOT_FOUND_ERROR, SALONS_RETRIEVED_SUCESS } from "../../constants/web/SalonConstants.js";
 import { CUSTOMER_CHANGE_DEFAULT_SALON_SUCCESS, CUSTOMER_DASHBOARD_SUCCESS } from "../../constants/mobile/SalonConstants.js";
 import { ALLOWED_IMAGE_EXTENSIONS, CUSTOMER_IMAGE_EMPTY_ERROR, IMAGE_FAILED_DELETE, IMAGE_UPLOAD_FAILED_ERROR, MAX_FILE_SIZE } from "../../constants/web/Common/ImageConstant.js";
+import { createCustomerFcmToken } from "../../services/web/userTokenRegister/userTokenRegister.js";
 
 
 //DESC:CHECK WEATHER THE EMAIL ALREADY EXISTS IN THE DATABASE =======
@@ -333,36 +334,37 @@ export const signIn = async (req, res, next) => {
             return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE_201, res)
         }
 
-        //    // Save FCM Tokens based on the switch-case logic
-        // let tokenType, tokenValue;
-        // switch (true) {
-        //   case !!webFcmToken:
-        //     tokenType = 'webFcmToken';
-        //     tokenValue = webFcmToken;
-        //     break;
-        //   case !!androidFcmToken:
-        //     tokenType = 'androidFcmToken';
-        //     tokenValue = androidFcmToken;
-        //     break;
-        //   case !!iosFcmToken:
-        //     tokenType = 'iosFcmToken';
-        //     tokenValue = iosFcmToken;
-        //     break;
-        //   default:
-        //     res.status(201).json({
-        //       success: false,
-        //       message: "No valid FCM tokens present"
-        //     })
-        //     break;
-        // }
+           // Save FCM Tokens based on the switch-case logic
+        let tokenType, tokenValue;
+        switch (true) {
+          case !!webFcmToken:
+            tokenType = 'webFcmToken';
+            tokenValue = webFcmToken;
+            break;
+          case !!androidFcmToken:
+            tokenType = 'androidFcmToken';
+            tokenValue = androidFcmToken;
+            break;
+          case !!iosFcmToken:
+            tokenType = 'iosFcmToken';
+            tokenValue = iosFcmToken;
+            break;
+          default:
+            res.status(201).json({
+              success: false,
+              message: "No valid FCM tokens present"
+            })
+            break;
+        }
 
-        // if (tokenType && tokenValue) {
+        if (tokenType && tokenValue) {
         //   await UserTokenTable.findOneAndUpdate(
         //     { email: email },
         //     { [tokenType]: tokenValue, type: "customer" },
         //     { upsert: true, new: true }
         //   );
-        // }
+        await createCustomerFcmToken(email, tokenType, tokenValue)
+        }
 
         // const accessToken = jwt.sign(
         //     {

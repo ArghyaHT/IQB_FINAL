@@ -185,7 +185,7 @@ export const allAppointmentsBySalonIdAndDate = async (salonId, appointmentDate) 
         {
             $addFields: {
                 "appointmentList.barberName": {
-                    $arrayElemAt: ["$barberInfo.name", 0]
+                    $arrayElemAt: ["$barberInfo.name", 0]        
                 },
                 "appointmentList.background": "#FFFFFF", // Set your default color here
                 "appointmentList.startTime": "$appointmentList.startTime",

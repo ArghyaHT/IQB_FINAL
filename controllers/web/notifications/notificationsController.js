@@ -50,6 +50,7 @@ export const sendNotification = async (req, res, next) => {
     }
   }
   
+  
  //DESC: SEND MULTIPLE WEB NOTIFICATION
   export const multiplesendNotification = async(req, res) =>{
     const { title, body, emails } = req.body;

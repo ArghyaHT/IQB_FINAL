@@ -21,3 +21,13 @@ export const getMultipleUserTokens = async(emails) => {
   const users =  await UserTokenTable.find({ email: { $in: emails } });
   return users;
   }
+
+
+  export const createCustomerFcmToken = async(email, tokenType, tokenValue)=> {
+    const customer =  await UserTokenTable.findOneAndUpdate(
+      { email: email },
+      { [tokenType]: tokenValue, type: "customer" },
+      { upsert: true, new: true }
+    );
+      return customer;
+}
