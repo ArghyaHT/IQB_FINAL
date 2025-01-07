@@ -213,6 +213,14 @@ return appointments;
             }
         },
         {
+            $lookup: {
+                from: "salons",
+                localField: "appointmentList.barberId",
+                foreignField: "barberId",
+                as: "barberInfo"
+            }
+        },
+        {
             $addFields: {
                 "appointmentList.barberName": {
                     $arrayElemAt: ["$barberInfo.name", 0]
@@ -232,8 +240,14 @@ return appointments;
             },
                 "appointmentList.background": "#FFFFFF", // Set your default color here
                 "appointmentList.startTime": "$appointmentList.startTime",
-                "appointmentList.endTime": "$appointmentList.endTime"
+                "appointmentList.endTime": "$appointmentList.endTime",
+                "appointmentList.appointmentDate": {
+                    $dateToString: {
+                        format: "%Y-%m-%d",
+                        date: "$appointmentList.appointmentDate"
+                    }
             }
+        }
         },
         {
             $group: {

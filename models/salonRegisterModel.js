@@ -195,6 +195,21 @@ const salonsSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isTrailEnabled: {
+        type: Boolean,
+        default: false
+    },
+    trailEndDate: {
+        type: Date
+    },
+    isQueuing: {
+        type: Boolean,
+        default: false
+    },
+    isAppointments: {
+        type: Boolean,
+        default: false
+    },
     gallery: [
         {
             public_id: {
