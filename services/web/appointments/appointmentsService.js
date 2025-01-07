@@ -212,14 +212,14 @@ return appointments;
                 as: "customerInfo"
             }
         },
-        {
-            $lookup: {
-                from: "salons",
-                localField: "appointmentList.barberId",
-                foreignField: "barberId",
-                as: "barberInfo"
-            }
-        },
+        // {
+        //     $lookup: {
+        //         from: "salons",
+        //         localField: "appointmentList.barberId",
+        //         foreignField: "barberId",
+        //         as: "barberInfo"
+        //     }
+        // },
         {
             $addFields: {
                 "appointmentList.barberName": {
