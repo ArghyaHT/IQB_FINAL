@@ -64,6 +64,9 @@ const salonsSchema = new mongoose.Schema({
         type: String,
          default:"£"
     },
+    currencyCode:{
+        type: String
+    },
     postCode: {
         type: String,
         // required: true
@@ -195,21 +198,21 @@ const salonsSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    isTrailEnabled: {
-        type: Boolean,
-        default: false
-    },
-    trailEndDate: {
-        type: Date
-    },
-    isQueuing: {
-        type: Boolean,
-        default: false
-    },
-    isAppointments: {
-        type: Boolean,
-        default: false
-    },
+    // isTrailEnabled: {
+    //     type: Boolean,
+    //     default: false
+    // },
+    // trailEndDate: {
+    //     type: Date
+    // },
+    // isQueuing: {
+    //     type: Boolean,
+    //     default: false
+    // },
+    // isAppointments: {
+    //     type: Boolean,
+    //     default: false
+    // },
     gallery: [
         {
             public_id: {
@@ -220,6 +223,98 @@ const salonsSchema = new mongoose.Schema({
             }
         }
     ],
+
+    // productPayment: [
+    //     {   
+    //         salonId: Number,
+    //         adminEmail: String,
+    //         customerName: String,
+    //         customerEmail: String,
+    //         amount: Number,
+    //         currency: String,
+    //         paymentIntentId: String,
+    //         status: String,
+    //         paymentType: "Free" / "Paid",
+    //         paymentExpiryDate: "current date + 14days / paid date time",
+            
+    //         products: [
+    //           {
+    //             name: String,
+    //             quantity: Number,
+    //             price: Number,
+    //             currency: String,
+    //           },
+    //         ],
+    //         createdAt: { type: Date, default: Date.now },
+    //     }
+    // ],
+
+    productPayment: [
+        {
+          salonId: Number,
+          adminEmail: String,
+          customerName: String,
+          customerEmail: String,
+          amount: Number,
+          currency: String,
+          paymentIntentId: String,
+          status: String,
+          paymentType: {
+            type: String,
+            enum: ["Free", "Paid"],
+            // default: "Free",
+          },
+          paymentExpiryDate: {
+            type: Date,
+            // default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+          },
+          products: [
+            {
+              name: String,
+              quantity: Number,
+              price: Number,
+              currency: String,
+            },
+          ],
+          createdAt: { type: Date, default: Date.now },
+        },
+      ],
+      
+
+    paymentHistory: [
+        // {
+        //     Jokhn payment expire hbe tokhon productPayment array theke delete kore armodhe put koredite hbe.
+        // }
+        {
+            salonId: Number,
+            adminEmail: String,
+            customerName: String,
+            customerEmail: String,
+            amount: Number,
+            currency: String,
+            paymentIntentId: String,
+            status: String,
+            paymentType: {
+              type: String,
+              enum: ["Free", "Paid"],
+            //   default: "Free",
+            },
+            paymentExpiryDate: {
+              type: Date,
+            //   default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+            },
+            products: [
+              {
+                name: String,
+                quantity: Number,
+                price: Number,
+                currency: String,
+              },
+            ],
+            createdAt: { type: Date, default: Date.now },
+          },
+    ]
+
 
 }, { timestamps: true });
 

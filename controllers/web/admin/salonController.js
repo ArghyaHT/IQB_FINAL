@@ -23,6 +23,7 @@ import SalonQueueListModel from "../../../models/salonQueueListModel.js";
 import { findCountryByName } from "../../../services/web/countries/countryService.js";
 import { City } from "country-state-city";
 import { CITY_NOT_FOUND_ERROR, COUNTRY_NOT_FOUND_ERROR } from "../../../constants/web/CountriesConstants.js";
+import moment from "moment";
 
 
 //DESC:CREATE SALON BY ADMIN============================
@@ -53,8 +54,6 @@ export const createSalonByAdmin = async (req, res, next) => {
       services,
       adminEmail
     } = req.body
-
-    console.log(city)
 
     if (!adminEmail) {
       return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
@@ -123,7 +122,7 @@ export const createSalonByAdmin = async (req, res, next) => {
     if (postCode && !/^[a-zA-Z0-9]{1,10}$/.test(postCode)) {
       return ErrorHandler(SALON_POSTCODE_ERROR, ERROR_STATUS_CODE, res);
     }
-    
+
 
     if (!salonType) {
       return ErrorHandler(SALON_TYPE_ERROR, ERROR_STATUS_CODE, res)
@@ -135,7 +134,7 @@ export const createSalonByAdmin = async (req, res, next) => {
 
     const countryname = await findCountryByName(country)
 
-    if(countryname === null){
+    if (countryname === null) {
       return ErrorHandler(COUNTRY_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
 
     }
@@ -144,7 +143,7 @@ export const createSalonByAdmin = async (req, res, next) => {
       return cityName.countryCode === code && (city === cityName.name);
     });
 
-    
+
     if (retrievedCities.length === 0) {
       return ErrorHandler(CITY_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res);
     }
@@ -244,6 +243,10 @@ export const createSalonByAdmin = async (req, res, next) => {
 
     const savedSalon = await saveSalon(salonId, salonData);
 
+    // savedSalon.trailEndDate = moment(savedSalon.createdAt).add(14, 'days');
+
+    // await savedSalon.save();
+    
     const admin = await findAdminByEmailandRole(adminEmail);
 
     if (admin) {
@@ -324,7 +327,7 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
     if (postCode && !/^[a-zA-Z0-9]{1,10}$/.test(postCode)) {
       return ErrorHandler(SALON_POSTCODE_ERROR, ERROR_STATUS_CODE, res);
     }
-    
+
 
     if (!contactTel) {
       return ErrorHandler(SALON_CONTACT_TEL_ERROR, ERROR_STATUS_CODE, res)
@@ -908,9 +911,9 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
     const salonQueueList = await SalonQueueListModel.findOne({ salonId });
 
-if (salonQueueList?.queueList?.length > 0 && isOnline === false) {
-  return ErrorHandler(SALON_QUEUELIST_ERROR, ERROR_STATUS_CODE, res);
-}
+    if (salonQueueList?.queueList?.length > 0 && isOnline === false) {
+      return ErrorHandler(SALON_QUEUELIST_ERROR, ERROR_STATUS_CODE, res);
+    }
 
     const updatedSalon = await salonOnlineStatus(salonId, isOnline)
 
@@ -1198,7 +1201,6 @@ export const deleteSalonLogo = async (req, res) => {
     next(error);
   }
 };
-
 
 
 //DESC:UPDATE THE SALON INFO =================

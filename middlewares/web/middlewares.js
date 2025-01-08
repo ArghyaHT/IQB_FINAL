@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken"
 import { findAdminByEmailandRole } from "../../services/web/admin/adminService.js";
 import { findBarberByEmailAndRole } from "../../services/web/barber/barberService.js";
-import { getSalonBySalonId } from "../../services/web/admin/salonService.js";
+import { findSalonBySalonIdAndAdmin, getSalonBySalonId } from "../../services/web/admin/salonService.js";
 
 //COMMON MIDDLEWARES FOR ALL ==========================
 export const handleProtectedRoute = async (req, res, next) => {
@@ -71,6 +71,8 @@ export const AdminLoggedIn = async (req, res, next) => {
 
     const loggedinAdmin = await findAdminByEmailandRole(email)
 
+    const salon = await findSalonBySalonIdAndAdmin(loggedinAdmin.salonId, email)
+
     // if (!admincookie?.AdminToken) {
     //     return res.status(401).json({
     //         success: false,
@@ -97,11 +99,16 @@ export const AdminLoggedIn = async (req, res, next) => {
     //     }
     // )
 
-    res.status(201).json({
-      success: true,
-      message: "Yes i am admin Logged in",
-      user: [loggedinAdmin]
-    })
+ // Respond with admin and payment details
+ res.status(201).json({
+  success: true,
+  message: "Yes, I am admin logged in",
+  user: [loggedinAdmin],
+  paymentDetails: salon.productPayment.map(payment => ({
+    paymentType: payment.paymentType,
+    products: payment.products
+  })),
+});
   }
   catch (error) {
     next(error);

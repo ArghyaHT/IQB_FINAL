@@ -47,6 +47,7 @@ import { logMiddleware } from "./controllers/loggerController.js";
 import { updateCustomers } from "./triggers/cronjobs.js";
 import Stripe from "stripe";
 import SalonPayments from "./models/paymentGatewayModel.js";
+import Salon from "./models/salonRegisterModel.js";
 
 dotenv.config()
 
@@ -136,8 +137,12 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
 
     // Save payment details to MongoDB
     const paymentData = {
+      salonId: session.salonId,
+      adminEmail: session.customerEmail,
       customerEmail: session.customer_details.email,
       customerName: session.customer_details.name,
+      paymentType:session.paymentType,
+      paymentExpiryDate: new Date(Date.now()),
       amount: session.amount_total, // Convert from cents to dollars
       currency: session.currency,
       paymentIntentId: session.payment_intent,
@@ -145,7 +150,6 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       products: products,
     };
 
-    console.log("Working A")
     // Convert amount based on currency
     if (session.currency !== 'jpy' && session.currency !== 'krw') {
       paymentData.amount = paymentData.amount / 100; // Convert to main currency unit
@@ -154,9 +158,12 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       paymentData.amount = paymentData.amount; // Keep it as is
     }
 
-    SalonPayments.create(paymentData)
-      .then(() => console.log("Payment saved to database"))
-      .catch((err) => console.error("Error saving payment to database:", err));
+    Salon.updateOne(
+      { salonId: session.salonId }, // Replace with the identifier for the salon
+      { $push: { productPayment: paymentData } }
+    )
+      .then(() => console.log("Payment added to productPayment array"))
+      .catch((err) => console.error("Error adding payment to productPayment array:", err));
 
   }
 

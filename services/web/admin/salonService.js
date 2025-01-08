@@ -3,6 +3,7 @@ import { getCurrencySymbol } from "../../../utils/currencySymbolMap/currencysymb
 import { findCountryByName } from "../../../services/web/countries/countryService.js";
 import SalonQueueListModel from "../../../models/salonQueueListModel.js";
 
+
 //FIND SALON BY SALON NAME
 export const findSalonBySalonNameOrEmail = async (salonName, salonEmail) => {
   const salon = await Salon.findOne({ $or: [{ salonEmail }, { salonName }] });
@@ -46,6 +47,8 @@ export const saveSalon = async (salonId, salonData) => {
   // Find the country data from the Country model
   const countryData = await findCountryByName(country);
 
+  console.log(countryData.currency)
+
   // Retrieve currency from countryData
   const currency = await getCurrencySymbol(countryData.currency);
 
@@ -68,6 +71,9 @@ export const saveSalon = async (salonId, salonData) => {
     contactTel,
     tiktokLink,
     webLink,
+    isTrailEnabled: true,
+    isQueuing: true,
+    isAppointments: true,
     fbLink,
     salonEmail,
     twitterLink,
@@ -82,7 +88,7 @@ export const saveSalon = async (salonId, salonData) => {
 
 //FIND SALON BY SALONID AND ADMIN EMAIL
 export const findSalonBySalonIdAndAdmin = async (salonId, adminEmail) => {
-  const salon = await Salon.findOne({ salonId: salonId, adminEmail: adminEmail })
+  const salon = await Salon.findOne({ salonId: salonId, adminEmail: adminEmail }).lean();
   return salon;
 }
 
@@ -350,4 +356,7 @@ export const changeSalonService = async(salonId) => {
   const salon = await SalonQueueListModel.findOne({ salonId });
   return salon
 }
+
+
+// export const 
 
