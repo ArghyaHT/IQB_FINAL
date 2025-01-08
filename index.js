@@ -206,6 +206,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       adminEmail: session.metadata.adminEmail,
       paymentType: session.metadata.paymentType,
       paymentExpiryDate: session.metadata.paymentExpiryDate,
+      isQueuing: session.metadata.isQueuing,
+      isAppointments: session.metadata.isAppointments,
       customerEmail: session.customer_details.email,
       customerName: session.customer_details.name,
       amount: session.amount_total / 100, // Convert from cents
@@ -409,6 +411,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
           adminEmail: productInfo.adminEmail,
           paymentType: productInfo.paymentType,
           paymentExpiryDate: productInfo.paymentExpiryDate,
+          isQueuing:productInfo.isQueuing,
+          isAppointments:productInfo.isAppointments
         },
       });
   

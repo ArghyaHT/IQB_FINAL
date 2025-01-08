@@ -13,11 +13,11 @@ const coordinatesSchema = new mongoose.Schema({
 const salonsSchema = new mongoose.Schema({
     salonId: {
         type: Number,
-         default:0
+        default: 0
     },
     salonName: {
         type: String,
-         default:""
+        default: ""
     },
     adminEmail: {
         type: String,
@@ -27,26 +27,26 @@ const salonsSchema = new mongoose.Schema({
     },
     salonLogo: {
         type: [{
-          public_id: {
-            type: String
-          },
-          url: {
-            type: String,
-            default: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720532593/depositphotos_247872612-stock-illustration-no-image-available-icon-vector_fhytrg.jpg"
-          }
+            public_id: {
+                type: String
+            },
+            url: {
+                type: String,
+                default: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720532593/depositphotos_247872612-stock-illustration-no-image-available-icon-vector_fhytrg.jpg"
+            }
         }],
         default: [{}]
-      },
+    },
     salonType: {
         type: String
     },
     salonDesc: {
-        type:String,
+        type: String,
         default: ""
     },
     address: {
         type: String,
-         default:""
+        default: ""
         // required: true
     },
     city: {
@@ -62,9 +62,9 @@ const salonsSchema = new mongoose.Schema({
     },
     currency: {
         type: String,
-         default:"£"
+        default: "£"
     },
-    currencyCode:{
+    currencyCode: {
         type: String
     },
     postCode: {
@@ -75,31 +75,31 @@ const salonsSchema = new mongoose.Schema({
         type: Number,
     },
 
-    mobileCountryCode:{
+    mobileCountryCode: {
         type: Number
     },
 
     webLink: {
         type: String,
-        default:""
+        default: ""
     },
     fbLink: {
         type: String,
-         default:""
+        default: ""
 
     },
     twitterLink: {
         type: String,
-         default:""
+        default: ""
     },
     instraLink: {
         type: String,
-          default:""
+        default: ""
     },
-    
+
     tiktokLink: {
         type: String,
-         default:""
+        default: ""
     },
     salonEmail: {
         type: String
@@ -125,7 +125,7 @@ const salonsSchema = new mongoose.Schema({
     services: [{
         serviceId: {
             type: Number,
-             default:0
+            default: 0
             // required: true,
         },
         serviceCode: {
@@ -134,7 +134,7 @@ const salonsSchema = new mongoose.Schema({
         },
         serviceName: {
             type: String,
-             default:""
+            default: ""
             // required: true,
         },
         serviceIcon: {
@@ -149,19 +149,19 @@ const salonsSchema = new mongoose.Schema({
         },
         serviceDesc: {
             type: String,
-            default:""
+            default: ""
         },
         servicePrice: {
             type: Number,
-             default:0
+            default: 0
             // required: true
         },
         serviceEWT: {
             type: Number,
-             default:0
+            default: 0
         },
-        vipService:{
-            type:Boolean,
+        vipService: {
+            type: Boolean,
             default: false
         }
     }],
@@ -170,11 +170,11 @@ const salonsSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    isQueuing:{
+    isQueuing: {
         type: Boolean,
         default: false
     },
-    isAppointments:{
+    isAppointments: {
         type: Boolean,
         default: false
     },
@@ -190,11 +190,11 @@ const salonsSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    mobileBookingAvailability:{
-        type:Boolean,
+    mobileBookingAvailability: {
+        type: Boolean,
         default: false
     },
-    kioskAvailability:{
+    kioskAvailability: {
         type: Boolean,
         default: false
     },
@@ -236,7 +236,7 @@ const salonsSchema = new mongoose.Schema({
     //         status: String,
     //         paymentType: "Free" / "Paid",
     //         paymentExpiryDate: "current date + 14days / paid date time",
-            
+
     //         products: [
     //           {
     //             name: String,
@@ -251,35 +251,35 @@ const salonsSchema = new mongoose.Schema({
 
     productPayment: [
         {
-          salonId: Number,
-          adminEmail: String,
-          customerName: String,
-          customerEmail: String,
-          amount: Number,
-          currency: String,
-          paymentIntentId: String,
-          status: String,
-          paymentType: {
-            type: String,
-            enum: ["Free", "Paid"],
-            // default: "Free",
-          },
-          paymentExpiryDate: {
-            type: Date,
-            // default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
-          },
-          products: [
-            {
-              name: String,
-              quantity: Number,
-              price: Number,
-              currency: String,
+            salonId: Number,
+            adminEmail: String,
+            customerName: String,
+            customerEmail: String,
+            amount: Number,
+            currency: String,
+            paymentIntentId: String,
+            status: String,
+            paymentType: {
+                type: String,
+                enum: ["Free", "Paid"],
+                // default: "Free",
             },
-          ],
-          createdAt: { type: Date, default: Date.now },
+            paymentExpiryDate: {
+                type: Date,
+                // default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+            },
+            products: [
+                {
+                    name: String,
+                    quantity: Number,
+                    price: Number,
+                    currency: String,
+                },
+            ],
+            createdAt: { type: Date, default: Date.now },
         },
-      ],
-      
+    ],
+
 
     paymentHistory: [
         // {
@@ -295,24 +295,32 @@ const salonsSchema = new mongoose.Schema({
             paymentIntentId: String,
             status: String,
             paymentType: {
-              type: String,
-              enum: ["Free", "Paid"],
-            //   default: "Free",
+                type: String,
+                enum: ["Free", "Paid"],
+                //   default: "Free",
             },
             paymentExpiryDate: {
-              type: Date,
-            //   default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+                type: Date,
+                //   default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+            },
+            isQueuing: {
+                type: Boolean,
+                default: false
+            },
+            isAppointments: {
+                type: Boolean,
+                default: false
             },
             products: [
-              {
-                name: String,
-                quantity: Number,
-                price: Number,
-                currency: String,
-              },
+                {
+                    name: String,
+                    quantity: Number,
+                    price: Number,
+                    currency: String,
+                },
             ],
             createdAt: { type: Date, default: Date.now },
-          },
+        },
     ]
 
 
