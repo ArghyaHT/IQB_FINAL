@@ -111,12 +111,77 @@ const stripe = Stripe("sk_test_51QdUcgJJY2GyQI9MG1P9ZNELM63wZn7fEpDw2x8BfnSLsjUA
 
 const endpointSecret = "whsec_DHdgxBkr9Q3LxPngNylgMs00eTyZXxqi"; // Replace with your actual webhook secret
 
+// app.post('/api/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
+//   const sig = request.headers['stripe-signature'];
+//   let event;
+
+//   try {
+//     // Construct the event using the raw body and the signature header
+//     event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+//   } catch (err) {
+//     console.error('Webhook signature verification failed:', err.message);
+//     return response.status(400).send(`Webhook Error: ${err.message}`);
+//   }
+
+//   if (event.type === "checkout.session.completed") {
+//     const session = event.data.object;
+
+//     const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+
+//     const products = lineItems.data.map((item) => ({
+//       name: item.description,
+//       quantity: item.quantity,
+//       price: item.amount_total / 100, // Amount in dollars (converted from cents)
+//       currency: session.currency,
+//     }));
+
+//     // Save payment details to MongoDB
+//     const paymentData = {
+//       salonId: session.salonId,
+//       adminEmail: session.customerEmail,
+//       customerEmail: session.customer_details.email,
+//       customerName: session.customer_details.name,
+//       paymentType:session.paymentType,
+//       paymentExpiryDate: session.paymentExpiryDate,
+//       amount: session.amount_total, // Convert from cents to dollars
+//       currency: session.currency,
+//       paymentIntentId: session.payment_intent,
+//       status: session.payment_status,
+//       products: products,
+//     };
+
+//     // Convert amount based on currency
+//     if (session.currency !== 'jpy' && session.currency !== 'krw') {
+//       paymentData.amount = paymentData.amount / 100; // Convert to main currency unit
+//     } else {
+//       // For JPY, KRW or other currencies that don't need division by 100
+//       paymentData.amount = paymentData.amount; // Keep it as is
+//     }
+
+//     Salon.updateOne(
+//       { salonId: session.salonId }, // Replace with the identifier for the salon
+//       { $push: { productPayment: paymentData } }
+//     )
+//       .then(() => console.log("Payment added to productPayment array"))
+//       .catch((err) => console.error("Error adding payment to productPayment array:", err));
+
+//   }
+
+//   if (event.type === 'payment_intent.payment_failed') {
+//     const paymentIntent = event.data.object;
+//     console.log("Payment Failed ", paymentIntent)
+//     // It can happen example:
+//     // If user card has insufficient balance.
+//     // Here i can send a email to the user that he/she has insufficient balance for that the payment is not completed.
+//   }
+//   response.status(200).json({ received: true });
+// });
+
 app.post('/api/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
   const sig = request.headers['stripe-signature'];
   let event;
 
   try {
-    // Construct the event using the raw body and the signature header
     event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
@@ -135,45 +200,29 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       currency: session.currency,
     }));
 
-    // Save payment details to MongoDB
+    // Access additional data from metadata
     const paymentData = {
-      salonId: session.salonId,
-      adminEmail: session.customerEmail,
+      salonId: session.metadata.salonId,
+      adminEmail: session.metadata.adminEmail,
+      paymentType: session.metadata.paymentType,
+      paymentExpiryDate: session.metadata.paymentExpiryDate,
       customerEmail: session.customer_details.email,
       customerName: session.customer_details.name,
-      paymentType:session.paymentType,
-      paymentExpiryDate: session.paymentExpiryDate,
-      amount: session.amount_total, // Convert from cents to dollars
+      amount: session.amount_total / 100, // Convert from cents
       currency: session.currency,
       paymentIntentId: session.payment_intent,
       status: session.payment_status,
       products: products,
     };
 
-    // Convert amount based on currency
-    if (session.currency !== 'jpy' && session.currency !== 'krw') {
-      paymentData.amount = paymentData.amount / 100; // Convert to main currency unit
-    } else {
-      // For JPY, KRW or other currencies that don't need division by 100
-      paymentData.amount = paymentData.amount; // Keep it as is
-    }
-
     Salon.updateOne(
-      { salonId: session.salonId }, // Replace with the identifier for the salon
+      { salonId: session.metadata.salonId },
       { $push: { productPayment: paymentData } }
     )
       .then(() => console.log("Payment added to productPayment array"))
       .catch((err) => console.error("Error adding payment to productPayment array:", err));
-
   }
 
-  if (event.type === 'payment_intent.payment_failed') {
-    const paymentIntent = event.data.object;
-    console.log("Payment Failed ", paymentIntent)
-    // It can happen example:
-    // If user card has insufficient balance.
-    // Here i can send a email to the user that he/she has insufficient balance for that the payment is not completed.
-  }
   response.status(200).json({ received: true });
 });
 
@@ -281,49 +330,101 @@ app.use("/api/barberAppointmentDays", barberAppointmentDays)
 
 
 // Create Checkout Session Endpoint
+// app.post("/api/create-checkout-session", async (req, res) => {
+//   try {
+//     // const productsArray = req.body.products;
+
+//     // const productInfo = {
+//     //   salonId,
+//     //   adminEmail,
+//     //   paymentType: "Free",
+//     //   paymentExpiryDate: new Date(),
+//     //   products
+//     // }
+
+//     const productInfo = req.body.productInfo
+
+//     console.log("Working B")
+
+//     const session = await stripe.checkout.sessions.create({
+//       payment_method_types: ["card"], // Types of card (Visa, MasterCard, etc.)
+//       mode: "payment",
+//       // line_items: productsArray.map((item) => ({
+//       //   price_data: {
+//       //     currency: item.currency,
+//       //     product_data: {
+//       //       name: item.name,
+//       //     },
+//       //     unit_amount: item.price * 100, // Amount in cents
+//       //   },
+//       //   quantity: item.unit,
+//       // })),
+//       line_items: [
+//         {
+//           price_data: {
+//             currency: 'usd',
+//             product_data: {
+//               name: 'T-shirt',
+//             },
+//             unit_amount: 2000, // Price in cents
+//           },
+//           quantity: 1, // Add quantity here
+//         },
+//       ],
+//       success_url: "https://iqb-final.netlify.app/admin-salon",
+//       cancel_url: "https://iqb-final.netlify.app/admin-salon",
+//     });
+
+//     res.status(200).json({
+//       success: true,
+//       session,
+//     });
+//   } catch (error) {
+//     console.log("Payment Check-Out Failed ", error)
+//   }
+// });
+
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
-    const productsArray = req.body.products;
+    const { productInfo } = req.body;
 
-    console.log("Working B")
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"], // Types of card (Visa, MasterCard, etc.)
-      mode: "payment",
-      // line_items: productsArray.map((item) => ({
-      //   price_data: {
-      //     currency: item.currency,
-      //     product_data: {
-      //       name: item.name,
-      //     },
-      //     unit_amount: item.price * 100, // Amount in cents
-      //   },
-      //   quantity: item.unit,
-      // })),
-      line_items: [
-        {
+    if(productInfo){
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        mode: "payment",
+        line_items: productInfo.products.map((product) => ({
           price_data: {
-            currency: 'usd',
+            currency: product.currency,
             product_data: {
-              name: 'T-shirt',
+              name: product.name,
             },
-            unit_amount: 2000, // Price in cents
+            unit_amount: product.price * 100, // Price in cents
           },
-          quantity: 1, // Add quantity here
+          quantity: product.quantity,
+        })),
+        success_url: "https://iqb-final.netlify.app/admin-salon",
+        cancel_url: "https://iqb-final.netlify.app/admin-salon",
+        metadata: {
+          salonId: productInfo.salonId,
+          adminEmail: productInfo.adminEmail,
+          paymentType: productInfo.paymentType,
+          paymentExpiryDate: productInfo.paymentExpiryDate,
         },
-      ],
-      success_url: "https://iqb-final.netlify.app/admin-salon",
-      cancel_url: "https://iqb-final.netlify.app/admin-salon",
-    });
+      });
+  
+      res.status(200).json({
+        success: true,
+        session,
+      });
+    }
 
-    res.status(200).json({
-      success: true,
-      session,
-    });
+    
   } catch (error) {
-    console.log("Payment Check-Out Failed ", error)
+    console.error("Payment Check-Out Failed ", error);
+    res.status(500).send("Internal Server Error");
   }
 });
+
 
 //////////////////////////////////////////
 // Global Error Handler
