@@ -104,12 +104,14 @@ export const AdminLoggedIn = async (req, res, next) => {
   success: true,
   message: "Yes, I am admin logged in",
   user: [loggedinAdmin],
-  paymentDetails: salon.productPayment.map(payment => ({
-    paymentType: payment.paymentType,
-    products: payment.products
-  })),
+  paymentDetails: salon.productPayment?.length
+    ? salon.productPayment.map(payment => ({
+        paymentType: payment.paymentType,
+        products: payment.products,
+      }))
+    : [],
 });
-  }
+}
   catch (error) {
     next(error);
   }
