@@ -142,7 +142,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       customerEmail: session.customer_details.email,
       customerName: session.customer_details.name,
       paymentType:session.paymentType,
-      paymentExpiryDate: new Date(Date.now()),
+      paymentExpiryDate: session.paymentExpiryDate,
       amount: session.amount_total, // Convert from cents to dollars
       currency: session.currency,
       paymentIntentId: session.payment_intent,
@@ -290,18 +290,30 @@ app.post("/api/create-checkout-session", async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"], // Types of card (Visa, MasterCard, etc.)
       mode: "payment",
-      line_items: productsArray.map((item) => ({
-        price_data: {
-          currency: item.currency,
-          product_data: {
-            name: item.name,
+      // line_items: productsArray.map((item) => ({
+      //   price_data: {
+      //     currency: item.currency,
+      //     product_data: {
+      //       name: item.name,
+      //     },
+      //     unit_amount: item.price * 100, // Amount in cents
+      //   },
+      //   quantity: item.unit,
+      // })),
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'T-shirt',
+            },
+            unit_amount: 2000, // Price in cents
           },
-          unit_amount: item.price * 100, // Amount in cents
+          quantity: 1, // Add quantity here
         },
-        quantity: item.unit,
-      })),
-      success_url: "https://productstripe.netlify.app/success",
-      cancel_url: "https://productstripe.netlify.app/cancel",
+      ],
+      success_url: "https://iqb-final.netlify.app/admin-salon",
+      cancel_url: "https://iqb-final.netlify.app/admin-salon",
     });
 
     res.status(200).json({
