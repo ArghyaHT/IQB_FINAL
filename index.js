@@ -211,7 +211,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       salonId: session.metadata.salonId,
       adminEmail: session.metadata.adminEmail,
       paymentType: session.metadata.paymentType,
-      // purchaseDate: session.metadata.purchaseDate,
+      purchaseDate: session.metadata.purchaseDate,
       paymentExpiryDate: formattedDate,
       isQueuing: session.metadata.isQueuing,
       isAppointments: session.metadata.isAppointments,
@@ -444,7 +444,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
         metadata: {
           salonId: productInfo.salonId,
           adminEmail: productInfo.adminEmail,
-          // purchaseDate: new Date.now(),
+          purchaseDate:  new Date(),
           paymentType: productInfo.paymentType,
           paymentExpiryDate: expiryDate,
           isQueuing: productInfo.isQueuing,
