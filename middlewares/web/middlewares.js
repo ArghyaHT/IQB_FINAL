@@ -73,19 +73,18 @@ export const AdminLoggedIn = async (req, res, next) => {
 
     const salon = await findSalonBySalonIdAndAdmin(loggedinAdmin.salonId, email)
 
-     // Ensure `productPayment` is an array
-     const productPayments = Array.isArray(salon.productPayment) ? salon.productPayment : [];
+    // Add `isQueueing` and `isAppointments` fields from `salon` to `loggedinAdmin`
+    const enhancedAdmin = {
+      ...loggedinAdmin,
+      isQueueing: salon.isQueuing,
+      isAppointments: salon.isAppointments,
+    };
 
-     // Find matching payments
-     const matchingPayments = productPayments.filter(payment =>
-       payment.salonId === loggedinAdmin.salonId && payment.adminEmail === email
-     );
     // Respond with admin and payment details
     res.status(201).json({
       success: true,
       message: "Yes, I am admin logged in",
-      user: [loggedinAdmin],
-      payments: matchingPayments,
+      user: [enhancedAdmin],
     })
 
     // if (!admincookie?.AdminToken) {

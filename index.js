@@ -48,6 +48,7 @@ import { updateCustomers } from "./triggers/cronjobs.js";
 import Stripe from "stripe";
 import SalonPayments from "./models/paymentGatewayModel.js";
 import Salon from "./models/salonRegisterModel.js";
+import { getSalonBySalonId } from "./services/mobile/salonServices.js";
 
 dotenv.config()
 
@@ -216,6 +217,14 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       status: session.payment_status,
       products: products,
     };
+
+    const salon = await getSalonBySalonId(session.metadata.salonId)
+
+    salon.isQueuing = session.metadata.isQueuing;
+
+    salon.isAppointments = session.metadata.isAppointments
+
+    await salon.save();
 
     Salon.updateOne(
       { salonId: session.metadata.salonId },
@@ -414,6 +423,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
           isQueuing:productInfo.isQueuing,
           isAppointments:productInfo.isAppointments
         },
+        customer_email: productInfo.adminEmail
       });
   
       res.status(200).json({
