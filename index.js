@@ -192,9 +192,11 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
 
-    const expiryDate = moment().add(session.metadata.paymentExpiryDate, 'days').toDate();
+    // const expiryDate = moment().add(session.metadata.paymentExpiryDate, 'days').toDate();
 
-    console.log("Expiry Date webhook",expiryDate)
+    console.log("Paymentexpiry",session.metadata.paymentExpiryDate)
+
+
 
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
@@ -210,7 +212,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       salonId: session.metadata.salonId,
       adminEmail: session.metadata.adminEmail,
       paymentType: session.metadata.paymentType,
-      paymentExpiryDate: expiryDate,
+      // paymentExpiryDate: session.metadata.paymentExpiryDate,
       isQueuing: session.metadata.isQueuing,
       isAppointments: session.metadata.isAppointments,
       customerEmail: session.customer_details.email,
@@ -222,6 +224,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       products: products,
     };
 
+
+    console.log("Payments from webhook ", paymentData)
     // await addSalonPayments(session.metadata.salonId,session.metadata.isQueuing,session.metadata.isAppointments, paymentData)
 
     // Salon.updateOne(
@@ -232,20 +236,22 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     //   },
     //   { $push: { productPayment: paymentData } }
     // )
-    await Salon.updateOne(
-      { salonId: session.metadata.salonId },
-      {
-        $set: {
-          isQueuing: session.metadata.isQueuing,
-          isAppointments: session.metadata.isAppointments,
-        },
-        $push: {
-          productPayment: paymentData,
-        },
-      }
-    )
-      .then(() => console.log("Payment added to productPayment array"))
-      .catch((err) => console.error("Error adding payment to productPayment array:", err));
+
+
+    // await Salon.updateOne(
+    //   { salonId: session.metadata.salonId },
+    //   {
+    //     $set: {
+    //       isQueuing: session.metadata.isQueuing,
+    //       isAppointments: session.metadata.isAppointments,
+    //     },
+    //     $push: {
+    //       productPayment: paymentData,
+    //     },
+    //   }
+    // )
+    //   .then(() => console.log("Payment added to productPayment array"))
+    //   .catch((err) => console.error("Error adding payment to productPayment array:", err));
   }
 
   response.status(200).json({ received: true });
@@ -415,7 +421,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
 
     console.log("pro info",productInfo.paymentExpiryDate)
 
-    const expiryDate = moment().add(productInfo.paymentExpiryDate, 'days').toDate();
+    const expiryDate = moment().add(productInfo.paymentExpiryDate, 'days').toDate().split("T")[0];
 
     console.log("Expiry Date checkout session",expiryDate)
 
@@ -439,7 +445,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
           salonId: productInfo.salonId,
           adminEmail: productInfo.adminEmail,
           paymentType: productInfo.paymentType,
-          paymentExpiryDate: expiryDate,
+          // paymentExpiryDate: expiryDate,
+          // paymentExpiryDate: productInfo.paymentExpiryDate,
           isQueuing: productInfo.isQueuing,
           isAppointments: productInfo.isAppointments
         },
