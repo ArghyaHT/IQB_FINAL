@@ -357,16 +357,20 @@ export const changeSalonService = async(salonId) => {
 }
 
 
-export const addSalonPayments =async(salonId, isQueuing, isAppointments, paymentData) => {
-  const salonpayments = Salon.updateOne(
-    { salonId:salonId },
+export const addSalonPayments = async (salonId, isQueuing, isAppointments, paymentData) => {
+  const salonPayments = await Salon.updateOne(
+    { salonId: salonId },
     {
-      isQueuing:isQueuing,
-      isAppointments:isAppointments
-    },
-    { $push: { productPayment: paymentData } }
-  )
+      $set: {
+        isQueuing: isQueuing,
+        isAppointments: isAppointments,
+      },
+      $push: {
+        productPayment: paymentData,
+      },
+    }
+  );
 
-  return salonpayments
-}
+  return salonPayments;
+};
 
