@@ -264,6 +264,10 @@ const salonsSchema = new mongoose.Schema({
                 enum: ["Free", "Paid"],
                 // default: "Free",
             },
+            purchaseDate: {
+                type: Date,
+                //   default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+            },
             paymentExpiryDate: {
                 type: Date,
                 // default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
@@ -306,6 +310,10 @@ const salonsSchema = new mongoose.Schema({
                 type: String,
                 enum: ["Free", "Paid"],
                 //   default: "Free",
+            },
+            purchaseDate: {
+                type: Date,
+                //   default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
             },
             paymentExpiryDate: {
                 type: Date,
