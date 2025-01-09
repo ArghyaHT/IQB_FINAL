@@ -5,6 +5,7 @@ export const allSalonsByAdmin = async (registeredSalons) => {
 
   const salons = await Salon.find({
     salonId: { $in: registeredSalons },
+    isQueuing:true,
     isDeleted: false,
   });
   return salons;
