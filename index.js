@@ -421,7 +421,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
 
     console.log("pro info",productInfo.paymentExpiryDate)
 
-    const expiryDate = moment().add(productInfo.paymentExpiryDate, 'days').toDate().split("T")[0];
+    const expiryDate = moment().add(productInfo.paymentExpiryDate, 'days').toDate();
 
     console.log("Expiry Date checkout session",expiryDate)
 
