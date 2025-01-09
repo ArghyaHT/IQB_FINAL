@@ -190,6 +190,11 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
 
+     // Calculate the expiry date (30 days from now)
+     const currentDate = new Date();
+     const expiryDate = new Date();
+     expiryDate.setDate(currentDate.getDate() + session.metadata.paymentExpiryDate);
+
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
     const products = lineItems.data.map((item) => ({
@@ -204,7 +209,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       salonId: session.metadata.salonId,
       adminEmail: session.metadata.adminEmail,
       paymentType: session.metadata.paymentType,
-      paymentExpiryDate: session.metadata.paymentExpiryDate,
+      paymentExpiryDate: expiryDate,
       isQueuing: session.metadata.isQueuing,
       isAppointments: session.metadata.isAppointments,
       customerEmail: session.customer_details.email,
@@ -395,6 +400,11 @@ app.post("/api/create-checkout-session", async (req, res) => {
   try {
     const { productInfo } = req.body;
 
+    // Calculate the expiry date (30 days from now)
+    const currentDate = new Date();
+    const expiryDate = new Date();
+    expiryDate.setDate(currentDate.getDate() + productInfo.paymentExpiryDate);
+
     if (productInfo) {
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
@@ -415,7 +425,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
           salonId: productInfo.salonId,
           adminEmail: productInfo.adminEmail,
           paymentType: productInfo.paymentType,
-          paymentExpiryDate: productInfo.paymentExpiryDate,
+          paymentExpiryDate: expiryDate,
           isQueuing: productInfo.isQueuing,
           isAppointments: productInfo.isAppointments
         },
