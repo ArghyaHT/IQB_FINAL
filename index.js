@@ -194,7 +194,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
 
     const expiryDate = moment().add(session.metadata.paymentExpiryDate, 'days').toDate();
 
-    console.log(expiryDate)
+    console.log("Expiry Date webhook",expiryDate)
 
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
@@ -413,11 +413,11 @@ app.post("/api/create-checkout-session", async (req, res) => {
   try {
     const { productInfo } = req.body;
 
-    console.log(productInfo.paymentExpiryDate)
+    console.log("pro info",productInfo.paymentExpiryDate)
 
     const expiryDate = moment().add(productInfo.paymentExpiryDate, 'days').toDate();
 
-    console.log(expiryDate)
+    console.log("Expiry Date checkout session",expiryDate)
 
     if (productInfo) {
       const session = await stripe.checkout.sessions.create({
