@@ -218,16 +218,20 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       products: products,
     };
 
-    const salon = await getSalonBySalonId(session.metadata.salonId)
+    // const salon = await getSalonBySalonId(session.metadata.salonId)
 
-    salon.isQueuing = session.metadata.isQueuing;
+    // salon.isQueuing = session.metadata.isQueuing;
 
-    salon.isAppointments = session.metadata.isAppointments
+    // salon.isAppointments = session.metadata.isAppointments
 
-    await salon.save();
+    // await salon.save();
 
     Salon.updateOne(
       { salonId: session.metadata.salonId },
+      {
+        isQueuing: session.metadata.isQueuing,
+        isAppointments: session.metadata.isAppointments
+      },
       { $push: { productPayment: paymentData } }
     )
       .then(() => console.log("Payment added to productPayment array"))
@@ -399,7 +403,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
   try {
     const { productInfo } = req.body;
 
-    if(productInfo){
+    if (productInfo) {
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         mode: "payment",
@@ -420,19 +424,19 @@ app.post("/api/create-checkout-session", async (req, res) => {
           adminEmail: productInfo.adminEmail,
           paymentType: productInfo.paymentType,
           paymentExpiryDate: productInfo.paymentExpiryDate,
-          isQueuing:productInfo.isQueuing,
-          isAppointments:productInfo.isAppointments
+          isQueuing: productInfo.isQueuing,
+          isAppointments: productInfo.isAppointments
         },
         customer_email: productInfo.adminEmail
       });
-  
+
       res.status(200).json({
         success: true,
         session,
       });
     }
 
-    
+
   } catch (error) {
     console.error("Payment Check-Out Failed ", error);
     res.status(500).send("Internal Server Error");
