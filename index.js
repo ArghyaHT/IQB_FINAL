@@ -192,10 +192,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
 
-    const formattedDate = moment.unix(session.metadata.paymentExpiryDate).format('YYYY-MM-DD HH:mm:ss');
-    console.log("Paymentexpiry session",formattedDate)
-
-
+    const formattedPurchaseDate = moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD HH:mm:ss');
+    const formattedExpiryDate = moment.unix(session.metadata.paymentExpiryDate).format('YYYY-MM-DD HH:mm:ss');
 
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
@@ -211,8 +209,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       salonId: session.metadata.salonId,
       adminEmail: session.metadata.adminEmail,
       paymentType: session.metadata.paymentType,
-      purchaseDate: session.metadata.purchaseDate,
-      paymentExpiryDate: formattedDate,
+      purchaseDate: formattedPurchaseDate,
+      paymentExpiryDate: formattedExpiryDate,
       isQueuing: session.metadata.isQueuing,
       isAppointments: session.metadata.isAppointments,
       customerEmail: session.customer_details.email,
