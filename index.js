@@ -413,6 +413,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
   try {
     const { productInfo } = req.body;
 
+    console.log(productInfo.paymentExpiryDate)
+
     const expiryDate = moment().add(productInfo.paymentExpiryDate, 'days').toDate();
 
     console.log(expiryDate)
