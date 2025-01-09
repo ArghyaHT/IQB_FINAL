@@ -47,8 +47,6 @@ export const saveSalon = async (salonId, salonData) => {
   // Find the country data from the Country model
   const countryData = await findCountryByName(country);
 
-  console.log(countryData.currency)
-
   // Retrieve currency from countryData
   const currency = await getCurrencySymbol(countryData.currency);
 
@@ -67,6 +65,7 @@ export const saveSalon = async (salonId, salonData) => {
     location,
     country,
     currency: currency,
+    isoCurrencyCode:countryData.currency.toLowerCase(),
     postCode,
     contactTel,
     tiktokLink,
@@ -356,7 +355,4 @@ export const changeSalonService = async(salonId) => {
   const salon = await SalonQueueListModel.findOne({ salonId });
   return salon
 }
-
-
-// export const 
 

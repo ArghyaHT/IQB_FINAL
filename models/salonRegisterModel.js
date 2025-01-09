@@ -64,7 +64,7 @@ const salonsSchema = new mongoose.Schema({
         type: String,
         default: "£"
     },
-    currencyCode: {
+    isoCurrencyCode: {
         type: String
     },
     postCode: {
