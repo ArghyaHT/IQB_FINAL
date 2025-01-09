@@ -47,6 +47,7 @@ import { logMiddleware } from "./controllers/loggerController.js";
 import { updateCustomers } from "./triggers/cronjobs.js";
 import Stripe from "stripe";
 import { addSalonPayments } from "./services/web/admin/salonService.js";
+import Salon from "./models/salonRegisterModel.js";
 
 dotenv.config()
 
@@ -221,7 +222,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       products: products,
     };
 
-    await addSalonPayments(session.metadata.salonId,session.metadata.isQueuing,session.metadata.isAppointments, paymentData)
+    // await addSalonPayments(session.metadata.salonId,session.metadata.isQueuing,session.metadata.isAppointments, paymentData)
 
     // Salon.updateOne(
     //   { salonId: session.metadata.salonId },
@@ -231,6 +232,18 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     //   },
     //   { $push: { productPayment: paymentData } }
     // )
+    await Salon.updateOne(
+      { salonId: session.metadata.salonId },
+      {
+        $set: {
+          isQueuing: session.metadata.isQueuing,
+          isAppointments: session.metadata.isAppointments,
+        },
+        $push: {
+          productPayment: paymentData,
+        },
+      }
+    )
       .then(() => console.log("Payment added to productPayment array"))
       .catch((err) => console.error("Error adding payment to productPayment array:", err));
   }
