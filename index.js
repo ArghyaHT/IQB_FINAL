@@ -211,7 +211,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       salonId: session.metadata.salonId,
       adminEmail: session.metadata.adminEmail,
       paymentType: session.metadata.paymentType,
-      purchaseDate: session.metadata.purchaseDate,
+      // purchaseDate: session.metadata.purchaseDate,
       paymentExpiryDate: formattedDate,
       isQueuing: session.metadata.isQueuing,
       isAppointments: session.metadata.isAppointments,
@@ -238,20 +238,20 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     // )
 
 
-    // await Salon.updateOne(
-    //   { salonId: session.metadata.salonId },
-    //   {
-    //     $set: {
-    //       isQueuing: session.metadata.isQueuing,
-    //       isAppointments: session.metadata.isAppointments,
-    //     },
-    //     $push: {
-    //       productPayment: paymentData,
-    //     },
-    //   }
-    // )
-    //   .then(() => console.log("Payment added to productPayment array"))
-    //   .catch((err) => console.error("Error adding payment to productPayment array:", err));
+    await Salon.updateOne(
+      { salonId: session.metadata.salonId },
+      {
+        $set: {
+          isQueuing: session.metadata.isQueuing,
+          isAppointments: session.metadata.isAppointments,
+        },
+        $push: {
+          productPayment: paymentData,
+        },
+      }
+    )
+      .then(() => console.log("Payment added to productPayment array"))
+      .catch((err) => console.error("Error adding payment to productPayment array:", err));
   }
 
   response.status(200).json({ received: true });
@@ -444,7 +444,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
         metadata: {
           salonId: productInfo.salonId,
           adminEmail: productInfo.adminEmail,
-          purchaseDate: new Date.now(),
+          // purchaseDate: new Date.now(),
           paymentType: productInfo.paymentType,
           paymentExpiryDate: expiryDate,
           isQueuing: productInfo.isQueuing,
