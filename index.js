@@ -427,7 +427,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
           isQueuing: productInfo.isQueuing,
           isAppointments: productInfo.isAppointments
         },
-        customer_email: productInfo.adminEmail
+        // customer_email: productInfo.adminEmail ** this code will prefill the email in stripe payment in frontend default and cannot be modify
       });
 
       res.status(200).json({
