@@ -194,7 +194,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
 
     // const expiryDate = moment().add(session.metadata.paymentExpiryDate, 'days').toDate();
 
-    console.log("Paymentexpiry",session.metadata.paymentExpiryDate)
+    console.log("Paymentexpiry session",session.metadata.paymentExpiryDate)
 
 
 
