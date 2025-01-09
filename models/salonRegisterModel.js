@@ -265,11 +265,11 @@ const salonsSchema = new mongoose.Schema({
                 // default: "Free",
             },
             purchaseDate: {
-                type: Date,
+                type: String,
                 //   default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
             },
             paymentExpiryDate: {
-                type: Date,
+                type: String,
                 // default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
             },
             isQueuing: {
@@ -312,11 +312,11 @@ const salonsSchema = new mongoose.Schema({
                 //   default: "Free",
             },
             purchaseDate: {
-                type: Date,
+                type: String,
                 //   default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
             },
             paymentExpiryDate: {
-                type: Date,
+                type: String,
                 //   default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
             },
             isQueuing: {

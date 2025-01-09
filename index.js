@@ -192,8 +192,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
 
-    const formattedPurchaseDate = moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD HH:mm:ss');
-    const formattedExpiryDate = moment.unix(session.metadata.paymentExpiryDate).format('YYYY-MM-DD HH:mm:ss');
+    // const formattedPurchaseDate = moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD HH:mm:ss');
+    // const formattedExpiryDate = moment.unix(session.metadata.paymentExpiryDate).format('YYYY-MM-DD HH:mm:ss');
 
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
@@ -209,8 +209,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       salonId: session.metadata.salonId,
       adminEmail: session.metadata.adminEmail,
       paymentType: session.metadata.paymentType,
-      purchaseDate: formattedPurchaseDate,
-      paymentExpiryDate: formattedExpiryDate,
+      purchaseDate: session.metadata.purchaseDate,
+      paymentExpiryDate: session.metadata.paymentExpiryDate,
       isQueuing: session.metadata.isQueuing,
       isAppointments: session.metadata.isAppointments,
       customerEmail: session.customer_details.email,
@@ -235,23 +235,14 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     //   { $push: { productPayment: paymentData } }
     // )
 
-    if(session.metadata.isQueuing === true){
-      await Salon.updateOne(
-        { salonId: session.metadata.salonId },
-        {
-          $set: {
-            isQueuing: session.metadata.isQueuing,
-            // isAppointments: session.metadata.isAppointments,
-          },
-          $push: {
-            productPayment: paymentData,
-          },
-        }
-      )
-        .then(() => console.log("Payment added to productPayment array"))
-        .catch((err) => console.error("Error adding payment to productPayment array:", err));
-    }
-
+    // if(isQueuing && !isAppointments){
+    //   queuing = true
+    // }else if(!isQueueing && isAppointments){
+    //   appoint = true
+    // }else if(isQueueing && isAppointments){
+    //   appoint = true
+    //   queuing = true
+    // }
     if(session.metadata.isAppointments === true){
       await Salon.updateOne(
         { salonId: session.metadata.salonId },

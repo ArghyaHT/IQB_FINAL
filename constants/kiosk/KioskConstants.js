@@ -27,9 +27,7 @@ export const KIOSK_AVAILABILITY_ERROR= "Kiosk status cant be changed"
 
 export const NO_BARBERS_AVAILABLE_QUEUE_ERROR = "No barbers available for selected service"
 
-
-
-
+export const ADMIN_LOGIN_QUEUE_ERROR = "The current salon associated with this admin does not have the queuing feature. Please purchase it or choose another salon"
 
 
 //SUCCESS
