@@ -235,15 +235,23 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     //   { $push: { productPayment: paymentData } }
     // )
 
-    // if(isQueuing && !isAppointments){
-    //   queuing = true
-    // }else if(!isQueueing && isAppointments){
-    //   appoint = true
-    // }else if(isQueueing && isAppointments){
-    //   appoint = true
-    //   queuing = true
-    // }
-    if(session.metadata.isAppointments === true){
+    if(isQueuing && !isAppointments){
+      await Salon.updateOne(
+        { salonId: session.metadata.salonId },
+        {
+          $set: {
+            isQueuing: session.metadata.isQueuing,
+            // isAppointments: session.metadata.isAppointments,
+          },
+          $push: {
+            productPayment: paymentData,
+          },
+        }
+      )
+        .then(() => console.log("Payment added to productPayment array"))
+        .catch((err) => console.error("Error adding payment to productPayment array:", err));
+    }
+    else if(!isQueueing && isAppointments){
       await Salon.updateOne(
         { salonId: session.metadata.salonId },
         {
@@ -257,10 +265,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
         }
       )
         .then(() => console.log("Payment added to productPayment array"))
-        .catch((err) => console.error("Error adding payment to productPayment array:", err));
-    }
-
-    if(session.metadata.isQueuing === true && session.metadata.isAppointments === true){
+        .catch((err) => console.error("Error adding payment to productPayment array:", err));    }
+    else if(isQueueing && isAppointments){
       await Salon.updateOne(
         { salonId: session.metadata.salonId },
         {
