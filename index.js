@@ -445,8 +445,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
           salonId: productInfo.salonId,
           adminEmail: productInfo.adminEmail,
           paymentType: productInfo.paymentType,
-          // paymentExpiryDate: expiryDate,
-          paymentExpiryDate: productInfo.paymentExpiryDate,
+          paymentExpiryDate: expiryDate,
+          // paymentExpiryDate: productInfo.paymentExpiryDate,
           isQueuing: productInfo.isQueuing,
           isAppointments: productInfo.isAppointments
         },
