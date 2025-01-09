@@ -73,10 +73,21 @@ export const AdminLoggedIn = async (req, res, next) => {
 
     const salon = await findSalonBySalonIdAndAdmin(loggedinAdmin.salonId, email)
 
-    //Find matching payments
-    const matchingPayments = salon.productPayment.filter(payment =>
-      payment.salonId === loggedinAdmin.salonId && payment.adminEmail === email
-    );
+     // Ensure `productPayment` is an array
+     const productPayments = Array.isArray(salon.productPayment) ? salon.productPayment : [];
+
+     // Find matching payments
+     const matchingPayments = productPayments.filter(payment =>
+       payment.salonId === loggedinAdmin.salonId && payment.adminEmail === email
+     );
+    // Respond with admin and payment details
+    res.status(201).json({
+      success: true,
+      message: "Yes, I am admin logged in",
+      user: [loggedinAdmin],
+      payments: matchingPayments,
+    })
+
     // if (!admincookie?.AdminToken) {
     //     return res.status(401).json({
     //         success: false,
@@ -102,14 +113,6 @@ export const AdminLoggedIn = async (req, res, next) => {
 
     //     }
     // )
-
-    // Respond with admin and payment details
-    res.status(201).json({
-      success: true,
-      message: "Yes, I am admin logged in",
-      user: [loggedinAdmin],
-      payments: matchingPayments,
-    })
   }
   catch (error) {
     next(error);
