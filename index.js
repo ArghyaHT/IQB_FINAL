@@ -194,7 +194,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
 
     // const expiryDate = moment().add(session.metadata.paymentExpiryDate, 'days').toDate();
 
-    console.log("Paymentexpiry session",session.metadata.paymentExpiryDate)
+    // console.log("Paymentexpiry session",session.metadata.paymentExpiryDate)
 
 
 
@@ -212,7 +212,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       salonId: session.metadata.salonId,
       adminEmail: session.metadata.adminEmail,
       paymentType: session.metadata.paymentType,
-      // paymentExpiryDate: session.metadata.paymentExpiryDate,
+      paymentExpiryDate: session.metadata.paymentExpiryDate,
       isQueuing: session.metadata.isQueuing,
       isAppointments: session.metadata.isAppointments,
       customerEmail: session.customer_details.email,
@@ -446,7 +446,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
           adminEmail: productInfo.adminEmail,
           paymentType: productInfo.paymentType,
           // paymentExpiryDate: expiryDate,
-          // paymentExpiryDate: productInfo.paymentExpiryDate,
+          paymentExpiryDate: productInfo.paymentExpiryDate,
           isQueuing: productInfo.isQueuing,
           isAppointments: productInfo.isAppointments
         },
