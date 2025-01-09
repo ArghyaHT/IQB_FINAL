@@ -356,3 +356,17 @@ export const changeSalonService = async(salonId) => {
   return salon
 }
 
+
+export const addSalonPayments =async(salonId, isQueuing, isAppointments, paymentData) => {
+  const salonpayments = Salon.updateOne(
+    { salonId:salonId },
+    {
+      isQueuing:isQueuing,
+      isAppointments:isAppointments
+    },
+    { $push: { productPayment: paymentData } }
+  )
+
+  return salonpayments
+}
+

@@ -46,9 +46,7 @@ import { GlobalErrorHandler } from "./middlewares/GlobalErrorHandler.js";
 import { logMiddleware } from "./controllers/loggerController.js";
 import { updateCustomers } from "./triggers/cronjobs.js";
 import Stripe from "stripe";
-import SalonPayments from "./models/paymentGatewayModel.js";
-import Salon from "./models/salonRegisterModel.js";
-import { getSalonBySalonId } from "./services/mobile/salonServices.js";
+import { addSalonPayments } from "./services/web/admin/salonService.js";
 
 dotenv.config()
 
@@ -218,22 +216,16 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       products: products,
     };
 
-    // const salon = await getSalonBySalonId(session.metadata.salonId)
+    await addSalonPayments(session.metadata.salonId,session.metadata.isQueuing,session.metadata.isAppointments, paymentData)
 
-    // salon.isQueuing = session.metadata.isQueuing;
-
-    // salon.isAppointments = session.metadata.isAppointments
-
-    // await salon.save();
-
-    Salon.updateOne(
-      { salonId: session.metadata.salonId },
-      {
-        isQueuing: session.metadata.isQueuing,
-        isAppointments: session.metadata.isAppointments
-      },
-      { $push: { productPayment: paymentData } }
-    )
+    // Salon.updateOne(
+    //   { salonId: session.metadata.salonId },
+    //   {
+    //     isQueuing: session.metadata.isQueuing,
+    //     isAppointments: session.metadata.isAppointments
+    //   },
+    //   { $push: { productPayment: paymentData } }
+    // )
       .then(() => console.log("Payment added to productPayment array"))
       .catch((err) => console.error("Error adding payment to productPayment array:", err));
   }
