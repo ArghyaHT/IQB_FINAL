@@ -236,6 +236,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     // )
 
     console.log("queueing",session.metadata.isQueuing)
+    console.log("Queueing type", typeof(session.metadata.isQueuing))
     console.log("appointments",session.metadata.isAppointments)
 
 
@@ -254,6 +255,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
   )
     .then(() => console.log("Payment added to productPayment array"))
     .catch((err) => console.error("Error adding payment to productPayment array:", err));
+
+    return
 } else if (!session.metadata.isQueuing && session.metadata.isAppointments) {
   console.log("Updating isAppointments only");
   await Salon.updateOne(
@@ -269,6 +272,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
   )
     .then(() => console.log("Payment added to productPayment array"))
     .catch((err) => console.error("Error adding payment to productPayment array:", err));
+
+    return
 } else if (session.metadata.isQueuing && session.metadata.isAppointments) {
   console.log("Updating both isQueuing and isAppointments");
   await Salon.updateOne(
@@ -285,6 +290,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
   )
     .then(() => console.log("Payment added to productPayment array"))
     .catch((err) => console.error("Error adding payment to productPayment array:", err));
+
+    return
 }
   }
 
