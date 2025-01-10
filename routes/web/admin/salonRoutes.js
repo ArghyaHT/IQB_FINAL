@@ -1,7 +1,7 @@
 import express from "express";
 
 // import {  handleBarberProtectedRoute, handleProtectedRoute } from "../../middlewares/middlewares.js";
-import { changeSalonOnlineStatus, createSalonByAdmin, deleteSalon, deleteSalonImages, deleteSalonLogo, getAllSalonServices, getAllSalons, getSalonImages, getSalonInfo, getSalonLogo, getSalonsByLocation, searchSalonsByNameAndCity, updateSalonBySalonIdAndAdminEmail, updateSalonImages, updateSalonInfo, updateSalonLogo, uploadMoreSalonGalleryImages, uploadSalonGalleryImages, uploadSalonLogo } from "../../../controllers/web/admin/salonController.js";
+import { changeSalonOnlineStatus, createSalonByAdmin, deleteSalon, deleteSalonImages, deleteSalonLogo, getAllSalonServices, getAllSalons, getSalonImages, getSalonInfo, getSalonLogo, getSalonPaymentsBySalonId, getSalonsByLocation, searchSalonsByNameAndCity, updateSalonBySalonIdAndAdminEmail, updateSalonImages, updateSalonInfo, updateSalonLogo, uploadMoreSalonGalleryImages, uploadSalonGalleryImages, uploadSalonLogo } from "../../../controllers/web/admin/salonController.js";
 import { verifyRefreshTokenAdmin } from "../../../middlewares/web/VerifyRefreshTokenAdmin.js";
 import { getAllSalonsByAdmin } from "../../../controllers/web/admin/adminController.js";
 import { verifyRefreshTokenBarber } from "../../../middlewares/web/VerifyRefreshTokenBarber.js";
@@ -73,7 +73,9 @@ router.route("/updateSalonInfo").post(updateSalonInfo)
 
 
 
-router.route("/getSalonsByLocation").get(verifyRefreshTokenBarber,getSalonsByLocation) //api working
+router.route("/getSalonsByLocation").get(verifyRefreshTokenBarber,getSalonsByLocation)
+
+router.route("/getSalonPaymentsBySalonId").post(getSalonPaymentsBySalonId)
 
 
 

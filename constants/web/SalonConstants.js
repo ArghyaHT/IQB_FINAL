@@ -69,6 +69,7 @@ export const SALON_DESCRIPTION_UPDATE_SUCCESS = "Salon description updated succe
 export const SALON_CONNECT_SUCCESS = "Need to connect to salon first"
 export const SALON_DESCRIPTION_EMPTY_SUCCESS = "Salon description not present"
 export const SALON_DESCRIPTION_RETRIEVED_SUCCESS = "Salon information retrieved successfully"
+export const SALON_PAYMENTS_RETRIEVED_SUCCESS = "Salon payments retrieved successfully"
 
 
 

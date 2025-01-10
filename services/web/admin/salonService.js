@@ -2,6 +2,7 @@ import Salon from "../../../models/salonRegisterModel.js"
 import { getCurrencySymbol } from "../../../utils/currencySymbolMap/currencysymbolmap.js";
 import { findCountryByName } from "../../../services/web/countries/countryService.js";
 import SalonQueueListModel from "../../../models/salonQueueListModel.js";
+import moment from "moment";
 
 
 //FIND SALON BY SALON NAME
@@ -354,20 +355,41 @@ export const changeSalonService = async(salonId) => {
 }
 
 
-export const addSalonPayments = async (salonId, isQueuing, isAppointments, paymentData) => {
-  const salonPayments = await Salon.updateOne(
-    { salonId: salonId },
-    {
-      $set: {
-        isQueuing: isQueuing,
-        isAppointments: isAppointments,
-      },
-      $push: {
-        productPayment: paymentData,
-      },
-    }
-  );
+// export const addSalonPayments = async (salonId, isQueuing, isAppointments, paymentData) => {
+//   const salonPayments = await Salon.updateOne(
+//     { salonId: salonId },
+//     {
+//       $set: {
+//         isQueuing: isQueuing,
+//         isAppointments: isAppointments,
+//       },
+//       $push: {
+//         productPayment: paymentData,
+//       },
+//     }
+//   );
 
-  return salonPayments;
+//   return salonPayments;
+// };
+
+
+export const getSalonPayments = async (salonId) => {
+  const salon = await Salon.findOne({ salonId }, { productPayment: 1 }); // Only select the productPayment field
+  if (!salon || !salon.productPayment) return [];
+
+  // Convert dates and add activityStatus
+  const formattedPayments = salon.productPayment.map(payment => {
+    const purchaseDate = moment.unix(payment.purchaseDate);
+    const paymentExpiryDate = moment.unix(payment.paymentExpiryDate);
+    const today = moment();
+
+    return {
+      ...payment._doc, // Spread other fields from the document
+      purchaseDate: purchaseDate.format('YYYY-MM-DD'), // Format as 'YYYY-MM-DD'
+      paymentExpiryDate: paymentExpiryDate.format('YYYY-MM-DD'), // Format as 'YYYY-MM-DD'
+      activityStatus: today.isBetween(purchaseDate, paymentExpiryDate, undefined, '[]'), // Check if today is between purchaseDate and paymentExpiryDate (inclusive)
+    };
+  });
+
+  return formattedPayments;
 };
-
