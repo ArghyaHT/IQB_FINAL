@@ -239,7 +239,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     console.log("appointments",session.metadata.isAppointments)
 
 
-    if (session.metadata.isQueuing && !session.metadata.isAppointments) {
+    if (session.metadata.isQueuing === true && session.metadata.isAppointments === false) {
       console.log("Updating isQueuing only");
       await Salon.updateOne(
         { salonId: session.metadata.salonId },
@@ -254,7 +254,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       )
         .then(() => console.log("Payment added to productPayment array"))
         .catch((err) => console.error("Error adding payment to productPayment array:", err));
-    } else if (!session.metadata.isQueuing && session.metadata.isAppointments) {
+    } else if (session.metadata.isQueuing === false && session.metadata.isAppointments === true) {
       console.log("Updating isAppointments only");
       await Salon.updateOne(
         { salonId: session.metadata.salonId },
@@ -269,7 +269,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       )
         .then(() => console.log("Payment added to productPayment array"))
         .catch((err) => console.error("Error adding payment to productPayment array:", err));
-    } else if (session.metadata.isQueuing && session.metadata.isAppointments) {
+    } else if (session.metadata.isQueuing === true && session.metadata.isAppointments === true) {
       console.log("Updating both isQueuing and isAppointments");
       await Salon.updateOne(
         { salonId: session.metadata.salonId },
