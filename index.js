@@ -239,63 +239,122 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     console.log("Queueing type", typeof (session.metadata.isQueuing))
     console.log("appointments", session.metadata.isAppointments)
 
+    // const isQueuingValue = Boolean(session.metadata.isQueuing);
+    // const isAppointmentValue = Boolean(session.metadata.isAppointments);
+
+
+    // if (isQueuingValue && !isAppointmentValue) {
+    //   console.log("Updating isQueuing only");
+    //   await Salon.updateOne(
+    //     { salonId: session.metadata.salonId },
+    //     {
+    //       $set: {
+    //         isQueuing: isQueuingValue,
+    //       },
+    //       $push: {
+    //         productPayment: paymentData,
+    //       },
+    //     }
+    //   )
+    //     .then(() => console.log("Payment added to productPayment array"))
+    //     .catch((err) => console.error("Error adding payment to productPayment array:", err));
+
+    //   return
+    // } else if (!isQueuingValue && isAppointmentValue) {
+    //   console.log("Updating isAppointments only");
+    //   await Salon.updateOne(
+    //     { salonId: session.metadata.salonId },
+    //     {
+    //       $set: {
+    //         isAppointments: isAppointmentValue,
+    //       },
+    //       $push: {
+    //         productPayment: paymentData,
+    //       },
+    //     }
+    //   )
+    //     .then(() => console.log("Payment added to productPayment array"))
+    //     .catch((err) => console.error("Error adding payment to productPayment array:", err));
+
+    //   return
+    // } else if (isQueuingValue && isAppointmentValue) {
+    //   console.log("Updating both isQueuing and isAppointments");
+    //   await Salon.updateOne(
+    //     { salonId: session.metadata.salonId },
+    //     {
+    //       $set: {
+    //         isQueuing: isQueuingValue,
+    //         isAppointments: isAppointmentValue,
+    //       },
+    //       $push: {
+    //         productPayment: paymentData,
+    //       },
+    //     }
+    //   )
+    //     .then(() => console.log("Payment added to productPayment array"))
+    //     .catch((err) => console.error("Error adding payment to productPayment array:", err));
+
+    //   return
+    // }
     const isQueuingValue = Boolean(session.metadata.isQueuing);
-    const isAppointmentValue = Boolean(session.metadata.isAppointments);
+const isAppointmentValue = Boolean(session.metadata.isAppointments);
 
+try {
+  if (isQueuingValue && !isAppointmentValue) {
+    console.log("Updating isQueuing only");
+    await Salon.updateOne(
+      { salonId: session.metadata.salonId },
+      {
+        $set: {
+          isQueuing: isQueuingValue,
+        },
+        $push: {
+          productPayment: paymentData,
+        },
+      }
+    );
+    console.log("Payment added to productPayment array");
+    return;
+  }
 
-    if (isQueuingValue && !isAppointmentValue) {
-      console.log("Updating isQueuing only");
-      await Salon.updateOne(
-        { salonId: session.metadata.salonId },
-        {
-          $set: {
-            isQueuing: isQueuingValue,
-          },
-          $push: {
-            productPayment: paymentData,
-          },
-        }
-      )
-        .then(() => console.log("Payment added to productPayment array"))
-        .catch((err) => console.error("Error adding payment to productPayment array:", err));
+  if (!isQueuingValue && isAppointmentValue) {
+    console.log("Updating isAppointments only");
+    await Salon.updateOne(
+      { salonId: session.metadata.salonId },
+      {
+        $set: {
+          isAppointments: isAppointmentValue,
+        },
+        $push: {
+          productPayment: paymentData,
+        },
+      }
+    );
+    console.log("Payment added to productPayment array");
+    return;
+  }
 
-      return
-    } else if (!isQueuingValue && isAppointmentValue) {
-      console.log("Updating isAppointments only");
-      await Salon.updateOne(
-        { salonId: session.metadata.salonId },
-        {
-          $set: {
-            isAppointments: isAppointmentValue,
-          },
-          $push: {
-            productPayment: paymentData,
-          },
-        }
-      )
-        .then(() => console.log("Payment added to productPayment array"))
-        .catch((err) => console.error("Error adding payment to productPayment array:", err));
+  if (isQueuingValue && isAppointmentValue) {
+    console.log("Updating both isQueuing and isAppointments");
+    await Salon.updateOne(
+      { salonId: session.metadata.salonId },
+      {
+        $set: {
+          isQueuing: isQueuingValue,
+          isAppointments: isAppointmentValue,
+        },
+        $push: {
+          productPayment: paymentData,
+        },
+      }
+    );
+    console.log("Payment added to productPayment array");
+    return;
+  }
+} catch (err) {
+  console.error("Error adding payment to productPayment array:", err);
+}
 
-      return
-    } else if (isQueuingValue && isAppointmentValue) {
-      console.log("Updating both isQueuing and isAppointments");
-      await Salon.updateOne(
-        { salonId: session.metadata.salonId },
-        {
-          $set: {
-            isQueuing: isQueuingValue,
-            isAppointments: isAppointmentValue,
-          },
-          $push: {
-            productPayment: paymentData,
-          },
-        }
-      )
-        .then(() => console.log("Payment added to productPayment array"))
-        .catch((err) => console.error("Error adding payment to productPayment array:", err));
-
-      return
-    }
   }
 
   response.status(200).json({ received: true });
