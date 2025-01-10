@@ -235,10 +235,6 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     //   { $push: { productPayment: paymentData } }
     // )
 
-    console.log("queueing", session.metadata.isQueuing)
-    console.log("Queueing type", typeof (session.metadata.isQueuing))
-    console.log("appointments", session.metadata.isAppointments)
-
 
     // const isQueueing = Boolean(session.metadata.isQueuing)
     // const isAppointment = Boolean(session.metadata.isAppointments)
@@ -250,16 +246,60 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
 
     if(isQueueing === "true" && isAppointment === "false"){
       console.log("Queueing is true")
+
+      const isQueuingValue = Boolean(session.metadata.isQueuing)
+
+      await Salon.updateOne(
+            { salonId: session.metadata.salonId },
+            {
+              $set: {
+                isQueuing: isQueuingValue,
+              },
+              $push: {
+                productPayment: paymentData,
+              },
+            }
+          )
       return
     }
 
     if(isAppointment === "true" && isQueueing === "false"){
       console.log("Appointment is true")
+
+      const isQueuingValue = Boolean(session.metadata.isQueuing)
+      const isAppointmentValue = Boolean(session.metadata.isAppointments) 
+
+      await Salon.updateOne(
+            { salonId: session.metadata.salonId },
+            {
+              $set: {
+                isAppointments: isAppointmentValue,
+              },
+              $push: {
+                productPayment: paymentData,
+              },
+            }
+          )
       return
     }
 
     if(isAppointment === "true" && isQueueing === "true"){
       console.log("Queuing and appointment is true")
+      const isQueuingValue = Boolean(session.metadata.isQueuing)
+      const isAppointmentValue = Boolean(session.metadata.isAppointments) 
+
+      await Salon.updateOne(
+            { salonId: session.metadata.salonId },
+            {
+              $set: {
+                isQueuing: isQueuingValue,
+                isAppointments: isAppointmentValue,
+              },
+              $push: {
+                productPayment: paymentData,
+              },
+            }
+          )
       return
     }
 
