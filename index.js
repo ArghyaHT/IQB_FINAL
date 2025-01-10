@@ -240,22 +240,25 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     console.log("appointments", session.metadata.isAppointments)
 
 
-    const isQueueing = Boolean(session.metadata.isQueuing)
-    const isAppointment = Boolean(session.metadata.isAppointments)
+    // const isQueueing = Boolean(session.metadata.isQueuing)
+    // const isAppointment = Boolean(session.metadata.isAppointments)
+
+    const isQueueing = session.metadata.isQueuing;
+    const isAppointment = session.metadata.isAppointments;
 
     console.log("Queue ", typeof(isQueueing))
 
-    if(isQueueing && !isAppointment){
+    if(isQueueing === "true" && isAppointment === "false"){
       console.log("Queueing is true")
       return
     }
 
-    if(isAppointment && !isQueueing){
+    if(isAppointment === "true" && isQueueing === "false"){
       console.log("Appointment is true")
       return
     }
 
-    if(isAppointment && isQueueing){
+    if(isAppointment === "true" && isQueueing === "true"){
       console.log("Queuing and appointment is true")
       return
     }
