@@ -239,13 +239,13 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     console.log("appointments",session.metadata.isAppointments)
 
 
-    if(session.metadata.isQueuing && !session.metadata.isAppointments){
+    if (session.metadata.isQueuing && !session.metadata.isAppointments) {
+      console.log("Updating isQueuing only");
       await Salon.updateOne(
         { salonId: session.metadata.salonId },
         {
           $set: {
             isQueuing: session.metadata.isQueuing,
-            // isAppointments: session.metadata.isAppointments,
           },
           $push: {
             productPayment: paymentData,
@@ -254,13 +254,12 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       )
         .then(() => console.log("Payment added to productPayment array"))
         .catch((err) => console.error("Error adding payment to productPayment array:", err));
-    }
-    else if(!session.metadata.isQueueing && session.metadata.isAppointments){
+    } else if (!session.metadata.isQueuing && session.metadata.isAppointments) {
+      console.log("Updating isAppointments only");
       await Salon.updateOne(
         { salonId: session.metadata.salonId },
         {
           $set: {
-            // isQueuing: session.metadata.isQueuing,
             isAppointments: session.metadata.isAppointments,
           },
           $push: {
@@ -269,8 +268,9 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
         }
       )
         .then(() => console.log("Payment added to productPayment array"))
-        .catch((err) => console.error("Error adding payment to productPayment array:", err));    }
-    else if(session.metadata.isQueueing && session.metadata.isAppointments){
+        .catch((err) => console.error("Error adding payment to productPayment array:", err));
+    } else if (session.metadata.isQueuing && session.metadata.isAppointments) {
+      console.log("Updating both isQueuing and isAppointments");
       await Salon.updateOne(
         { salonId: session.metadata.salonId },
         {
@@ -455,11 +455,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
   try {
     const { productInfo } = req.body;
 
-    console.log("pro info",productInfo.paymentExpiryDate)
-
     const expiryDate = moment().add(productInfo.paymentExpiryDate, 'days').toDate();
-
-    console.log("Expiry Date checkout session",expiryDate)
 
     if (productInfo) {
       const session = await stripe.checkout.sessions.create({
