@@ -207,11 +207,9 @@ const salonsSchema = new mongoose.Schema({
     // },
     isQueuing: {
         type: Boolean,
-        default: false
     },
     isAppointments: {
         type: Boolean,
-        default: false
     },
     gallery: [
         {
