@@ -223,7 +223,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     };
 
 
-    console.log("Payments from webhook ", paymentData)
+    // console.log("Payments from webhook ", paymentData)
     // await addSalonPayments(session.metadata.salonId,session.metadata.isQueuing,session.metadata.isAppointments, paymentData)
 
     // Salon.updateOne(
@@ -240,7 +240,25 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     console.log("appointments", session.metadata.isAppointments)
 
 
-    console.log(Boolean(session.metadata.isQueuing))
+    const isQueueing = Boolean(session.metadata.isQueuing)
+    const isAppointment = Boolean(session.metadata.isAppointments)
+
+    console.log("Queue ", typeof(isQueueing))
+
+    if(isQueueing && !isAppointment){
+      console.log("Queueing is true")
+      return
+    }
+
+    if(isAppointment && !isQueueing){
+      console.log("Appointment is true")
+      return
+    }
+
+    if(isAppointment && isQueueing){
+      console.log("Queuing and appointment is true")
+      return
+    }
 
     // const isQueuingValue = Boolean(session.metadata.isQueuing);
     // const isAppointmentValue = Boolean(session.metadata.isAppointments);
