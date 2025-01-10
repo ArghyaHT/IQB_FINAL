@@ -235,64 +235,67 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     //   { $push: { productPayment: paymentData } }
     // )
 
-    console.log("queueing",session.metadata.isQueuing)
-    console.log("Queueing type", typeof(session.metadata.isQueuing))
-    console.log("appointments",session.metadata.isAppointments)
+    console.log("queueing", session.metadata.isQueuing)
+    console.log("Queueing type", typeof (session.metadata.isQueuing))
+    console.log("appointments", session.metadata.isAppointments)
+
+    const isQueuingValue = Boolean(session.metadata.isQueuing);
+    const isAppointmentValue = Boolean(session.metadata.isAppointments);
 
 
-    if (session.metadata.isQueuing && !session.metadata.isAppointments) {
-  console.log("Updating isQueuing only");
-  await Salon.updateOne(
-    { salonId: session.metadata.salonId },
-    {
-      $set: {
-        isQueuing: session.metadata.isQueuing,
-      },
-      $push: {
-        productPayment: paymentData,
-      },
+    if (isQueuingValue && !isAppointmentValue) {
+      console.log("Updating isQueuing only");
+      await Salon.updateOne(
+        { salonId: session.metadata.salonId },
+        {
+          $set: {
+            isQueuing: isQueuingValue,
+          },
+          $push: {
+            productPayment: paymentData,
+          },
+        }
+      )
+        .then(() => console.log("Payment added to productPayment array"))
+        .catch((err) => console.error("Error adding payment to productPayment array:", err));
+
+      return
+    } else if (!isQueuingValue && isAppointmentValue) {
+      console.log("Updating isAppointments only");
+      await Salon.updateOne(
+        { salonId: session.metadata.salonId },
+        {
+          $set: {
+            isAppointments: isAppointmentValue,
+          },
+          $push: {
+            productPayment: paymentData,
+          },
+        }
+      )
+        .then(() => console.log("Payment added to productPayment array"))
+        .catch((err) => console.error("Error adding payment to productPayment array:", err));
+
+      return
+    } else if (isQueuingValue && isAppointmentValue) {
+      console.log("Updating both isQueuing and isAppointments");
+      await Salon.updateOne(
+        { salonId: session.metadata.salonId },
+        {
+          $set: {
+            isQueuing: isQueuingValue,
+            isAppointments: isAppointmentValue,
+          },
+          $push: {
+            productPayment: paymentData,
+          },
+        }
+      )
+        .then(() => console.log("Payment added to productPayment array"))
+        .catch((err) => console.error("Error adding payment to productPayment array:", err));
+
+      return
     }
-  )
-    .then(() => console.log("Payment added to productPayment array"))
-    .catch((err) => console.error("Error adding payment to productPayment array:", err));
-
-    return
-} else if (!session.metadata.isQueuing && session.metadata.isAppointments) {
-  console.log("Updating isAppointments only");
-  await Salon.updateOne(
-    { salonId: session.metadata.salonId },
-    {
-      $set: {
-        isAppointments: session.metadata.isAppointments,
-      },
-      $push: {
-        productPayment: paymentData,
-      },
-    }
-  )
-    .then(() => console.log("Payment added to productPayment array"))
-    .catch((err) => console.error("Error adding payment to productPayment array:", err));
-
-    return
-} else if (session.metadata.isQueuing && session.metadata.isAppointments) {
-  console.log("Updating both isQueuing and isAppointments");
-  await Salon.updateOne(
-    { salonId: session.metadata.salonId },
-    {
-      $set: {
-        isQueuing: session.metadata.isQueuing,
-        isAppointments: session.metadata.isAppointments,
-      },
-      $push: {
-        productPayment: paymentData,
-      },
-    }
-  )
-    .then(() => console.log("Payment added to productPayment array"))
-    .catch((err) => console.error("Error adding payment to productPayment array:", err));
-
-    return
-}
   }
 
   response.status(200).json({ received: true });
@@ -483,7 +486,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
         metadata: {
           salonId: productInfo.salonId,
           adminEmail: productInfo.adminEmail,
-          purchaseDate:  new Date(),
+          purchaseDate: new Date(),
           paymentType: productInfo.paymentType,
           paymentExpiryDate: expiryDate,
           isQueuing: productInfo.isQueuing,
