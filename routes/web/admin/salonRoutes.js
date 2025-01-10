@@ -75,7 +75,7 @@ router.route("/updateSalonInfo").post(updateSalonInfo)
 
 router.route("/getSalonsByLocation").get(verifyRefreshTokenBarber,getSalonsByLocation)
 
-router.route("/getSalonPaymentsBySalonId").post(getSalonPaymentsBySalonId)
+router.route("/getSalonPaymentsBySalonId").post(verifyRefreshTokenAdmin,getSalonPaymentsBySalonId)
 
 
 

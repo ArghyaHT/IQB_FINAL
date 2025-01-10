@@ -221,23 +221,6 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       products: products,
     };
 
-
-    // console.log("Payments from webhook ", paymentData)
-    // await addSalonPayments(session.metadata.salonId,session.metadata.isQueuing,session.metadata.isAppointments, paymentData)
-
-    // Salon.updateOne(
-    //   { salonId: session.metadata.salonId },
-    //   {
-    //     isQueuing: session.metadata.isQueuing,
-    //     isAppointments: session.metadata.isAppointments
-    //   },
-    //   { $push: { productPayment: paymentData } }
-    // )
-
-
-    // const isQueueing = Boolean(session.metadata.isQueuing)
-    // const isAppointment = Boolean(session.metadata.isAppointments)
-
     const isQueueing = session.metadata.isQueuing;
     const isAppointment = session.metadata.isAppointments;
 
