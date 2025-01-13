@@ -61,12 +61,10 @@ export const updateSalonSettings = async (req, res, next) => {
         
         if(startTime === endTime){
         return ErrorHandler(START_END_TIME_EQUAL_ERROR, ERROR_STATUS_CODE, res)
-
         }
 
         if(startTime > endTime){
         return ErrorHandler(START_END_TIME_LATER_ERROR, ERROR_STATUS_CODE, res)
-
         }
 
         if(intervalInMinutes === 0){
