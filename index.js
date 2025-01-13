@@ -226,62 +226,62 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     const isQueueing = session.metadata.isQueuing;
     const isAppointment = session.metadata.isAppointments;
 
-    if(isQueueing === "true" && isAppointment === "false"){
+    if (isQueueing === "true" && isAppointment === "false") {
 
       const isQueuingValue = Boolean(session.metadata.isQueuing)
 
       await Salon.updateOne(
-            { salonId: session.metadata.salonId },
-            {
-              $set: {
-                isQueuing: isQueuingValue,
-              },
-              $push: {
-                productPayment: paymentData,
-              },
-            }
-          )
+        { salonId: session.metadata.salonId },
+        {
+          $set: {
+            isQueuing: isQueuingValue,
+          },
+          $push: {
+            productPayment: paymentData,
+          },
+        }
+      )
       return
     }
 
-    if(isAppointment === "true" && isQueueing === "false"){
-      const isAppointmentValue = Boolean(session.metadata.isAppointments) 
+    if (isAppointment === "true" && isQueueing === "false") {
+      const isAppointmentValue = Boolean(session.metadata.isAppointments)
 
       await Salon.updateOne(
-            { salonId: session.metadata.salonId },
-            {
-              $set: {
-                isAppointments: isAppointmentValue,
-              },
-              $push: {
-                productPayment: paymentData,
-              },
-            }
-          )
+        { salonId: session.metadata.salonId },
+        {
+          $set: {
+            isAppointments: isAppointmentValue,
+          },
+          $push: {
+            productPayment: paymentData,
+          },
+        }
+      )
       return
     }
 
-    if(isAppointment === "true" && isQueueing === "true"){
+    if (isAppointment === "true" && isQueueing === "true") {
       const isQueuingValue = Boolean(session.metadata.isQueuing)
-      const isAppointmentValue = Boolean(session.metadata.isAppointments) 
+      const isAppointmentValue = Boolean(session.metadata.isAppointments)
 
       await Salon.updateOne(
-            { salonId: session.metadata.salonId },
-            {
-              $set: {
-                isQueuing: isQueuingValue,
-                isAppointments: isAppointmentValue,
-              },
-              $push: {
-                productPayment: paymentData,
-              },
-            }
-          )
+        { salonId: session.metadata.salonId },
+        {
+          $set: {
+            isQueuing: isQueuingValue,
+            isAppointments: isAppointmentValue,
+          },
+          $push: {
+            productPayment: paymentData,
+          },
+        }
+      )
       return
     }
 
-    const salon  = await getSalonBySalonId(session.metadata.salonId)
-    
+    const salon = await getSalonBySalonId(session.metadata.salonId)
+
     const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
     const emailBody = `
     <!DOCTYPE html>
@@ -368,12 +368,16 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     </body>
     </html>
     `;
+    console.log('Preparing to send email to:', session.customer_details.email);
+    console.log('Email Subject:', emailSubject);
+    console.log('Email Body:', emailBody);
 
     try {
-        await sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody);
+      await sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody);
+      console.log("Payment Email Sent")
     } catch (error) {
-        console.error('Error sending email:', error);
-        // Handle error if email sending fails
+      console.error('Error sending email:', error);
+      // Handle error if email sending fails
     }
   }
 
