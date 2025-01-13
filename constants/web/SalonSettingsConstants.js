@@ -1,8 +1,9 @@
 //ERROR
 
 export const SALON_SETTINGS_EMPTY_ERROR = "Please fill all the fields"
-export const SALON_SETTINGS_STARTTIME_EMPTY_ERROR = "Please choose start time"
-export const SALON_SETTINGS_ENDTIME_EMPTY_ERROR = "Please choose end time"
+export const SALON_SETTINGS_STARTTIME_EMPTY_ERROR = "Please select start time"
+export const SALON_SETTINGS_ENDTIME_EMPTY_ERROR = "Please select end time"
+export const SALON_SETTINGS_INTERVAL_MINS_EMPTY_ERROR = "Please select interval time"
 export const SALON_DAYOFFS_ERROR = "Please choose salon dayoffs"
 export const APPOINTMENT_ADVANCE_DAYS_ERROR = "Please choose appointment advance days"
 
