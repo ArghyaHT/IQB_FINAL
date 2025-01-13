@@ -43,15 +43,15 @@ export const updateSalonSettings = async (req, res, next) => {
     
         }
 
-        if(!salonOffDays){
-            return ErrorHandler(SALON_DAYOFFS_ERROR, ERROR_STATUS_CODE, res)
+        // if(!salonOffDays){
+        //     return ErrorHandler(SALON_DAYOFFS_ERROR, ERROR_STATUS_CODE, res)
 
-        }
+        // }
 
-        if(!appointmentAdvanceDays){
-            return ErrorHandler(APPOINTMENT_ADVANCE_DAYS_ERROR, ERROR_STATUS_CODE, res)
+        // if(!appointmentAdvanceDays){
+        //     return ErrorHandler(APPOINTMENT_ADVANCE_DAYS_ERROR, ERROR_STATUS_CODE, res)
 
-        }
+        // }
         
         if(startTime === endTime){
         return ErrorHandler(START_END_TIME_EQUAL_ERROR, ERROR_STATUS_CODE, res)
@@ -77,8 +77,8 @@ export const updateSalonSettings = async (req, res, next) => {
                     existingSalonSettings.appointmentSettings.appointmentStartTime = startTime;
                     existingSalonSettings.appointmentSettings.appointmentEndTime = endTime;
                     existingSalonSettings.appointmentSettings.intervalInMinutes = intervalInMinutes;
-                    existingSalonSettings.salonOffDays = salonOffDays;
-                    existingSalonSettings.appointmentAdvanceDays = appointmentAdvanceDays
+                    // existingSalonSettings.salonOffDays = salonOffDays;
+                    // existingSalonSettings.appointmentAdvanceDays = appointmentAdvanceDays
                 }
 
                 // Save the updated SalonSettings to the database
