@@ -281,3 +281,22 @@ export const barberLeaveApproval = (email, emailSubject, emailBody) => {
     }
   });
 };
+
+
+//DESC:SEND PAYMENT SUCCESS===========================
+export const sendPaymentSuccesEmail = (email, emailSubject, emailBody) => {
+  const mailOptions = {
+    from: process.env.SENDER_EMAIL_ADDRESS, // Replace with your sender email address
+    to: email,
+    subject: emailSubject,
+    html: emailBody
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error sending email:', error);
+    } else {
+      console.log('Email sent:', info.response);
+    }
+  });
+};

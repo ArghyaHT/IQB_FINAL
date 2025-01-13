@@ -73,12 +73,19 @@ export const AdminLoggedIn = async (req, res, next) => {
 
     const salon = await findSalonBySalonIdAndAdmin(loggedinAdmin.salonId, email)
 
-  // Convert Mongoose document to plain object
-  const adminData = loggedinAdmin.toObject();
+    // Convert Mongoose document to plain object
+    const adminData = loggedinAdmin.toObject();
 
-  // Add `isQueueing` and `isAppointments` fields from `salon` to `loggedinAdmin`
-  adminData.isQueueing = salon.isQueuing || false; // Default to false if undefined
-  adminData.isAppointments = salon.isAppointments || false; // Default to false if undefined
+    if (loggedinAdmin.salonId === 0) {
+
+      adminData.isQueueing = false; // Default to false if undefined
+      adminData.isAppointments = false;
+    }
+    else {
+      // Add `isQueueing` and `isAppointments` fields from `salon` to `loggedinAdmin`
+      adminData.isQueueing = salon.isQueuing  // Default to false if undefined
+      adminData.isAppointments = salon.isAppointments // Default to false if undefined
+    }
 
     // Respond with admin and payment details
     res.status(201).json({
