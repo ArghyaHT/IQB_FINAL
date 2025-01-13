@@ -1,7 +1,7 @@
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { barberAppointmentDays, createBarberAppointmentDays, updateBarberAppointmentDays } from "../../../services/web/barberAppointmentDays/barberAppointmentDaysService.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
-import { APPOINTMENT_DAYS_ARRAY_ERROR, BARBER_APPOINTMENT_DAYS_ADD_SUCCESS, BARBER_APPOINTMENT_DAYS_UPDATE_SUCCESS, BARBER_APPOINTMENT_RETRIEVE_SUCCESS } from "../../../constants/web/BarberAppointmentConstants.js";
+import { APPOINTMENT_DAYS_ARRAY_ERROR, BARBER_APPOINTMENT_DAYS_ADD_SUCCESS, BARBER_APPOINTMENT_DAYS_ARRAY_ERROR, BARBER_APPOINTMENT_DAYS_UPDATE_SUCCESS, BARBER_APPOINTMENT_RETRIEVE_SUCCESS } from "../../../constants/web/BarberAppointmentConstants.js";
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 
 
@@ -39,6 +39,11 @@ export const getBarberAppointmentDays = async (req, res, next) => {
 
         const getbarberAppointmentDays = await barberAppointmentDays(salonId, barberId)
 
+        if(!getbarberAppointmentDays){
+            return ErrorHandler(BARBER_APPOINTMENT_DAYS_ARRAY_ERROR, ERROR_STATUS_CODE, res)
+
+        }
+
         return SuccessHandler(BARBER_APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: getbarberAppointmentDays })
 
     }
@@ -54,39 +59,42 @@ export const getBarberAppointmentDayNumbers = async (req, res, next) => {
         // Get the barber's available appointment days
         const barberData = await barberAppointmentDays(salonId, barberId);
 
-        // Extract appointmentDays from the response, default to an empty array if not available
-        const appointmentDays = barberData.appointmentDays || [];
+        if(!barberData){
+            return ErrorHandler(BARBER_APPOINTMENT_DAYS_ARRAY_ERROR, ERROR_STATUS_CODE, res)
 
-        console.log(barberData.appointmentDays)
-
-        // If no appointmentDays are available, set it to an empty array
-        if (appointmentDays.length === 0) {
-            barberData.appointmentDays = [];
-        } else {
-            // Define the mapping for the days of the week
-            const daysOfWeek = {
-                Monday: 1,
-                Tuesday: 2,
-                Wednesday: 3,
-                Thursday: 4,
-                Friday: 5,
-                Saturday: 6,
-                Sunday: 0
-            };
-
-            // Map the available days to their numeric values
-            const mappedAppointmentDays = appointmentDays.map(day => daysOfWeek[day]);
-
-            // Update the barberData with the mapped appointmentDays
-            barberData.appointmentDays = mappedAppointmentDays;
         }
 
+        // Extract appointmentDays from the response
+        const appointmentDays = barberData.appointmentDays || [];
+
+        // Define the mapping for the days of the week
+        const daysOfWeek = {
+            Monday: 1,
+            Tuesday: 2,
+            Wednesday: 3,
+            Thursday: 4,
+            Friday: 5,
+            Saturday: 6,
+            Sunday: 0
+        };
+
+        // Map the available days to their numeric values
+  // Get the days of the week that are missing in the appointmentDays array
+  const missingDays = Object.keys(daysOfWeek)  // Get the days of the week
+  .filter(day => !appointmentDays.includes(day))  // Filter the days not in appointmentDays
+  .map(day => daysOfWeek[day]);
         // Convert the Mongoose document to a plain object
         const plainBarberData = barberData.toObject ? barberData.toObject() : barberData;
 
-        // Return the full response with the updated appointmentDays
+        // Modify the barberData object with the mapped appointmentDays
+        const updatedBarberData = {
+            ...plainBarberData,
+            appointmentDays: missingDays // Replace the original days with their numeric values
+        };
+
+        // Return the full response with the modified appointmentDays
         return SuccessHandler(BARBER_APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { 
-            response: plainBarberData
+            response: updatedBarberData
         });
 
     } catch (error) {

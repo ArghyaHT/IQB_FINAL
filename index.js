@@ -361,7 +361,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
                 <p>Best regards,</p>
                 <p>
                     <strong>IQueueBook</strong><br>
-                    <strong>support@iqueuebarbers.com:</strong> 
+                    <strong>support@iqueuebarbers.com</strong> 
                 </p>
             </div>
             <div class="footer">

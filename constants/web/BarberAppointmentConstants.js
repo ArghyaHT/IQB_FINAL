@@ -1,6 +1,9 @@
 //ERROR
 export const APPOINTMENT_DAYS_ARRAY_ERROR = "Appointment days should be an array"
 
+export const BARBER_APPOINTMENT_DAYS_ARRAY_ERROR = "Please select you appontment days first"
+
+
 
 
 //SUCCESS
