@@ -39,11 +39,6 @@ export const getBarberAppointmentDays = async (req, res, next) => {
 
         const getbarberAppointmentDays = await barberAppointmentDays(salonId, barberId)
 
-        if(!getbarberAppointmentDays){
-            return ErrorHandler(BARBER_APPOINTMENT_DAYS_ARRAY_ERROR, ERROR_STATUS_CODE, res)
-
-        }
-
         return SuccessHandler(BARBER_APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: getbarberAppointmentDays })
 
     }
@@ -58,11 +53,6 @@ export const getBarberAppointmentDayNumbers = async (req, res, next) => {
 
         // Get the barber's available appointment days
         const barberData = await barberAppointmentDays(salonId, barberId);
-
-        if(!barberData){
-            return ErrorHandler(BARBER_APPOINTMENT_DAYS_ARRAY_ERROR, ERROR_STATUS_CODE, res)
-
-        }
 
         // Extract appointmentDays from the response
         const appointmentDays = barberData.appointmentDays || [];
