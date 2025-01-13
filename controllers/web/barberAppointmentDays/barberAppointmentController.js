@@ -54,35 +54,39 @@ export const getBarberAppointmentDayNumbers = async (req, res, next) => {
         // Get the barber's available appointment days
         const barberData = await barberAppointmentDays(salonId, barberId);
 
-        // Extract appointmentDays from the response
+        // Extract appointmentDays from the response, default to an empty array if not available
         const appointmentDays = barberData.appointmentDays || [];
 
-        // Define the mapping for the days of the week
-        const daysOfWeek = {
-            Monday: 1,
-            Tuesday: 2,
-            Wednesday: 3,
-            Thursday: 4,
-            Friday: 5,
-            Saturday: 6,
-            Sunday: 7
-        };
+        console.log(barberData.appointmentDays)
 
-        // Map the available days to their numeric values
-        const mappedAppointmentDays = appointmentDays.map(day => daysOfWeek[day]);
+        // If no appointmentDays are available, set it to an empty array
+        if (appointmentDays.length === 0) {
+            barberData.appointmentDays = [];
+        } else {
+            // Define the mapping for the days of the week
+            const daysOfWeek = {
+                Monday: 1,
+                Tuesday: 2,
+                Wednesday: 3,
+                Thursday: 4,
+                Friday: 5,
+                Saturday: 6,
+                Sunday: 0
+            };
+
+            // Map the available days to their numeric values
+            const mappedAppointmentDays = appointmentDays.map(day => daysOfWeek[day]);
+
+            // Update the barberData with the mapped appointmentDays
+            barberData.appointmentDays = mappedAppointmentDays;
+        }
 
         // Convert the Mongoose document to a plain object
         const plainBarberData = barberData.toObject ? barberData.toObject() : barberData;
 
-        // Modify the barberData object with the mapped appointmentDays
-        const updatedBarberData = {
-            ...plainBarberData,
-            appointmentDays: mappedAppointmentDays // Replace the original days with their numeric values
-        };
-
-        // Return the full response with the modified appointmentDays
+        // Return the full response with the updated appointmentDays
         return SuccessHandler(BARBER_APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { 
-            response: updatedBarberData
+            response: plainBarberData
         });
 
     } catch (error) {
