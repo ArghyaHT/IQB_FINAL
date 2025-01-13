@@ -290,11 +290,11 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Payment Confirmation</title>
         <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                background-color: #f9f9f9;
+        body {
+               font-family: 'Poppins', sans-serif;
+               margin: 0;
+               padding: 0;
+               background-color: #f9f9f9;
             }
             .container {
                 max-width: 600px;
@@ -318,6 +318,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
             .email-content {
                 padding: 20px;
                 background-color: #f8f8f8;
+                font-size: 1rem;
                 border-radius: 10px;
             }
             ul {
@@ -339,10 +340,10 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     </head>
     <body>
         <div class="container">
+            <div class="email-content">
             <div class="header">
                 <h1>Payment Confirmation</h1>
             </div>
-            <div class="email-content">
                 <p>Dear ${session.customer_details.name},</p>
                 <p>Thank you for your payment at <strong>${salon.salonName}</strong>. Below are the details of your transaction:</p>
                 <ul>
