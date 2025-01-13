@@ -46,3 +46,46 @@ export const getBarberAppointmentDays = async (req, res, next) => {
         next(error);
     }
 }
+
+export const getBarberAppointmentDayNumbers = async (req, res, next) => {
+    try {
+        const { salonId, barberId } = req.body;
+
+        // Get the barber's available appointment days
+        const barberData = await barberAppointmentDays(salonId, barberId);
+
+        // Extract appointmentDays from the response
+        const appointmentDays = barberData.appointmentDays || [];
+
+        // Define the mapping for the days of the week
+        const daysOfWeek = {
+            Monday: 1,
+            Tuesday: 2,
+            Wednesday: 3,
+            Thursday: 4,
+            Friday: 5,
+            Saturday: 6,
+            Sunday: 7
+        };
+
+        // Map the available days to their numeric values
+        const mappedAppointmentDays = appointmentDays.map(day => daysOfWeek[day]);
+
+        // Convert the Mongoose document to a plain object
+        const plainBarberData = barberData.toObject ? barberData.toObject() : barberData;
+
+        // Modify the barberData object with the mapped appointmentDays
+        const updatedBarberData = {
+            ...plainBarberData,
+            appointmentDays: mappedAppointmentDays // Replace the original days with their numeric values
+        };
+
+        // Return the full response with the modified appointmentDays
+        return SuccessHandler(BARBER_APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { 
+            response: updatedBarberData
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};

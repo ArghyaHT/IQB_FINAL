@@ -27,6 +27,7 @@
     "express-fileupload": "^1.5.0",
     "express-rate-limit": "^7.2.0",
     "firebase-admin": "^12.1.1",
+    "fs": "^0.0.1-security",
     "google-auth-library": "^9.10.0",
     "google-libphonenumber": "^3.2.38",
     "helmet": "^8.0.0",
@@ -39,6 +40,7 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.13",
     "nodemon": "^3.1.1",
+    "pdfkit": "^0.16.0",
     "stripe": "^17.5.0",
     "twilio": "^5.1.0",
     "winston": "^3.13.0"
