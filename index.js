@@ -51,7 +51,7 @@ import moment from "moment";
 import { sendPaymentSuccesEmail } from "./utils/emailSender/emailSender.js";
 import { getSalonBySalonId } from "./services/mobile/salonServices.js";
 import { generateInvoiceNumber } from "./utils/invoice/invoicepdf.js";
-import SalonPayments from "./models/salonPaymnetsModel.js";
+import { salonPayments } from "./services/web/salonPayments/salonPaymentService.js";
 
 dotenv.config()
 
@@ -282,7 +282,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       )
     }
 
-    await SalonPayments(paymentData)
+    await salonPayments(paymentData)
 
 
     // console.log("Payment is hitting")
