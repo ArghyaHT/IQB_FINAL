@@ -302,9 +302,9 @@ export const sendPaymentSuccesEmail = async(email, emailSubject, emailBody, invo
     html: emailBody,
     attachments: [
       {
-        filename: 'invoice.pdf',
-        path: invoicePath, // Attach the generated invoice file
-        contentType: 'application/pdf', // Specify MIME type
+        filename: 'invoice.html',  // Name of the attachment file
+        path: invoicePath,         // Path to the generated HTML file
+        contentType: 'text/html',  // MIME type for HTML file
       },
     ]
   };

@@ -12,7 +12,7 @@ import chrome from "html-pdf-chrome"
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const generateInvoicePDF = async (invoice, session, products) => {
+export const generateInvoiceHTML = async (invoice, session, products) => {
   const salon = await getSalonBySalonId(session.metadata.salonId);
   const invoiceDate = moment().format('DD-MM-YYYY');
   const amount = (session.amount_total / 100).toFixed(2);
@@ -125,12 +125,11 @@ export const generateInvoicePDF = async (invoice, session, products) => {
     </html>
   `;
 
-  // Generate PDF using chrome-headless
-  const pdf = await chrome.create().fromHTML(htmlContent).toPdf();
-  const invoicePath = path.resolve(__dirname, 'invoice.pdf');
-  await chrome.create().fromHTML(htmlContent).toFile(invoicePath);
+  // Save HTML content to file
+  const htmlFilePath = path.resolve(__dirname, 'invoice.html');
+  fs.writeFileSync(htmlFilePath, htmlContent);
 
-  return invoicePath;
+  return htmlFilePath;
 };
 
 
