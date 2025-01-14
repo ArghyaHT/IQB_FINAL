@@ -17,60 +17,56 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ margin: 50 });
     const invoicePath = path.resolve(__dirname, 'invoice.pdf');
-
+    
     const writeStream = fs.createWriteStream(invoicePath);
     writeStream.on('finish', () => resolve(invoicePath));
     writeStream.on('error', reject);
-
+    
     doc.pipe(writeStream);
 
-    // Header
+    // Header Section
     doc.fontSize(14).text('IQueueBook', { align: 'left' });
     doc.fontSize(10).text('16 Raffles Quay, #33-02, Hong Leong Building, Singapore 48581', { align: 'left' });
     doc.text('Singapore', { align: 'left' });
     doc.text('Registration No.: 9919SGP29004OSJ', { align: 'left' });
     doc.moveDown(2); // Add extra spacing between sections
 
-    // Invoice Information
+    // Invoice Information Section
     doc.fontSize(12).text('INVOICE', { align: 'center' });
     doc.moveDown();
     doc.text(`Invoice #:${invoice}`, { align: 'left' });
     doc.text(`Invoice Issued: ${moment().format('DD-MM-YYYY')}`, { align: 'left' });
     doc.text(`Invoice Amount: ${session.currency.toUpperCase()} ${(session.amount_total / 100).toFixed(2)}`, { align: 'left' });
     doc.text(`Payment Status: ${session.payment_status.toUpperCase()}`, { align: 'left' });
-    doc.moveDown(2);
+    doc.moveDown(2); // Add extra space after invoice details
 
-    // Billing Information
-    doc.text('BILLED TO', { underline: true });
+    // Billing Information Section
+    doc.fontSize(10).text('BILLED TO', { underline: true });
     doc.text(`${session.customer_details.name}`, { align: 'left' });
     doc.text(`${session.customer_details.email}`, { align: 'left' });
-    doc.moveDown(2);
+    doc.moveDown(2); // Space before the table starts
 
-    // Product Details (Table Structure)
-    const columnWidths = [200, 100, 100, 100]; // Define column widths for DESCRIPTION, PRICE, DISCOUNT, TOTAL
-    const lineHeight = 15; // Adjust line height for each row
-
-    // Draw table headers
-    doc.fontSize(10)
-      .text('DESCRIPTION', 50, doc.y, { width: columnWidths[0], align: 'left' })
-      .text('PRICE', 250, doc.y, { width: columnWidths[0], align: 'right' })
-      .text('DISCOUNT', 350, doc.y, { width: columnWidths[0], align: 'right' })
-      .text('TOTAL', 450, doc.y, { width: columnWidths[0], align: 'right' });
-
+    // Product Details Section (Table)
+    const columnWidths = [300, 100, 100, 100]; // Adjust column widths for DESCRIPTION, PRICE, DISCOUNT, TOTAL
+    const lineHeight = 15; // Line height for each row
+    doc.fontSize(10).text('DESCRIPTION', 50, doc.y, { width: columnWidths[0], align: 'left' });
+    doc.text('PRICE', 350, doc.y, { width: columnWidths[1], align: 'right' });
+    doc.text('DISCOUNT', 450, doc.y, { width: columnWidths[2], align: 'right' });
+    doc.text('TOTAL', 550, doc.y, { width: columnWidths[3], align: 'right' });
     doc.moveDown(1);
 
     // Draw table rows for products
     products.forEach(product => {
       doc.text(product.name, 50, doc.y, { width: columnWidths[0], align: 'left' });
-      doc.text(`${session.currency.toUpperCase()} ${product.price.toFixed(2)}`, 250, doc.y, { width: columnWidths[1], align: 'right' });
-      doc.text('-', 350, doc.y, { width: columnWidths[2], align: 'center' });
-      doc.text(`${session.currency.toUpperCase()} ${product.price.toFixed(2)}`, 450, doc.y, { width: columnWidths[3], align: 'right' });
+      doc.text(`${session.currency.toUpperCase()} ${product.price.toFixed(2)}`, 350, doc.y, { width: columnWidths[1], align: 'right' });
+      doc.text('-', 450, doc.y, { width: columnWidths[2], align: 'center' });
+      doc.text(`${session.currency.toUpperCase()} ${product.price.toFixed(2)}`, 550, doc.y, { width: columnWidths[3], align: 'right' });
       doc.moveDown();
     });
 
     doc.moveDown(2); // Space between the table and summary
 
-    // Summary
+    // Summary Section
     const total = products.reduce((sum, product) => sum + product.price, 0);
     const tax = total * 0.18; // Assuming 18% GST
     const grandTotal = total + tax;
@@ -82,10 +78,10 @@ export const generateInvoicePDF = async (invoice, session, products) => {
     doc.text(`Amount Due: ${session.currency.toUpperCase()} 0.00`, { align: 'left' });
     doc.moveDown(2);
 
-    // Footer
+    // Footer Section
     doc.fontSize(10).text('Thank you for choosing IQueueBook!', { align: 'center' });
-    doc.end();
 
+    doc.end();
   });
 };
 
