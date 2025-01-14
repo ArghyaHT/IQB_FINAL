@@ -53,9 +53,9 @@ export const generateInvoicePDF = async (invoice, session, products) => {
     // Draw table headers
     doc.fontSize(10)
       .text('DESCRIPTION', 50, doc.y, { width: columnWidths[0], align: 'left' })
-      .text('PRICE', 250, doc.y, { width: columnWidths[1], align: 'right' })
-      .text('DISCOUNT', 350, doc.y, { width: columnWidths[2], align: 'right' })
-      .text('TOTAL', 450, doc.y, { width: columnWidths[3], align: 'right' });
+      .text('PRICE', 250, doc.y, { width: columnWidths[0], align: 'right' })
+      .text('DISCOUNT', 350, doc.y, { width: columnWidths[0], align: 'right' })
+      .text('TOTAL', 450, doc.y, { width: columnWidths[0], align: 'right' });
 
     doc.moveDown(1);
 
