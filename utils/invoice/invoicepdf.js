@@ -5,6 +5,7 @@ import moment from "moment";
 import { fileURLToPath } from 'url';
 import { getSalonBySalonId } from "../../services/mobile/salonServices.js";
 import SalonPayments from "../../models/salonPaymnetsModel.js";
+import puppeteer from "puppeteer";
 
 
 // Define __dirname in ES Modules
@@ -13,92 +14,126 @@ const __dirname = path.dirname(__filename);
 
 export const generateInvoicePDF = async (invoice, session, products) => {
   const salon = await getSalonBySalonId(session.metadata.salonId);
+  const invoiceDate = moment().format('DD-MM-YYYY');
+  const amount = (session.amount_total / 100).toFixed(2);
 
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ margin: 50 });
-    const invoicePath = path.resolve(__dirname, 'invoice.pdf');
+  // Write the HTML content
+  let htmlContent = `
+    <html>
+      <head>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+          }
+          .invoice-container {
+            margin: 50px;
+          }
+          .header, .footer {
+            text-align: center;
+          }
+          .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+          }
+          .table th, .table td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+          }
+          .table th {
+            background-color: #f2f2f2;
+          }
+          .summary {
+            margin-top: 20px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-container">
+          <div class="header">
+            <h1>IQueueBook</h1>
+            <p>16 Raffles Quay, #33-02, Hong Leong Building, Singapore 48581</p>
+            <p>Singapore</p>
+            <p>Registration No.: 9919SGP29004OSJ</p>
+          </div>
 
-    const writeStream = fs.createWriteStream(invoicePath);
-    writeStream.on('finish', () => resolve(invoicePath));
-    writeStream.on('error', reject);
+          <div class="invoice-info" style="text-align: right;">
+            <h2>INVOICE</h2>
+            <p><strong>Invoice #: </strong>${invoice}</p>
+            <p><strong>Invoice Issued: </strong>${invoiceDate}</p>
+            <p><strong>Invoice Amount: </strong>${session.currency.toUpperCase()} ${amount}</p>
+            <p><strong>Payment Status: </strong>${session.payment_status.toUpperCase()}</p>
+          </div>
 
-    doc.pipe(writeStream);
+          <div class="billing-info">
+            <h3>BILLED TO</h3>
+            <p>${session.customer_details.name}</p>
+            <p>${session.customer_details.email}</p>
+          </div>
 
-    // Header Section - Left-aligned
-    doc.fontSize(14).text('IQueueBook', { align: 'left' });
-    doc.fontSize(10).text('16 Raffles Quay, #33-02, Hong Leong Building, Singapore 48581', { align: 'left' });
-    doc.text('Singapore', { align: 'left' });
-    doc.text('Registration No.: 9919SGP29004OSJ', { align: 'left' });
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Discount</th>
+                <th>Total</th>
+                <th>Extra</th>
+              </tr>
+            </thead>
+            <tbody>
+  `;
 
-    // Invoice Information Section - Right-aligned
-    const rightColumnX = 400; // X position for right-aligned invoice info
-    doc.fontSize(12).text('INVOICE', rightColumnX);
-    doc.fontSize(10).text(`Invoice #:${invoice}`, rightColumnX);
-    doc.text(`Invoice Issued: ${moment().format('DD-MM-YYYY')}`, rightColumnX);
-    doc.text(`Invoice Amount: ${session.currency.toUpperCase()} ${(session.amount_total / 100).toFixed(2)}`, rightColumnX);
-    doc.text(`Payment Status: ${session.payment_status.toUpperCase()}`, rightColumnX);
-
-    doc.moveDown(2); // Space before the billing section
-
-    // Billing Information Section
-    doc.fontSize(10).text('BILLED TO', { underline: true });
-    doc.text(`${session.customer_details.name}`, { align: 'left' });
-    doc.text(`${session.customer_details.email}`, { align: 'left' });
-    doc.moveDown(2); // Space before the table starts
-
-    // Grid (Table) Setup
-    const columnWidths = [200, 100, 100, 100, 100]; // Column widths for DESCRIPTION, PRICE, DISCOUNT, TOTAL, EXTRA
-    const gridStartY = doc.y; // Remember the Y position to start the table
-    const rowHeight = 20; // Height for each row
-
-    // Define X positions for each column (column grid)
-    const colX = [50, 100, 150, 200, 250]; // X positions for each column
-
-     // Draw horizontal line below each row to simulate grid separation
-    //  doc.moveTo(50, rowY + 5).lineTo(600, rowY + 5).stroke();
-
-    // Draw table header (grid-like)
-    doc.fontSize(10).text('DESCRIPTION', colX[0], gridStartY);
-    doc.text('PRICE', colX[1], gridStartY, { align: 'right' });
-    doc.text('DISCOUNT', colX[2], gridStartY, { align: 'right' });
-    doc.text('TOTAL', colX[3], gridStartY, { align: 'right' });
-    doc.text('EXTRA', colX[4], gridStartY, { align: 'right' });
-
-    // Draw horizontal line below header to simulate grid separation
-    doc.moveTo(50, doc.y + 5).lineTo(600, doc.y + 5).stroke();
-
-    // Draw product rows
-    products.forEach((product, index) => {
-      const rowY = gridStartY + (index + 1) * rowHeight; // Calculate Y position for each row
-      doc.text(product.name, colX[0], rowY);
-      doc.text(`${session.currency.toUpperCase()} ${product.price.toFixed(2)}`, colX[1], rowY, { align: 'right' });
-      doc.text('-', colX[2], rowY, { align: 'center' });
-      doc.text(`${session.currency.toUpperCase()} ${product.price.toFixed(2)}`, colX[3], rowY, { align: 'right' });
-      doc.text('Some Extra', colX[4], rowY, { align: 'right' });
-
-      // Draw horizontal line below each row to simulate grid separation
-      doc.moveTo(50, rowY + 5).lineTo(600, rowY + 5).stroke();
-    });
-
-    doc.moveDown(2); // Space between the table and summary
-
-    // Summary Section
-    const total = products.reduce((sum, product) => sum + product.price, 0);
-    const tax = total * 0.18; // Assuming 18% GST
-    const grandTotal = total + tax;
-
-    doc.fontSize(10).text(`Total excl. Tax: ${session.currency.toUpperCase()} ${total.toFixed(2)}`, { align: 'left' });
-    doc.text(`Tax @ 18%: ${session.currency.toUpperCase()} ${tax.toFixed(2)}`, { align: 'left' });
-    doc.text(`Total: ${session.currency.toUpperCase()} ${grandTotal.toFixed(2)}`, { align: 'left' });
-    doc.text(`Payments: ${session.currency.toUpperCase()} -${grandTotal.toFixed(2)}`, { align: 'left' });
-    doc.text(`Amount Due: ${session.currency.toUpperCase()} 0.00`, { align: 'left' });
-    doc.moveDown(2);
-
-    // Footer Section
-    doc.fontSize(10).text('Thank you for choosing IQueueBook!', { align: 'center' });
-
-    doc.end();
+  // Add product rows
+  products.forEach(product => {
+    htmlContent += `
+      <tr>
+        <td>${product.name}</td>
+        <td>${session.currency.toUpperCase()} ${product.price.toFixed(2)}</td>
+        <td>-</td>
+        <td>${session.currency.toUpperCase()} ${product.price.toFixed(2)}</td>
+        <td>Some Extra</td>
+      </tr>
+    `;
   });
+
+  // Add summary section
+  const total = products.reduce((sum, product) => sum + product.price, 0);
+  const tax = total * 0.18; // Assuming 18% GST
+  const grandTotal = total + tax;
+
+  htmlContent += `
+            </tbody>
+          </table>
+
+          <div class="summary">
+            <p><strong>Total excl. Tax: </strong>${session.currency.toUpperCase()} ${total.toFixed(2)}</p>
+            <p><strong>Tax @ 18%: </strong>${session.currency.toUpperCase()} ${tax.toFixed(2)}</p>
+            <p><strong>Total: </strong>${session.currency.toUpperCase()} ${grandTotal.toFixed(2)}</p>
+            <p><strong>Payments: </strong>${session.currency.toUpperCase()} -${grandTotal.toFixed(2)}</p>
+            <p><strong>Amount Due: </strong>${session.currency.toUpperCase()} 0.00</p>
+          </div>
+
+          <div class="footer">
+            <p>Thank you for choosing IQueueBook!</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  // Generate PDF using puppeteer
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.setContent(htmlContent);
+  const invoicePath = path.resolve(__dirname, 'invoice.pdf');
+  await page.pdf({ path: invoicePath, format: 'A4' });
+  await browser.close();
+
+  return invoicePath;
 };
 
 
