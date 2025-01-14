@@ -125,15 +125,13 @@ export const generateInvoicePDF = async (invoice, session, products) => {
     </html>
   `;
 
-
-  // Generate PDF using html-pdf-chrome
-  const pdf = await chrome.create().from(htmlContent).toPdf();
+  // Generate PDF using chrome-headless
+  const pdf = await chrome.create().fromHTML(htmlContent).toPdf();
   const invoicePath = path.resolve(__dirname, 'invoice.pdf');
-  await chrome.create().from(htmlContent).toFile(invoicePath);
+  await chrome.create().fromHTML(htmlContent).toFile(invoicePath);
 
   return invoicePath;
 };
-
 
 
 
