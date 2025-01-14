@@ -17,6 +17,7 @@ export const generateInvoiceHTML = async (invoice, session, products) => {
   const invoiceDate = moment().format('DD-MM-YYYY');
   const amount = (session.amount_total / 100).toFixed(2);
 
+  
   // Write the HTML content
   let htmlContent = `
     <html>
