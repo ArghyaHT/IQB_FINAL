@@ -24,71 +24,77 @@ export const generateInvoicePDF = async (invoice, session, products) => {
 
     doc.pipe(writeStream);
 
-    // Header Section - Left-aligned
-    doc.fontSize(14).text('IQueueBook', { align: 'left' });
-    doc.fontSize(10).text('16 Raffles Quay, #33-02, Hong Leong Building, Singapore 48581', { align: 'left' });
-    doc.text('Singapore', { align: 'left' });
-    doc.text('Registration No.: 9919SGP29004OSJ', { align: 'left' });
+ // Header Section - Left-aligned
+doc.fontSize(14).text('IQueueBook', { align: 'left' });
+doc.fontSize(10).text('16 Raffles Quay, #33-02, Hong Leong Building, Singapore 48581', { align: 'left' });
+doc.text('Singapore', { align: 'left' });
+doc.text('Registration No.: 9919SGP29004OSJ', { align: 'left' });
 
-    // Move to a specific line height for the next section
-    const headerHeight = doc.y; // Track current Y position after header content
-    const rightColumnX = 400;  // X position for the right-aligned invoice information
+// Move to a specific line height for the next section
+const headerHeight = doc.y; // Track current Y position after header content
+const rightColumnX = 400;  // X position for the right-aligned invoice information
 
-    // Ensure the invoice information is on the same line
-    doc.y = headerHeight;  // Keep Y position from header to maintain same line
+// Ensure the invoice information is on the same line
+doc.y = headerHeight;  // Keep Y position from header to maintain same line
 
-    // Invoice Information Section - Right-aligned
-    doc.fontSize(12).text('INVOICE', rightColumnX);
-    doc.moveDown(0);  // Prevent default line break after text, keeping it on the same line
-    doc.fontSize(10).text(`Invoice #:${invoice}`, rightColumnX);
-    doc.text(`Invoice Issued: ${moment().format('DD-MM-YYYY')}`, rightColumnX);
-    doc.text(`Invoice Amount: ${session.currency.toUpperCase()} ${(session.amount_total / 100).toFixed(2)}`, rightColumnX);
-    doc.text(`Payment Status: ${session.payment_status.toUpperCase()}`, rightColumnX);
+// Invoice Information Section - Right-aligned
+doc.fontSize(12).text('INVOICE', rightColumnX);
+doc.moveDown(0);  // Prevent default line break after text, keeping it on the same line
+doc.fontSize(10).text(`Invoice #:${invoice}`, rightColumnX);
+doc.text(`Invoice Issued: ${moment().format('DD-MM-YYYY')}`, rightColumnX);
+doc.text(`Invoice Amount: ${session.currency.toUpperCase()} ${(session.amount_total / 100).toFixed(2)}`, rightColumnX);
+doc.text(`Payment Status: ${session.payment_status.toUpperCase()}`, rightColumnX);
 
-    // Continue with other content below
-    doc.moveDown(2); // Adjust vertical space for the next section
-    // Billing Information Section
-    doc.fontSize(10).text('BILLED TO', { underline: true });
-    doc.text(`${session.customer_details.name}`, { align: 'left' });
-    doc.text(`${session.customer_details.email}`, { align: 'left' });
-    doc.moveDown(2); // Space before the table starts
+// Continue with other content below
+doc.moveDown(2); // Adjust vertical space for the next section
 
-    // Product Details Section (Table)
-    const columnWidths = [300, 100, 100, 100]; // Adjust column widths for DESCRIPTION, PRICE, DISCOUNT, TOTAL
-    const lineHeight = 15; // Line height for each row
-    doc.fontSize(10).text('DESCRIPTION', 50, doc.y, { width: columnWidths[0], align: 'left' });
-    doc.text('PRICE', 350, doc.y, { width: columnWidths[1], align: 'right' });
-    doc.text('DISCOUNT', 450, doc.y, { width: columnWidths[2], align: 'right' });
-    doc.text('TOTAL', 550, doc.y, { width: columnWidths[3], align: 'right' });
-    doc.moveDown(1);
+// Billing Information Section (1 row)
+doc.fontSize(10).text('BILLED TO', { underline: true });
+doc.text(`${session.customer_details.name}`, { align: 'left' });
+doc.text(`${session.customer_details.email}`, { align: 'left' });
+doc.moveDown(2); // Space before the table starts
 
-    // Draw table rows for products
-    products.forEach(product => {
-      doc.text(product.name, 50, doc.y, { width: columnWidths[0], align: 'left' });
-      doc.text(`${session.currency.toUpperCase()} ${product.price.toFixed(2)}`, 350, doc.y, { width: columnWidths[1], align: 'right' });
-      doc.text('-', 450, doc.y, { width: columnWidths[2], align: 'center' });
-      doc.text(`${session.currency.toUpperCase()} ${product.price.toFixed(2)}`, 550, doc.y, { width: columnWidths[3], align: 'right' });
-      doc.moveDown();
-    });
+// Product Details Section (2 rows, 5 columns)
+const columnWidths = [200, 100, 100, 100, 100]; // Adjust column widths for DESCRIPTION, PRICE, DISCOUNT, TOTAL, EXTRA
+const lineHeight = 15; // Line height for each row
 
-    doc.moveDown(2); // Space between the table and summary
+// First row (header for table)
+doc.fontSize(10).text('DESCRIPTION', 50, doc.y, { width: columnWidths[0], align: 'left' });
+doc.text('PRICE', 250, doc.y, { width: columnWidths[1], align: 'right' });
+doc.text('DISCOUNT', 350, doc.y, { width: columnWidths[2], align: 'right' });
+doc.text('TOTAL', 450, doc.y, { width: columnWidths[3], align: 'right' });
+doc.text('EXTRA', 550, doc.y, { width: columnWidths[4], align: 'right' });
+doc.moveDown(1);
 
-    // Summary Section
-    const total = products.reduce((sum, product) => sum + product.price, 0);
-    const tax = total * 0.18; // Assuming 18% GST
-    const grandTotal = total + tax;
+// Draw table rows for products (2 rows, 5 columns)
+products.forEach(product => {
+  doc.text(product.name, 50, doc.y, { width: columnWidths[0], align: 'left' });
+  doc.text(`${session.currency.toUpperCase()} ${product.price.toFixed(2)}`, 250, doc.y, { width: columnWidths[1], align: 'right' });
+  doc.text('-', 350, doc.y, { width: columnWidths[2], align: 'center' });
+  doc.text(`${session.currency.toUpperCase()} ${product.price.toFixed(2)}`, 450, doc.y, { width: columnWidths[3], align: 'right' });
+  doc.text('Some Extra', 550, doc.y, { width: columnWidths[4], align: 'right' }); // You can adjust this as needed
+  doc.moveDown();
+});
 
-    doc.fontSize(10).text(`Total excl. Tax: ${session.currency.toUpperCase()} ${total.toFixed(2)}`, { align: 'left' });
-    doc.text(`Tax @ 18%: ${session.currency.toUpperCase()} ${tax.toFixed(2)}`, { align: 'left' });
-    doc.text(`Total: ${session.currency.toUpperCase()} ${grandTotal.toFixed(2)}`, { align: 'left' });
-    doc.text(`Payments: ${session.currency.toUpperCase()} -${grandTotal.toFixed(2)}`, { align: 'left' });
-    doc.text(`Amount Due: ${session.currency.toUpperCase()} 0.00`, { align: 'left' });
-    doc.moveDown(2);
+doc.moveDown(2); // Space between the table and summary
 
-    // Footer Section
-    doc.fontSize(10).text('Thank you for choosing IQueueBook!', { align: 'center' });
+// Summary Section (1 row)
+const total = products.reduce((sum, product) => sum + product.price, 0);
+const tax = total * 0.18; // Assuming 18% GST
+const grandTotal = total + tax;
 
-    doc.end();
+doc.fontSize(10).text(`Total excl. Tax: ${session.currency.toUpperCase()} ${total.toFixed(2)}`, { align: 'left' });
+doc.text(`Tax @ 18%: ${session.currency.toUpperCase()} ${tax.toFixed(2)}`, { align: 'left' });
+doc.text(`Total: ${session.currency.toUpperCase()} ${grandTotal.toFixed(2)}`, { align: 'left' });
+doc.text(`Payments: ${session.currency.toUpperCase()} -${grandTotal.toFixed(2)}`, { align: 'left' });
+doc.text(`Amount Due: ${session.currency.toUpperCase()} 0.00`, { align: 'left' });
+doc.moveDown(2);
+
+// Footer Section (1 row)
+doc.fontSize(10).text('Thank you for choosing IQueueBook!', { align: 'center' });
+
+doc.end();
+
   });
 };
 
