@@ -373,7 +373,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     `;
 
     try {
-      sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody);
+      sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, session, products);
       console.log("Payment Email Sent")
       return
     } catch (error) {

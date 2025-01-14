@@ -1,4 +1,6 @@
 import nodemailer from "nodemailer"
+import { generateInvoicePDF } from "../invoice/invoicepdf.js";
+import fs from "fs"
 
 // Configure the email transporter
 const transporter = nodemailer.createTransport({
@@ -285,11 +287,26 @@ export const barberLeaveApproval = (email, emailSubject, emailBody) => {
 
 //DESC:SEND PAYMENT SUCCESS===========================
 export const sendPaymentSuccesEmail = (email, emailSubject, emailBody) => {
+
+  const invoicePath = generateInvoicePDF(session, products);
+
+  if (!fs.existsSync(invoicePath)) {
+    console.error('Invoice file does not exist:', invoicePath);
+    return;
+  }
+
   const mailOptions = {
     from: process.env.SENDER_EMAIL_ADDRESS, // Replace with your sender email address
     to: email,
     subject: emailSubject,
-    html: emailBody
+    html: emailBody,
+    attachments: [
+      {
+        filename: 'invoice.pdf',
+        path: invoicePath, // Attach the generated invoice file
+        contentType: 'application/pdf', // Specify MIME type
+      },
+    ]
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
@@ -297,6 +314,13 @@ export const sendPaymentSuccesEmail = (email, emailSubject, emailBody) => {
       console.error('Error sending email:', error);
     } else {
       console.log('Email sent:', info.response);
+    }
+    // Delete the file after successfully sending the email
+    try {
+      fs.unlinkSync(invoicePath);
+      console.log('Temporary invoice file deleted:', invoicePath);
+    } catch (unlinkError) {
+      console.error('Error deleting the invoice file:', unlinkError.message);
     }
   });
 };
