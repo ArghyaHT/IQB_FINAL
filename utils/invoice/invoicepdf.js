@@ -10,7 +10,7 @@ import { getSalonBySalonId } from "../../services/mobile/salonServices.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const generateInvoicePDF = async (session, products) => {
+export const generateInvoicePDF = async (invoice, session, products) => {
   const salon = await getSalonBySalonId(session.metadata.salonId);
 
   return new Promise((resolve, reject) => {
@@ -33,7 +33,7 @@ export const generateInvoicePDF = async (session, products) => {
       // Invoice Information
       doc.fontSize(12).text('INVOICE', { align: 'center' });
       doc.moveDown();
-      // doc.text(`Invoice #: IQB-${}`, { align: 'left' });
+      doc.text(`Invoice #:${invoice}`, { align: 'left' });
       doc.text(`Invoice Issued: ${moment().format('DD-MM-YYYY')}`, { align: 'left' });
       doc.text(`Invoice Amount: ${session.currency.toUpperCase()} ${(session.amount_total / 100).toFixed(2)}`, { align: 'left' });
       doc.text(`Payment Status: ${session.payment_status.toUpperCase()}`, { align: 'left' });
