@@ -551,6 +551,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
 
     const expiryDate = moment().add(productInfo.paymentExpiryDate, 'days').toDate();
 
+    console.log(productInfo)
+
     if (productInfo) {
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
