@@ -1,7 +1,7 @@
 import express from "express";
 import { getAllSalonServices, getAllSalons, getSalonInfo, getSalonsByLocation, getSalonsByNameAndCity } from "../../controllers/mobile/salonController.js";
 
-import { createAppointment, deleteAppointment, editAppointment, getAllAppointmentsByBarberId, getAllAppointmentsByBarberIdAndDate, getAllAppointmentsBySalonId, getAllAppointmentsBySalonIdAndDate, getEngageBarberTimeSlots } from "../../controllers/mobile/appointmentController.js";
+import { bookAppointmentBarbers, createAppointment, deleteAppointment, editAppointment, getAllAppointmentsByBarberId, getAllAppointmentsByBarberIdAndDate, getAllAppointmentsBySalonId, getAllAppointmentsBySalonIdAndDate, getEngageBarberTimeSlots } from "../../controllers/mobile/appointmentController.js";
 // import { verifyRefreshCustomerToken } from "../middlewares/VerifyRefreshCustomerToken.js";
 import { getAllBarberbySalonId } from "../../controllers/mobile/barberController.js";
 import { cancelQueueByCustomer, getAvailableBarbersForQ, getBarberByServices, getBarberServicesByBarberId, getQlistbyBarberId, getQueueListBySalonId, groupJoinQueue, singleJoinQueue } from "../../controllers/mobile/joinQueueController.js";
@@ -33,6 +33,8 @@ router.route("/createAppointment").post(createAppointment);
 router.route("/editAppointments").put(editAppointment)
 
 router.route("/deleteAppointments").delete(deleteAppointment)
+
+router.route("/bookAppointmentBarbers").post(bookAppointmentBarbers)
 
 router.route("/getEngageBarberTimeSlots").post(getEngageBarberTimeSlots)
 

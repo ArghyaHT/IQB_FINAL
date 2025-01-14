@@ -9,8 +9,12 @@ import { getSalonBySalonId } from "../../services/web/admin/salonService.js"
 import moment from "moment";
 import { checkAppointmentDate } from "../../services/web/barberDayOff/barberDayOffService.js";
 import { getAppointmentbySalonId } from "../../services/web/appointments/appointmentsService.js";
-import { matchAppointmentDays } from "../../services/web/barberAppointmentDays/barberAppointmentDaysService.js";
+import { getBarbersBySalonIdForAppointments, matchAppointmentDays } from "../../services/web/barberAppointmentDays/barberAppointmentDaysService.js";
 import { matchSalonOffDays } from "../../services/web/salonSettings/salonSettingsService.js";
+import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../constants/kiosk/StatusCodeConstants.js";
+import { BOOK_APPOINTMENT_BARBER_RETRIEVE_ERROR, BOOK_APPOINTMENT_BARBER_RETRIEVE_SUCCESS } from "../../constants/web/BarberAppointmentConstants.js";
+import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
+import { ErrorHandler } from "../../middlewares/ErrorHandler.js";
 
 //Creating Appointment
 export const createAppointment = async (req, res, next) => {
@@ -587,3 +591,34 @@ export const getAllAppointmentsByBarberIdAndDate = async (req, res, next) => {
     next(error);
   }
 };
+
+export const bookAppointmentBarbers =  async(req, res, next) => {
+  try{
+    const {salonId} = req.body;
+
+    const barbers = await getBarbersBySalonIdForAppointments(salonId)
+
+    if(barbers.length === 0){
+      return ErrorHandler(BOOK_APPOINTMENT_BARBER_RETRIEVE_ERROR, ERROR_STATUS_CODE, res)
+    }
+
+     // Format the barber details and fetch additional data using barberId
+     const formattedBarbers = await Promise.all(
+      barbers.map(async barber => {
+        const barberDetails = await getBarberbyId(barber.barberId); // Fetch barber details
+        return {
+          ...barberDetails.toObject(), // Add fetched barber details
+        };
+      })
+    );
+
+    // Return the full response with the modified appointmentDays
+    return SuccessHandler(BOOK_APPOINTMENT_BARBER_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { 
+      response: formattedBarbers
+  });
+
+  }
+  catch (error) {
+    next(error);
+  }
+}

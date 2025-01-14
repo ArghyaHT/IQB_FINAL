@@ -3,6 +3,9 @@ export const APPOINTMENT_DAYS_ARRAY_ERROR = "Appointment days should be an array
 
 export const BARBER_APPOINTMENT_DAYS_ARRAY_ERROR = "Please select you appontment days first"
 
+export const BOOK_APPOINTMENT_BARBER_RETRIEVE_ERROR = "No barbers available"
+
+
 
 
 
@@ -12,5 +15,8 @@ export const BARBER_APPOINTMENT_DAYS_UPDATE_SUCCESS = "Appointment days updated 
 export const BARBER_APPOINTMENT_DAYS_ADD_SUCCESS = "Appointment days added successfully."
 
 export const BARBER_APPOINTMENT_RETRIEVE_SUCCESS = "Appointment days retrieved successfully."
+
+export const BOOK_APPOINTMENT_BARBER_RETRIEVE_SUCCESS = "Barbers retrieved successfully."
+
 
 

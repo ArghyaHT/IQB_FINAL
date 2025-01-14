@@ -36,3 +36,9 @@ export const barberAppointmentDays = async(salonId, barberId) => {
     return record;
 }
 
+export const getBarbersBySalonIdForAppointments = async(salonId) => {
+    const barbers = await BarberAppointmentDays.find({salonId});
+
+    return barbers
+}
+
