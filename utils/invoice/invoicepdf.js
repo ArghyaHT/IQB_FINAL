@@ -85,7 +85,7 @@ export const generateInvoiceNumber = async () => {
   let newInvoiceNumber = 1;
 
   if (lastInvoice) {
-    const lastInvoiceNumber = parseInt(lastInvoice.productPayment.invoiceNumber.split('-')[2]);
+    const lastInvoiceNumber = parseInt(lastInvoice.invoiceNumber.split('-')[2]);
     newInvoiceNumber = lastInvoiceNumber + 1; // Increment the invoice number
   }
 
