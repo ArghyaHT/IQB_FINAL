@@ -209,13 +209,13 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     }));
 
     console.log("Products", products)
-    const invoice = await generateInvoiceNumber()
+    // const invoice = await generateInvoiceNumber()
 
     // Access additional data from metadata
     const paymentData = {
       salonId: session.metadata.salonId,
       adminEmail: session.metadata.adminEmail,
-      invoiceNumber: invoice,
+      // invoiceNumber: invoice,
       paymentType: session.metadata.paymentType,
       purchaseDate: session.metadata.purchaseDate,
       paymentExpiryDate: session.metadata.paymentExpiryDate,
@@ -243,9 +243,9 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
           $set: {
             isQueuing: isQueuingValue,
           },
-          // $push: {
-          //   productPayment: paymentData,
-          // },
+          $push: {
+            productPayment: paymentData,
+          },
         }
       )
     }
@@ -259,9 +259,9 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
           $set: {
             isAppointments: isAppointmentValue,
           },
-          // $push: {
-          //   productPayment: paymentData,
-          // },
+          $push: {
+            productPayment: paymentData,
+          },
         }
       )
     }
@@ -277,14 +277,14 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
             isQueuing: isQueuingValue,
             isAppointments: isAppointmentValue,
           },
-          // $push: {
-          //   productPayment: paymentData,
-          // },
+          $push: {
+            productPayment: paymentData,
+          },
         }
       )
     }
 
-    await salonPayments(paymentData)
+    // await salonPayments(paymentData)
 
     const salon = await getSalonBySalonId(session.metadata.salonId)
 
