@@ -30,21 +30,23 @@ export const generateInvoicePDF = async (invoice, session, products) => {
     doc.text('Singapore', { align: 'left' });
     doc.text('Registration No.: 9919SGP29004OSJ', { align: 'left' });
 
-    // Position to move to the right side for the Invoice Information Section
-    const headerHeight = doc.y; // Track the current Y position of the header section
+    // Move to a specific line height for the next section
+    const headerHeight = doc.y; // Track current Y position after header content
     const rightColumnX = 400;  // X position for the right-aligned invoice information
+
+    // Ensure the invoice information is on the same line
+    doc.y = headerHeight;  // Keep Y position from header to maintain same line
 
     // Invoice Information Section - Right-aligned
     doc.fontSize(12).text('INVOICE', rightColumnX);
-    doc.moveDown();
+    doc.moveDown(0);  // Prevent default line break after text, keeping it on the same line
     doc.fontSize(10).text(`Invoice #:${invoice}`, rightColumnX);
     doc.text(`Invoice Issued: ${moment().format('DD-MM-YYYY')}`, rightColumnX);
     doc.text(`Invoice Amount: ${session.currency.toUpperCase()} ${(session.amount_total / 100).toFixed(2)}`, rightColumnX);
     doc.text(`Payment Status: ${session.payment_status.toUpperCase()}`, rightColumnX);
 
-    // Add extra space below the invoice section
-    doc.moveDown(2);// Add extra space after invoice details
-
+    // Continue with other content below
+    doc.moveDown(2); // Adjust vertical space for the next section
     // Billing Information Section
     doc.fontSize(10).text('BILLED TO', { underline: true });
     doc.text(`${session.customer_details.name}`, { align: 'left' });
