@@ -2,6 +2,12 @@ import fs from "fs"
 import PDFDocument from "pdfkit"
 import path from "path";
 import moment from "moment";
+import { fileURLToPath } from 'url';
+
+
+// Define __dirname in ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Function to generate the invoice PDF
 export const generateInvoicePDF = async (session, products) => {
