@@ -78,13 +78,13 @@ export const generateInvoiceNumber = async () => {
   const currentMonth = new Date().toLocaleString('default', { month: 'short' }).toUpperCase(); // Get the short month (JAN, FEB, etc.)
   const year = new Date().getFullYear(); // Get current year
 
-  // Find the latest invoice based on invoice number
-  const lastInvoice = await SalonPayments.findOne()
-    .sort({ "productPayment.invoiceNumber": -1 }); // Sort by invoice number descending
+  // Find the latest invoice based on invoice number, sorted in descending order
+  const lastInvoice = await SalonPayments.findOne().sort({ invoiceNumber: -1 }); // Sort by invoice number descending
 
   let newInvoiceNumber = 1;
 
-  if (lastInvoice) {
+  if (lastInvoice && lastInvoice.invoiceNumber) {
+    // Extract and increment the invoice number from the last document
     const lastInvoiceNumber = parseInt(lastInvoice.invoiceNumber.split('-')[2]);
     newInvoiceNumber = lastInvoiceNumber + 1; // Increment the invoice number
   }
