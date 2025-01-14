@@ -31,6 +31,7 @@
     "google-auth-library": "^9.10.0",
     "google-libphonenumber": "^3.2.38",
     "helmet": "^8.0.0",
+    "html-pdf-chrome": "^0.8.4",
     "jsonfile": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",

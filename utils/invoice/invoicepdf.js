@@ -5,7 +5,7 @@ import moment from "moment";
 import { fileURLToPath } from 'url';
 import { getSalonBySalonId } from "../../services/mobile/salonServices.js";
 import SalonPayments from "../../models/salonPaymnetsModel.js";
-import puppeteer from "puppeteer";
+import chrome from "html-pdf-chrome"
 
 
 // Define __dirname in ES Modules
@@ -125,13 +125,11 @@ export const generateInvoicePDF = async (invoice, session, products) => {
     </html>
   `;
 
-  // Generate PDF using puppeteer
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  await page.setContent(htmlContent);
+
+  // Generate PDF using html-pdf-chrome
+  const pdf = await chrome.create().from(htmlContent).toPdf();
   const invoicePath = path.resolve(__dirname, 'invoice.pdf');
-  await page.pdf({ path: invoicePath, format: 'A4' });
-  await browser.close();
+  await chrome.create().from(htmlContent).toFile(invoicePath);
 
   return invoicePath;
 };
