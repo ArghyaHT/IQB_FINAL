@@ -50,6 +50,8 @@ import Salon from "./models/salonRegisterModel.js";
 import moment from "moment";
 import { sendPaymentSuccesEmail } from "./utils/emailSender/emailSender.js";
 import { getSalonBySalonId } from "./services/mobile/salonServices.js";
+import { generateInvoiceNumber } from "./utils/invoice/invoicepdf.js";
+import SalonPayments from "./models/salonPaymnetsModel.js";
 
 dotenv.config()
 
@@ -205,10 +207,13 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       currency: session.currency,
     }));
 
+    const invoice = await generateInvoiceNumber()
+
     // Access additional data from metadata
     const paymentData = {
       salonId: session.metadata.salonId,
       adminEmail: session.metadata.adminEmail,
+      invoiceNumber: invoice,
       paymentType: session.metadata.paymentType,
       purchaseDate: session.metadata.purchaseDate,
       paymentExpiryDate: session.metadata.paymentExpiryDate,
@@ -236,9 +241,9 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
           $set: {
             isQueuing: isQueuingValue,
           },
-          $push: {
-            productPayment: paymentData,
-          },
+          // $push: {
+          //   productPayment: paymentData,
+          // },
         }
       )
     }
@@ -252,9 +257,9 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
           $set: {
             isAppointments: isAppointmentValue,
           },
-          $push: {
-            productPayment: paymentData,
-          },
+          // $push: {
+          //   productPayment: paymentData,
+          // },
         }
       )
     }
@@ -270,12 +275,15 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
             isQueuing: isQueuingValue,
             isAppointments: isAppointmentValue,
           },
-          $push: {
-            productPayment: paymentData,
-          },
+          // $push: {
+          //   productPayment: paymentData,
+          // },
         }
       )
     }
+
+    await SalonPayments(paymentData)
+
 
     // console.log("Payment is hitting")
 
@@ -373,7 +381,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     `;
 
     try {
-      sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, session, products);
+      sendPaymentSuccesEmail(session.customer_details.email, emailSubject,invoice, emailBody, session, products);
       console.log("Payment Email Sent")
       return
     } catch (error) {
@@ -559,7 +567,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
         mode: "payment",
         line_items: productInfo.products.map((product) => ({
           price_data: {
-            currency: product.currency,
+            // currency: product.currency,
+             currency: "inr",
             product_data: {
               name: product.name,
             },
