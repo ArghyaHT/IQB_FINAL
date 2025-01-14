@@ -73,24 +73,23 @@ export const generateInvoicePDF = async (invoice, session, products) => {
 };
 
 
-    // Function to generate invoice number
-    export const generateInvoiceNumber = async () => {
-      const currentMonth = new Date().toLocaleString('default', { month: 'short' }).toUpperCase(); // Get the short month (JAN, FEB, etc.)
-      const year = new Date().getFullYear(); // Get current year
+// Function to generate invoice number
+export const generateInvoiceNumber = async () => {
+  const currentMonth = new Date().toLocaleString('default', { month: 'short' }).toUpperCase(); // Get the short month (JAN, FEB, etc.)
+  const year = new Date().getFullYear(); // Get current year
 
-      // Find the latest invoice number for the current month and year
-      const lastInvoice = await SalonPayments.findOne({
-        "productPayment.purchaseDate": { $regex: `^${year}-${String(new Date().getMonth() + 1).padStart(2, '0')}` }, // Match invoices from this year and month
-      }).sort({ "productPayment.invoiceNumber": -1 }); // Sort by invoice number descending to get the latest invoice
+  // Find the latest invoice based on invoice number
+  const lastInvoice = await SalonPayments.findOne()
+    .sort({ "productPayment.invoiceNumber": -1 }); // Sort by invoice number descending
 
-      let newInvoiceNumber = 1;
+  let newInvoiceNumber = 1;
 
-      if (lastInvoice) {
-        const lastInvoiceNumber = parseInt(lastInvoice.productPayment.invoiceNumber.split('-')[2]);
-        newInvoiceNumber = lastInvoiceNumber + 1; // Increment the invoice number
-      }
+  if (lastInvoice) {
+    const lastInvoiceNumber = parseInt(lastInvoice.productPayment.invoiceNumber.split('-')[2]);
+    newInvoiceNumber = lastInvoiceNumber + 1; // Increment the invoice number
+  }
 
-      // Format the new invoice number as `IQB-MMM-001`
-      return `IQB-${currentMonth}-${String(newInvoiceNumber).padStart(3, '0')}`;
-    };
+  // Format the new invoice number as `IQB-MMM-001`
+  return `IQB-${currentMonth}-${String(newInvoiceNumber).padStart(3, '0')}`;
+};
   
