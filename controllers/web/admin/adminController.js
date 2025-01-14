@@ -14,7 +14,7 @@ import fs from "fs"
 import { v2 as cloudinary } from "cloudinary";
 import { approveBarberByadmin, findBarberByBarberEmailAndSalonId } from "../../../services/web/barber/barberService.js";
 import { validateEmail } from "../../../middlewares/validator.js";
-import { findSalonSetingsBySalonId } from "../../../services/web/salonSettings/salonSettingsService.js";
+import { findSalonSetingsBySalonId, getSalonSettings } from "../../../services/web/salonSettings/salonSettingsService.js";
 import { v4 as uuidv4 } from 'uuid';
 
 import { sendMobileVerificationCode } from "../../../utils/mobileMessageSender/mobileMessageSender.js";
@@ -751,7 +751,15 @@ export const getDefaultSalonByAdmin = async (req, res, next) => {
 
             const defaultSalon = await getDefaultSalonDetailsByAdmin(admin.salonId);
 
-            return SuccessHandler(GET_DEFAULT_SALON_SUCCESS, SUCCESS_STATUS_CODE, res, { response: defaultSalon });
+            const defaultSalonSettings = await getSalonSettings(admin.salonId)
+
+             // Include appointmentAdvanceDays in the response
+             const formattedDefaultSalon = {
+                ...defaultSalon.toObject(),
+                appointmentAdvanceDays: defaultSalonSettings?.appointmentAdvanceDays || 0 // Fallback to null if not found
+            };
+
+            return SuccessHandler(GET_DEFAULT_SALON_SUCCESS, SUCCESS_STATUS_CODE, res, { response: formattedDefaultSalon });
 
         }
     }
