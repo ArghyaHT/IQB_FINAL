@@ -15,60 +15,77 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   const salon = await getSalonBySalonId(session.metadata.salonId);
 
   return new Promise((resolve, reject) => {
-      const doc = new PDFDocument({ margin: 50 });
-      const invoicePath = path.resolve(__dirname, 'invoice.pdf');
+    const doc = new PDFDocument({ margin: 50 });
+    const invoicePath = path.resolve(__dirname, 'invoice.pdf');
 
-      const writeStream = fs.createWriteStream(invoicePath);
-      writeStream.on('finish', () => resolve(invoicePath));
-      writeStream.on('error', reject);
+    const writeStream = fs.createWriteStream(invoicePath);
+    writeStream.on('finish', () => resolve(invoicePath));
+    writeStream.on('error', reject);
 
-      doc.pipe(writeStream);
+    doc.pipe(writeStream);
 
-      // Header
-      doc.fontSize(14).text('IQueueBook', { align: 'left' });
-      doc.fontSize(10).text('16 Raffles Quay, #33-02, Hong Leong Building, Singapore 48581', { align: 'left' });
-      doc.text('Singapore', { align: 'left' });
-      doc.text('Registration No.: 9919SGP29004OSJ', { align: 'left' });
+    // Header
+    doc.fontSize(14).text('IQueueBook', { align: 'left' });
+    doc.fontSize(10).text('16 Raffles Quay, #33-02, Hong Leong Building, Singapore 48581', { align: 'left' });
+    doc.text('Singapore', { align: 'left' });
+    doc.text('Registration No.: 9919SGP29004OSJ', { align: 'left' });
+    doc.moveDown(2); // Add extra spacing between sections
+
+    // Invoice Information
+    doc.fontSize(12).text('INVOICE', { align: 'center' });
+    doc.moveDown();
+    doc.text(`Invoice #:${invoice}`, { align: 'left' });
+    doc.text(`Invoice Issued: ${moment().format('DD-MM-YYYY')}`, { align: 'left' });
+    doc.text(`Invoice Amount: ${session.currency.toUpperCase()} ${(session.amount_total / 100).toFixed(2)}`, { align: 'left' });
+    doc.text(`Payment Status: ${session.payment_status.toUpperCase()}`, { align: 'left' });
+    doc.moveDown(2);
+
+    // Billing Information
+    doc.text('BILLED TO', { underline: true });
+    doc.text(`${session.customer_details.name}`, { align: 'left' });
+    doc.text(`${session.customer_details.email}`, { align: 'left' });
+    doc.moveDown(2);
+
+    // Product Details (Table Structure)
+    const columnWidths = [200, 100, 100, 100]; // Define column widths for DESCRIPTION, PRICE, DISCOUNT, TOTAL
+    const lineHeight = 15; // Adjust line height for each row
+
+    // Draw table headers
+    doc.fontSize(10)
+      .text('DESCRIPTION', 50, doc.y, { width: columnWidths[0], align: 'left' })
+      .text('PRICE', 250, doc.y, { width: columnWidths[1], align: 'right' })
+      .text('DISCOUNT', 350, doc.y, { width: columnWidths[2], align: 'right' })
+      .text('TOTAL', 450, doc.y, { width: columnWidths[3], align: 'right' });
+
+    doc.moveDown(1);
+
+    // Draw table rows for products
+    products.forEach(product => {
+      doc.text(product.name, 50, doc.y, { width: columnWidths[0], align: 'left' });
+      doc.text(`${session.currency.toUpperCase()} ${product.price.toFixed(2)}`, 250, doc.y, { width: columnWidths[1], align: 'right' });
+      doc.text('-', 350, doc.y, { width: columnWidths[2], align: 'center' });
+      doc.text(`${session.currency.toUpperCase()} ${product.price.toFixed(2)}`, 450, doc.y, { width: columnWidths[3], align: 'right' });
       doc.moveDown();
+    });
 
-      // Invoice Information
-      doc.fontSize(12).text('INVOICE', { align: 'center' });
-      doc.moveDown();
-      doc.text(`Invoice #:${invoice}`, { align: 'left' });
-      doc.text(`Invoice Issued: ${moment().format('DD-MM-YYYY')}`, { align: 'left' });
-      doc.text(`Invoice Amount: ${session.currency.toUpperCase()} ${(session.amount_total / 100).toFixed(2)}`, { align: 'left' });
-      doc.text(`Payment Status: ${session.payment_status.toUpperCase()}`, { align: 'left' });
-      doc.moveDown();
+    doc.moveDown(2); // Space between the table and summary
 
-      // Billing Information
-      doc.text('BILLED TO', { underline: true });
-      doc.text(`${session.customer_details.name}`, { align: 'left' });
-      doc.text(`${session.customer_details.email}`, { align: 'left' });
-      doc.moveDown();
+    // Summary
+    const total = products.reduce((sum, product) => sum + product.price, 0);
+    const tax = total * 0.18; // Assuming 18% GST
+    const grandTotal = total + tax;
 
-      // Product Details (Table Structure)
-      doc.text('DESCRIPTION               PRICE               DISCOUNT               TOTAL', { underline: true });
-      products.forEach(product => {
-          doc.text(`${product.name}          ${product.price}          -          ${product.price}`, { align: 'left' });
-      });
-      doc.moveDown();
+    doc.fontSize(10).text(`Total excl. Tax: ${session.currency.toUpperCase()} ${total.toFixed(2)}`, { align: 'left' });
+    doc.text(`Tax @ 18%: ${session.currency.toUpperCase()} ${tax.toFixed(2)}`, { align: 'left' });
+    doc.text(`Total: ${session.currency.toUpperCase()} ${grandTotal.toFixed(2)}`, { align: 'left' });
+    doc.text(`Payments: ${session.currency.toUpperCase()} -${grandTotal.toFixed(2)}`, { align: 'left' });
+    doc.text(`Amount Due: ${session.currency.toUpperCase()} 0.00`, { align: 'left' });
+    doc.moveDown(2);
 
-      // Summary
-      const total = products.reduce((sum, product) => sum + product.price, 0);
-      const tax = total * 0.18; // Assuming 18% GST
-      const grandTotal = total + tax;
+    // Footer
+    doc.fontSize(10).text('Thank you for choosing IQueueBook!', { align: 'center' });
+    doc.end();
 
-      doc.text(`Total excl. Tax: ${session.currency.toUpperCase()} ${total.toFixed(2)}`);
-      doc.text(`Tax @ 18%: ${session.currency.toUpperCase()} ${tax.toFixed(2)}`);
-      doc.text(`Total: ${session.currency.toUpperCase()} ${grandTotal.toFixed(2)}`);
-      doc.text(`Payments: ${session.currency.toUpperCase()} -${grandTotal.toFixed(2)}`);
-      doc.text(`Amount Due: ${session.currency.toUpperCase()} 0.00`, { align: 'left' });
-      doc.moveDown();
-
-      // Footer
-      doc.text('Thank you for choosing IQueueBook!', { align: 'center' });
-
-      doc.end();
   });
 };
 
