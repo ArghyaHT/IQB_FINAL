@@ -17,28 +17,33 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ margin: 50 });
     const invoicePath = path.resolve(__dirname, 'invoice.pdf');
-    
+
     const writeStream = fs.createWriteStream(invoicePath);
     writeStream.on('finish', () => resolve(invoicePath));
     writeStream.on('error', reject);
-    
+
     doc.pipe(writeStream);
 
-    // Header Section
+    // Header Section - Left-aligned
     doc.fontSize(14).text('IQueueBook', { align: 'left' });
     doc.fontSize(10).text('16 Raffles Quay, #33-02, Hong Leong Building, Singapore 48581', { align: 'left' });
     doc.text('Singapore', { align: 'left' });
     doc.text('Registration No.: 9919SGP29004OSJ', { align: 'left' });
-    doc.moveDown(2); // Add extra spacing between sections
 
-    // Invoice Information Section
-    doc.fontSize(12).text('INVOICE', { align: 'center' });
+    // Position to move to the right side for the Invoice Information Section
+    const headerHeight = doc.y; // Track the current Y position of the header section
+    const rightColumnX = 400;  // X position for the right-aligned invoice information
+
+    // Invoice Information Section - Right-aligned
+    doc.fontSize(12).text('INVOICE', rightColumnX);
     doc.moveDown();
-    doc.text(`Invoice #:${invoice}`, { align: 'left' });
-    doc.text(`Invoice Issued: ${moment().format('DD-MM-YYYY')}`, { align: 'left' });
-    doc.text(`Invoice Amount: ${session.currency.toUpperCase()} ${(session.amount_total / 100).toFixed(2)}`, { align: 'left' });
-    doc.text(`Payment Status: ${session.payment_status.toUpperCase()}`, { align: 'left' });
-    doc.moveDown(2); // Add extra space after invoice details
+    doc.fontSize(10).text(`Invoice #:${invoice}`, rightColumnX);
+    doc.text(`Invoice Issued: ${moment().format('DD-MM-YYYY')}`, rightColumnX);
+    doc.text(`Invoice Amount: ${session.currency.toUpperCase()} ${(session.amount_total / 100).toFixed(2)}`, rightColumnX);
+    doc.text(`Payment Status: ${session.payment_status.toUpperCase()}`, rightColumnX);
+
+    // Add extra space below the invoice section
+    doc.moveDown(2);// Add extra space after invoice details
 
     // Billing Information Section
     doc.fontSize(10).text('BILLED TO', { underline: true });
