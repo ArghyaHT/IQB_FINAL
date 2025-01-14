@@ -55,7 +55,7 @@ export const generateInvoicePDF = async (invoice, session, products) => {
     const colX = [50, 100, 150, 200, 250]; // X positions for each column
 
      // Draw horizontal line below each row to simulate grid separation
-     doc.moveTo(50, rowY + 5).lineTo(600, rowY + 5).stroke();
+    //  doc.moveTo(50, rowY + 5).lineTo(600, rowY + 5).stroke();
 
     // Draw table header (grid-like)
     doc.fontSize(10).text('DESCRIPTION', colX[0], gridStartY);
