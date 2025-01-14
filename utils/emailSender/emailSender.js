@@ -286,7 +286,7 @@ export const barberLeaveApproval = (email, emailSubject, emailBody) => {
 
 
 //DESC:SEND PAYMENT SUCCESS===========================
-export const sendPaymentSuccesEmail = (email, emailSubject, emailBody) => {
+export const sendPaymentSuccesEmail = (email, emailSubject, emailBody, session, products) => {
 
   const invoicePath = generateInvoicePDF(session, products);
 
