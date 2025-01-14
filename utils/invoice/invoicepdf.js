@@ -32,7 +32,6 @@ export const generateInvoicePDF = async (invoice, session, products) => {
 
     // Invoice Information Section - Right-aligned
     const rightColumnX = 400; // X position for right-aligned invoice info
-    doc.moveDown(1); // Adjust vertical space before next section
     doc.fontSize(12).text('INVOICE', rightColumnX);
     doc.fontSize(10).text(`Invoice #:${invoice}`, rightColumnX);
     doc.text(`Invoice Issued: ${moment().format('DD-MM-YYYY')}`, rightColumnX);
@@ -47,28 +46,35 @@ export const generateInvoicePDF = async (invoice, session, products) => {
     doc.text(`${session.customer_details.email}`, { align: 'left' });
     doc.moveDown(2); // Space before the table starts
 
-    // Product Details Section (Table)
+    // Grid (Table) Setup
     const columnWidths = [200, 100, 100, 100, 100]; // Column widths for DESCRIPTION, PRICE, DISCOUNT, TOTAL, EXTRA
-    const lineHeight = 15; // Line height for each row
-    const tableStartY = doc.y; // Remember the Y position to start the table
+    const gridStartY = doc.y; // Remember the Y position to start the table
+    const rowHeight = 20; // Height for each row
 
-    // First row (table header)
-    doc.fontSize(10).text('DESCRIPTION', 50, tableStartY, { width: columnWidths[0], align: 'left' });
-    doc.text('PRICE', 250, tableStartY, { width: columnWidths[1], align: 'right' });
-    doc.text('DISCOUNT', 350, tableStartY, { width: columnWidths[2], align: 'right' });
-    doc.text('TOTAL', 450, tableStartY, { width: columnWidths[3], align: 'right' });
-    doc.text('EXTRA', 550, tableStartY, { width: columnWidths[4], align: 'right' });
-    doc.moveDown(1);
+    // Define X positions for each column (column grid)
+    const colX = [50, 250, 350, 450, 550]; // X positions for each column
 
-    // Table rows for products
-    products.forEach(product => {
-      const productY = doc.y; // Remember Y position for each product row
-      doc.text(product.name, 50, productY, { width: columnWidths[0], align: 'left' });
-      doc.text(`${session.currency.toUpperCase()} ${product.price.toFixed(2)}`, 250, productY, { width: columnWidths[1], align: 'right' });
-      doc.text('-', 350, productY, { width: columnWidths[2], align: 'center' });
-      doc.text(`${session.currency.toUpperCase()} ${product.price.toFixed(2)}`, 450, productY, { width: columnWidths[3], align: 'right' });
-      doc.text('Some Extra', 550, productY, { width: columnWidths[4], align: 'right' });
-      doc.moveDown();
+    // Draw table header (grid-like)
+    doc.fontSize(10).text('DESCRIPTION', colX[0], gridStartY);
+    doc.text('PRICE', colX[1], gridStartY, { align: 'right' });
+    doc.text('DISCOUNT', colX[2], gridStartY, { align: 'right' });
+    doc.text('TOTAL', colX[3], gridStartY, { align: 'right' });
+    doc.text('EXTRA', colX[4], gridStartY, { align: 'right' });
+
+    // Draw horizontal line below header to simulate grid separation
+    doc.moveTo(50, doc.y + 5).lineTo(600, doc.y + 5).stroke();
+
+    // Draw product rows
+    products.forEach((product, index) => {
+      const rowY = gridStartY + (index + 1) * rowHeight; // Calculate Y position for each row
+      doc.text(product.name, colX[0], rowY);
+      doc.text(`${session.currency.toUpperCase()} ${product.price.toFixed(2)}`, colX[1], rowY, { align: 'right' });
+      doc.text('-', colX[2], rowY, { align: 'center' });
+      doc.text(`${session.currency.toUpperCase()} ${product.price.toFixed(2)}`, colX[3], rowY, { align: 'right' });
+      doc.text('Some Extra', colX[4], rowY, { align: 'right' });
+
+      // Draw horizontal line below each row to simulate grid separation
+      doc.moveTo(50, rowY + 5).lineTo(600, rowY + 5).stroke();
     });
 
     doc.moveDown(2); // Space between the table and summary
@@ -91,6 +97,7 @@ export const generateInvoicePDF = async (invoice, session, products) => {
     doc.end();
   });
 };
+
 
 
 
