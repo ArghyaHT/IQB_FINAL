@@ -208,6 +208,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       currency: session.currency,
     }));
 
+    console.log("Products", products)
     const invoice = await generateInvoiceNumber()
 
     // Access additional data from metadata
