@@ -3,6 +3,7 @@ import PDFDocument from "pdfkit"
 import path from "path";
 import moment from "moment";
 import { fileURLToPath } from 'url';
+import { getSalonBySalonId } from "../../services/mobile/salonServices";
 
 
 // Define __dirname in ES Modules
@@ -11,6 +12,9 @@ const __dirname = path.dirname(__filename);
 
 // Function to generate the invoice PDF
 export const generateInvoicePDF = async (session, products) => {
+
+    const salon = await getSalonBySalonId(session.metadata.salonId)
+
     return new Promise((resolve, reject) => {
       const doc = new PDFDocument();
       const invoicePath = path.resolve(__dirname, 'invoice.pdf');
@@ -26,7 +30,7 @@ export const generateInvoicePDF = async (session, products) => {
       doc.moveDown();
       doc.fontSize(12).text(`Invoice Date: ${moment().format('YYYY-MM-DD')}`);
       doc.text(`Customer: ${session.customer_details.name}`);
-      doc.text(`Salon: ${session.metadata.salonName}`);
+      doc.text(`Salon: ${salon.salonName}`);
       doc.text('----------------------------------------');
   
       // Payment Details
