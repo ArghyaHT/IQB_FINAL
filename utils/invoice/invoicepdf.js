@@ -4,6 +4,7 @@ import path from "path";
 import moment from "moment";
 import { fileURLToPath } from 'url';
 import { getSalonBySalonId } from "../../services/mobile/salonServices.js";
+import SalonPayments from "../../models/salonPaymnetsModel.js";
 
 
 // Define __dirname in ES Modules
