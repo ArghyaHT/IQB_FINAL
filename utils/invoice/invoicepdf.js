@@ -14,6 +14,8 @@ const __dirname = path.dirname(__filename);
 export const generateInvoicePDF = async (invoice, session, products) => {
 
   const salon = await getSalonBySalonId(session.metadata.salonId)
+
+  console.log(salon)
   
   const doc = new PDFDocument({ margin: 50 });
   const invoicePath = path.resolve(__dirname, 'invoice.pdf');

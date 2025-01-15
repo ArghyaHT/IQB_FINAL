@@ -3,6 +3,7 @@ import { getCurrencySymbol } from "../../../utils/currencySymbolMap/currencysymb
 import { findCountryByName } from "../../../services/web/countries/countryService.js";
 import SalonQueueListModel from "../../../models/salonQueueListModel.js";
 import moment from "moment";
+import SalonPayments from "../../../models/salonPaymnetsModel.js";
 
 
 //FIND SALON BY SALON NAME
@@ -374,22 +375,46 @@ export const changeSalonService = async(salonId) => {
 
 
 export const getSalonPayments = async (salonId) => {
-  const salon = await Salon.findOne({ salonId }, { productPayment: 1 }); // Only select the productPayment field
-  if (!salon || !salon.productPayment) return [];
+  // const salon = await SalonPayments.findOne({ salonId }) // Only select the productPayment field
+  // if (!salon || !salon.productPayment) return [];
 
-  // Convert dates and add activityStatus
-  const formattedPayments = salon.productPayment.map(payment => {
+  // // Convert dates and add activityStatus
+  // const formattedPayments = salon.productPayment.map(payment => {
+  //   const purchaseDate = moment.unix(payment.purchaseDate);
+  //   const paymentExpiryDate = moment.unix(payment.paymentExpiryDate);
+  //   const today = moment();
+
+  //   return {
+  //     ...payment._doc, // Spread other fields from the document
+  //     purchaseDate: purchaseDate.format('YYYY-MM-DD'), // Format as 'YYYY-MM-DD'
+  //     paymentExpiryDate: paymentExpiryDate.format('YYYY-MM-DD'), // Format as 'YYYY-MM-DD'
+  //     activityStatus: today.isBetween(purchaseDate, paymentExpiryDate, undefined, '[]'), // Check if today is between purchaseDate and paymentExpiryDate (inclusive)
+  //   };
+  // });
+
+  // return formattedPayments;
+// };
+const salonPayments = await SalonPayments.find({ salonId }); // Find all payments for the salonId
+
+if (!salonPayments || salonPayments.length === 0) return []; // Return empty array if no payments found
+
+// Format payments and add activityStatus
+const formattedPayments = salonPayments.map((salon) => {
+  const formattedProductPayments = salonPayments.map((payment) => {
     const purchaseDate = moment.unix(payment.purchaseDate);
     const paymentExpiryDate = moment.unix(payment.paymentExpiryDate);
     const today = moment();
 
     return {
-      ...payment._doc, // Spread other fields from the document
+      ...payment.toObject(), // Spread other fields from the document
       purchaseDate: purchaseDate.format('YYYY-MM-DD'), // Format as 'YYYY-MM-DD'
       paymentExpiryDate: paymentExpiryDate.format('YYYY-MM-DD'), // Format as 'YYYY-MM-DD'
       activityStatus: today.isBetween(purchaseDate, paymentExpiryDate, undefined, '[]'), // Check if today is between purchaseDate and paymentExpiryDate (inclusive)
     };
   });
 
-  return formattedPayments;
+ return formattedProductPayments
+});
+
+return formattedPayments.filter((payment) => payment !== null); // Filter out any null results
 };
