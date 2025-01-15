@@ -47,10 +47,10 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   const colWidths = { description: 200, price: 100, discount: 100, total: 100, tax: 100 };
   doc.fontSize(10)
     .text('DESCRIPTION', 50, tableTop, { width: colWidths.description, ellipsis: true })
-    .text('PRICE', 100, tableTop, { align: 'left', width: colWidths.price })
-    .text('DISCOUNT', 150, tableTop, { align: 'left', width: colWidths.discount })
-    .text('TAX (18%)', 200, tableTop, { align: 'left', width: colWidths.tax })
-    .text('TOTAL', 250, tableTop, { align: 'left', width: colWidths.total })
+    .text('PRICE', 150, tableTop, { align: 'left', width: colWidths.price })
+    .text('DISCOUNT', 250, tableTop, { align: 'left', width: colWidths.discount })
+    .text('TAX (18%)', 350, tableTop, { align: 'left', width: colWidths.tax })
+    .text('TOTAL', 450, tableTop, { align: 'left', width: colWidths.total })
 
   doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
 
@@ -58,10 +58,10 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   let currentY = tableTop + 20;
   products.forEach((product) => {
     doc.text(product.name, 50, currentY, { width: colWidths.description, ellipsis: true })
-      .text(`${salon.currency}${product.price.toFixed(2)}`, 100, currentY, { align: 'left' })
-      .text('-', 150, currentY, { align: 'left' })
-      .text(`${salon.currency}${(product.price * 0.18).toFixed(2)}`, 200, currentY, { align: 'left' })
-      .text(`${salon.currency}${product.price.toFixed(2)}`, 250, currentY, { align: 'left' })
+      .text(`${salon.currency}${product.price.toFixed(2)}`, 150, currentY, { align: 'left' })
+      .text('-', 250, currentY, { align: 'left' })
+      .text(`${salon.currency}${(product.price * 0.18).toFixed(2)}`, 350, currentY, { align: 'left' })
+      .text(`${salon.currency}${product.price.toFixed(2)}`, 450, currentY, { align: 'left' })
 
     currentY += 20;
 
