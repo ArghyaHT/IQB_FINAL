@@ -43,12 +43,16 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   // Print "Status: " without changing color
   doc.text('Status: ', detailsX, detailsY + 60);
 
-  // Change color to green for payment status and print it
-  doc.fillColor('green')
-    .text(session.payment_status.toUpperCase(), detailsX + 60, detailsY + 60) // Adjust the X position slightly for alignment
+  // Change the color to green for the payment status and make it bold and larger
+  doc.fillColor('green') // Set color to green
+    .fontSize(12) // Increase the font size
+    .font('Helvetica-Bold') // Make it bold
+    .text(session.payment_status.toUpperCase(), detailsX + 60, detailsY + 60); // Adjust X for proper alignment
 
-    // Reset color back to black for the rest of the document
-    .fillColor('black');
+  // Reset color to black and font back to default for subsequent text
+  doc.fillColor('black')
+    .font('Helvetica')
+    .fontSize(10);
   // Billed To Section
   const billedToY = headerY + 70; // Adjust Y-axis to position it below the previous sections
   // Draw a straight horizontal line for the section
