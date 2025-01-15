@@ -1,5 +1,9 @@
 import Stripe from "stripe";
-import SalonPayments from "../../../models/paymentGatewayModel.js";
+import { getSalonPaymentsBySalonId } from "../../../services/web/salonPayments/salonPaymentService.js";
+import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
+import { ERROR_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
+import { SALON_PAYMENTS_ERROR } from "../../../constants/web/SalonPaymentsConstants.js";
+import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 
 const stripe = Stripe("sk_test_51QRTpyG07uuapMPyWzgvxhY67VAuRJFsOhi5yxTbv7GVJMXXDDorgg1aZYCQPKNIlPBuh3mpFXx7Pc9lXz2KyZsR00Zeu15xy7")
 
@@ -158,7 +162,17 @@ const endpointSecret = "whsec_2ac18f1342ab2f8f01876c568138feabea067bff3ee2108080
 // };
 
 export const getSalonPayments = async(req, res, next) => {
-    const {salonId} = req.body;
+    try{
+        const {salonId} = req.body;
 
-    const salonPayments = await getSalonPaymentsBySalonId(salonId)
+        const salonPayments = await getSalonPaymentsBySalonId(salonId)
+
+        if(!salonPayments){
+            return ErrorHandler(SALON_PAYMENTS_ERROR, ERROR_STATUS_CODE, res)
+        }
+        return SuccessHandler()
+    }
+    catch (error) {
+        next(error);
+    }
 }
