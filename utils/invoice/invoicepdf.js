@@ -49,7 +49,7 @@ doc.moveTo(50, billedToY + 5) // Move slightly above for better alignment
    .lineTo(550, billedToY + 5) // Keep the same Y-coordinate for a straight line
    .stroke(); 
   doc.fontSize(12).text('BILLED TO', 50, billedToY + 15, { underline: true });
-  doc.fontSize(10).text(session.customer_details.name, 50, billedToY + 30);
+  doc.fontSize(10).text(session.customer_details.name, 50, billedToY + 35);
   doc.text(session.customer_details.email, 50, billedToY + 50);
   
   // Table Header
@@ -65,7 +65,7 @@ doc.moveTo(50, billedToY + 5) // Move slightly above for better alignment
   doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
   
   // Table Rows
-  let currentY = tableTop + 30; // Initial position for the table rows
+  let currentY = tableTop + 20; // Initial position for the table rows
   const rowHeight = 20; // Adjust row height for proper spacing
   
   products.forEach((product, index) => {
