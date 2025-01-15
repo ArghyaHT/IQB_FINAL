@@ -47,12 +47,13 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   doc.fillColor('green') // Set color to green
     .fontSize(12) // Increase the font size
     .font('Helvetica-Bold') // Make it bold
-    .text(session.payment_status.toUpperCase(), detailsX + 60, detailsY + 60); // Adjust X for proper alignment
+    .text(session.payment_status.toUpperCase(), detailsX, detailsY + 60); // Adjust X for proper alignment
 
   // Reset color to black and font back to default for subsequent text
   doc.fillColor('black')
     .font('Helvetica')
     .fontSize(10);
+
   // Billed To Section
   const billedToY = headerY + 70; // Adjust Y-axis to position it below the previous sections
   // Draw a straight horizontal line for the section
