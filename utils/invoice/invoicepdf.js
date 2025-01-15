@@ -49,7 +49,7 @@ doc.moveTo(70, billedToY - 5) // Move slightly above for better alignment
    .lineTo(550, billedToY - 5) // Keep the same Y-coordinate for a straight line
    .stroke();  doc.fontSize(12).text('BILLED TO', 50, billedToY + 10, { underline: true });
   doc.fontSize(10).text(session.customer_details.name, 50, billedToY + 30);
-  doc.text(session.customer_details.email, 50, billedToY + 40);
+  doc.text(session.customer_details.email, 50, billedToY + 50);
   
   // Table Header
   const tableTop = billedToY + 70;
