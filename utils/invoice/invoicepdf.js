@@ -65,18 +65,22 @@ doc.moveTo(50, billedToY + 5) // Move slightly above for better alignment
   doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
   
   // Table Rows
-  let currentY = tableTop + 30;
-  products.forEach((product) => {
+  let currentY = tableTop + 30; // Initial position for the table rows
+  const rowHeight = 20; // Adjust row height for proper spacing
+  
+  products.forEach((product, index) => {
+    // Write product details in the table
     doc.text(product.name, 50, currentY, { width: colWidths.description, ellipsis: true })
       .text(`${salon.currency}${product.price.toFixed(2)}`, 150, currentY, { align: 'left' })
       .text('-', 250, currentY, { align: 'left' })
       .text(`${salon.currency}${(product.price * 0.18).toFixed(2)}`, 350, currentY, { align: 'left' })
       .text(`${salon.currency}${product.price.toFixed(2)}`, 450, currentY, { align: 'left' });
   
-    currentY += 20;
+    // Increment Y for the next row, ensuring spacing between rows
+    currentY += rowHeight;
   
-    // Add row separator
-    doc.moveTo(50, currentY).lineTo(550, currentY).stroke();
+    // Add row separator line
+    doc.moveTo(50, currentY - 5).lineTo(550, currentY - 5).stroke();
   });
   
   // Summary Section
