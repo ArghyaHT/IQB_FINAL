@@ -33,7 +33,7 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   doc.text('Registration No.: 9919SGP29004OSJ', 50, headerY + 50);
   
   // Invoice Details (Right-aligned)
-  const detailsX = 450;
+  const detailsX = 400;
   const detailsY = headerY;
   doc.fontSize(14).text('INVOICE', detailsX, detailsY);
   doc.fontSize(10)
@@ -44,13 +44,15 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   
   // Billed To Section
   const billedToY = headerY + 70; // Adjust Y-axis to position it below the previous sections
-  doc.moveTo(50, billedToY).lineTo(550, billedToY).stroke();
-  doc.fontSize(12).text('BILLED TO', 50, billedToY + 10, { underline: true });
-  doc.fontSize(10).text(session.customer_details.name, 50, billedToY + 20);
-  doc.text(session.customer_details.email, 50, billedToY + 35);
+// Draw a straight horizontal line for the section
+doc.moveTo(50, billedToY - 5) // Move slightly above for better alignment
+   .lineTo(550, billedToY - 5) // Keep the same Y-coordinate for a straight line
+   .stroke();  doc.fontSize(12).text('BILLED TO', 50, billedToY + 10, { underline: true });
+  doc.fontSize(10).text(session.customer_details.name, 50, billedToY + 30);
+  doc.text(session.customer_details.email, 50, billedToY + 40);
   
   // Table Header
-  const tableTop = billedToY + 50;
+  const tableTop = billedToY + 70;
   const colWidths = { description: 200, price: 100, discount: 100, total: 100, tax: 100 };
   doc.fontSize(10)
     .text('DESCRIPTION', 50, tableTop, { width: colWidths.description, ellipsis: true })
