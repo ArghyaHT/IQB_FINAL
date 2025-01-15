@@ -24,14 +24,14 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   doc.image(logoPath, 50, 30, { width: 100 });
 
   // Header Section
-  doc.fontSize(16).text('IQueueBook', 50, 80);
+  doc.fontSize(16).text('IQueueBook', 50, 100);
   doc.fontSize(10).text('16 Raffles Quay, #33-02, Hong Leong Building, Singapore 48581', 50, 70);
   doc.text('Singapore', 50, 85);
   doc.text('Registration No.: 9919SGP29004OSJ', 50, 100);
 
   // Invoice Details (Right-aligned)
-  const detailsX = 400;
-  const detailsY = 80;
+  const detailsX = 450;
+  const detailsY = 50;
   doc.fontSize(14).text('INVOICE', detailsX, detailsY);
   doc.fontSize(10)
     .text(`Invoice #: ${invoice}`, detailsX, detailsY + 15)
@@ -40,10 +40,10 @@ export const generateInvoicePDF = async (invoice, session, products) => {
     .text(`Status: ${session.payment_status.toUpperCase()}`, detailsX, detailsY + 60);
 
   // Billed To Section
-  doc.moveTo(50, 130).lineTo(550, 130).stroke();
-  doc.fontSize(12).text('BILLED TO', 50, 140, { underline: true });
-  doc.fontSize(10).text(session.customer_details.name, 50, 160);
-  doc.text(session.customer_details.email, 50, 175);
+  doc.moveTo(50, 150).lineTo(550, 130).stroke();
+  doc.fontSize(12).text('BILLED TO', 50, 160, { underline: true });
+  doc.fontSize(10).text(session.customer_details.name, 50, 170);
+  doc.text(session.customer_details.email, 50, 185);
 
   // Table Header
   const tableTop = 200;
