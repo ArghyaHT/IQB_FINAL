@@ -81,27 +81,27 @@ doc.font('Helvetica');
   doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
 
   // Table Rows
-  let currentY = tableTop + 30; // Initial position for the table rows
-  const rowHeight = 20; // Adjust row height for proper spacing
+let currentY = tableTop + 30; // Initial position for the table rows
+const rowHeight = 20; // Adjust row height for proper spacing
 
-  products.forEach((product, index) => {
-    // Calculate tax and total (price + tax) for the product
-    const tax = product.price * 0.18;
-    const totalWithTax = product.price + tax;
+products.forEach((product, index) => {
+  // Calculate tax and total (price + tax) for the product
+  const tax = product.price * 0.18;
+  const totalWithTax = product.price + tax;
 
-    // Write product details in the table
-    doc.text(product.name, 50, currentY, { width: colWidths.description, ellipsis: true })
-      .text(`${salon.currency}${product.price.toFixed(2)}`, 150, currentY, { align: 'left' })
-      .text('-', 250, currentY, { align: 'left' })
-      .text(`${salon.currency}${tax.toFixed(2)}`, 350, currentY, { align: 'left' })
-      .text(`${salon.currency}${totalWithTax.toFixed(2)}`, 450, currentY, { align: 'left' });
+  // Add row separator line before adding the row's content
+  doc.moveTo(50, currentY + 5).lineTo(550, currentY + 5).stroke();
 
-    // Increment Y for the next row, ensuring spacing between rows
-    currentY += rowHeight;
+  // Write product details in the table
+  doc.text(product.name, 50, currentY, { width: colWidths.description, ellipsis: true })
+    .text(`${salon.currency}${product.price.toFixed(2)}`, 150, currentY, { align: 'left' })
+    .text('-', 250, currentY, { align: 'left' })
+    .text(`${salon.currency}${tax.toFixed(2)}`, 350, currentY, { align: 'left' })
+    .text(`${salon.currency}${totalWithTax.toFixed(2)}`, 450, currentY, { align: 'left' });
 
-    // Add row separator line
-    doc.moveTo(50, currentY + 5).lineTo(550, currentY + 5).stroke();
-  });
+  // Increment Y for the next row, ensuring spacing between rows
+  currentY += rowHeight;
+});
 
   // Summary Section
   const summaryStartY = currentY + 30;
