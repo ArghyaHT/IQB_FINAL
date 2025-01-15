@@ -47,7 +47,7 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   doc.fillColor('green') // Set color to green
     .fontSize(12) // Increase the font size
     .font('Helvetica-Bold') // Make it bold
-    .text(session.payment_status.toUpperCase(), detailsX+40, detailsY + 60); // Adjust X for proper alignment
+    .text(session.payment_status.toUpperCase(), detailsX+35, detailsY + 60); // Adjust X for proper alignment
 
   // Reset color to black and font back to default for subsequent text
   doc.fillColor('black')
