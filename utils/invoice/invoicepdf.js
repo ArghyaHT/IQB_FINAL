@@ -5,133 +5,91 @@ import moment from "moment";
 import { fileURLToPath } from 'url';
 import { getSalonBySalonId } from "../../services/mobile/salonServices.js";
 import SalonPayments from "../../models/salonPaymnetsModel.js";
-import chrome from "html-pdf-chrome"
 
 
 // Define __dirname in ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const generateInvoiceHTML = async (invoice, session, products) => {
+export const generateInvoicePDF = async (invoice, session, products) => {
   const salon = await getSalonBySalonId(session.metadata.salonId);
-  const invoiceDate = moment().format('DD-MM-YYYY');
-  const amount = (session.amount_total / 100).toFixed(2);
 
-  
-  // Write the HTML content
-  let htmlContent = `
-    <html>
-      <head>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-          }
-          .invoice-container {
-            margin: 50px;
-          }
-          .header, .footer {
-            text-align: center;
-          }
-          .table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-          }
-          .table th, .table td {
-            padding: 8px;
-            text-align: left;
-            border: 1px solid #ddd;
-          }
-          .table th {
-            background-color: #f2f2f2;
-          }
-          .summary {
-            margin-top: 20px;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="invoice-container">
-          <div class="header">
-            <h1>IQueueBook</h1>
-            <p>16 Raffles Quay, #33-02, Hong Leong Building, Singapore 48581</p>
-            <p>Singapore</p>
-            <p>Registration No.: 9919SGP29004OSJ</p>
-          </div>
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ margin: 50 });
+    const invoicePath = path.resolve(__dirname, 'invoice.pdf');
+    const writeStream = fs.createWriteStream(invoicePath);
+    writeStream.on('finish', () => resolve(invoicePath));
+    writeStream.on('error', reject);
+    doc.pipe(writeStream);
 
-          <div class="invoice-info" style="text-align: right;">
-            <h2>INVOICE</h2>
-            <p><strong>Invoice #: </strong>${invoice}</p>
-            <p><strong>Invoice Issued: </strong>${invoiceDate}</p>
-            <p><strong>Invoice Amount: </strong>${session.currency.toUpperCase()} ${amount}</p>
-            <p><strong>Payment Status: </strong>${session.payment_status.toUpperCase()}</p>
-          </div>
+    // Header Section
+    doc.fontSize(16).text('IQueueBook', { align: 'left' });
+    doc.fontSize(10).text('16 Raffles Quay, #33-02, Hong Leong Building, Singapore 48581', { align: 'left' });
+    doc.text('Singapore', { align: 'left' });
+    doc.text('Registration No.: 9919SGP29004OSJ', { align: 'left' });
 
-          <div class="billing-info">
-            <h3>BILLED TO</h3>
-            <p>${session.customer_details.name}</p>
-            <p>${session.customer_details.email}</p>
-          </div>
+    // Invoice Details - Right-aligned
+    doc.moveDown();
+    doc.fontSize(14).text('INVOICE', { align: 'right' });
+    doc.fontSize(10).text(`Invoice #: ${invoice}`, { align: 'right' });
+    doc.text(`Invoice Issued: ${moment().format('DD MMM, YYYY')}`, { align: 'right' });
+    doc.text(`Invoice Amount: ₹${(session.amount_total / 100).toFixed(2)}`, { align: 'right' });
+    doc.text(`Status: ${session.payment_status.toUpperCase()}`, { align: 'right' });
 
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Description</th>
-                <th>Price</th>
-                <th>Discount</th>
-                <th>Total</th>
-                <th>Extra</th>
-              </tr>
-            </thead>
-            <tbody>
-  `;
+    // Billed To Section
+    doc.moveDown();
+    doc.fontSize(12).text('BILLED TO', { underline: true });
+    doc.fontSize(10).text(`${session.customer_details.name}`);
+    doc.text(`${session.customer_details.email}`);
+    doc.text(`${session.customer_details.address || ''}`);
 
-  // Add product rows
-  products.forEach(product => {
-    htmlContent += `
-      <tr>
-        <td>${product.name}</td>
-        <td>${session.currency.toUpperCase()} ${product.price.toFixed(2)}</td>
-        <td>-</td>
-        <td>${session.currency.toUpperCase()} ${product.price.toFixed(2)}</td>
-        <td>Some Extra</td>
-      </tr>
-    `;
+    // Table Header
+    doc.moveDown();
+    const tableTop = doc.y;
+    doc.fontSize(10)
+      .text('DESCRIPTION', 50, tableTop)
+      .text('PRICE', 200, tableTop, { align: 'right' })
+      .text('DISCOUNT', 300, tableTop, { align: 'right' })
+      .text('TOTAL', 400, tableTop, { align: 'right' })
+      .text('TAX (18%)', 500, tableTop, { align: 'right' });
+
+    // Draw horizontal line
+    doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
+
+    // Table Rows
+    let currentY = tableTop + 20;
+    products.forEach((product) => {
+      doc.text(product.name, 50, currentY)
+        .text(`₹${product.price.toFixed(2)}`, 200, currentY, { align: 'right' })
+        .text('-', 300, currentY, { align: 'right' })
+        .text(`₹${product.price.toFixed(2)}`, 400, currentY, { align: 'right' })
+        .text(`₹${(product.price * 0.18).toFixed(2)}`, 500, currentY, { align: 'right' });
+      currentY += 20;
+
+      // Draw horizontal line
+      doc.moveTo(50, currentY).lineTo(550, currentY).stroke();
+    });
+
+    // Summary Section
+    doc.moveDown(2);
+    const total = products.reduce((sum, p) => sum + p.price, 0);
+    const tax = total * 0.18;
+    const grandTotal = total + tax;
+
+    doc.fontSize(10).text(`Total excl. Tax: ₹${total.toFixed(2)}`);
+    doc.text(`Tax @ 18%: ₹${tax.toFixed(2)}`);
+    doc.text(`Total incl. Tax: ₹${grandTotal.toFixed(2)}`);
+    doc.text(`Payments: ₹-${grandTotal.toFixed(2)}`);
+    doc.text('Amount Due: ₹0.00');
+
+    // Footer Section
+    doc.moveDown();
+    doc.fontSize(10).text('Thank you for choosing IQueueBook!', { align: 'center' });
+
+    doc.end();
   });
-
-  // Add summary section
-  const total = products.reduce((sum, product) => sum + product.price, 0);
-  const tax = total * 0.18; // Assuming 18% GST
-  const grandTotal = total + tax;
-
-  htmlContent += `
-            </tbody>
-          </table>
-
-          <div class="summary">
-            <p><strong>Total excl. Tax: </strong>${session.currency.toUpperCase()} ${total.toFixed(2)}</p>
-            <p><strong>Tax @ 18%: </strong>${session.currency.toUpperCase()} ${tax.toFixed(2)}</p>
-            <p><strong>Total: </strong>${session.currency.toUpperCase()} ${grandTotal.toFixed(2)}</p>
-            <p><strong>Payments: </strong>${session.currency.toUpperCase()} -${grandTotal.toFixed(2)}</p>
-            <p><strong>Amount Due: </strong>${session.currency.toUpperCase()} 0.00</p>
-          </div>
-
-          <div class="footer">
-            <p>Thank you for choosing IQueueBook!</p>
-          </div>
-        </div>
-      </body>
-    </html>
-  `;
-
-  // Save HTML content to file
-  const htmlFilePath = path.resolve(__dirname, 'invoice.html');
-  fs.writeFileSync(htmlFilePath, htmlContent);
-
-  return htmlFilePath;
 };
+
 
 
 

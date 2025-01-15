@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer"
-import { generateInvoiceHTML } from "../invoice/invoicepdf.js";
+import { generateInvoicePDF } from "../invoice/invoicepdf.js";
 import fs from "fs"
 
 // Configure the email transporter
@@ -288,7 +288,7 @@ export const barberLeaveApproval = (email, emailSubject, emailBody) => {
 //DESC:SEND PAYMENT SUCCESS===========================
 export const sendPaymentSuccesEmail = async(email, emailSubject, emailBody, invoice, session, products) => {
 
-  const invoicePath = await generateInvoiceHTML(invoice, session, products);
+  const invoicePath = await generateInvoicePDF(invoice, session, products);
 
   if (!fs.existsSync(invoicePath)) {
     console.error('Invoice file does not exist:', invoicePath);
