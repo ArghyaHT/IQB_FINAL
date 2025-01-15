@@ -40,8 +40,15 @@ export const generateInvoicePDF = async (invoice, session, products) => {
     .text(`Invoice #: ${invoice}`, detailsX, detailsY + 15)
     .text(`Invoice Issued: ${moment().format('DD MMM, YYYY')}`, detailsX, detailsY + 30)
     .text(`Invoice Amount: ${salon.currency}${(session.amount_total / 100).toFixed(2)}`, detailsX, detailsY + 45)
-    .text(`Status: ${session.payment_status.toUpperCase()}`, detailsX, detailsY + 60);
+  // Print "Status: " without changing color
+  doc.text('Status: ', detailsX, detailsY + 60);
 
+  // Change color to green for payment status and print it
+  doc.fillColor('green')
+    .text(session.payment_status.toUpperCase(), detailsX + 60, detailsY + 60) // Adjust the X position slightly for alignment
+
+    // Reset color back to black for the rest of the document
+    .fillColor('black');
   // Billed To Section
   const billedToY = headerY + 70; // Adjust Y-axis to position it below the previous sections
   // Draw a straight horizontal line for the section
