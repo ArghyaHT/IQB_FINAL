@@ -44,7 +44,7 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   
   // Billed To Section
   const billedToY = headerY + 70; // Adjust Y-axis to position it below the previous sections
-  doc.moveTo(50, billedToY).lineTo(550, billedToY - 20).stroke();
+  doc.moveTo(50, billedToY).lineTo(550, billedToY).stroke();
   doc.fontSize(12).text('BILLED TO', 50, billedToY + 10, { underline: true });
   doc.fontSize(10).text(session.customer_details.name, 50, billedToY + 20);
   doc.text(session.customer_details.email, 50, billedToY + 35);
