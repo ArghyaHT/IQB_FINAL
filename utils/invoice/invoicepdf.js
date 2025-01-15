@@ -69,12 +69,16 @@ doc.moveTo(50, billedToY + 5) // Move slightly above for better alignment
   const rowHeight = 20; // Adjust row height for proper spacing
   
   products.forEach((product, index) => {
+    // Calculate tax and total (price + tax) for the product
+    const tax = product.price * 0.18;
+    const totalWithTax = product.price + tax;
+  
     // Write product details in the table
     doc.text(product.name, 50, currentY, { width: colWidths.description, ellipsis: true })
       .text(`${salon.currency}${product.price.toFixed(2)}`, 150, currentY, { align: 'left' })
       .text('-', 250, currentY, { align: 'left' })
-      .text(`${salon.currency}${(product.price * 0.18).toFixed(2)}`, 350, currentY, { align: 'left' })
-      .text(`${salon.currency}${product.price.toFixed(2)}`, 450, currentY, { align: 'left' });
+      .text(`${salon.currency}${tax.toFixed(2)}`, 350, currentY, { align: 'left' })
+      .text(`${salon.currency}${totalWithTax.toFixed(2)}`, 450, currentY, { align: 'left' });
   
     // Increment Y for the next row, ensuring spacing between rows
     currentY += rowHeight;
@@ -92,11 +96,14 @@ doc.moveTo(50, billedToY + 5) // Move slightly above for better alignment
   const summaryX = 450; // Adjust this value as needed for proper alignment on the right side
   
   doc.fontSize(10)
-    .text(`Total excl. Tax: ${salon.currency}${total.toFixed(2)}`, summaryX, summaryStartY, { align: 'left' })
-    .text(`Tax @ 18%: ${salon.currency}${tax.toFixed(2)}`, summaryX, summaryStartY + 15, { align: 'left' })
-    .text(`Total incl. Tax: ${salon.currency}${grandTotal.toFixed(2)}`, summaryX, summaryStartY + 30, { align: 'left' })
-    .text(`Payments: ${salon.currency}${grandTotal.toFixed(2)}`, summaryX, summaryStartY + 45, { align: 'left' })
-    .text(`Amount Due: ${salon.currency}0.00`, summaryX, summaryStartY + 60, { align: 'left' });
+    // .text(`Total excl. Tax: ${salon.currency}${total.toFixed(2)}`, summaryX, summaryStartY, { align: 'left' })
+    // .text(`Tax @ 18%: ${salon.currency}${tax.toFixed(2)}`, summaryX, summaryStartY + 15, { align: 'left' })
+// Position Total incl. Tax
+const totalInclTaxY = currentY + 20; // Position below the last table row
+doc.fontSize(10)
+  .text('Total incl. Tax:', 350, totalInclTaxY, { align: 'left' }) // Label column
+  .text(`${salon.currency}${grandTotal.toFixed(2)}`, 450, totalInclTaxY, { align: 'left' }) // Value column    // .text(`Payments: ${salon.currency}${grandTotal.toFixed(2)}`, summaryX, summaryStartY + 45, { align: 'left' })
+  .text(`Amount Due: ${salon.currency}0.00`, summaryX, summaryStartY + 60, { align: 'left' });
   
   // Footer
   doc.moveDown(2);
