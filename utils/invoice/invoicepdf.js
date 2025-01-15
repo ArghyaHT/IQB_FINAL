@@ -15,12 +15,13 @@ export const generateInvoicePDF = async (invoice, session, products) => {
 
   const salon = await getSalonBySalonId(session.metadata.salonId)
 
-  console.log(salon)
-  
   const doc = new PDFDocument({ margin: 50 });
   const invoicePath = path.resolve(__dirname, 'invoice.pdf');
   const writeStream = fs.createWriteStream(invoicePath);
   doc.pipe(writeStream);
+
+  const logoPath = path.resolve(__dirname, "/utils/images/IQB-Logo.png"); // Path to your logo image
+  doc.image(logoPath, 50, 30, { width: 100 })
 
   // Header Section
   doc.fontSize(16).text('IQueueBook', 50, 50);
@@ -80,11 +81,11 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   const summaryX = 400; // Adjust this value as needed for proper alignment on the right side
 
   doc.fontSize(10)
-    .text(`Total excl. Tax: ${salon.currency}${total.toFixed(2)}`, summaryX, summaryStartY, { align: 'right' })
-    .text(`Tax @ 18%: ${salon.currency}${tax.toFixed(2)}`, summaryX, summaryStartY + 15, { align: 'right' })
-    .text(`Total incl. Tax: ${salon.currency}${grandTotal.toFixed(2)}`, summaryX, summaryStartY + 30, { align: 'right' })
-    .text(`Payments: ${salon.currency}${grandTotal.toFixed(2)}`, summaryX, summaryStartY + 45, { align: 'right' })
-    .text(`Amount Due: ${salon.currency}0.00`, summaryX, summaryStartY + 60, { align: 'right' });
+    .text(`Total excl. Tax: ${salon.currency}${total.toFixed(2)}`, summaryX, summaryStartY, { align: 'left' })
+    .text(`Tax @ 18%: ${salon.currency}${tax.toFixed(2)}`, summaryX, summaryStartY + 15, { align: 'left' })
+    .text(`Total incl. Tax: ${salon.currency}${grandTotal.toFixed(2)}`, summaryX, summaryStartY + 30, { align: 'left' })
+    .text(`Payments: ${salon.currency}${grandTotal.toFixed(2)}`, summaryX, summaryStartY + 45, { align: 'left' })
+    .text(`Amount Due: ${salon.currency}0.00`, summaryX, summaryStartY + 60, { align: 'left' });
 
   // Footer
   doc.moveDown(2);
