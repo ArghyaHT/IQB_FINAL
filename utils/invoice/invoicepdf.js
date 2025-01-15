@@ -65,14 +65,18 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   doc.text(session.customer_details.email, 50, billedToY + 50);
 
   // Table Header
-  const tableTop = billedToY + 70;
+  const tableTop = billedToY + 90;
   const colWidths = { description: 200, price: 100, discount: 100, total: 100, tax: 100 };
-  doc.fontSize(10)
-    .text('DESCRIPTION', 50, tableTop, { width: colWidths.description, ellipsis: true })
-    .text('PRICE', 150, tableTop, { align: 'left', width: colWidths.price })
-    .text('DISCOUNT', 250, tableTop, { align: 'left', width: colWidths.discount })
-    .text('TAX (18%)', 350, tableTop, { align: 'left', width: colWidths.tax })
-    .text('TOTAL', 450, tableTop, { align: 'left', width: colWidths.total });
+// Set font to bold for the headers
+doc.font('Helvetica-Bold').fontSize(10)
+  .text('DESCRIPTION', 50, tableTop, { width: colWidths.description, ellipsis: true })
+  .text('PRICE', 150, tableTop, { align: 'left', width: colWidths.price })
+  .text('DISCOUNT', 250, tableTop, { align: 'left', width: colWidths.discount })
+  .text('TAX (18%)', 350, tableTop, { align: 'left', width: colWidths.tax })
+  .text('TOTAL', 450, tableTop, { align: 'left', width: colWidths.total });
+
+// Reset font to normal for subsequent text (if needed)
+doc.font('Helvetica');
 
   doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
 
