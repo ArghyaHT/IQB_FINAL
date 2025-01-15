@@ -20,8 +20,8 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   const writeStream = fs.createWriteStream(invoicePath);
   doc.pipe(writeStream);
 
-  const logoPath = path.resolve(__dirname, "/utils/images/IQB-Logo.png"); // Path to your logo image
-  doc.image(logoPath, 50, 30, { width: 100 })
+  const logoPath = path.resolve(__dirname, '../../utils/images/IQB-Logo.png'); // Adjusted to your relative path
+  doc.image(logoPath, 50, 30, { width: 100 });
 
   // Header Section
   doc.fontSize(16).text('IQueueBook', 50, 50);
