@@ -60,12 +60,12 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   doc.moveTo(50, billedToY + 5) // Move slightly above for better alignment
     .lineTo(550, billedToY + 5) // Keep the same Y-coordinate for a straight line
     .stroke();
-  doc.fontSize(12).text('BILLED TO', 50, billedToY + 15, { underline: true });
-  doc.fontSize(10).text(session.customer_details.name, 50, billedToY + 35);
-  doc.text(session.customer_details.email, 50, billedToY + 50);
+  doc.fontSize(12).text('BILLED TO', 50, billedToY + 30, { underline: true });
+  doc.fontSize(10).text(session.customer_details.name, 50, billedToY + 50);
+  doc.text(session.customer_details.email, 50, billedToY + 65);
 
   // Table Header
-  const tableTop = billedToY + 90;
+  const tableTop = billedToY + 120;
   const colWidths = { description: 200, price: 100, discount: 100, total: 100, tax: 100 };
 // Set font to bold for the headers
 doc.font('Helvetica-Bold').fontSize(10)
@@ -100,7 +100,7 @@ doc.font('Helvetica');
     currentY += rowHeight;
 
     // Add row separator line
-    doc.moveTo(50, currentY - 5).lineTo(550, currentY - 5).stroke();
+    doc.moveTo(50, currentY + 5).lineTo(550, currentY + 5).stroke();
   });
 
   // Summary Section
