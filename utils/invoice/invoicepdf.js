@@ -22,16 +22,16 @@ export const generateInvoicePDF = async (invoice, session, products) => {
 
   const logoPath = path.resolve(__dirname, '../../utils/images/IQB-Logo.png'); // Adjusted to your relative path
   doc.image(logoPath, 50, 30, { width: 100 });
-  
+
   // Adjust the Y-axis positions for the header and subsequent content
   const headerY = 150;  // Adjusted header Y position below the logo
-  
+
   // Header Section
   doc.fontSize(16).text('IQueueBook', 50, headerY);
   doc.fontSize(10).text('16 Raffles Quay, #33-02, Hong Leong Building, Singapore 48581', 50, headerY + 20);
   doc.text('Singapore', 50, headerY + 35);
   doc.text('Registration No.: 9919SGP29004OSJ', 50, headerY + 50);
-  
+
   // Invoice Details (Right-aligned)
   const detailsX = 400;
   const detailsY = headerY;
@@ -41,17 +41,17 @@ export const generateInvoicePDF = async (invoice, session, products) => {
     .text(`Invoice Issued: ${moment().format('DD MMM, YYYY')}`, detailsX, detailsY + 30)
     .text(`Invoice Amount: ${salon.currency}${(session.amount_total / 100).toFixed(2)}`, detailsX, detailsY + 45)
     .text(`Status: ${session.payment_status.toUpperCase()}`, detailsX, detailsY + 60);
-  
+
   // Billed To Section
   const billedToY = headerY + 70; // Adjust Y-axis to position it below the previous sections
-// Draw a straight horizontal line for the section
-doc.moveTo(50, billedToY + 5) // Move slightly above for better alignment
-   .lineTo(550, billedToY + 5) // Keep the same Y-coordinate for a straight line
-   .stroke(); 
+  // Draw a straight horizontal line for the section
+  doc.moveTo(50, billedToY + 5) // Move slightly above for better alignment
+    .lineTo(550, billedToY + 5) // Keep the same Y-coordinate for a straight line
+    .stroke();
   doc.fontSize(12).text('BILLED TO', 50, billedToY + 15, { underline: true });
   doc.fontSize(10).text(session.customer_details.name, 50, billedToY + 35);
   doc.text(session.customer_details.email, 50, billedToY + 50);
-  
+
   // Table Header
   const tableTop = billedToY + 70;
   const colWidths = { description: 200, price: 100, discount: 100, total: 100, tax: 100 };
@@ -61,56 +61,55 @@ doc.moveTo(50, billedToY + 5) // Move slightly above for better alignment
     .text('DISCOUNT', 250, tableTop, { align: 'left', width: colWidths.discount })
     .text('TAX (18%)', 350, tableTop, { align: 'left', width: colWidths.tax })
     .text('TOTAL', 450, tableTop, { align: 'left', width: colWidths.total });
-  
+
   doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
-  
+
   // Table Rows
   let currentY = tableTop + 20; // Initial position for the table rows
   const rowHeight = 20; // Adjust row height for proper spacing
-  
+
   products.forEach((product, index) => {
     // Calculate tax and total (price + tax) for the product
     const tax = product.price * 0.18;
     const totalWithTax = product.price + tax;
-  
+
     // Write product details in the table
     doc.text(product.name, 50, currentY, { width: colWidths.description, ellipsis: true })
       .text(`${salon.currency}${product.price.toFixed(2)}`, 150, currentY, { align: 'left' })
       .text('-', 250, currentY, { align: 'left' })
       .text(`${salon.currency}${tax.toFixed(2)}`, 350, currentY, { align: 'left' })
       .text(`${salon.currency}${totalWithTax.toFixed(2)}`, 450, currentY, { align: 'left' });
-  
+
     // Increment Y for the next row, ensuring spacing between rows
     currentY += rowHeight;
-  
+
     // Add row separator line
     doc.moveTo(50, currentY - 5).lineTo(550, currentY - 5).stroke();
   });
-  
+
   // Summary Section
   const summaryStartY = currentY + 30;
   const total = products.reduce((sum, p) => sum + p.price, 0);
   const tax = total * 0.18;
   const grandTotal = total + tax;
-  
+
   const summaryX = 450; // Adjust this value as needed for proper alignment on the right side
-  
+
   doc.fontSize(10)
-    // .text(`Total excl. Tax: ${salon.currency}${total.toFixed(2)}`, summaryX, summaryStartY, { align: 'left' })
-    // .text(`Tax @ 18%: ${salon.currency}${tax.toFixed(2)}`, summaryX, summaryStartY + 15, { align: 'left' })
-// Position Total incl. Tax
-const totalInclTaxY = currentY + 20; // Position below the last table row
-doc.fontSize(10)
-  .text('Total incl. Tax:', 350, totalInclTaxY, { align: 'left' }) // Label column
-  .text(`${salon.currency}${grandTotal.toFixed(2)}`, 450, totalInclTaxY, { align: 'left' }) // Value column    // .text(`Payments: ${salon.currency}${grandTotal.toFixed(2)}`, summaryX, summaryStartY + 45, { align: 'left' })
-  .text(`Amount Due: ${salon.currency}0.00`, summaryX, summaryStartY + 60, { align: 'left' });
-  
+  // .text(`Total excl. Tax: ${salon.currency}${total.toFixed(2)}`, summaryX, summaryStartY, { align: 'left' })
+  // .text(`Tax @ 18%: ${salon.currency}${tax.toFixed(2)}`, summaryX, summaryStartY + 15, { align: 'left' })
+  // Position Total incl. Tax
+  const totalInclTaxY = currentY + 20; // Position below the last table row
+  doc.fontSize(10)
+    .text('Total incl. Tax:', 350, totalInclTaxY, { align: 'left' }) // Label column
+    .text(`${salon.currency}${grandTotal.toFixed(2)}`, 450, totalInclTaxY, { align: 'left' }) // Value column    // .text(`Payments: ${salon.currency}${grandTotal.toFixed(2)}`, summaryX, summaryStartY + 45, { align: 'left' })
+
   // Footer
   doc.moveDown(2);
   doc.fontSize(10).text('Thank you for choosing IQueueBook!', 50, summaryStartY + 90, { align: 'center' });
-  
+
   doc.end();
-  
+
   return new Promise((resolve, reject) => {
     writeStream.on('finish', () => resolve(invoicePath));
     writeStream.on('error', reject);
