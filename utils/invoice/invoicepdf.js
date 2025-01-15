@@ -24,7 +24,7 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   doc.image(logoPath, 50, 30, { width: 100 });
   
   // Adjust the Y-axis positions for the header and subsequent content
-  const headerY = 120;  // Adjusted header Y position below the logo
+  const headerY = 150;  // Adjusted header Y position below the logo
   
   // Header Section
   doc.fontSize(16).text('IQueueBook', 50, headerY);
