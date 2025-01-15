@@ -159,5 +159,6 @@ const endpointSecret = "whsec_2ac18f1342ab2f8f01876c568138feabea067bff3ee2108080
 
 export const getSalonPayments = async(req, res, next) => {
     const {salonId} = req.body;
-    
+
+    const salonPayments = await getSalonPaymentsBySalonId(salonId)
 }

@@ -23,3 +23,10 @@ const newPayment = new SalonPayments({
   // Save the new payment document directly
   await newPayment.save();
 }
+
+
+export const getSalonPaymentsBySalonId = async(salonId) => {
+  const salonpayments = await SalonPayments.find({salonId})
+
+  return salonpayments
+}

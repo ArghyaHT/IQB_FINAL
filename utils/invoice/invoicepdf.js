@@ -12,6 +12,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const generateInvoicePDF = async (invoice, session, products) => {
+
+  const salon = await getSalonBySalonId(session.salonId)
+  
   const doc = new PDFDocument({ margin: 50 });
   const invoicePath = path.resolve(__dirname, 'invoice.pdf');
   const writeStream = fs.createWriteStream(invoicePath);
@@ -30,7 +33,7 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   doc.fontSize(10)
     .text(`Invoice #: ${invoice}`, detailsX, detailsY + 15)
     .text(`Invoice Issued: ${moment().format('DD MMM, YYYY')}`, detailsX, detailsY + 30)
-    .text(`Invoice Amount: ₹${(session.amount_total / 100).toFixed(2)}`, detailsX, detailsY + 45)
+    .text(`Invoice Amount: ${salon.currency}${(session.amount_total / 100).toFixed(2)}`, detailsX, detailsY + 45)
     .text(`Status: ${session.payment_status.toUpperCase()}`, detailsX, detailsY + 60);
 
   // Billed To Section
@@ -44,10 +47,10 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   const colWidths = { description: 200, price: 100, discount: 100, total: 100, tax: 100 };
   doc.fontSize(10)
     .text('DESCRIPTION', 50, tableTop, { width: colWidths.description, ellipsis: true })
-    .text('PRICE', 250, tableTop, { align: 'left', width: colWidths.price })
-    .text('DISCOUNT', 350, tableTop, { align: 'left', width: colWidths.discount })
-    .text('TOTAL', 450, tableTop, { align: 'left', width: colWidths.total })
-    .text('TAX (18%)', 550, tableTop, { align: 'left', width: colWidths.tax });
+    .text('PRICE', 100, tableTop, { align: 'left', width: colWidths.price })
+    .text('DISCOUNT', 150, tableTop, { align: 'left', width: colWidths.discount })
+    .text('TAX (18%)', 200, tableTop, { align: 'left', width: colWidths.tax })
+    .text('TOTAL', 250, tableTop, { align: 'left', width: colWidths.total })
 
   doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
 
@@ -55,10 +58,10 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   let currentY = tableTop + 20;
   products.forEach((product) => {
     doc.text(product.name, 50, currentY, { width: colWidths.description, ellipsis: true })
-      .text(`₹${product.price.toFixed(2)}`, 250, currentY, { align: 'left' })
-      .text('-', 350, currentY, { align: 'left' })
-      .text(`₹${product.price.toFixed(2)}`, 450, currentY, { align: 'left' })
-      .text(`₹${(product.price * 0.18).toFixed(2)}`, 550, currentY, { align: 'left' });
+      .text(`${salon.currency}${product.price.toFixed(2)}`, 100, currentY, { align: 'left' })
+      .text('-', 150, currentY, { align: 'left' })
+      .text(`${salon.currency}${(product.price * 0.18).toFixed(2)}`, 200, currentY, { align: 'left' })
+      .text(`${salon.currency}${product.price.toFixed(2)}`, 250, currentY, { align: 'left' })
 
     currentY += 20;
 
@@ -73,11 +76,11 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   const grandTotal = total + tax;
 
   doc.fontSize(10)
-    .text(`Total excl. Tax: ₹${total.toFixed(2)}`, 50, summaryStartY)
-    .text(`Tax @ 18%: ₹${tax.toFixed(2)}`, 50, summaryStartY + 15)
-    .text(`Total incl. Tax: ₹${grandTotal.toFixed(2)}`, 50, summaryStartY + 30)
-    .text(`Payments: ₹-${grandTotal.toFixed(2)}`, 50, summaryStartY + 45)
-    .text('Amount Due: ₹0.00', 50, summaryStartY + 60);
+    .text(`Total excl. Tax: ${salon.currency}${total.toFixed(2)}`, 50, summaryStartY)
+    .text(`Tax @ 18%: ${salon.currency}${tax.toFixed(2)}`, 50, summaryStartY + 15)
+    .text(`Total incl. Tax: ${salon.currency}${grandTotal.toFixed(2)}`, 50, summaryStartY + 30)
+    .text(`Payments: ${salon.currency}${grandTotal.toFixed(2)}`, 50, summaryStartY + 45)
+    .text(`Amount Due: ${salon.currency}0.00`, 50, summaryStartY + 60);
 
   // Footer
   doc.moveDown(2);
