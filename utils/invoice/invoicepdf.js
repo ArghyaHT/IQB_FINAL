@@ -45,7 +45,7 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   // Billed To Section
   const billedToY = headerY + 70; // Adjust Y-axis to position it below the previous sections
 // Draw a straight horizontal line for the section
-doc.moveTo(50, billedToY - 5) // Move slightly above for better alignment
+doc.moveTo(70, billedToY - 5) // Move slightly above for better alignment
    .lineTo(550, billedToY - 5) // Keep the same Y-coordinate for a straight line
    .stroke();  doc.fontSize(12).text('BILLED TO', 50, billedToY + 10, { underline: true });
   doc.fontSize(10).text(session.customer_details.name, 50, billedToY + 30);
