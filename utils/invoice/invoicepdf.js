@@ -24,14 +24,14 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   doc.image(logoPath, 50, 30, { width: 100 });
 
   // Header Section
-  doc.fontSize(16).text('IQueueBook', 50, 50);
+  doc.fontSize(16).text('IQueueBook', 50, 80);
   doc.fontSize(10).text('16 Raffles Quay, #33-02, Hong Leong Building, Singapore 48581', 50, 70);
   doc.text('Singapore', 50, 85);
   doc.text('Registration No.: 9919SGP29004OSJ', 50, 100);
 
   // Invoice Details (Right-aligned)
   const detailsX = 400;
-  const detailsY = 50;
+  const detailsY = 80;
   doc.fontSize(14).text('INVOICE', detailsX, detailsY);
   doc.fontSize(10)
     .text(`Invoice #: ${invoice}`, detailsX, detailsY + 15)
@@ -78,7 +78,7 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   const tax = total * 0.18;
   const grandTotal = total + tax;
 
-  const summaryX = 400; // Adjust this value as needed for proper alignment on the right side
+  const summaryX = 450; // Adjust this value as needed for proper alignment on the right side
 
   doc.fontSize(10)
     .text(`Total excl. Tax: ${salon.currency}${total.toFixed(2)}`, summaryX, summaryStartY, { align: 'left' })
