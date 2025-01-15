@@ -77,12 +77,14 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   const tax = total * 0.18;
   const grandTotal = total + tax;
 
+  const summaryX = 400; // Adjust this value as needed for proper alignment on the right side
+
   doc.fontSize(10)
-    .text(`Total excl. Tax: ${salon.currency}${total.toFixed(2)}`, 50, summaryStartY)
-    .text(`Tax @ 18%: ${salon.currency}${tax.toFixed(2)}`, 50, summaryStartY + 15)
-    .text(`Total incl. Tax: ${salon.currency}${grandTotal.toFixed(2)}`, 50, summaryStartY + 30)
-    .text(`Payments: ${salon.currency}${grandTotal.toFixed(2)}`, 50, summaryStartY + 45)
-    .text(`Amount Due: ${salon.currency}0.00`, 50, summaryStartY + 60);
+    .text(`Total excl. Tax: ${salon.currency}${total.toFixed(2)}`, summaryX, summaryStartY, { align: 'right' })
+    .text(`Tax @ 18%: ${salon.currency}${tax.toFixed(2)}`, summaryX, summaryStartY + 15, { align: 'right' })
+    .text(`Total incl. Tax: ${salon.currency}${grandTotal.toFixed(2)}`, summaryX, summaryStartY + 30, { align: 'right' })
+    .text(`Payments: ${salon.currency}${grandTotal.toFixed(2)}`, summaryX, summaryStartY + 45, { align: 'right' })
+    .text(`Amount Due: ${salon.currency}0.00`, summaryX, summaryStartY + 60, { align: 'right' });
 
   // Footer
   doc.moveDown(2);
