@@ -12,83 +12,85 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const generateInvoicePDF = async (invoice, session, products) => {
-  const salon = await getSalonBySalonId(session.metadata.salonId);
+  const doc = new PDFDocument({ margin: 50 });
+  const invoicePath = path.resolve(__dirname, 'invoice.pdf');
+  const writeStream = fs.createWriteStream(invoicePath);
+  doc.pipe(writeStream);
+
+  // Header Section
+  doc.fontSize(16).text('IQueueBook', 50, 50);
+  doc.fontSize(10).text('16 Raffles Quay, #33-02, Hong Leong Building, Singapore 48581', 50, 70);
+  doc.text('Singapore', 50, 85);
+  doc.text('Registration No.: 9919SGP29004OSJ', 50, 100);
+
+  // Invoice Details (Right-aligned)
+  const detailsX = 400;
+  const detailsY = 50;
+  doc.fontSize(14).text('INVOICE', detailsX, detailsY);
+  doc.fontSize(10)
+    .text(`Invoice #: ${invoice}`, detailsX, detailsY + 15)
+    .text(`Invoice Issued: ${moment().format('DD MMM, YYYY')}`, detailsX, detailsY + 30)
+    .text(`Invoice Amount: ₹${(session.amount_total / 100).toFixed(2)}`, detailsX, detailsY + 45)
+    .text(`Status: ${session.payment_status.toUpperCase()}`, detailsX, detailsY + 60);
+
+  // Billed To Section
+  doc.moveTo(50, 130).lineTo(550, 130).stroke();
+  doc.fontSize(12).text('BILLED TO', 50, 140, { underline: true });
+  doc.fontSize(10).text(session.customer_details.name, 50, 160);
+  doc.text(session.customer_details.email, 50, 175);
+
+  // Table Header
+  const tableTop = 200;
+  const colWidths = { description: 200, price: 100, discount: 100, total: 100, tax: 100 };
+  doc.fontSize(10)
+    .text('DESCRIPTION', 50, tableTop, { width: colWidths.description, ellipsis: true })
+    .text('PRICE', 250, tableTop, { align: 'left', width: colWidths.price })
+    .text('DISCOUNT', 350, tableTop, { align: 'left', width: colWidths.discount })
+    .text('TOTAL', 450, tableTop, { align: 'left', width: colWidths.total })
+    .text('TAX (18%)', 550, tableTop, { align: 'left', width: colWidths.tax });
+
+  doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
+
+  // Table Rows
+  let currentY = tableTop + 20;
+  products.forEach((product) => {
+    doc.text(product.name, 50, currentY, { width: colWidths.description, ellipsis: true })
+      .text(`₹${product.price.toFixed(2)}`, 250, currentY, { align: 'left' })
+      .text('-', 350, currentY, { align: 'left' })
+      .text(`₹${product.price.toFixed(2)}`, 450, currentY, { align: 'left' })
+      .text(`₹${(product.price * 0.18).toFixed(2)}`, 550, currentY, { align: 'left' });
+
+    currentY += 20;
+
+    // Add row separator
+    doc.moveTo(50, currentY).lineTo(550, currentY).stroke();
+  });
+
+  // Summary Section
+  const summaryStartY = currentY + 30;
+  const total = products.reduce((sum, p) => sum + p.price, 0);
+  const tax = total * 0.18;
+  const grandTotal = total + tax;
+
+  doc.fontSize(10)
+    .text(`Total excl. Tax: ₹${total.toFixed(2)}`, 50, summaryStartY)
+    .text(`Tax @ 18%: ₹${tax.toFixed(2)}`, 50, summaryStartY + 15)
+    .text(`Total incl. Tax: ₹${grandTotal.toFixed(2)}`, 50, summaryStartY + 30)
+    .text(`Payments: ₹-${grandTotal.toFixed(2)}`, 50, summaryStartY + 45)
+    .text('Amount Due: ₹0.00', 50, summaryStartY + 60);
+
+  // Footer
+  doc.moveDown(2);
+  doc.fontSize(10).text('Thank you for choosing IQueueBook!', 50, summaryStartY + 90, { align: 'center' });
+
+  doc.end();
 
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ margin: 50 });
-    const invoicePath = path.resolve(__dirname, 'invoice.pdf');
-    const writeStream = fs.createWriteStream(invoicePath);
     writeStream.on('finish', () => resolve(invoicePath));
     writeStream.on('error', reject);
-    doc.pipe(writeStream);
-
-    // Header Section
-    doc.fontSize(16).text('IQueueBook', { align: 'left' });
-    doc.fontSize(10).text('16 Raffles Quay, #33-02, Hong Leong Building, Singapore 48581', { align: 'left' });
-    doc.text('Singapore', { align: 'left' });
-    doc.text('Registration No.: 9919SGP29004OSJ', { align: 'left' });
-
-    // Invoice Details - Right-aligned
-    doc.moveDown();
-    doc.fontSize(14).text('INVOICE', { align: 'right' });
-    doc.fontSize(10).text(`Invoice #: ${invoice}`, { align: 'right' });
-    doc.text(`Invoice Issued: ${moment().format('DD MMM, YYYY')}`, { align: 'right' });
-    doc.text(`Invoice Amount: ₹${(session.amount_total / 100).toFixed(2)}`, { align: 'right' });
-    doc.text(`Status: ${session.payment_status.toUpperCase()}`, { align: 'right' });
-
-    // Billed To Section
-    doc.moveDown();
-    doc.fontSize(12).text('BILLED TO', { underline: true });
-    doc.fontSize(10).text(`${session.customer_details.name}`);
-    doc.text(`${session.customer_details.email}`);
-    doc.text(`${session.customer_details.address || ''}`);
-
-    // Table Header
-    doc.moveDown();
-    const tableTop = doc.y;
-    doc.fontSize(10)
-      .text('DESCRIPTION', 50, tableTop)
-      .text('PRICE', 200, tableTop, { align: 'right' })
-      .text('DISCOUNT', 300, tableTop, { align: 'right' })
-      .text('TOTAL', 400, tableTop, { align: 'right' })
-      .text('TAX (18%)', 500, tableTop, { align: 'right' });
-
-    // Draw horizontal line
-    doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
-
-    // Table Rows
-    let currentY = tableTop + 20;
-    products.forEach((product) => {
-      doc.text(product.name, 50, currentY)
-        .text(`₹${product.price.toFixed(2)}`, 200, currentY, { align: 'right' })
-        .text('-', 300, currentY, { align: 'right' })
-        .text(`₹${product.price.toFixed(2)}`, 400, currentY, { align: 'right' })
-        .text(`₹${(product.price * 0.18).toFixed(2)}`, 500, currentY, { align: 'right' });
-      currentY += 20;
-
-      // Draw horizontal line
-      doc.moveTo(50, currentY).lineTo(550, currentY).stroke();
-    });
-
-    // Summary Section
-    doc.moveDown(2);
-    const total = products.reduce((sum, p) => sum + p.price, 0);
-    const tax = total * 0.18;
-    const grandTotal = total + tax;
-
-    doc.fontSize(10).text(`Total excl. Tax: ₹${total.toFixed(2)}`);
-    doc.text(`Tax @ 18%: ₹${tax.toFixed(2)}`);
-    doc.text(`Total incl. Tax: ₹${grandTotal.toFixed(2)}`);
-    doc.text(`Payments: ₹-${grandTotal.toFixed(2)}`);
-    doc.text('Amount Due: ₹0.00');
-
-    // Footer Section
-    doc.moveDown();
-    doc.fontSize(10).text('Thank you for choosing IQueueBook!', { align: 'center' });
-
-    doc.end();
   });
 };
+
 
 
 
