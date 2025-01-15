@@ -1,8 +1,8 @@
 import Stripe from "stripe";
 import { getSalonPaymentsBySalonId } from "../../../services/web/salonPayments/salonPaymentService.js";
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
-import { ERROR_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
-import { SALON_PAYMENTS_ERROR } from "../../../constants/web/SalonPaymentsConstants.js";
+import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
+import { SALON_PAYMENTS_ERROR, SALON_PAYMENTS_SUCCESS } from "../../../constants/web/SalonPaymentsConstants.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 
 const stripe = Stripe("sk_test_51QRTpyG07uuapMPyWzgvxhY67VAuRJFsOhi5yxTbv7GVJMXXDDorgg1aZYCQPKNIlPBuh3mpFXx7Pc9lXz2KyZsR00Zeu15xy7")
@@ -170,7 +170,8 @@ export const getSalonPayments = async(req, res, next) => {
         if(!salonPayments){
             return ErrorHandler(SALON_PAYMENTS_ERROR, ERROR_STATUS_CODE, res)
         }
-        return SuccessHandler()
+
+            return SuccessHandler(SALON_PAYMENTS_SUCCESS, SUCCESS_STATUS_CODE, res, { response: salonPayments })
     }
     catch (error) {
         next(error);
