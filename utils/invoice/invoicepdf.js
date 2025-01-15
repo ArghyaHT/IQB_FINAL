@@ -81,7 +81,7 @@ doc.font('Helvetica');
   doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
 
   // Table Rows
-  let currentY = tableTop + 20; // Initial position for the table rows
+  let currentY = tableTop + 30; // Initial position for the table rows
   const rowHeight = 20; // Adjust row height for proper spacing
 
   products.forEach((product, index) => {
