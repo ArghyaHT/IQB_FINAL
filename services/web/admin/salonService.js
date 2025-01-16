@@ -394,3 +394,36 @@ const formattedPayments = salonPayments.map((payment) => {
 
 return formattedPayments;
 };
+
+
+export const checkQueueingExpireDate = async() => {
+  const todayDate = Math.floor(Date.now() / 1000); // Current time in seconds
+
+  // Fetch all salons from the database
+  const salons = await Salon.find();
+
+  for (const salon of salons) {
+    const queueExpiryDate = parseInt(salon.queueingExpiryDate, 10); // Convert expiry date to a number
+    if (todayDate >= queueExpiryDate) {
+      salon.isQueuing = false; // Update the field locally
+      await salon.save(); // Save the updated salon to the database
+    }
+  }
+  return
+}
+
+export const checkAppointmentExpireDate = async() => {
+  const todayDate = Math.floor(Date.now() / 1000); // Current time in seconds
+
+  // Fetch all salons from the database
+  const salons = await Salon.find();
+
+  for (const salon of salons) {
+    const appointmentExpiryDate = parseInt(salon.appointmentExpiryDate, 10); // Convert expiry date to a number
+    if (todayDate >= appointmentExpiryDate) {
+      salon.isAppointments = false; // Update the field locally
+      await salon.save(); // Save the updated salon to the database
+    }
+  }
+  return
+}

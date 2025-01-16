@@ -44,7 +44,7 @@ import loggerRoutes from "./routes/loggerRoutes.js"
 import logger from "./utils/logger/logger.js";
 import { GlobalErrorHandler } from "./middlewares/GlobalErrorHandler.js";
 import { logMiddleware } from "./controllers/loggerController.js";
-import { updateCustomers } from "./triggers/cronjobs.js";
+import { checkQueuingAndAppointmentExpire, updateCustomers } from "./triggers/cronjobs.js";
 import Stripe from "stripe";
 import Salon from "./models/salonRegisterModel.js";
 import moment from "moment";
@@ -240,10 +240,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
         {
           $set: {
             isQueuing: isQueuingValue,
+            queueingExpiryDate: session.metadata.paymentExpiryDate
           },
-          // $push: {
-          //   productPayment: paymentData,
-          // },
         }
       )
     }
@@ -256,10 +254,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
         {
           $set: {
             isAppointments: isAppointmentValue,
+            appointmentExpiryDate: session.metadata.paymentExpiryDate
           },
-          // $push: {
-          //   productPayment: paymentData,
-          // },
         }
       )
     }
@@ -274,18 +270,14 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
           $set: {
             isQueuing: isQueuingValue,
             isAppointments: isAppointmentValue,
+            queueingExpiryDate: session.metadata.paymentExpiryDate,
+            appointmentExpiryDate: session.metadata.paymentExpiryDate
           },
-          // $push: {
-          //   productPayment: paymentData,
-          // },
         }
       )
     }
 
     await salonPayments(paymentData)
-
-
-    // console.log("Payment is hitting")
 
     const salon = await getSalonBySalonId(session.metadata.salonId)
 
@@ -617,6 +609,7 @@ app.get('*', (req, res) =>
 const PORT = 8001;
 
 updateCustomers()
+checkQueuingAndAppointmentExpire()
 
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);

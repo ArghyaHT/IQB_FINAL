@@ -209,9 +209,15 @@ const salonsSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    queueingExpiryDate: {
+        type: String
+    },
     isAppointments: {
         type: Boolean,
         default: false
+    },
+    appointmentExpiryDate:{
+        type: String
     },
     gallery: [
         {
@@ -223,31 +229,6 @@ const salonsSchema = new mongoose.Schema({
             }
         }
     ],
-
-    // productPayment: [
-    //     {   
-    //         salonId: Number,
-    //         adminEmail: String,
-    //         customerName: String,
-    //         customerEmail: String,
-    //         amount: Number,
-    //         currency: String,
-    //         paymentIntentId: String,
-    //         status: String,
-    //         paymentType: "Free" / "Paid",
-    //         paymentExpiryDate: "current date + 14days / paid date time",
-
-    //         products: [
-    //           {
-    //             name: String,
-    //             quantity: Number,
-    //             price: Number,
-    //             currency: String,
-    //           },
-    //         ],
-    //         createdAt: { type: Date, default: Date.now },
-    //     }
-    // ],
 
     productPayment: [
         {
