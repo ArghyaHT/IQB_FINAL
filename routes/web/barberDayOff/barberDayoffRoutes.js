@@ -1,15 +1,13 @@
 import express from "express";
-import { barberDayOff} from "../../../controllers/web/barberDayOff/barberDayOffController.js";
+import { addBarberDayOff, getBarberDayOffNumbers, getBarberOffDays} from "../../../controllers/web/barberDayOff/barberDayOffController.js";
 
 const router = express.Router();
 
-router.route("/barberDayOffRequest").post(barberDayOff)
+router.route("/addBarberDayOffs").post(addBarberDayOff)
 
-// router.route("/barberDayOffApproval").post(barberDayOffApprovalByAdmin)
+router.route("/getBarberDayOffs").post(getBarberOffDays)
 
-// router.route("/getAllBarberDayOffRequests").post(getBarberDayOffRequests)
-
-
+router.route("/getBarberDayOffsNumbers").post(getBarberDayOffNumbers)
 
 
 export default router;

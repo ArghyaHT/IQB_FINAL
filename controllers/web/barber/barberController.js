@@ -27,7 +27,6 @@ import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ALLOWED_IMAGE_EXTENSIONS, BARBER_IMAGE_EMPTY_ERROR, IMAGE_FAILED_DELETE, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 import { SALON_EXISTS_ERROR, SALON_NOT_CREATED_ERROR, SALON_NOT_FOUND_ERROR, SALON_SERVICES_RETRIEVED_SUCESS } from "../../../constants/web/SalonConstants.js";
 import { NO_SALON_CONNECTED_ERROR } from "../../../constants/web/QueueConstants.js";
-import { addBarberForDayOff } from "../../../services/web/barberDayOff/barberDayOffService.js";
 
 
 // Desc: Register
@@ -668,8 +667,6 @@ export const createBarberByAdmin = async (req, res, next) => {
         // Save the new barber to the database
         const savedBarber = await adminCreateBarber(email, hashedPassword, name, nickName, salonId, countryCode, formattedNumberAsNumber, dateOfBirth, barberCode, barberId, barberExp, barberServices);
 
-        await addBarberForDayOff(salonId, barberId)
-
         //   // Save FCM Tokens based on the switch-case logic
         //   let tokenType, tokenValue;
         //   switch (true) {
@@ -1072,9 +1069,6 @@ export const connectBarberToSalon = async (req, res, next) => {
         }
 
         const barber = await connectBarberSalon(email, salonId, barberServices, approvePendingMessage)
-
-        await addBarberForDayOff(salonId, barber.barberId)
-
 
         //If barber not found
         if (!barber) {

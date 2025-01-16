@@ -7,7 +7,6 @@ import { getSalonBySalonId } from "../../services/web/admin/salonService.js"
 
 
 import moment from "moment";
-import { checkAppointmentDate } from "../../services/web/barberDayOff/barberDayOffService.js";
 import { getAppointmentbySalonId } from "../../services/web/appointments/appointmentsService.js";
 import { getBarbersBySalonIdForAppointments, matchAppointmentDays } from "../../services/web/barberAppointmentDays/barberAppointmentDaysService.js";
 import { matchSalonOffDays } from "../../services/web/salonSettings/salonSettingsService.js";
@@ -95,15 +94,6 @@ export const createAppointment = async (req, res, next) => {
         message: "The salon is currently offine"
       });
     }
-
-    // const checkAppointments = await checkAppointmentDate(salonId, barberId, appointmentDate) 
-
-    // if(checkAppointments){
-    //   return res.status(201).json({
-    //     success: false,
-    //     message: "The barber is off duty"
-    //   });
-    // }
 
     const day = moment(appointmentDate).format('dddd');
 
@@ -298,15 +288,6 @@ export const editAppointment = async (req, res, next) => {
         message: 'Please fill all the fields',
       });
     }
-
-    // const checkAppointments = await checkAppointmentDate(salonId, barberId, appointmentDate)
-
-    // if (checkAppointments) {
-    //   return res.status(201).json({
-    //     success: false,
-    //     message: "The barber is off duty"
-    //   });
-    // }
 
     const day = moment(appointmentDate).format('dddd');
 

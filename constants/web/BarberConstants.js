@@ -8,6 +8,9 @@ export const NO_BARBER_SERVICEID_ERROR = "No barbers found for the given service
 export const BARBER_NOT_APPROVE_ERROR = "Barber is not approved"
 export const CUSTOMERS_IN_QUEUE_ERROR = "Cant clock you out as you have customers in the queue"
 export const EMPTY_SERVICE_ERROR = "Please provide a service"
+export const BARBER_DAYOFFS_ARRAY_ERROR = "Barber off days should be an array"
+
+
 
 
 //SUCCESS
@@ -24,3 +27,8 @@ export const BARBER_CLOCKIN_SUCCESS = "You are clocked in"
 export const BARBER_CLOCKOUT_SUCCESS = "You are clocked out"
 export const CHANGE_PASSWORD_SUCCESS = "Barber password updated successfully"
 export const CREATE_BARBER_SUCCESS = "Barber created successfully" 
+export const BARBER_DAYOFFS_UPDATE_SUCCESS = "Barber dayoffs update successfully"
+export const BARBER_DAYOFFS_ADDED_SUCCESS = "Barber dayoffs added successfully" 
+export const BARBER_DAYOFFS_RETRIEVE_SUCCESS = "Barber dayoffs retrieved successfully" 
+
+

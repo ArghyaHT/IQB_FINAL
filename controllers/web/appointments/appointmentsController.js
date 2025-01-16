@@ -12,7 +12,6 @@ import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/C
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import {SuccessHandler} from "../../../middlewares/SuccessHandler.js"
 import { SALON_NOT_FOUND_ERROR } from "../../../constants/web/SalonConstants.js";
-import { checkAppointmentDate } from "../../../services/web/barberDayOff/barberDayOffService.js";
 
 
 //DESC:CREATE APPOINTMENT ====================
@@ -36,15 +35,6 @@ export const createAppointment = async (req, res, next) => {
         //     message: "Invalid Email "
         //   });
         // }
-
-        const checkAppointments = await checkAppointmentDate(salonId, barberId, appointmentDate) 
-
-        if(checkAppointments){
-          return res.status(201).json({
-            success: true,
-            message: "The barber is off duty"
-          });
-        }
     
         // Fetch barber information
         const barber = await getBarberbyId(barberId);

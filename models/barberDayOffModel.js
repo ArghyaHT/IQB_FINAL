@@ -8,14 +8,19 @@ const barberDayoffSchema = new mongoose.Schema({
     barberId: {
         type: Number,
     },
-    dayoff: [{
-        fromDate: {
-            type: Date,
-        },
-        toDate: {
-            type: Date,
-        }
-    }]
+    barberOffDays: {
+        type: [String], // Directly store an array of strings
+        enum: [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ],
+    }
+
 
 },{timestamps:true})
 
