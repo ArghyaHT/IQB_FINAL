@@ -45,7 +45,7 @@ export const checkQueuingAndAppointmentExpire = (next) => {
 
     // For each timezone, schedule a cron job that runs at midnight
     timezones.forEach((timezone) => {
-        cron.schedule('0 0 * * *', async () => {
+        cron.schedule('* * * * *', async () => {
             try {
                 await checkQueueingExpireDate()
                 await checkAppointmentExpireDate()
