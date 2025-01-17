@@ -39,7 +39,12 @@ export const getBarberOffDays = async (req, res, next) => {
 
         const barberOffDays = await getBarberDayOffs(salonId, barberId)
 
-        return SuccessHandler(BARBER_DAYOFFS_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barberOffDays })
+         // Extract and format the barberOffDays to only include the dates in YYYY-MM-DD format
+         const barberOffDaysFormatted = barberOffDays.barberOffDays.map(day =>
+          new Date(day).toISOString().split("T")[0]
+      );
+
+        return SuccessHandler(BARBER_DAYOFFS_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barberOffDaysFormatted })
 
     }
     catch (error) {
