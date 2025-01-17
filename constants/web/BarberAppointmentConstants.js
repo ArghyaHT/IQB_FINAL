@@ -16,6 +16,9 @@ export const BARBER_APPOINTMENT_DAYS_ADD_SUCCESS = "Appointment days added succe
 
 export const BARBER_APPOINTMENT_RETRIEVE_SUCCESS = "Appointment days retrieved successfully."
 
+export const BARBER_DISABLED_APPOINTMENT_DATES_RETRIEVE_SUCCESS = "Appointment disabled days retrieved successfully."
+
+
 export const BOOK_APPOINTMENT_BARBER_RETRIEVE_SUCCESS = "Barbers retrieved successfully."
 
 

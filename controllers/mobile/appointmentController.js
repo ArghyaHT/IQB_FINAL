@@ -14,6 +14,7 @@ import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../constants/kiosk/St
 import { BOOK_APPOINTMENT_BARBER_RETRIEVE_ERROR, BOOK_APPOINTMENT_BARBER_RETRIEVE_SUCCESS } from "../../constants/web/BarberAppointmentConstants.js";
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 import { ErrorHandler } from "../../middlewares/ErrorHandler.js";
+import { matchBarberOffDays } from "../../services/web/barberDayOff/barberDayOffService.js";
 
 //Creating Appointment
 export const createAppointment = async (req, res, next) => {
@@ -102,10 +103,9 @@ export const createAppointment = async (req, res, next) => {
     if(salonDayOff){
       return res.status(400).json({
         success: false,
-        message: "Salon closed today",
+        message: "Salon closed",
       });
     }
-
 
     const match = await matchAppointmentDays(salonId, barberId, day);
 

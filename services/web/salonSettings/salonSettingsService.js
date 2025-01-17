@@ -106,7 +106,7 @@ export const saveNewSalonSettings = async (salonId, startTime, endTime, interval
           appointmentEndTime: endTime,
           intervalInMinutes: intervalInMinutes,
       },
-      // salonOffDays: salonOffDays,
+      salonOffDays: salonOffDays,
       appointmentAdvanceDays: appointmentAdvanceDays
   });
   await salonSettings.save();

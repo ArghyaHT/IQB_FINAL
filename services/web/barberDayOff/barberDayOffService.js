@@ -25,3 +25,13 @@ export const getBarberDayOffs = async(salonId, barberId) => {
     return record;
 }
 
+export const matchBarberOffDays = async(salonId, barberId, day) =>{
+  // Find a record where the day matches the appointmentDays array
+  const record = await BarberDayOff.findOne({
+      salonId,
+      barberId,
+      barberOffDays: { $in: [day] }, 
+      });
+  return record;
+}
+

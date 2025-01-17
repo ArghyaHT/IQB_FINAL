@@ -81,7 +81,7 @@ export const updateSalonSettings = async (req, res, next) => {
                     existingSalonSettings.appointmentSettings.appointmentStartTime = startTime;
                     existingSalonSettings.appointmentSettings.appointmentEndTime = endTime;
                     existingSalonSettings.appointmentSettings.intervalInMinutes = intervalInMinutes;
-                    // existingSalonSettings.salonOffDays = salonOffDays;
+                    existingSalonSettings.salonOffDays = salonOffDays;
                     existingSalonSettings.appointmentAdvanceDays = appointmentAdvanceDays
                 }
 

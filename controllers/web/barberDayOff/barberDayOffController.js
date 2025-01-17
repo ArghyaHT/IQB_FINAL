@@ -9,11 +9,8 @@ export const addBarberDayOff = async (req, res, next) => {
     try {
         const { salonId, barberId, barberDayOffs  } = req.body
 
-        console.log(barberDayOffs)
-
         if (!Array.isArray(barberDayOffs)) {
             return ErrorHandler(BARBER_DAYOFFS_ARRAY_ERROR, ERROR_STATUS_CODE, res)
-
         }
 
         const existingRecord = await updateBarberDayOff(salonId, barberId);
@@ -27,7 +24,6 @@ export const addBarberDayOff = async (req, res, next) => {
         else {
             const addRecord = await createBarberDayOff(salonId, barberId, barberDayOffs)
 
-            console.log(addRecord)
             return SuccessHandler(BARBER_DAYOFFS_ADDED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: addRecord })
         }
     }
@@ -61,19 +57,11 @@ export const getBarberDayOffNumbers = async (req, res, next) => {
       // Extract barberOffDays from the response
       const barberOffDays = barberData.barberOffDays || [];
   
-      // Define the mapping for the days of the week
-      const daysOfWeek = {
-        Monday: 1,
-        Tuesday: 2,
-        Wednesday: 3,
-        Thursday: 4,
-        Friday: 5,
-        Saturday: 6,
-        Sunday: 0
-      };
-  
-      // Map the barber's off days to their numeric values
-      const offDayNumbers = barberOffDays.map(day => daysOfWeek[day]);
+    // Convert the dates to day numbers (0 = Sunday, 6 = Saturday)
+    const offDayNumbers = barberOffDays.map(dateString => {
+      const date = new Date(dateString); // Convert the date string to a Date object
+      return date.getUTCDay(); // Get the day of the week as a number (0-6)
+    });
   
       // Convert the Mongoose document to a plain object
       const plainBarberData = barberData.toObject ? barberData.toObject() : barberData;
