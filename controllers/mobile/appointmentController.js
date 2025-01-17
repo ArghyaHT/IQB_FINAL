@@ -8,13 +8,13 @@ import { getSalonBySalonId } from "../../services/web/admin/salonService.js"
 
 import moment from "moment";
 import { getAppointmentbySalonId } from "../../services/web/appointments/appointmentsService.js";
-import { getBarbersBySalonIdForAppointments, matchAppointmentDays } from "../../services/web/barberAppointmentDays/barberAppointmentDaysService.js";
-import { matchSalonOffDays } from "../../services/web/salonSettings/salonSettingsService.js";
+import { barberAppointmentDays, getBarbersBySalonIdForAppointments } from "../../services/web/barberAppointmentDays/barberAppointmentDaysService.js";
+import { findSalonSetingsBySalonId, matchSalonOffDays } from "../../services/web/salonSettings/salonSettingsService.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../constants/kiosk/StatusCodeConstants.js";
 import { BOOK_APPOINTMENT_BARBER_RETRIEVE_ERROR, BOOK_APPOINTMENT_BARBER_RETRIEVE_SUCCESS } from "../../constants/web/BarberAppointmentConstants.js";
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 import { ErrorHandler } from "../../middlewares/ErrorHandler.js";
-import { matchBarberOffDays } from "../../services/web/barberDayOff/barberDayOffService.js";
+import { getBarberDayOffs } from "../../services/web/barberDayOff/barberDayOffService.js";
 
 //Creating Appointment
 export const createAppointment = async (req, res, next) => {
@@ -100,16 +100,56 @@ export const createAppointment = async (req, res, next) => {
 
     const salonDayOff = await matchSalonOffDays(salonId, day)
 
-    if(salonDayOff){
+    if (salonDayOff) {
       return res.status(400).json({
         success: false,
         message: "Salon closed",
       });
     }
 
-    const match = await matchAppointmentDays(salonId, barberId, day);
 
-    if (match) {
+    const getSalonSettings = await findSalonSetingsBySalonId(salonId)
+
+    const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1));
+
+    // Number of days to advance
+    const appointmentAdvanceDays = getSalonSettings.appointmentAdvanceDays;
+
+    // Generate the list of dates
+    const dates = Array.from({ length: appointmentAdvanceDays }, (_, index) => {
+      const date = new Date(tomorrow); // Clone the starting date
+      date.setDate(tomorrow.getDate() + index); // Add the index to calculate subsequent days
+      return date.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+    });
+
+    const barberAppointmentDay = await barberAppointmentDays(salonId, barberId)
+
+    const appointmentDays = barberAppointmentDay.appointmentDays;
+
+    // Function to convert a date string (YYYY-MM-DD) to the weekday name
+    const getDayName = (dateString) => {
+      const date = new Date(dateString); // Convert the date string to a Date object
+      const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      return daysOfWeek[date.getDay()]; // Returns the weekday name (e.g., "Monday")
+    };
+
+    // Filter the dates based on available appointment weekdays
+    let availableDates = dates.filter(date => {
+      const dayName = getDayName(date); // Get the weekday name of the date
+      return appointmentDays.includes(dayName); // Check if it's one of the available appointment days
+    });
+
+    const barberDayOff = await getBarberDayOffs(salonId, barberId)
+
+    if (barberDayOff) {
+      const daysOffs = barberDayOff.barberOffDays;
+
+      const daysOffsFormatted = daysOffs.map(day => new Date(day).toISOString().split("T")[0]);
+
+      availableDates = availableDates.filter(date => !daysOffsFormatted.includes(date));
+    }
+
+    if (availableDates.includes(appointmentDate)) {
       // Fetch barber information
       const barber = await getBarberbyId(barberId);
 
@@ -262,13 +302,12 @@ export const createAppointment = async (req, res, next) => {
 
         //   // Send emails to admin, barber, and customer
         //   sendAppointmentsEmail(emailDataArray);
-
       }
     }
     else {
-      return res.status(400).json({
-        success: false,
-        message: "Barber can't take appointment in that day",
+      res.status(400).json({
+        success: true,
+        message: 'Barber updated his appointment days. please refresh the page',
       });
     }
   } catch (error) {
@@ -293,16 +332,55 @@ export const editAppointment = async (req, res, next) => {
 
     const salonDayOff = await matchSalonOffDays(salonId, day)
 
-    if(salonDayOff){
+    if (salonDayOff) {
       return res.status(400).json({
         success: false,
         message: "Salon closed today",
       });
     }
 
-    const match = await matchAppointmentDays(salonId, barberId, day);
+    const getSalonSettings = await findSalonSetingsBySalonId(salonId)
 
-    if (match) {
+    const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1));
+
+    // Number of days to advance
+    const appointmentAdvanceDays = getSalonSettings.appointmentAdvanceDays;
+
+    // Generate the list of dates
+    const dates = Array.from({ length: appointmentAdvanceDays }, (_, index) => {
+      const date = new Date(tomorrow); // Clone the starting date
+      date.setDate(tomorrow.getDate() + index); // Add the index to calculate subsequent days
+      return date.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+    });
+
+    const barberAppointmentDay = await barberAppointmentDays(salonId, barberId)
+
+    const appointmentDays = barberAppointmentDay.appointmentDays;
+
+    // Function to convert a date string (YYYY-MM-DD) to the weekday name
+    const getDayName = (dateString) => {
+      const date = new Date(dateString); // Convert the date string to a Date object
+      const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      return daysOfWeek[date.getDay()]; // Returns the weekday name (e.g., "Monday")
+    };
+
+    // Filter the dates based on available appointment weekdays
+    let availableDates = dates.filter(date => {
+      const dayName = getDayName(date); // Get the weekday name of the date
+      return appointmentDays.includes(dayName); // Check if it's one of the available appointment days
+    });
+
+    const barberDayOff = await getBarberDayOffs(salonId, barberId)
+
+    if (barberDayOff) {
+      const daysOffs = barberDayOff.barberOffDays;
+
+      const daysOffsFormatted = daysOffs.map(day => new Date(day).toISOString().split("T")[0]);
+
+      availableDates = availableDates.filter(date => !daysOffsFormatted.includes(date));
+    }
+
+    if (availableDates.includes(appointmentDate)) {
       // Fetch barber information
       const barber = await getBarberbyId(barberId);
 
@@ -374,9 +452,9 @@ export const editAppointment = async (req, res, next) => {
       });
     }
     else {
-      return res.status(400).json({
-        success: false,
-        message: "Barber can't take appointment in that day",
+      res.status(400).json({
+        success: true,
+        message: 'Barber updated his appointment days. please refresh the page',
       });
     }
   } catch (error) {
@@ -573,18 +651,18 @@ export const getAllAppointmentsByBarberIdAndDate = async (req, res, next) => {
   }
 };
 
-export const bookAppointmentBarbers =  async(req, res, next) => {
-  try{
-    const {salonId} = req.body;
+export const bookAppointmentBarbers = async (req, res, next) => {
+  try {
+    const { salonId } = req.body;
 
     const barbers = await getBarbersBySalonIdForAppointments(salonId)
 
-    if(barbers.length === 0){
+    if (barbers.length === 0) {
       return ErrorHandler(BOOK_APPOINTMENT_BARBER_RETRIEVE_ERROR, ERROR_STATUS_CODE, res)
     }
 
-     // Format the barber details and fetch additional data using barberId
-     const formattedBarbers = await Promise.all(
+    // Format the barber details and fetch additional data using barberId
+    const formattedBarbers = await Promise.all(
       barbers.map(async barber => {
         const barberDetails = await getBarberbyId(barber.barberId); // Fetch barber details
         return {
@@ -594,9 +672,9 @@ export const bookAppointmentBarbers =  async(req, res, next) => {
     );
 
     // Return the full response with the modified appointmentDays
-    return SuccessHandler(BOOK_APPOINTMENT_BARBER_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { 
+    return SuccessHandler(BOOK_APPOINTMENT_BARBER_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, {
       response: formattedBarbers
-  });
+    });
 
   }
   catch (error) {

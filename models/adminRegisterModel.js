@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import crypto from "crypto"
 
 const adminSchema = new mongoose.Schema({
-    salonId:{
+    salonId: {
         type: Number,
         default: 0
     },
@@ -16,26 +16,26 @@ const adminSchema = new mongoose.Schema({
     email: {
         type: String,
     },
-    emailVerified:{
+    emailVerified: {
         type: Boolean,
         default: false
     },
-    verificationCode:{
+    verificationCode: {
         type: String,
         // required:true
     },
     password: {
         type: String,
     },
-    role:{
-        type:String
+    role: {
+        type: String
     },
     AuthType: {
         type: String,
         default: "local"
     },
-    gender:{
-        type:String,
+    gender: {
+        type: String,
     },
 
     profile: {
@@ -51,20 +51,23 @@ const adminSchema = new mongoose.Schema({
         default: [{}]  // Ensure default value is an array with an object
     },
 
-    dateOfBirth:{
+    dateOfBirth: {
         type: Date,
         default: ""
     },
-    mobileNumber:{
+    mobileNumber: {
         type: Number,
     },
-    mobileCountryCode:{
+    mobileCountryCode: {
         type: Number
     },
 
-    mobileVerified:{
+    mobileVerified: {
         type: Boolean,
         default: false
+    },
+    adminSellerId: {
+        type: String
     },
     isActive: {
         type: Boolean,
@@ -72,8 +75,8 @@ const adminSchema = new mongoose.Schema({
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date
-  },{ timestamps: true });
-  //Generating Password Reset Token
+}, { timestamps: true });
+//Generating Password Reset Token
 adminSchema.methods.getResetPasswordToken = function () {
 
     //generate token
@@ -87,6 +90,6 @@ adminSchema.methods.getResetPasswordToken = function () {
     //We return this because when user click then this resetPasswordToken will form .so thast why 
     return resetToken
 }
-  const Admin = mongoose.model('Admin', adminSchema);
-  
-  export default Admin;
+const Admin = mongoose.model('Admin', adminSchema);
+
+export default Admin;
