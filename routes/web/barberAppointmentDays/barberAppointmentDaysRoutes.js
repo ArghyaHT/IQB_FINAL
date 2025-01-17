@@ -9,7 +9,7 @@ router.route("/getBarberAppointmentDays").post(getBarberAppointmentDays)
 
 router.route("/getBarberAppointmentDayNumbers").post(getBarberAppointmentDayNumbers)
 
-router.route("/getBarberMissingAppointmentDates").post(getBarberMissingAppointmentDates)
+router.route("/getBarberDisabledAppointmentDates").post(getBarberMissingAppointmentDates)
 
 
 
