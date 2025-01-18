@@ -2,9 +2,11 @@ import Admin from "../../../models/adminRegisterModel.js"
 
 
 export const findAdminByEmailandRole = async (email) => {
-   const admin = await Admin.findOne({ email, role: 'Admin' }).exec()
+   const admin = await Admin.findOne({ email, role: 'Admin' })
+     .select('-vendorAccountDetails.vendorAccountId') // Exclude vendorAccountId
+     .exec();
    return admin;
-}
+ };
 
 //SAVE ADMIN
 export const createAdmin = async (email, hashedPassword) => {
