@@ -209,99 +209,322 @@ export const createAppointment = async (req, res, next) => {
         methodUsed,
       };
 
+
+      const barberDetails = await getBarberbyId(barberId)
+
       if (existingAppointmentList) {
         existingAppointmentList.appointmentList.push(newAppointment);
         await existingAppointmentList.save();
+
+        const emailSubject = 'Appointment Created';
+        const emailBody = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Salon Appointment Details</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .container {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                    }
+                    .logo {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    .logo img {
+                        max-width: 200px;
+                    }
+                    .email-content {
+                        background-color: #f8f8f8;
+                        padding: 20px;
+                        border-radius: 10px;
+                    }
+                    ul {
+                        padding-left: 20px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="email-content">
+                    <div class="logo">
+                    <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
+                </div>
+                        <h1 style="text-align: center;">Salon Queue Details</h1>
+                        <p>Dear ${customerName},</p>
+                        <p>Thank you for appointment at our salon. Here are your appointment details:</p>
+                        <ul>
+                        <li><strong>Barber:</strong> ${barberDetails.name}</li>
+                        <li><strong>Service(s):</strong> ${serviceNames.join(', ')}</li>
+                        <li><strong>Appointment Date:</strong> ${appointmentDate}</li>
+                        <li><strong>Appointment Time:</strong> ${startTime} - ${endTime}</li>
+                        <li><strong>Service Estimated Time:</strong> ${totalServiceEWT} minutes</li>
+                        </ul>
+                        <p>Please feel free to contact us if you have any questions or need further assistance at the below mentioned.</p>
+                        <p>Best regards,</p>
+                        <p style="margin: 0; padding: 10px 0 5px;">
+                        ${salon.salonName}<br>
+                        Contact No.: ${salon.contactTel}<br>
+                        EmailId: ${salon.salonEmail}
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+
+        try {
+          await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+          console.log('Email sent successfully.');
+        } catch (error) {
+          console.error('Error sending email:', error);
+          // Handle error if email sending fails
+        }
+
+
+        const emailSubjectForBarber = 'New Appointment Created';
+        const emailBodyForBarber = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>New Salon Appointment</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            .logo {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .logo img {
+                max-width: 200px;
+            }
+            .email-content {
+                background-color: #f8f8f8;
+                padding: 20px;
+                border-radius: 10px;
+            }
+            ul {
+                padding-left: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="email-content">
+            <div class="logo">
+                <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
+            </div>
+            <h1 style="text-align: center;">New Appointment Details</h1>
+            <p>Dear ${barberDetails.name},</p>
+            <p>You have a new appointment at our salon. Here are the appointment details:</p>
+            <ul>
+                <li><strong>Customer Name:</strong> ${customerName}</li>
+                <li><strong>Service(s):</strong> ${serviceNames.join(', ')}</li>
+                <li><strong>Appointment Date:</strong> ${appointmentDate}</li>
+                <li><strong>Appointment Time:</strong> ${startTime} - ${endTime}</li>
+                <li><strong>Service Estimated Time:</strong> ${totalServiceEWT} minutes</li>
+            </ul>
+            <p>Please make sure to be prepared for the appointment at the specified time. If you have any questions, feel free to contact the salon.</p>
+            <p>Best regards,</p>
+            <p style="margin: 0; padding: 10px 0 5px;">
+                ${salon.salonName}<br>
+                Contact No.: ${salon.contactTel}<br>
+                EmailId: ${salon.salonEmail}
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+`;
+
+        try {
+          await sendQueuePositionEmail(barberDetails.email, emailSubjectForBarber, emailBodyForBarber);
+          console.log('Barber email sent successfully.');
+        } catch (error) {
+          console.error('Error sending barber email:', error);
+          // Handle error if email sending fails
+        }
+
+
         return res.status(200).json({
           success: true,
           message: "Appointment Confirmed",
           response: existingAppointmentList,
         });
-
-        //   const adminEmail = await Admin.findOne({ salonId }).select("email")
-
-        //   // Prepare email data for admin, barber, and customer
-        //   const adminEmailData = {
-        //     email: adminEmail, // Replace with the admin's email address
-        //     subject: 'New Appointment Created',
-        //     html: `
-        //     <h2>Hello Admin!</h2>
-        //     <p>A new appointment has been created at ${startTime} by ${customerName}.</p>
-        //     <!-- Add more details here -->
-        //   `,
-        //   };
-
-        //   const barberEmailData = {
-        //     email: barber.email, // Replace with the barber's email address
-        //     subject: 'New Appointment Created',
-        //     html: `
-        //     <h2>Hello ${barber.name}!</h2>
-        //     <p>You have a new appointment scheduled at ${startTime}.</p>
-        //     <!-- Add more details here -->
-        //   `,
-        //   };
-
-        //   const customerEmailData = {
-        //     email: customerEmail, // Replace with the customer's email address
-        //     subject: 'Appointment Confirmation',
-        //     html: `
-        //     <h2>Hello ${customerName}!</h2>
-        //     <p>Your appointment has been confirmed at ${startTime}.</p>
-        //     <!-- Add more details here -->
-        //   `,
-        //   };
-
-        //   // Combine email data objects into an array
-        //   const emailDataArray = [adminEmailData, barberEmailData, customerEmailData];
-
-        //   // Send emails to admin, barber, and customer
-        //   sendAppointmentsEmail(emailDataArray);
       } else {
         const newAppointmentData = await createNewAppointment(salonId, newAppointment)
         const savedAppointment = await newAppointmentData.save();
+
+
+
+        const emailSubject = 'Appointment Created';
+        const emailBody = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Salon Appointment Details</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .container {
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                    }
+                    .logo {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    .logo img {
+                        max-width: 200px;
+                    }
+                    .email-content {
+                        background-color: #f8f8f8;
+                        padding: 20px;
+                        border-radius: 10px;
+                    }
+                    ul {
+                        padding-left: 20px;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="email-content">
+                    <div class="logo">
+                    <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
+                </div>
+                        <h1 style="text-align: center;">Salon Queue Details</h1>
+                        <p>Dear ${customerName},</p>
+                        <p>Thank you for appointment at our salon. Here are your appointment details:</p>
+                        <ul>
+                        <li><strong>Barber:</strong> ${barberDetails.name}</li>
+                        <li><strong>Service(s):</strong> ${serviceNames.join(', ')}</li>
+                        <li><strong>Appointment Date:</strong> ${appointmentDate}</li>
+                        <li><strong>Appointment Time:</strong> ${startTime} - ${endTime}</li>
+                        <li><strong>Service Estimated Time:</strong> ${totalServiceEWT} minutes</li>
+                        </ul>
+                        <p>Please feel free to contact us if you have any questions or need further assistance at the below mentioned.</p>
+                        <p>Best regards,</p>
+                        <p style="margin: 0; padding: 10px 0 5px;">
+                        ${salon.salonName}<br>
+                        Contact No.: ${salon.contactTel}<br>
+                        EmailId: ${salon.salonEmail}
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+
+        try {
+          await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+          console.log('Email sent successfully.');
+        } catch (error) {
+          console.error('Error sending email:', error);
+          // Handle error if email sending fails
+        }
+
+        
+        const emailSubjectForBarber = 'New Appointment Created';
+        const emailBodyForBarber = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>New Salon Appointment</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            .logo {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .logo img {
+                max-width: 200px;
+            }
+            .email-content {
+                background-color: #f8f8f8;
+                padding: 20px;
+                border-radius: 10px;
+            }
+            ul {
+                padding-left: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="email-content">
+            <div class="logo">
+                <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
+            </div>
+            <h1 style="text-align: center;">New Appointment Details</h1>
+            <p>Dear ${barberDetails.name},</p>
+            <p>You have a new appointment at our salon. Here are the appointment details:</p>
+            <ul>
+                <li><strong>Customer Name:</strong> ${customerName}</li>
+                <li><strong>Service(s):</strong> ${serviceNames.join(', ')}</li>
+                <li><strong>Appointment Date:</strong> ${appointmentDate}</li>
+                <li><strong>Appointment Time:</strong> ${startTime} - ${endTime}</li>
+                <li><strong>Service Estimated Time:</strong> ${totalServiceEWT} minutes</li>
+            </ul>
+            <p>Please make sure to be prepared for the appointment at the specified time. If you have any questions, feel free to contact the salon.</p>
+            <p>Best regards,</p>
+            <p style="margin: 0; padding: 10px 0 5px;">
+                ${salon.salonName}<br>
+                Contact No.: ${salon.contactTel}<br>
+                EmailId: ${salon.salonEmail}
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+`;
+
+        try {
+          await sendQueuePositionEmail(barberDetails.email, emailSubjectForBarber, emailBodyForBarber);
+          console.log('Barber email sent successfully.');
+        } catch (error) {
+          console.error('Error sending barber email:', error);
+          // Handle error if email sending fails
+        }
+
         return res.status(200).json({
           success: true,
           message: "Appointment Confirmed",
           response: savedAppointment,
         });
-        //   const adminEmail = await Admin.findOne({ salonId }).select("email")
-
-
-        //   // Prepare email data for admin, barber, and customer
-        //   const adminEmailData = {
-        //     email: adminEmail, // Replace with the admin's email address
-        //     subject: 'New Appointment Created',
-        //     html: `
-        //           <h2>Hello Admin!</h2>
-        //           <p>A new appointment has been created at ${startTime} by ${customerName}.</p>
-        //           <!-- Add more details here -->
-        //         `,
-        //   };
-
-        //   const barberEmailData = {
-        //     email: barber.email, // Replace with the barber's email address
-        //     subject: 'New Appointment Created',
-        //     html: `
-        //     <h2>Hello ${barber.name}!</h2>
-        //           <p>You have a new appointment scheduled at ${startTime}.</p>
-        //           <!-- Add more details here -->
-        //         `,
-        //   };
-
-        //   const customerEmailData = {
-        //     email: customerEmail, // Replace with the customer's email address
-        //     subject: 'Appointment Confirmation',
-        //     html: `
-        //     <h2>Hello ${customerName}!</h2>
-        //           <p>Your appointment has been confirmed at ${startTime}.</p>
-        //           <!-- Add more details here -->
-        //         `,
-        //   };
-        //   // Combine email data objects into an array
-        //   const emailDataArray = [adminEmailData, barberEmailData, customerEmailData];
-
-        //   // Send emails to admin, barber, and customer
-        //   sendAppointmentsEmail(emailDataArray);
       }
     }
     else {
