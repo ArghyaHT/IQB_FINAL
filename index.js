@@ -650,12 +650,11 @@ app.post("/api/create-checkout-session", async (req, res) => {
   }
 });
 
-
 app.post("/api/onboard-vendor-account", async (req, res, next) => {
   try {
+    const { email } = req.body;
 
-    const { email, vendorAccountId } = req.body
-
+    // Basic validations
     if (!email) {
       return res.status(400).json({
         success: false,
@@ -670,68 +669,76 @@ app.post("/api/onboard-vendor-account", async (req, res, next) => {
       });
     }
 
-    if(!vendorAccountId){
-      const account = await stripe.accounts.create({
-        type: 'express',
-        country: 'US', // Country of the vendor
-        email,
-        capabilities: {
-          card_payments: { requested: true },
-          transfers: { requested: true },
-        },
-        business_type: 'individual',
-      });
+    const existingVendor = await Admin.findOne({ email });
 
-      const accountLink = await stripe.accountLinks.create({
-        account: account.id,
-        refresh_url: 'http://localhost:5173',
-        return_url: 'http://localhost:5173/stripe',
-        type: 'account_onboarding',
-      });
+    if (existingVendor) {
 
-      return res.status(200).json({
-        success: true,
-        response: accountLink
-      });
+      if (
+        existingVendor.vendorAccountDetails &&
+        existingVendor.vendorAccountDetails.vendorAccountId
+      ) {
+        const vendorAccountId = existingVendor.vendorAccountDetails.vendorAccountId;
+
+        // Create an account link for onboarding
+        const accountLink = await stripe.accountLinks.create({
+          account: vendorAccountId,
+          refresh_url: 'http://localhost:5173',
+          return_url: 'http://localhost:5173/stripe',
+          type: 'account_onboarding',
+        });
+
+        return res.status(200).json({
+          success: true,
+          response: accountLink,
+        });
+      }
     }
 
+    const stripeAccount = await stripe.accounts.create({
+      type: 'express',
+      country: 'US',
+      email,
+      capabilities: {
+        card_payments: { requested: true },
+        transfers: { requested: true },
+      },
+      business_type: 'individual',
+    });
 
-    const accountExist = await stripe.accounts.retrieve(vendorAccountId);
+    await Admin.findOneAndUpdate(
+      { email },
+      {
+        $set: {
+          "vendorAccountDetails.vendorAccountId": stripeAccount.id,
+        }
+      },
+      { new: true, upsert: true }
+    );
 
-    if (accountExist.requirements.currently_due.length > 0) {
-      const account = await stripe.accounts.create({
-        type: 'express',
-        country: 'US', // Country of the vendor
-        email,
-        capabilities: {
-          card_payments: { requested: true },
-          transfers: { requested: true },
-        },
-        business_type: 'individual',
-      });
+    // Generate an account link for onboarding
+    const accountLink = await stripe.accountLinks.create({
+      account: stripeAccount.id,
+      refresh_url: 'http://localhost:5173',
+      return_url: 'http://localhost:5173/stripe',
+      type: 'account_onboarding',
+    });
 
-      const accountLink = await stripe.accountLinks.create({
-        account: account.id,
-        refresh_url: 'http://localhost:5173',
-        return_url: 'http://localhost:5173/stripe',
-        type: 'account_onboarding',
-      });
-
-      return res.status(200).json({
-        success: true,
-        response: accountLink
-      });
-    } else {
-      return res.status(400).json({
-        success: true,
-        response: "Account is fully onboarded."
-      })
-    }
+    return res.status(200).json({
+      success: true,
+      response: accountLink,
+    });
 
   } catch (error) {
-    console.log(error)
+    console.error("Error onboarding vendor account:", error);
+
+    // Return a generic error response
+    return res.status(500).json({
+      success: false,
+      response: "An error occurred while onboarding the vendor. Please try again."
+    });
   }
 });
+
 
 
 //////////////////////////////////////////
