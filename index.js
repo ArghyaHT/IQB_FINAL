@@ -187,7 +187,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(request.body, sig, "whsec_taObwxVSB3H2XeUaVg7ol1ZVOni0EyUf");
+    event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
     return response.status(400).send(`Webhook Error: ${err.message}`);
@@ -394,7 +394,7 @@ app.post('/api/saveaccountid', express.raw({ type: 'application/json' }), async 
   try {
       // Verify the webhook signature to ensure it's from Stripe
       const signature = req.headers['stripe-signature'];
-      event = stripe.webhooks.constructEvent(req.body, signature, endpointSecret);
+      event = stripe.webhooks.constructEvent(req.body, signature, "whsec_DI2vfnOkeWPhrsuIpX1S3gzNf5mw2ArF");
   } catch (err) {
       console.error('Error verifying webhook signature:', err);
       return res.status(400).send(`Webhook Error: ${err.message}`);
