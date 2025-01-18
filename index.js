@@ -400,32 +400,38 @@ app.post('/api/saveaccountid', express.raw({ type: 'application/json' }), async 
       return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Handle the account.updated event
+  // // Handle the account.updated event
+  // if (event.type === 'account.updated') {
+  //     const account = event.data.object;
+
+  //     // Log the account ID (optional)
+  //     console.log('Account ID:', account.id);
+  // } else {
+  //     // If event is not `account.updated`, ignore it
+  //     res.status(200).send('Event ignored');
+  // }
+
   if (event.type === 'account.updated') {
-      const account = event.data.object;
+    const account = event.data.object;
 
-      // Log the account ID (optional)
-      console.log('Account ID:', account.id);
+    // Check if onboarding is complete
+    
+    if (
+        account.requirements.currently_due.length === 0 && // No remaining requirements
+        account.capabilities.transfers === 'active' // Account is fully activated for transfers
+    ) {
+        console.log('Onboarding completed for Account ID:', account.id);
 
-      // // Save the seller's account ID to your MongoDB database
-      // try {
-      //     const seller = await Seller.findOneAndUpdate(
-      //         { email: account.email }, // Assuming the email is unique for each seller
-      //         { stripeAccountId: account.id }, // Save the account ID
-      //         { new: true, upsert: true } // Create a new document if not found
-      //     );
+    } else {
+        console.log('Account updated but onboarding not complete:', account.id);
+    }
 
-      //     console.log('Seller account updated:', seller);
+    return res.status(200).send('Webhook processed');
+} else {
+    // Ignore other events
+    return res.status(200).send('Event ignored');
+}
 
-      //     res.status(200).send('Webhook processed successfully');
-      // } catch (err) {
-      //     console.error('Error saving account ID to database:', err);
-      //     res.status(500).send('Failed to save account ID to database');
-      // }
-  } else {
-      // If event is not `account.updated`, ignore it
-      res.status(200).send('Event ignored');
-  }
 });
 
 
@@ -715,6 +721,7 @@ app.post("/api/onboard-vendor-account", async (req, res, next) => {
     console.log(error)
   }
 });
+
 
 //////////////////////////////////////////
 // Global Error Handler
