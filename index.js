@@ -393,54 +393,55 @@ app.post('/api/saveaccountid', express.raw({ type: 'application/json' }), async 
   let event;
 
   try {
-      // Verify the webhook signature to ensure it's from Stripe
-      const signature = req.headers['stripe-signature'];
-      event = stripe.webhooks.constructEvent(req.body, signature, "whsec_DI2vfnOkeWPhrsuIpX1S3gzNf5mw2ArF");
+    // Verify the webhook signature to ensure it's from Stripe
+    const signature = req.headers['stripe-signature'];
+    event = stripe.webhooks.constructEvent(req.body, signature, "whsec_DI2vfnOkeWPhrsuIpX1S3gzNf5mw2ArF");
   } catch (err) {
-      console.error('Error verifying webhook signature:', err);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
+    console.error('Error verifying webhook signature:', err);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
 
   if (event.type === 'account.updated') {
     const account = event.data.object;
-    
+
     if (
-        account.requirements.currently_due.length === 0 && // No remaining requirements
-        account.capabilities.transfers === 'active' // Account is fully activated for transfers
+      account.requirements.currently_due.length === 0 && // No remaining requirements
+      account.capabilities.transfers === 'active' // Account is fully activated for transfers
     ) {
 
-        const vendorEmail = account.email
-        const vendorAccountId = account.id
-        const vendorCountry = account.country
-        const vendorCurrency = account.default_currency
-        const vendorCardPaymentStatus = account.capabilities.card_payments
-        const vendorTransferStatus = account.capabilities.transfers
+      const vendorEmail = account.email
+      const vendorAccountId = account.id
+      const vendorCountry = account.country
+      const vendorCurrency = account.default_currency
+      const vendorCardPaymentStatus = account.capabilities.card_payments
+      const vendorTransferStatus = account.capabilities.transfers
 
 
-        const updatedAdminVendorDetails = await Admin.findOneAndUpdate(
-          { email: vendorEmail }, // Match condition
-          {
-              $set: {
-                  "vendorAccountDetails.vendorEmail": vendorEmail,
-                  "vendorAccountDetails.vendorAccountId": vendorAccountId,
-                  "vendorAccountDetails.vendorCountry": vendorCountry,
-                  "vendorAccountDetails.vendorCurrency": vendorCurrency,
-                  "vendorAccountDetails.vendorCardPaymentStatus": vendorCardPaymentStatus,
-                  "vendorAccountDetails.vendorTransferStatus": vendorTransferStatus
-              }
-          },
-          { new: true, upsert: true } // Options to return updated document and insert if not found
+      const updatedAdminVendorDetails = await Admin.findOneAndUpdate(
+        { email: vendorEmail }, // Match condition
+        {
+          $set: {
+            "vendorAccountDetails.vendorEmail": vendorEmail,
+            "vendorAccountDetails.vendorAccountId": vendorAccountId,
+            "vendorAccountDetails.vendorCountry": vendorCountry,
+            "vendorAccountDetails.vendorCurrency": vendorCurrency,
+            "vendorAccountDetails.vendorCardPaymentStatus": vendorCardPaymentStatus,
+            "vendorAccountDetails.vendorTransferStatus": vendorTransferStatus
+          }
+        },
+        { new: true, upsert: true } // Options to return updated document and insert if not found
       );
 
-     return console.log(updatedAdminVendorDetails)
-    } 
+      console.log(updatedAdminVendorDetails)
+      return
+    }
 
     return res.status(200).send('Webhook processed');
-} else {
+  } else {
     // Ignore other events
     return res.status(200).send('Event ignored');
-}
+  }
 
 });
 
