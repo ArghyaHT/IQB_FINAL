@@ -740,7 +740,7 @@ app.post("/api/onboard-vendor-account", async (req, res, next) => {
 });
 
 
-app.get("/api/vendor-loginlink", async (req, res) => {
+app.post("/api/vendor-loginlink", async (req, res) => {
   try {
 
     const { email } = req.body;
