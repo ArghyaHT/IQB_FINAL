@@ -740,6 +740,42 @@ app.post("/api/onboard-vendor-account", async (req, res, next) => {
 });
 
 
+app.get("/api/vendor-loginlink", async (req, res) => {
+  try {
+
+    const { email } = req.body;
+
+    // Basic validations
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        response: "Please enter email"
+      });
+    }
+
+    if (!validateEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        response: "Invalid Email Format"
+      });
+    }
+
+    const existingVendor = await Admin.findOne({ email });
+
+    if(existingVendor){
+      const loginLink = await stripe.accounts.createLoginLink(existingVendor.vendorAccountDetails.vendorAccountId); 
+
+      // Send this link to the vendor
+      res.status(200).json({
+          success: true,
+          url: loginLink.url,
+      });
+    }
+
+  } catch (error) {
+      console.log(error)
+  }
+})
 
 //////////////////////////////////////////
 // Global Error Handler
