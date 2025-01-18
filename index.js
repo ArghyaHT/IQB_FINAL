@@ -53,6 +53,7 @@ import { getSalonBySalonId } from "./services/mobile/salonServices.js";
 import { generateInvoiceNumber } from "./utils/invoice/invoicepdf.js";
 import { salonPayments } from "./services/web/salonPayments/salonPaymentService.js";
 import { validateEmail } from "./middlewares/validator.js";
+import Admin from "./models/adminRegisterModel.js";
 
 dotenv.config()
 
@@ -400,34 +401,43 @@ app.post('/api/saveaccountid', express.raw({ type: 'application/json' }), async 
       return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // // Handle the account.updated event
-  // if (event.type === 'account.updated') {
-  //     const account = event.data.object;
-
-  //     // Log the account ID (optional)
-  //     console.log('Account ID:', account.id);
-  // } else {
-  //     // If event is not `account.updated`, ignore it
-  //     res.status(200).send('Event ignored');
-  // }
 
   if (event.type === 'account.updated') {
     const account = event.data.object;
-
-    // Check if onboarding is complete
-
-    // console.log("ACCOUNT ************************** ",
-    //   account
-    // )
     
     if (
         account.requirements.currently_due.length === 0 && // No remaining requirements
         account.capabilities.transfers === 'active' // Account is fully activated for transfers
     ) {
-        console.log('Onboarding completed for HURRAAYYYYY !!!!!! Account ID:', account.id);
-    } else {
-        console.log('Account updated but onboarding not complete:', account.id);
-    }
+
+        const vendorEmail = account.email
+        const vendorAccountId = account.id
+        const vendorCountry = account.country
+        const vendorCurrency = account.default_currency
+        const vendorCardPaymentStatus = account.capabilities.card_payments
+        const vendorTransferStatus = account.capabilities.transfers
+
+
+        const updatedAdminVendorDetails = await Admin.findOneAndUpdate(
+          { email: vendorEmail }, // Match condition
+          {
+              $set: {
+                  "vendorAccountDetails.vendorEmail": vendorEmail,
+                  "vendorAccountDetails.vendorAccountId": vendorAccountId,
+                  "vendorAccountDetails.vendorCountry": vendorCountry,
+                  "vendorAccountDetails.vendorCurrency": vendorCurrency,
+                  "vendorAccountDetails.vendorCardPaymentStatus": vendorCardPaymentStatus,
+                  "vendorAccountDetails.vendorTransferStatus": vendorTransferStatus
+              }
+          },
+          { new: true, upsert: true } // Options to return updated document and insert if not found
+      );
+
+      return res.status(200).json({
+        success:true,
+        response: updatedAdminVendorDetails
+      })
+    } 
 
     return res.status(200).send('Webhook processed');
 } else {
