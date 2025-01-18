@@ -46,6 +46,14 @@ export const createNewAppointment = async(salonId, newAppointment) => {
 return appointment;
 }
 
+export const getAppointmentsByAppointmentId = async(salonId, appointmentId) => {
+    const appointment = await Appointment.findOne({
+        salonId, 'appointmentList._id': appointmentId
+    })
+
+    return appointment;
+}
+
 
 // Function to update appointment
 export const updateAppointment = async (salonId, appointmentId, newData) => {

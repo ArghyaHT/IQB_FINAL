@@ -1,5 +1,5 @@
 import { validateEmail } from "../../middlewares/validator.js";
-import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppointmentsBySalonId, allAppointmentsBySalonIdAndDate, createNewAppointment, deleteAppointmentById, getAppointmentbyId, getAppointmentsByDateAndBarberId, updateAppointment } from "../../services/mobile/appointmentService.js";
+import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppointmentsBySalonId, allAppointmentsBySalonIdAndDate, createNewAppointment, deleteAppointmentById, getAppointmentbyId, getAppointmentsByAppointmentId, getAppointmentsByDateAndBarberId, updateAppointment } from "../../services/mobile/appointmentService.js";
 import { getBarberbyId } from "../../services/mobile/barberService.js";
 import { getSalonSettings } from "../../services/mobile/salonSettingsService.js";
 import { generateTimeSlots } from "../../utils/timeSlots.js";
@@ -667,6 +667,155 @@ export const editAppointment = async (req, res, next) => {
           success: false,
           message: 'Appointment not found',
         });
+      }
+
+      const appointment = getAppointmentsByAppointmentId(salonId, appointmentId)
+
+      const salon = await getSalonBySalonId(salonId)
+
+      // Send email to the customer about the rescheduled appointment
+      const emailSubjectForCustomer = 'Your Appointment Has Been Rescheduled';
+      const emailBodyForCustomer = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Appointment Rescheduled</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+                .logo {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                .logo img {
+                    max-width: 200px;
+                }
+                .email-content {
+                    background-color: #f8f8f8;
+                    padding: 20px;
+                    border-radius: 10px;
+                }
+                ul {
+                    padding-left: 20px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="email-content">
+                    <div class="logo">
+                        <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
+                    </div>
+                    <h1 style="text-align: center;">Appointment Rescheduled</h1>
+                    <p>Dear ${appointment.customerName},</p>
+                    <p>Your appointment has been rescheduled. Below are the updated details:</p>
+                    <ul>
+                        <li><strong>Barber:</strong> ${barber.name}</li>
+                        <li><strong>Service(s):</strong> ${serviceNames.join(', ')}</li>
+                         <li><strong>Appointment Date:</strong> ${appointmentDate}</li>
+                        <li><strong>New Appointment Time:</strong> ${startTime} - ${endTime}</li>
+                        <li><strong>Service Estimated Time:</strong> ${totalServiceEWT} minutes</li>
+
+                    </ul>
+                    <p>Please feel free to contact us if you have any questions or need further assistance.</p>
+                    <p>Best regards,</p>
+                    <p style="margin: 0; padding: 10px 0 5px;">
+                        ${salon.salonName}<br>
+                        Contact No.: ${salon.contactTel}<br>
+                        EmailId: ${salon.salonEmail}
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
+      `;
+      try {
+        await sendQueuePositionEmail(appointment.customerEmail, emailSubjectForCustomer, emailBodyForCustomer);
+        console.log('Email sent to customer successfully.');
+      } catch (error) {
+        console.error('Error sending email to customer:', error);
+      }
+
+      // Send email to the barber about the rescheduled appointment
+      const emailSubjectForBarber = 'Rescheduled Appointment Details';
+      const emailBodyForBarber = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Appointment Rescheduled</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+                .logo {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                .logo img {
+                    max-width: 200px;
+                }
+                .email-content {
+                    background-color: #f8f8f8;
+                    padding: 20px;
+                    border-radius: 10px;
+                }
+                ul {
+                    padding-left: 20px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="email-content">
+                    <div class="logo">
+                        <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
+                    </div>
+                    <h1 style="text-align: center;">Rescheduled Appointment Details</h1>
+                    <p>Dear ${barber.name},</p>
+                    <p>You have a new rescheduled appointment. Below are the updated details:</p>
+                    <ul>
+                        <li><strong>Customer Name:</strong> ${appointment.customerName}</li>
+                        <li><strong>Service(s):</strong> ${serviceNames.join(', ')}</li>
+                        <li><strong>Appointment Date:</strong> ${appointmentDate}</li>
+                        <li><strong>New Appointment Time:</strong> ${startTime} - ${endTime}</li>
+                        <li><strong>Service Estimated Time:</strong> ${totalServiceEWT} minutes</li>
+                    </ul>
+                    <p>Please make sure to be prepared for the appointment at the specified time.</p>
+                    <p>Best regards,</p>
+                    <p style="margin: 0; padding: 10px 0 5px;">
+                        ${salon.salonName}<br>
+                        Contact No.: ${salon.contactTel}<br>
+                        EmailId: ${salon.salonEmail}
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
+      `;
+      try {
+        await sendQueuePositionEmail(barber.email, emailSubjectForBarber, emailBodyForBarber);
+        console.log('Email sent to barber successfully.');
+      } catch (error) {
+        console.error('Error sending email to barber:', error);
       }
 
       res.status(200).json({
