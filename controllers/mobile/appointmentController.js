@@ -15,6 +15,7 @@ import { BOOK_APPOINTMENT_BARBER_RETRIEVE_ERROR, BOOK_APPOINTMENT_BARBER_RETRIEV
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 import { ErrorHandler } from "../../middlewares/ErrorHandler.js";
 import { getBarberDayOffs } from "../../services/web/barberDayOff/barberDayOffService.js";
+import { sendQueuePositionEmail } from "../../utils/emailSender/emailSender.js";
 
 //Creating Appointment
 export const createAppointment = async (req, res, next) => {
@@ -446,7 +447,7 @@ export const createAppointment = async (req, res, next) => {
           // Handle error if email sending fails
         }
 
-        
+
         const emailSubjectForBarber = 'New Appointment Created';
         const emailBodyForBarber = `
     <!DOCTYPE html>
