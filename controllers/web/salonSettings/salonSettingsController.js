@@ -1,8 +1,8 @@
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
-import { APPOINTMENT_ADVANCE_DAYS_ERROR, INTERVAL_MINUTES__ERROR, SALON_DAYOFFS_ERROR, SALON_SETTINGS_ADD_SUCCESS, SALON_SETTINGS_EMPTY_ERROR, SALON_SETTINGS_ENDTIME_EMPTY_ERROR, SALON_SETTINGS_INTERVAL_MINS_EMPTY_ERROR, SALON_SETTINGS_NOT_FOUND_ERROR, SALON_SETTINGS_STARTTIME_EMPTY_ERROR, SALON_SETTINGS_UPDATE_SUCCESS, START_END_TIME_EQUAL_ERROR, START_END_TIME_LATER_ERROR } from "../../../constants/web/SalonSettingsConstants.js";
+import { APPOINTMENT_ADVANCE_DAYS_ERROR, INTERVAL_MINUTES__ERROR, SALON_DAYOFFS_ERROR, SALON_OFF_DAYS_RETRIEVE_SUCCESS, SALON_SETTINGS_ADD_SUCCESS, SALON_SETTINGS_EMPTY_ERROR, SALON_SETTINGS_ENDTIME_EMPTY_ERROR, SALON_SETTINGS_INTERVAL_MINS_EMPTY_ERROR, SALON_SETTINGS_NOT_FOUND_ERROR, SALON_SETTINGS_STARTTIME_EMPTY_ERROR, SALON_SETTINGS_UPDATE_SUCCESS, START_END_TIME_EQUAL_ERROR, START_END_TIME_LATER_ERROR } from "../../../constants/web/SalonSettingsConstants.js";
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
-import { findSalonSetingsBySalonId, saveNewSalonSettings } from "../../../services/web/salonSettings/salonSettingsService.js";
+import { findSalonSetingsBySalonId, getSalonOffDaysBySalonId, saveNewSalonSettings } from "../../../services/web/salonSettings/salonSettingsService.js";
 
 
 //DESC: GET SALON SETTINGS BY SALON ID ================
@@ -103,3 +103,17 @@ export const updateSalonSettings = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getSalonOffDays = async(req, res, next) => {
+    try{
+       const {salonId} = req.body;
+       
+       const salonOffDays = await getSalonOffDaysBySalonId(salonId)
+
+       return SuccessHandler(SALON_OFF_DAYS_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, {response: salonOffDays})
+
+    }
+    catch (error) {
+        next(error);
+    }
+}

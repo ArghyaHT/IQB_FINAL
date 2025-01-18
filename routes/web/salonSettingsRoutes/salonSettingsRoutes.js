@@ -1,5 +1,5 @@
 import express from "express";
-import { getSalonSettingsBySalonId, updateSalonSettings } from "../../../controllers/web/salonSettings/salonSettingsController.js";
+import { getSalonOffDays, getSalonSettingsBySalonId, updateSalonSettings } from "../../../controllers/web/salonSettings/salonSettingsController.js";
 import { verifyRefreshTokenAdmin } from "../../../middlewares/web/VerifyRefreshTokenAdmin.js";
 
 const router = express.Router();
@@ -14,6 +14,9 @@ router.route("/getSalonSettings").post(verifyRefreshTokenAdmin, getSalonSettings
 router.route("/updateSalonSettings").put(verifyRefreshTokenAdmin, updateSalonSettings)
 
 // router.route("/deleteSalonSettings").delete(deleteSalonSettings)
+
+router.route("/getSalonoffDays").post(getSalonOffDays)
+
 
 
 export default router;

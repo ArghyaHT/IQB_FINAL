@@ -138,3 +138,12 @@ export const matchSalonOffDays = async(salonId, day) =>{
   return record;
 }
 
+
+export const getSalonOffDaysBySalonId = async(salonId) => {
+  const salon = await SalonSettings.findOne({salonId})
+
+  const salonOffDays = salon.salonOffDays;
+
+  return salonOffDays;
+}
+

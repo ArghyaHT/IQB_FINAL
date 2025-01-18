@@ -52,6 +52,7 @@ import { sendPaymentSuccesEmail } from "./utils/emailSender/emailSender.js";
 import { getSalonBySalonId } from "./services/mobile/salonServices.js";
 import { generateInvoiceNumber } from "./utils/invoice/invoicepdf.js";
 import { salonPayments } from "./services/web/salonPayments/salonPaymentService.js";
+import { validateEmail } from "./middlewares/validator.js";
 
 dotenv.config()
 
@@ -111,7 +112,7 @@ app.use(cors({
 
 
 //============================================Stripe=========================================//
-const stripe = Stripe("sk_test_51QdUcgJJY2GyQI9MG1P9ZNELM63wZn7fEpDw2x8BfnSLsjUA7amARck1wCu63ZbX4s02hfKOS7iB0KTt49MY3m8w00wi9WMXMi")
+const stripe = Stripe("sk_test_51QiEoiBFW0Etpz0PlD0VAk8LaCcjOtaTDJ5vOpRYT5UqwNzuMmacWYRAl9Gzvf4HGXH9Lbva9BOWEaH9WHvz1qNb00nkfkXPna")
 
 const endpointSecret = "whsec_DHdgxBkr9Q3LxPngNylgMs00eTyZXxqi"; // Replace with your actual webhook secret
 
@@ -387,6 +388,46 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
 
 
 
+app.post('/api/saveaccountid', express.raw({ type: 'application/json' }), async (req, res) => {
+  let event;
+
+  try {
+      // Verify the webhook signature to ensure it's from Stripe
+      const signature = req.headers['stripe-signature'];
+      event = stripe.webhooks.constructEvent(req.body, signature, endpointSecret);
+  } catch (err) {
+      console.error('Error verifying webhook signature:', err);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // Handle the account.updated event
+  if (event.type === 'account.updated') {
+      const account = event.data.object;
+
+      // Log the account ID (optional)
+      console.log('Account ID:', account.id);
+
+      // // Save the seller's account ID to your MongoDB database
+      // try {
+      //     const seller = await Seller.findOneAndUpdate(
+      //         { email: account.email }, // Assuming the email is unique for each seller
+      //         { stripeAccountId: account.id }, // Save the account ID
+      //         { new: true, upsert: true } // Create a new document if not found
+      //     );
+
+      //     console.log('Seller account updated:', seller);
+
+      //     res.status(200).send('Webhook processed successfully');
+      // } catch (err) {
+      //     console.error('Error saving account ID to database:', err);
+      //     res.status(500).send('Failed to save account ID to database');
+      // }
+  } else {
+      // If event is not `account.updated`, ignore it
+      res.status(200).send('Event ignored');
+  }
+});
+
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -593,6 +634,87 @@ app.post("/api/create-checkout-session", async (req, res) => {
   }
 });
 
+
+app.post("/api/onboard-vendor-account", async (req, res, next) => {
+  try {
+
+    const { email } = req.body
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        response: "Please enter email"
+      });
+    }
+
+    if (!validateEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        response: "Invalid Email Format"
+      });
+    }
+
+
+    const account = await stripe.accounts.create({
+      type: 'express',
+      country: 'US', // Country of the vendor
+      email,
+      capabilities: {
+        card_payments: { requested: true },
+        transfers: { requested: true },
+      },
+      business_type: 'individual',
+    });
+
+    const accountLink = await stripe.accountLinks.create({
+      account: account.id,
+      refresh_url: 'http://localhost:5173',
+      return_url: 'http://localhost:5173/stripe',
+      type: 'account_onboarding',
+    });
+
+    return res.status(200).json({
+      success: true,
+      response: accountLink
+    });
+
+    // const accountExist = await stripe.accounts.retrieve("acct_1QiF9vBG451xPQcz");
+
+    // if (accountExist.requirements.currently_due.length > 0) {
+
+    //   const account = await stripe.accounts.create({
+    //     type: 'express',
+    //     country: 'US', // Country of the vendor
+    //     email,
+    //     capabilities: {
+    //       card_payments: { requested: true },
+    //       transfers: { requested: true },
+    //     },
+    //     business_type: 'individual',
+    //   });
+
+    //   const accountLink = await stripe.accountLinks.create({
+    //     account: account.id,
+    //     refresh_url: 'http://localhost:5173',
+    //     return_url: 'http://localhost:5173/stripe',
+    //     type: 'account_onboarding',
+    //   });
+
+    //   return res.status(200).json({
+    //     success: true,
+    //     response: accountLink
+    //   });
+    // } else {
+    //   return res.status(400).json({
+    //     success: false,
+    //     response: "Account is fully onboarded."
+    //   })
+    // }
+
+  } catch (error) {
+    console.log(error)
+  }
+});
 
 //////////////////////////////////////////
 // Global Error Handler

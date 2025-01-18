@@ -21,4 +21,7 @@ export const INTERVAL_MINUTES__ERROR = "Interval miniutes can't be 0."
 export const SALON_SETTINGS_UPDATE_SUCCESS = "Salon settings retrieved successfully"
 export const SALON_SETTINGS_ADD_SUCCESS = "New salon settings added successfully"
 
+export const SALON_OFF_DAYS_RETRIEVE_SUCCESS = "Salon off days retrive successfully"
+
+
 

@@ -98,14 +98,14 @@ export const createAppointment = async (req, res, next) => {
 
     const day = moment(appointmentDate).format('dddd');
 
-    const salonDayOff = await matchSalonOffDays(salonId, day)
+    // const salonDayOff = await matchSalonOffDays(salonId, day)
 
-    if (salonDayOff) {
-      return res.status(400).json({
-        success: false,
-        message: "Salon closed",
-      });
-    }
+    // if (salonDayOff) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Salon closed",
+    //   });
+    // }
 
 
     const getSalonSettings = await findSalonSetingsBySalonId(salonId)
@@ -330,14 +330,14 @@ export const editAppointment = async (req, res, next) => {
 
     const day = moment(appointmentDate).format('dddd');
 
-    const salonDayOff = await matchSalonOffDays(salonId, day)
+    // const salonDayOff = await matchSalonOffDays(salonId, day)
 
-    if (salonDayOff) {
-      return res.status(400).json({
-        success: false,
-        message: "Salon closed today",
-      });
-    }
+    // if (salonDayOff) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Salon closed today",
+    //   });
+    // }
 
     const getSalonSettings = await findSalonSetingsBySalonId(salonId)
 
