@@ -433,10 +433,7 @@ app.post('/api/saveaccountid', express.raw({ type: 'application/json' }), async 
           { new: true, upsert: true } // Options to return updated document and insert if not found
       );
 
-      return res.status(200).json({
-        success:true,
-        response: updatedAdminVendorDetails
-      })
+     return console.log(updatedAdminVendorDetails)
     } 
 
     return res.status(200).send('Webhook processed');
