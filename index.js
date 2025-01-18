@@ -416,19 +416,18 @@ app.post('/api/saveaccountid', express.raw({ type: 'application/json' }), async 
 
     // Check if onboarding is complete
 
-    console.log("ACCOUNT ************************** ",
-      account
-    )
+    // console.log("ACCOUNT ************************** ",
+    //   account
+    // )
     
-    // if (
-    //     account.requirements.currently_due.length === 0 && // No remaining requirements
-    //     account.capabilities.transfers === 'active' // Account is fully activated for transfers
-    // ) {
-    //     console.log('Onboarding completed for Account ID:', account.id);
-
-    // } else {
-    //     console.log('Account updated but onboarding not complete:', account.id);
-    // }
+    if (
+        account.requirements.currently_due.length === 0 && // No remaining requirements
+        account.capabilities.transfers === 'active' // Account is fully activated for transfers
+    ) {
+        console.log('Onboarding completed for HURRAAYYYYY !!!!!! Account ID:', account.id);
+    } else {
+        console.log('Account updated but onboarding not complete:', account.id);
+    }
 
     return res.status(200).send('Webhook processed');
 } else {
