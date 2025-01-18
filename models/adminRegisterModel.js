@@ -78,27 +78,21 @@ const adminSchema = new mongoose.Schema({
     vendorAccountDetails: {
         vendorEmail: {
             type: String,
-            required: true, 
         },
         vendorAccountId: {
             type: String,
-            required: true, 
         },
         vendorCountry: {
             type: String,
-            required: true, 
         },
         vendorCurrency: {
             type: String,
-            required: true, 
         },
         vendorCardPaymentStatus: {
             type: String,
-            required: true,
         },
         vendorTransferStatus: {
             type: String,
-            required: true,
         }
     },
     
