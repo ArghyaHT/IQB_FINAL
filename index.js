@@ -931,7 +931,7 @@ app.post("/api/vendor-create-checkout-session", async (req, res) => {
           mode: "payment",
           line_items: productInfo.products.map((item) => ({
               price_data: {
-                  currency: product.currency,
+                  currency: item.currency,
                   product_data: { name: item.name },
                   unit_amount: item.price * 100,
               },
