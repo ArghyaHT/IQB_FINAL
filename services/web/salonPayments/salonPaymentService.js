@@ -32,6 +32,41 @@ export const getSalonPaymentsBySalonId = async(salonId) => {
 }
 
 
-// export const updateQueueingExpiryDate = async(session) => {
-//   const 
-// }
+export const checkSalonPaymentExpiryDate = async() => {
+
+   // Get today's date in Unix timestamp format
+   const today = Math.floor(Date.now() / 1000);
+
+// Fetch all salon payments
+    const salonPayments = await SalonPayments.find();
+
+    for (const payment of salonPayments) {
+      const paymentExpiryDate = parseInt(payment.paymentExpiryDate, 10);
+
+      if (paymentExpiryDate <= today) {
+        // Move the payment to SalonPaymentHistoryModel
+        await SalonPaymentHistoryModel.create({
+          salonId: payment.salonId,
+          adminEmail: payment.adminEmail,
+          customerName: payment.customerName,
+          customerEmail: payment.customerEmail,
+          amount: payment.amount,
+          currency: payment.currency,
+          paymentIntentId: payment.paymentIntentId,
+          status: payment.status,
+          paymentType: payment.paymentType,
+          purchaseDate: payment.purchaseDate,
+          paymentExpiryDate: payment.paymentExpiryDate,
+          isQueuing: payment.isQueuing,
+          isAppointments: payment.isAppointments,
+          products: payment.products,
+          createdAt: payment.createdAt,
+          updatedAt: payment.updatedAt,
+        });
+
+        // Delete the payment from SalonPayments
+        await SalonPayments.deleteOne({ _id: payment._id });
+      }
+    }
+
+}

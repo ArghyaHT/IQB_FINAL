@@ -44,7 +44,7 @@ import loggerRoutes from "./routes/loggerRoutes.js"
 import logger from "./utils/logger/logger.js";
 import { GlobalErrorHandler } from "./middlewares/GlobalErrorHandler.js";
 import { logMiddleware } from "./controllers/loggerController.js";
-import { checkQueuingAndAppointmentExpire, updateCustomers } from "./triggers/cronjobs.js";
+import { checkPaymentsExpiry, checkQueuingAndAppointmentExpire, updateCustomers } from "./triggers/cronjobs.js";
 import Stripe from "stripe";
 import Salon from "./models/salonRegisterModel.js";
 import moment from "moment";
@@ -949,8 +949,10 @@ app.get('*', (req, res) =>
 
 const PORT = 8001;
 
+//CRON-JOBS
 updateCustomers()
 checkQueuingAndAppointmentExpire()
+checkPaymentsExpiry()
 
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
