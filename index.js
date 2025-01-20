@@ -156,6 +156,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
         currency: session.currency,
       }));
 
+      console.log("amount",session.amount_total / 100)
+
             // Access additional data from metadata
             const paymentData = {
               salonId: session.metadata.salonId,
