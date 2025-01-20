@@ -659,7 +659,7 @@ export const editAppointment = async (req, res, next) => {
         endTime,
       }
 
-      // Fetch the appointment by its ID
+      //Fetch the appointment by its ID
       const existingAppointment = await updateAppointment(salonId, appointmentId, newData)
 
       if (!existingAppointment) {
@@ -669,7 +669,9 @@ export const editAppointment = async (req, res, next) => {
         });
       }
 
-      const appointment = getAppointmentsByAppointmentId(salonId, appointmentId)
+      const appointment = await getAppointmentsByAppointmentId(salonId, appointmentId)
+
+      console.log(appointment)
 
       const salon = await getSalonBySalonId(salonId)
 

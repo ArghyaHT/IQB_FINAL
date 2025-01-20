@@ -48,10 +48,14 @@ return appointment;
 
 export const getAppointmentsByAppointmentId = async(salonId, appointmentId) => {
     const appointment = await Appointment.findOne({
-        salonId, 'appointmentList._id': appointmentId
+        salonId
     })
 
-    return appointment;
+ // Filter the appointment list to find the appointment by its ID
+ const filteredAppointment = appointment.appointmentList.find(
+    (appointment) => appointment._id.toString() === appointmentId
+  );
+    return filteredAppointment;
 }
 
 
