@@ -2,8 +2,8 @@ import mongoose from "mongoose";
 
 const vendorCustomerSchema = new mongoose.Schema({
     salonId: {
-        type: Number
-    },
+        type: mongoose.Schema.Types.Mixed,
+        },
     salonName: {
         type: String
     },
@@ -29,8 +29,8 @@ const vendorCustomerSchema = new mongoose.Schema({
         type: Date
     },
     amount:{
-        type: Number
-    },
+        type: mongoose.Schema.Types.Mixed
+        },
     paymentIntentId:{
         type:String
     },

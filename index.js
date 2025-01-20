@@ -174,8 +174,10 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
             };
 
             console.log(paymentData)
+// 
+            // await vendorCustomerPayment(paymentData)
 
-            await vendorCustomerPayment(paymentData)
+            
 
     }
     else {
