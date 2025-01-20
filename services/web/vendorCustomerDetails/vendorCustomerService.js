@@ -3,7 +3,7 @@ import VendorCustomerPayments from "../../../models/vendorCustomerModel.js"
 export const vendorCustomerPayment = async(paymentData) => {
     const newPayment = new VendorCustomerPayments({
 
-        salonId: paymentDatasalonId,
+        salonId: paymentData.salonId,
         salonName: paymentData.salonName,
         vendorEmail: paymentData.vendorEmail,
         vendorAccountId: paymentData.vendorAccountId,
