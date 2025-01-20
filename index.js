@@ -137,6 +137,12 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
 
     console.log(session)
 
+    const paymentIntentId = session.payment_intent;
+    
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+    console.log("Payment In ", paymentIntent)
+
     // const formattedPurchaseDate = moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD HH:mm:ss');
     // const formattedExpiryDate = moment.unix(session.metadata.paymentExpiryDate).format('YYYY-MM-DD HH:mm:ss');
 
