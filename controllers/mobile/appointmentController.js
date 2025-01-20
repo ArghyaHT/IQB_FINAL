@@ -671,8 +671,6 @@ export const editAppointment = async (req, res, next) => {
 
       const appointment = await getAppointmentsByAppointmentId(salonId, appointmentId)
 
-      console.log(appointment)
-
       const salon = await getSalonBySalonId(salonId)
 
       // Send email to the customer about the rescheduled appointment
@@ -820,7 +818,7 @@ export const editAppointment = async (req, res, next) => {
         console.error('Error sending email to barber:', error);
       }
 
-      res.status(200).json({
+     return res.status(200).json({
         success: true,
         message: 'Appointment updated successfully',
         response: existingAppointment,
