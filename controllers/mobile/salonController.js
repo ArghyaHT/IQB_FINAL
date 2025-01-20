@@ -145,6 +145,8 @@ export const getallSalonsTest = async (req, res, next) => {
       salonId: salon.salonId,
       adminEmail: salon.adminEmail,
       salonName: salon.salonName,
+      currency: salon.currency,
+      isoCurrencyCode:salon.isoCurrencyCode
     }));
 
     return res.status(200).json({
