@@ -27,43 +27,6 @@ export const handleProtectedRoute = async (req, res, next) => {
 
 };
 
-// //MIDDLEWARE FOR ALL ADMIN PROTECTED ROUTES ==================
-// export const AdminLoggedIn = async (req, res, next) => {
-//   try {
-//       const admincookie = req.cookies
-
-//       if (!admincookie?.AdminToken) {
-//           return res.status(401).json({
-//               success: false,
-//               message: "UnAuthorized Admin"
-//           })
-//       }
-
-//       jwt.verify(
-//           admincookie?.AdminToken,
-//           process.env.JWT_ADMIN_ACCESS_SECRET,
-//           async (err, decoded) => {
-//               if (err) return res.status(403).json({ success: false, message: 'Forbidden Admin' })
-
-//               console.log(decoded)
-//               const adminEmail = decoded.email
-
-//               const loggedinUser = await findAdminByEmailandRole(adminEmail)
-
-//              return res.status(201).json({
-//                   success: true,
-//                   user: [loggedinUser]
-//               })
-
-//           }
-//       )
-//   }
-//   catch (error) {
-//       next(error);
-//   }
-
-// }
-
 //MIDDLEWARE FOR ALL ADMIN PROTECTED ROUTES ==================
 export const AdminLoggedIn = async (req, res, next) => {
   try {
@@ -72,6 +35,8 @@ export const AdminLoggedIn = async (req, res, next) => {
     const loggedinAdmin = await findAdminByEmailandRole(email)
 
     const salon = await findSalonBySalonIdAndAdmin(loggedinAdmin.salonId, email)
+
+    // const salon = await getSalonSettings(loggedinAdmin.salonId)
 
     // Convert Mongoose document to plain object
     const adminData = loggedinAdmin.toObject();

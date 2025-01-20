@@ -54,6 +54,7 @@ import { generateInvoiceNumber } from "./utils/invoice/invoicepdf.js";
 import { salonPayments } from "./services/web/salonPayments/salonPaymentService.js";
 import { validateEmail } from "./middlewares/validator.js";
 import Admin from "./models/adminRegisterModel.js";
+import SalonSettings from "./models/salonSettingsModel.js";
 
 dotenv.config()
 
@@ -183,6 +184,16 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
           },
         }
       )
+
+      // await SalonSettings.updateOne(
+      //   { salonId: session.metadata.salonId },
+      //   {
+      //     $set: {
+      //       isQueuing: isQueuingValue,
+      //       queueingExpiryDate: session.metadata.paymentExpiryDate
+      //     },
+      //   }
+      // )
     }
 
 
@@ -198,6 +209,16 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
           },
         }
       )
+
+      // await SalonSettings.updateOne(
+      //   { salonId: session.metadata.salonId },
+      //   {
+      //     $set: {
+      //       isAppointments: isAppointmentValue,
+      //       appointmentExpiryDate: session.metadata.paymentExpiryDate
+      //     },
+      //   }
+      // )
     }
 
     if (isAppointment === "true" && isQueueing === "true") {
@@ -215,6 +236,18 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
           },
         }
       )
+
+      // await SalonSettings.updateOne(
+      //   { salonId: session.metadata.salonId },
+      //   {
+      //     $set: {
+      //       isQueuing: isQueuingValue,
+      //       isAppointments: isAppointmentValue,
+      //       queueingExpiryDate: session.metadata.paymentExpiryDate,
+      //       appointmentExpiryDate: session.metadata.paymentExpiryDate
+      //     },
+      //   }
+      // )
     }
 
     await salonPayments(paymentData)
@@ -721,25 +754,52 @@ app.post("/api/vendor-loginlink", async (req, res) => {
 
 app.post("/api/vendor-create-checkout-session", async (req, res, next) => {
   try {
-      const productsArray = req.body.products;
-      const vendorEmail = req.body.vendorEmail
-      const customerName = req.body.customerName
 
-      if (!vendorEmail) {
+    const { productInfo } = req.body;
+
+    if(!productInfo.customerName){
+      return res.status(400).json({
+        success: false,
+        response: "Customer Name not present"
+      });
+    }
+
+    if(!productInfo.customerEmail){
+      return res.status(400).json({
+        success: false,
+        response: "Customer Email not present"
+      });
+    }
+
+    if(!productInfo.salonId){
+      return res.status(400).json({
+        success: false,
+        response: "Salon ID not present"
+      });
+    }
+
+    if(!productInfo.vendorAccountId){
+      return res.status(400).json({
+        success: false,
+        response: "Vendor Account Id not present"
+      });
+    }
+
+      if (!productInfo.adminEmail) {
         return res.status(400).json({
           success: false,
-          response: "Email is not present"
+          response: "Admin Email is not present"
         });
       }
 
-      if(productsArray.length === 0){
+      if(productInfo.products.length === 0){
         return res.status(400).json({
           success: false,
           response: "Please select a product"
         });
       }
 
-      const existingVendor = await Admin.findOne({ email });
+      const existingVendor = await Admin.findOne({ email: productInfo.adminEmail });
 
       if(!existingVendor.vendorAccountDetails && !existingVendor.vendorAccountDetails.vendorAccountId){
         return res.status(400).json({
@@ -748,7 +808,7 @@ app.post("/api/vendor-create-checkout-session", async (req, res, next) => {
         })
       }
       
-      const vendorId = existingVendor.vendorAccountDetails.vendorAccountId
+      const vendorId = productInfo.vendorAccountId
 
       const totalAmount = products.reduce((total, item) => total + (item.price * item.unit * 100), 0);
       // Calculating 10%
@@ -780,8 +840,12 @@ app.post("/api/vendor-create-checkout-session", async (req, res, next) => {
               on_behalf_of: vendorId
           },
           metadata: {
-            salonId: existingVendor.salonId,
-            adminEmail: existingVendor.adminEmail,
+            salonId: productInfo.salonId,
+            adminEmail: productInfo.adminEmail,
+            customerName: productInfo.customerName,
+            customerEmail: productInfo.customerName,
+            vendorAccountId: productInfo.vendorAccountId,
+            salonName: productInfo.salonName,
             purchaseDate: new Date(),
           },
       });
