@@ -156,8 +156,10 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
         currency: session.currency,
       }));
 
-      console.log("amount",session.amount_total / 100)
-
+// Assuming session.amount_total is in cents (like 150000 for 1500.00 currency)
+const amount = session.amount_total / 100;  // Convert to dollars or the base currency unit
+console.log("Amount:", amount);  // Logs the actual amount
+console.log("Type of Amount:", typeof amount); 
             // Access additional data from metadata
             const paymentData = {
               salonId: session.metadata.salonId,
