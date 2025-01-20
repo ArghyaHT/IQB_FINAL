@@ -135,234 +135,247 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
 
-    console.log(session)
+    // console.log(session)
 
     const paymentIntentId = session.payment_intent;
     
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-    console.log("Payment In ", paymentIntent)
+    const vendorAccountId = session.metadata.vendorAccountId
+    const paymentStatus = paymentIntent.status 
+    
+    if(vendorAccountId && paymentStatus === "succeeded"){
 
-    // const formattedPurchaseDate = moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD HH:mm:ss');
-    // const formattedExpiryDate = moment.unix(session.metadata.paymentExpiryDate).format('YYYY-MM-DD HH:mm:ss');
+console.log("This is for money transfering directly to admin account.")
+// const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
-    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+// const products = lineItems.data.map((item) => ({
+//   name: item.description,
+//   quantity: item.quantity,
+//   price: item.amount_total / 100, // Amount in dollars (converted from cents)
+//   currency: session.currency,
+// }));
 
-    const products = lineItems.data.map((item) => ({
-      name: item.description,
-      quantity: item.quantity,
-      price: item.amount_total / 100, // Amount in dollars (converted from cents)
-      currency: session.currency,
-    }));
+    }else{
 
-    const invoice = await generateInvoiceNumber()
+      console.log("This is for money transfering directly to admin account.")
+//       const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
-    // Access additional data from metadata
-    const paymentData = {
-      salonId: session.metadata.salonId,
-      adminEmail: session.metadata.adminEmail,
-      invoiceNumber: invoice,
-      paymentType: session.metadata.paymentType,
-      purchaseDate: session.metadata.purchaseDate,
-      paymentExpiryDate: session.metadata.paymentExpiryDate,
-      isQueuing: session.metadata.isQueuing,
-      isAppointments: session.metadata.isAppointments,
-      customerEmail: session.customer_details.email,
-      customerName: session.customer_details.name,
-      amount: session.amount_total / 100, // Convert from cents
-      currency: session.currency,
-      paymentIntentId: session.payment_intent,
-      status: session.payment_status,
-      products: products,
-    };
+//     const products = lineItems.data.map((item) => ({
+//       name: item.description,
+//       quantity: item.quantity,
+//       price: item.amount_total / 100, // Amount in dollars (converted from cents)
+//       currency: session.currency,
+//     }));
 
-    const isQueueing = session.metadata.isQueuing;
-    const isAppointment = session.metadata.isAppointments;
+//     const invoice = await generateInvoiceNumber()
 
-    if (isQueueing === "true" && isAppointment === "false") {
+//     // Access additional data from metadata
+//     const paymentData = {
+//       salonId: session.metadata.salonId,
+//       adminEmail: session.metadata.adminEmail,
+//       invoiceNumber: invoice,
+//       paymentType: session.metadata.paymentType,
+//       purchaseDate: session.metadata.purchaseDate,
+//       paymentExpiryDate: session.metadata.paymentExpiryDate,
+//       isQueuing: session.metadata.isQueuing,
+//       isAppointments: session.metadata.isAppointments,
+//       customerEmail: session.customer_details.email,
+//       customerName: session.customer_details.name,
+//       amount: session.amount_total / 100, // Convert from cents
+//       currency: session.currency,
+//       paymentIntentId: session.payment_intent,
+//       status: session.payment_status,
+//       products: products,
+//     };
 
-      const isQueuingValue = Boolean(session.metadata.isQueuing)
+//     const isQueueing = session.metadata.isQueuing;
+//     const isAppointment = session.metadata.isAppointments;
 
-      await Salon.updateOne(
-        { salonId: session.metadata.salonId },
-        {
-          $set: {
-            isQueuing: isQueuingValue,
-            queueingExpiryDate: session.metadata.paymentExpiryDate
-          },
-        }
-      )
+//     if (isQueueing === "true" && isAppointment === "false") {
 
-      // await SalonSettings.updateOne(
-      //   { salonId: session.metadata.salonId },
-      //   {
-      //     $set: {
-      //       isQueuing: isQueuingValue,
-      //       queueingExpiryDate: session.metadata.paymentExpiryDate
-      //     },
-      //   }
-      // )
-    }
+//       const isQueuingValue = Boolean(session.metadata.isQueuing)
+
+//       await Salon.updateOne(
+//         { salonId: session.metadata.salonId },
+//         {
+//           $set: {
+//             isQueuing: isQueuingValue,
+//             queueingExpiryDate: session.metadata.paymentExpiryDate
+//           },
+//         }
+//       )
+
+//       // await SalonSettings.updateOne(
+//       //   { salonId: session.metadata.salonId },
+//       //   {
+//       //     $set: {
+//       //       isQueuing: isQueuingValue,
+//       //       queueingExpiryDate: session.metadata.paymentExpiryDate
+//       //     },
+//       //   }
+//       // )
+//     }
 
 
-    if (isAppointment === "true" && isQueueing === "false") {
-      const isAppointmentValue = Boolean(session.metadata.isAppointments)
+//     if (isAppointment === "true" && isQueueing === "false") {
+//       const isAppointmentValue = Boolean(session.metadata.isAppointments)
 
-      await Salon.updateOne(
-        { salonId: session.metadata.salonId },
-        {
-          $set: {
-            isAppointments: isAppointmentValue,
-            appointmentExpiryDate: session.metadata.paymentExpiryDate
-          },
-        }
-      )
+//       await Salon.updateOne(
+//         { salonId: session.metadata.salonId },
+//         {
+//           $set: {
+//             isAppointments: isAppointmentValue,
+//             appointmentExpiryDate: session.metadata.paymentExpiryDate
+//           },
+//         }
+//       )
 
-      // await SalonSettings.updateOne(
-      //   { salonId: session.metadata.salonId },
-      //   {
-      //     $set: {
-      //       isAppointments: isAppointmentValue,
-      //       appointmentExpiryDate: session.metadata.paymentExpiryDate
-      //     },
-      //   }
-      // )
-    }
+//       // await SalonSettings.updateOne(
+//       //   { salonId: session.metadata.salonId },
+//       //   {
+//       //     $set: {
+//       //       isAppointments: isAppointmentValue,
+//       //       appointmentExpiryDate: session.metadata.paymentExpiryDate
+//       //     },
+//       //   }
+//       // )
+//     }
 
-    if (isAppointment === "true" && isQueueing === "true") {
-      const isQueuingValue = Boolean(session.metadata.isQueuing)
-      const isAppointmentValue = Boolean(session.metadata.isAppointments)
+//     if (isAppointment === "true" && isQueueing === "true") {
+//       const isQueuingValue = Boolean(session.metadata.isQueuing)
+//       const isAppointmentValue = Boolean(session.metadata.isAppointments)
 
-      await Salon.updateOne(
-        { salonId: session.metadata.salonId },
-        {
-          $set: {
-            isQueuing: isQueuingValue,
-            isAppointments: isAppointmentValue,
-            queueingExpiryDate: session.metadata.paymentExpiryDate,
-            appointmentExpiryDate: session.metadata.paymentExpiryDate
-          },
-        }
-      )
+//       await Salon.updateOne(
+//         { salonId: session.metadata.salonId },
+//         {
+//           $set: {
+//             isQueuing: isQueuingValue,
+//             isAppointments: isAppointmentValue,
+//             queueingExpiryDate: session.metadata.paymentExpiryDate,
+//             appointmentExpiryDate: session.metadata.paymentExpiryDate
+//           },
+//         }
+//       )
 
-      // await SalonSettings.updateOne(
-      //   { salonId: session.metadata.salonId },
-      //   {
-      //     $set: {
-      //       isQueuing: isQueuingValue,
-      //       isAppointments: isAppointmentValue,
-      //       queueingExpiryDate: session.metadata.paymentExpiryDate,
-      //       appointmentExpiryDate: session.metadata.paymentExpiryDate
-      //     },
-      //   }
-      // )
-    }
+//       // await SalonSettings.updateOne(
+//       //   { salonId: session.metadata.salonId },
+//       //   {
+//       //     $set: {
+//       //       isQueuing: isQueuingValue,
+//       //       isAppointments: isAppointmentValue,
+//       //       queueingExpiryDate: session.metadata.paymentExpiryDate,
+//       //       appointmentExpiryDate: session.metadata.paymentExpiryDate
+//       //     },
+//       //   }
+//       // )
+//     }
 
-    await salonPayments(paymentData)
+//     await salonPayments(paymentData)
 
-    const salon = await getSalonBySalonId(session.metadata.salonId)
+//     const salon = await getSalonBySalonId(session.metadata.salonId)
 
-    const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
-    const emailBody = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Payment Confirmation</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto&display=swap" rel="stylesheet">
+//     const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
+//     const emailBody = `
+//     <!DOCTYPE html>
+//     <html lang="en">
+//     <head>
+//         <meta charset="UTF-8">
+//         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//         <title>Payment Confirmation</title>
+//         <link rel="preconnect" href="https://fonts.googleapis.com">
+// <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+// <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto&display=swap" rel="stylesheet">
 
-        <style>
-        body {
-               font-family: 'Poppins', sans-serif;
-               margin: 0;
-               padding: 0;
-               background-color: #f9f9f9;
-               color: #000,
-            }
-            .container {
-                max-width: 600px;
-                margin: 20px auto;
-                padding: 20px;
-                background-color: #ffffff;
-                border-radius: 10px;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            }
-            .header {
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            .logo img {
-                max-width: 150px;
-                border-radius: 50%;
-                width: 150px;
-                height: 150px;
-                object-fit: cover;
-            }
-            .email-content {
-                padding: 20px;
-                background-color: #f8f8f8;
-                font-size: 1rem;
-                border-radius: 10px;
-            }
-            ul {
-                padding-left: 20px;
-            }
-            li {
-                margin-bottom: 8px;
-            }
-            p {
-                line-height: 1.6;
-            }
-            .footer {
-                margin-top: 20px;
-                font-size: 0.9em;
-                text-align: center;
-                color: #888888;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="email-content">
-            <div class="header">
-                <h1>Payment Confirmation</h1>
-            </div>
-                <p>Dear ${session.customer_details.name},</p>
-                <p>Thank you for your payment at <strong>${salon.salonName}</strong>. Below are the details of your transaction:</p>
-                <ul>
-                    <li><strong>Purchase Date:</strong> ${moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD')}</li>
-                    <li><strong>Expiry Date:</strong> ${moment.unix(session.metadata.paymentExpiryDate).format('YYYY-MM-DD')}</li>
-                    <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
-                    <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
-                </ul>
-                <p>If you have any questions or need further assistance, feel free to contact us.</p>
-                <p>Best regards,</p>
-                <p>
-                    <strong>IQueueBook</strong><br>
-                    <strong>support@iqueuebarbers.com</strong> 
-                </p>
-            </div>
-            <div class="footer">
-                &copy; ${new Date().getFullYear()} IQueueBook. All rights reserved.
-            </div>
-        </div>
-    </body>
-    </html>
-    `;
+//         <style>
+//         body {
+//                font-family: 'Poppins', sans-serif;
+//                margin: 0;
+//                padding: 0;
+//                background-color: #f9f9f9;
+//                color: #000,
+//             }
+//             .container {
+//                 max-width: 600px;
+//                 margin: 20px auto;
+//                 padding: 20px;
+//                 background-color: #ffffff;
+//                 border-radius: 10px;
+//                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+//             }
+//             .header {
+//                 text-align: center;
+//                 margin-bottom: 20px;
+//             }
+//             .logo img {
+//                 max-width: 150px;
+//                 border-radius: 50%;
+//                 width: 150px;
+//                 height: 150px;
+//                 object-fit: cover;
+//             }
+//             .email-content {
+//                 padding: 20px;
+//                 background-color: #f8f8f8;
+//                 font-size: 1rem;
+//                 border-radius: 10px;
+//             }
+//             ul {
+//                 padding-left: 20px;
+//             }
+//             li {
+//                 margin-bottom: 8px;
+//             }
+//             p {
+//                 line-height: 1.6;
+//             }
+//             .footer {
+//                 margin-top: 20px;
+//                 font-size: 0.9em;
+//                 text-align: center;
+//                 color: #888888;
+//             }
+//         </style>
+//     </head>
+//     <body>
+//         <div class="container">
+//             <div class="email-content">
+//             <div class="header">
+//                 <h1>Payment Confirmation</h1>
+//             </div>
+//                 <p>Dear ${session.customer_details.name},</p>
+//                 <p>Thank you for your payment at <strong>${salon.salonName}</strong>. Below are the details of your transaction:</p>
+//                 <ul>
+//                     <li><strong>Purchase Date:</strong> ${moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD')}</li>
+//                     <li><strong>Expiry Date:</strong> ${moment.unix(session.metadata.paymentExpiryDate).format('YYYY-MM-DD')}</li>
+//                     <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
+//                     <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
+//                 </ul>
+//                 <p>If you have any questions or need further assistance, feel free to contact us.</p>
+//                 <p>Best regards,</p>
+//                 <p>
+//                     <strong>IQueueBook</strong><br>
+//                     <strong>support@iqueuebarbers.com</strong> 
+//                 </p>
+//             </div>
+//             <div class="footer">
+//                 &copy; ${new Date().getFullYear()} IQueueBook. All rights reserved.
+//             </div>
+//         </div>
+//     </body>
+//     </html>
+//     `;
 
-    try {
-      sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, session, products);
-      console.log("Payment Email Sent")
-      return
-    } catch (error) {
-      console.error('Error sending email:', error);
-      return
-    }
+//     try {
+//       sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, session, products);
+//       console.log("Payment Email Sent")
+//       return
+//     } catch (error) {
+//       console.error('Error sending email:', error);
+//       return
+//     }
   }
-
+}  
   response.status(200).json({ received: true });
 });
 
@@ -425,26 +438,26 @@ app.post('/api/saveaccountid', express.raw({ type: 'application/json' }), async 
 
 
 
-app.post('/api/save-vendor-customer', express.raw({ type: 'application/json' }), async (request, response) => {
-  const sig = request.headers['stripe-signature'];
-  let event;
+// app.post('/api/save-vendor-customer', express.raw({ type: 'application/json' }), async (request, response) => {
+//   const sig = request.headers['stripe-signature'];
+//   let event;
 
-  try {
-    event = stripe.webhooks.constructEvent(request.body, sig, "whsec_rgrNdI1jsnC3FbGqY6Ki2uEwEpXByZbD");
-  } catch (err) {
-    console.error('Webhook signature verification failed:', err.message);
-    return response.status(400).send(`Webhook Error: ${err.message}`);
-  }
+//   try {
+//     event = stripe.webhooks.constructEvent(request.body, sig, "whsec_rgrNdI1jsnC3FbGqY6Ki2uEwEpXByZbD");
+//   } catch (err) {
+//     console.error('Webhook signature verification failed:', err.message);
+//     return response.status(400).send(`Webhook Error: ${err.message}`);
+//   }
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object;
+//   if (event.type === "checkout.session.completed") {
+//     const session = event.data.object;
 
-    console.log("Customer Session ", session)
+//     console.log("Customer Session ", session)
 
-  }
+//   }
 
-  response.status(200).json({ received: true });
-});
+//   response.status(200).json({ received: true });
+// });
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
