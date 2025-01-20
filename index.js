@@ -899,7 +899,7 @@ app.post("/api/vendor-create-checkout-session", async (req, res) => {
           mode: "payment",
           line_items: productInfo.products.map((item) => ({
               price_data: {
-                  currency: item.currency,
+                  currency: productInfo.isoCurrencyCode,
                   product_data: { name: item.name },
                   unit_amount: item.price * 100,
               },
@@ -918,6 +918,8 @@ app.post("/api/vendor-create-checkout-session", async (req, res) => {
               customerName: productInfo.customerName,
               customerEmail: productInfo.customerEmail,
               vendorAccountId: productInfo.vendorAccountId,
+              currency: productInfo.currency,
+              isoCurrencyCode: productInfo.isoCurrencyCode,
               salonName: productInfo.salonName,
               purchaseDate: new Date().toISOString(),
           },
