@@ -1,3 +1,4 @@
+import SalonPaymentsHistory from "../../../models/salonPaymentsHistoryModel.js";
 import SalonPayments from "../../../models/salonPaymnetsModel.js";
 
 export const salonPayments = async(paymentData) =>{
@@ -45,7 +46,7 @@ export const checkSalonPaymentExpiryDate = async() => {
 
       if (paymentExpiryDate <= today) {
         // Move the payment to SalonPaymentHistoryModel
-        await SalonPaymentHistoryModel.create({
+        await SalonPaymentsHistory.create({
           salonId: payment.salonId,
           adminEmail: payment.adminEmail,
           customerName: payment.customerName,
