@@ -92,7 +92,9 @@ const app = express()
 const allowedOrigins = [
   "https://productstripe.netlify.app",
   "http://localhost:5173",
+  "http://localhost:5174",
   "http://127.0.0.1:5173",
+  "http://127.0.0.1:5174",
   "https://iqb-kiosk.netlify.app",
   "https://iqb-final.onrender.com",
   "https://iqb-final.netlify.app"
@@ -711,6 +713,85 @@ app.post("/api/vendor-loginlink", async (req, res) => {
     console.log(error)
   }
 })
+
+// Vendor Check Out Session
+
+app.post("/api/vendor-create-checkout-session", async (req, res, next) => {
+  try {
+      const productsArray = req.body.products;
+      const vendorEmail = req.body.vendorEmail
+      const customerName = req.body.customerName
+
+      if (!vendorEmail) {
+        return res.status(400).json({
+          success: false,
+          response: "Email is not present"
+        });
+      }
+
+      if(productsArray.length === 0){
+        return res.status(400).json({
+          success: false,
+          response: "Please select a product"
+        });
+      }
+
+      const existingVendor = await Admin.findOne({ email });
+
+      if(!existingVendor.vendorAccountDetails && !existingVendor.vendorAccountDetails.vendorAccountId){
+        return res.status(400).json({
+          success: false,
+          response: "Vendor has no account created"
+        })
+      }
+      
+      const vendorId = existingVendor.vendorAccountDetails.vendorAccountId
+
+      const totalAmount = products.reduce((total, item) => total + (item.price * item.unit * 100), 0);
+      // Calculating 10%
+      const platformFee = Math.ceil(totalAmount * 0.10);
+
+      const successUrl = "http://localhost:5174/stripe/success";
+      const cancelUrl = "http://localhost:5174";
+
+      const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"], // Types of card (Visa, MasterCard, etc.)
+          mode: "payment",
+          line_items: productsArray.map((item) => ({
+              price_data: {
+                  currency: item.currency,
+                  product_data: {
+                      name: item.name,
+                  },
+                  unit_amount: item.price * 100, // Amount in cents
+              },
+              quantity: item.unit,
+          })),
+          success_url: successUrl,
+          cancel_url: cancelUrl,
+          payment_intent_data: {
+              application_fee_amount: platformFee, // My platform's fee (10%)
+              transfer_data: {
+                  destination: vendorId,
+              },
+              on_behalf_of: vendorId
+          },
+          metadata: {
+            salonId: existingVendor.salonId,
+            adminEmail: existingVendor.adminEmail,
+            purchaseDate: new Date(),
+          },
+      });
+
+      res.status(200).json({
+          success: true,
+          session,
+      });
+  } catch (error) {
+      console.log("Payment Check-Out Failed ", error);
+      next()
+  }
+});
 
 //////////////////////////////////////////
 // Global Error Handler

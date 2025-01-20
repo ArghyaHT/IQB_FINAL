@@ -8,6 +8,12 @@ export const findAdminByEmailandRole = async (email) => {
    return admin;
  };
 
+ export const findAdminByEmailandRoleTest = async (email) => {
+   const admin = await Admin.findOne({ email, role: 'Admin' })
+     .exec();
+   return admin;
+ };
+
 //SAVE ADMIN
 export const createAdmin = async (email, hashedPassword) => {
    const user = new Admin({

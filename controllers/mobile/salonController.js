@@ -1,6 +1,7 @@
 import { getbarbersBySalonId } from "../../services/mobile/barberService.js";
 import { getAverageSalonRating } from "../../services/mobile/salonRatingService.js";
 import { allSalonServices, allSalons, getSalonRating, salonInfoDetails, searchSalonsByLocation, searchSalonsByNameAndCity } from "../../services/mobile/salonServices.js";
+import { findAdminByEmailandRoleTest } from "../../services/web/admin/adminService.js";
 
 ///DESC:GET ALL SALONS =====================
 export const getAllSalons = async (req, res, next) => {
@@ -131,5 +132,48 @@ try {
 }
 catch (error) {
   next(error);
+}
+}
+
+
+export const getallSalonsTest = async (req, res, next) => {
+  try {
+    const salons = await allSalons(); // Retrieve all salons from the database
+
+    // Transform salons to include only the desired fields
+    const filteredSalons = salons.map(salon => ({
+      salonId: salon.salonId,
+      adminEmail: salon.adminEmail,
+      salonName: salon.salonName,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      message: "All salons retrieved successfully",
+      response: filteredSalons,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const getAdminDetailsByAdminEmailTest = async(req, res, next) => {
+  try{
+
+    const {adminEmail} = req.body;
+
+    const admin = await findAdminByEmailandRoleTest(adminEmail)
+
+    return res.status(200).json({
+      success: true,
+      message: "Admin retrieved successfully",
+      response: admin
+    });
+
+
+  }
+  catch (error) {
+    next(error);
 }
 }
