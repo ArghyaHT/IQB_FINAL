@@ -185,6 +185,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       )
     }
 
+
     if (isAppointment === "true" && isQueueing === "false") {
       const isAppointmentValue = Boolean(session.metadata.isAppointments)
 
@@ -543,6 +544,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
   try {
     const { productInfo } = req.body;
 
+    console.log(productInfo)
+
     const expiryDate = moment().add(productInfo.paymentExpiryDate, 'days').toDate();
 
     if (productInfo) {
@@ -751,8 +754,8 @@ app.post("/api/vendor-create-checkout-session", async (req, res, next) => {
       // Calculating 10%
       const platformFee = Math.ceil(totalAmount * 0.10);
 
-      const successUrl = "http://localhost:5174/stripe/success";
-      const cancelUrl = "http://localhost:5174";
+      const successUrl = "http://localhost:5173/mobilesuccess";
+      const cancelUrl = "http://localhost:5173";
 
       const session = await stripe.checkout.sessions.create({
           payment_method_types: ["card"], // Types of card (Visa, MasterCard, etc.)
