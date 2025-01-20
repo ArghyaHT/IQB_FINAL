@@ -135,6 +135,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
 
+    console.log(session)
+
     // const formattedPurchaseDate = moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD HH:mm:ss');
     // const formattedExpiryDate = moment.unix(session.metadata.paymentExpiryDate).format('YYYY-MM-DD HH:mm:ss');
 
@@ -433,16 +435,6 @@ app.post('/api/save-vendor-customer', express.raw({ type: 'application/json' }),
 
     console.log("Customer Session ", session)
 
-    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-
-    const products = lineItems.data.map((item) => ({
-      name: item.description,
-      quantity: item.quantity,
-      price: item.amount_total / 100, // Amount in dollars (converted from cents)
-      currency: session.currency,
-    }));
-
-    // const paymentData = {}
   }
 
   response.status(200).json({ received: true });
