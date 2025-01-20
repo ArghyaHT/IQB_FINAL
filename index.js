@@ -752,114 +752,188 @@ app.post("/api/vendor-loginlink", async (req, res) => {
 
 // Vendor Check Out Session
 
-app.post("/api/vendor-create-checkout-session", async (req, res, next) => {
-  res.json("Working Hurr")
-  // try {
+// app.post("/api/vendor-create-checkout-session", async (req, res, next) => {
+//   try {
 
-  //   const { productInfo } = req.body;
+//     const { productInfo } = req.body;
 
-  //   if(!productInfo.customerName){
-  //     return res.status(400).json({
-  //       success: false,
-  //       response: "Customer Name not present"
-  //     });
-  //   }
+//     if(!productInfo.customerName){
+//       return res.status(400).json({
+//         success: false,
+//         response: "Customer Name not present"
+//       });
+//     }
 
-  //   if(!productInfo.customerEmail){
-  //     return res.status(400).json({
-  //       success: false,
-  //       response: "Customer Email not present"
-  //     });
-  //   }
+//     if(!productInfo.customerEmail){
+//       return res.status(400).json({
+//         success: false,
+//         response: "Customer Email not present"
+//       });
+//     }
 
-  //   if(!productInfo.salonId){
-  //     return res.status(400).json({
-  //       success: false,
-  //       response: "Salon ID not present"
-  //     });
-  //   }
+//     if(!productInfo.salonId){
+//       return res.status(400).json({
+//         success: false,
+//         response: "Salon ID not present"
+//       });
+//     }
 
-  //   if(!productInfo.vendorAccountId){
-  //     return res.status(400).json({
-  //       success: false,
-  //       response: "Vendor Account Id not present"
-  //     });
-  //   }
+//     if(!productInfo.vendorAccountId){
+//       return res.status(400).json({
+//         success: false,
+//         response: "Vendor Account Id not present"
+//       });
+//     }
 
-  //     if (!productInfo.adminEmail) {
-  //       return res.status(400).json({
-  //         success: false,
-  //         response: "Admin Email is not present"
-  //       });
-  //     }
+//       if (!productInfo.adminEmail) {
+//         return res.status(400).json({
+//           success: false,
+//           response: "Admin Email is not present"
+//         });
+//       }
 
-  //     if(productInfo.products.length === 0){
-  //       return res.status(400).json({
-  //         success: false,
-  //         response: "Please select a product"
-  //       });
-  //     }
+//       if(productInfo.products.length === 0){
+//         return res.status(400).json({
+//           success: false,
+//           response: "Please select a product"
+//         });
+//       }
 
-  //     const existingVendor = await Admin.findOne({ email: productInfo.adminEmail });
+//       const existingVendor = await Admin.findOne({ email: productInfo.adminEmail });
 
-  //     if(!existingVendor.vendorAccountDetails && !existingVendor.vendorAccountDetails.vendorAccountId){
-  //       return res.status(400).json({
-  //         success: false,
-  //         response: "Vendor has no account created"
-  //       })
-  //     }
+//       if(!existingVendor.vendorAccountDetails && !existingVendor.vendorAccountDetails.vendorAccountId){
+//         return res.status(400).json({
+//           success: false,
+//           response: "Vendor has no account created"
+//         })
+//       }
       
-  //     const vendorId = productInfo.vendorAccountId
+//       const vendorId = productInfo.vendorAccountId
 
-  //     const totalAmount = products.reduce((total, item) => total + (item.price * item.unit * 100), 0);
-  //     // Calculating 10%
-  //     const platformFee = Math.ceil(totalAmount * 0.10);
+//       const totalAmount = products.reduce((total, item) => total + (item.price * item.unit * 100), 0);
+//       // Calculating 10%
+//       const platformFee = Math.ceil(totalAmount * 0.10);
 
-  //     const successUrl = "http://localhost:5173/mobilesuccess";
-  //     const cancelUrl = "http://localhost:5173";
+//       const successUrl = "http://localhost:5173/mobilesuccess";
+//       const cancelUrl = "http://localhost:5173";
 
-  //     const session = await stripe.checkout.sessions.create({
-  //         payment_method_types: ["card"], // Types of card (Visa, MasterCard, etc.)
-  //         mode: "payment",
-  //         line_items: productsArray.map((item) => ({
-  //             price_data: {
-  //                 currency: item.currency,
-  //                 product_data: {
-  //                     name: item.name,
-  //                 },
-  //                 unit_amount: item.price * 100, // Amount in cents
-  //             },
-  //             quantity: item.unit,
-  //         })),
-  //         success_url: successUrl,
-  //         cancel_url: cancelUrl,
-  //         payment_intent_data: {
-  //             application_fee_amount: platformFee, // My platform's fee (10%)
-  //             transfer_data: {
-  //                 destination: vendorId,
-  //             },
-  //             on_behalf_of: vendorId
-  //         },
-  //         metadata: {
-  //           salonId: productInfo.salonId,
-  //           adminEmail: productInfo.adminEmail,
-  //           customerName: productInfo.customerName,
-  //           customerEmail: productInfo.customerName,
-  //           vendorAccountId: productInfo.vendorAccountId,
-  //           salonName: productInfo.salonName,
-  //           purchaseDate: new Date(),
-  //         },
-  //     });
+//       const session = await stripe.checkout.sessions.create({
+//           payment_method_types: ["card"], // Types of card (Visa, MasterCard, etc.)
+//           mode: "payment",
+//           line_items: productsArray.map((item) => ({
+//               price_data: {
+//                   currency: item.currency,
+//                   product_data: {
+//                       name: item.name,
+//                   },
+//                   unit_amount: item.price * 100, // Amount in cents
+//               },
+//               quantity: item.unit,
+//           })),
+//           success_url: successUrl,
+//           cancel_url: cancelUrl,
+//           payment_intent_data: {
+//               application_fee_amount: platformFee, // My platform's fee (10%)
+//               transfer_data: {
+//                   destination: vendorId,
+//               },
+//               on_behalf_of: vendorId
+//           },
+//           metadata: {
+//             salonId: productInfo.salonId,
+//             adminEmail: productInfo.adminEmail,
+//             customerName: productInfo.customerName,
+//             customerEmail: productInfo.customerName,
+//             vendorAccountId: productInfo.vendorAccountId,
+//             salonName: productInfo.salonName,
+//             purchaseDate: new Date(),
+//           },
+//       });
 
-  //     res.status(200).json({
-  //         success: true,
-  //         session,
-  //     });
-  // } catch (error) {
-  //     console.log("Payment Check-Out Failed ", error);
-  //     next()
-  // }
+//       res.status(200).json({
+//           success: true,
+//           session,
+//       });
+//   } catch (error) {
+//       console.log("Payment Check-Out Failed ", error);
+//       next()
+//   }
+// });
+
+app.post("/api/vendor-create-checkout-session", async (req, res) => {
+  try {
+      const { productInfo } = req.body;
+
+      if (!productInfo.customerName) {
+          return res.status(400).json({ success: false, response: "Customer Name not present" });
+      }
+      if (!productInfo.customerEmail) {
+          return res.status(400).json({ success: false, response: "Customer Email not present" });
+      }
+      if (!productInfo.salonId) {
+          return res.status(400).json({ success: false, response: "Salon ID not present" });
+      }
+      if (!productInfo.vendorAccountId) {
+          return res.status(400).json({ success: false, response: "Vendor Account ID not present" });
+      }
+      if (!productInfo.adminEmail) {
+          return res.status(400).json({ success: false, response: "Admin Email is not present" });
+      }
+      if (!productInfo.products || productInfo.products.length === 0) {
+          return res.status(400).json({ success: false, response: "Please select a product" });
+      }
+
+      const existingVendor = await Admin.findOne({ email: productInfo.adminEmail });
+      if (!existingVendor?.vendorAccountDetails?.vendorAccountId) {
+          return res.status(400).json({ success: false, response: "Vendor has no account created" });
+      }
+
+      const totalAmount = productInfo.products.reduce(
+          (total, item) => total + item.price * item.unit * 100,
+          0
+      );
+      const platformFee = Math.ceil(totalAmount * 0.1);
+
+      const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          mode: "payment",
+          line_items: productInfo.products.map((item) => ({
+              price_data: {
+                  currency: item.currency,
+                  product_data: { name: item.name },
+                  unit_amount: item.price * 100,
+              },
+              quantity: item.unit,
+          })),
+          success_url: "http://localhost:5173/mobilesuccess",
+          cancel_url: "http://localhost:5173",
+          payment_intent_data: {
+              application_fee_amount: platformFee,
+              transfer_data: { destination: productInfo.vendorAccountId },
+              on_behalf_of: productInfo.vendorAccountId,
+          },
+          metadata: {
+              salonId: productInfo.salonId,
+              adminEmail: productInfo.adminEmail,
+              customerName: productInfo.customerName,
+              customerEmail: productInfo.customerEmail,
+              vendorAccountId: productInfo.vendorAccountId,
+              salonName: productInfo.salonName,
+              purchaseDate: new Date().toISOString(),
+          },
+      });
+
+      res.status(200).json({ success: true, session });
+  } catch (error) {
+      console.error("Payment Check-Out Failed ", error.message);
+      res.status(500).json({
+          success: false,
+          response: "An error occurred while creating the checkout session.",
+          error: error.message,
+      });
+  }
 });
+
 
 //////////////////////////////////////////
 // Global Error Handler
