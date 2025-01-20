@@ -178,7 +178,7 @@ console.log("Type of Amount:", typeof amount);
             };
 
             console.log(paymentData)
-// 
+
             await vendorCustomerPayment(paymentData)
 
             

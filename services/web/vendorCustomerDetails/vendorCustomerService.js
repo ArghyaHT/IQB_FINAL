@@ -10,7 +10,7 @@ export const vendorCustomerPayment = async(paymentData) => {
         purchaseDate: paymentData.purchaseDate,
         customerEmail: paymentData.customerEmail,
         customerName: paymentData.customerName,
-        amount: paymentData.amount_total / 100, // Convert from cents
+        amount: paymentData.amount, // Convert from cents
         isoCurrencyCode: paymentData.isoCurrencyCode,
         currency: paymentData.currency,
         paymentIntentId: paymentData.paymentIntentId,
