@@ -68,7 +68,9 @@ export const checkPaymentsExpiry = (next) => {
     timezones.forEach((timezone) => {
         cron.schedule('* * * * *', async () => {
             try {
-              await checkSalonPaymentExpiryDate();
+                console.log(`[${new Date().toISOString()}] Cron job started for timezone: ${timezone}`);
+                await checkSalonPaymentExpiryDate();
+                console.log(`[${new Date().toISOString()}] Cron job successfully executed for timezone: ${timezone}`);
             } catch (error) {
                 next(error);
             }

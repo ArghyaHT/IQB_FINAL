@@ -60,8 +60,6 @@ export const checkSalonPaymentExpiryDate = async() => {
           isQueuing: payment.isQueuing,
           isAppointments: payment.isAppointments,
           products: payment.products,
-          createdAt: payment.createdAt,
-          updatedAt: payment.updatedAt,
         });
 
         // Delete the payment from SalonPayments
