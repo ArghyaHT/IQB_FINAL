@@ -416,6 +416,38 @@ app.post('/api/saveaccountid', express.raw({ type: 'application/json' }), async 
 });
 
 
+
+app.post('/api/save-vendor-customer', express.raw({ type: 'application/json' }), async (request, response) => {
+  const sig = request.headers['stripe-signature'];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(request.body, sig, "whsec_rgrNdI1jsnC3FbGqY6Ki2uEwEpXByZbD");
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err.message);
+    return response.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+
+    console.log("Customer Session ", session)
+
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+
+    const products = lineItems.data.map((item) => ({
+      name: item.description,
+      quantity: item.quantity,
+      price: item.amount_total / 100, // Amount in dollars (converted from cents)
+      currency: session.currency,
+    }));
+
+    // const paymentData = {}
+  }
+
+  response.status(200).json({ received: true });
+});
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -899,7 +931,7 @@ app.post("/api/vendor-create-checkout-session", async (req, res) => {
           mode: "payment",
           line_items: productInfo.products.map((item) => ({
               price_data: {
-                  currency: productInfo.isoCurrencyCode,
+                  currency: product.currency,
                   product_data: { name: item.name },
                   unit_amount: item.price * 100,
               },
