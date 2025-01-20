@@ -115,73 +115,8 @@ app.use(cors({
 //============================================Stripe=========================================//
 const stripe = Stripe("sk_test_51QiEoiBFW0Etpz0PlD0VAk8LaCcjOtaTDJ5vOpRYT5UqwNzuMmacWYRAl9Gzvf4HGXH9Lbva9BOWEaH9WHvz1qNb00nkfkXPna")
 
-const endpointSecret = "whsec_DHdgxBkr9Q3LxPngNylgMs00eTyZXxqi"; // Replace with your actual webhook secret
+const endpointSecret = "whsec_pKv2A3YHgbW0MkJOKVgISTXZjtLoBNYX"; // Replace with your actual webhook secret
 
-// app.post('/api/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
-//   const sig = request.headers['stripe-signature'];
-//   let event;
-
-//   try {
-//     // Construct the event using the raw body and the signature header
-//     event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
-//   } catch (err) {
-//     console.error('Webhook signature verification failed:', err.message);
-//     return response.status(400).send(`Webhook Error: ${err.message}`);
-//   }
-
-//   if (event.type === "checkout.session.completed") {
-//     const session = event.data.object;
-
-//     const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-
-//     const products = lineItems.data.map((item) => ({
-//       name: item.description,
-//       quantity: item.quantity,
-//       price: item.amount_total / 100, // Amount in dollars (converted from cents)
-//       currency: session.currency,
-//     }));
-
-//     // Save payment details to MongoDB
-//     const paymentData = {
-//       salonId: session.salonId,
-//       adminEmail: session.customerEmail,
-//       customerEmail: session.customer_details.email,
-//       customerName: session.customer_details.name,
-//       paymentType:session.paymentType,
-//       paymentExpiryDate: session.paymentExpiryDate,
-//       amount: session.amount_total, // Convert from cents to dollars
-//       currency: session.currency,
-//       paymentIntentId: session.payment_intent,
-//       status: session.payment_status,
-//       products: products,
-//     };
-
-//     // Convert amount based on currency
-//     if (session.currency !== 'jpy' && session.currency !== 'krw') {
-//       paymentData.amount = paymentData.amount / 100; // Convert to main currency unit
-//     } else {
-//       // For JPY, KRW or other currencies that don't need division by 100
-//       paymentData.amount = paymentData.amount; // Keep it as is
-//     }
-
-//     Salon.updateOne(
-//       { salonId: session.salonId }, // Replace with the identifier for the salon
-//       { $push: { productPayment: paymentData } }
-//     )
-//       .then(() => console.log("Payment added to productPayment array"))
-//       .catch((err) => console.error("Error adding payment to productPayment array:", err));
-
-//   }
-
-//   if (event.type === 'payment_intent.payment_failed') {
-//     const paymentIntent = event.data.object;
-//     console.log("Payment Failed ", paymentIntent)
-//     // It can happen example:
-//     // If user card has insufficient balance.
-//     // Here i can send a email to the user that he/she has insufficient balance for that the payment is not completed.
-//   }
-//   response.status(200).json({ received: true });
-// });
 
 app.post('/api/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
   const sig = request.headers['stripe-signature'];
@@ -387,7 +322,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
   response.status(200).json({ received: true });
 });
 
-
+const saveAccountEndpointSecret = "whsec_DI2vfnOkeWPhrsuIpX1S3gzNf5mw2ArF"
 
 app.post('/api/saveaccountid', express.raw({ type: 'application/json' }), async (req, res) => {
   let event;
@@ -395,7 +330,7 @@ app.post('/api/saveaccountid', express.raw({ type: 'application/json' }), async 
   try {
     // Verify the webhook signature to ensure it's from Stripe
     const signature = req.headers['stripe-signature'];
-    event = stripe.webhooks.constructEvent(req.body, signature, "whsec_DI2vfnOkeWPhrsuIpX1S3gzNf5mw2ArF");
+    event = stripe.webhooks.constructEvent(req.body, signature, saveAccountEndpointSecret);
   } catch (err) {
     console.error('Error verifying webhook signature:', err);
     return res.status(400).send(`Webhook Error: ${err.message}`);
@@ -762,18 +697,18 @@ app.post("/api/vendor-loginlink", async (req, res) => {
 
     const existingVendor = await Admin.findOne({ email });
 
-    if(existingVendor){
-      const loginLink = await stripe.accounts.createLoginLink(existingVendor.vendorAccountDetails.vendorAccountId); 
+    if (existingVendor) {
+      const loginLink = await stripe.accounts.createLoginLink(existingVendor.vendorAccountDetails.vendorAccountId);
 
       // Send this link to the vendor
       res.status(200).json({
-          success: true,
-          url: loginLink.url,
+        success: true,
+        url: loginLink.url,
       });
     }
 
   } catch (error) {
-      console.log(error)
+    console.log(error)
   }
 })
 
