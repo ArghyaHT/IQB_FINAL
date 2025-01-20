@@ -146,7 +146,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     
     if(vendorAccountId && paymentStatus === "succeeded"){
 
-console.log("This is for money transfering directly to admin account.")
+console.log("This is for money transfering to vendor account.")
 // const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
 // const products = lineItems.data.map((item) => ({
