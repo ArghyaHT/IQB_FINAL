@@ -937,7 +937,7 @@ app.post("/api/vendor-create-checkout-session", async (req, res) => {
 
     const salonappointment = await getSalonBySalonId(productInfo.salonId);
     
-    if(salonappointment.isAppointments === true){
+    if(!salonappointment.isAppointments){
       return res.status(400).json({
         success: false,
         message: "The salon has no appointment feature"
