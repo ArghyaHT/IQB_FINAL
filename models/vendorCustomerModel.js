@@ -2,8 +2,8 @@ import mongoose from "mongoose";
 
 const vendorCustomerSchema = new mongoose.Schema({
     salonId: {
-        type: mongoose.Schema.Types.Mixed,
-        },
+        type: Number,
+    },
     salonName: {
         type: String
     },
@@ -28,29 +28,29 @@ const vendorCustomerSchema = new mongoose.Schema({
     purchaseDate: {
         type: Date
     },
-    amount:{
+    amount: {
         type: Number
-        },
-    paymentIntentId:{
-        type:String
     },
-    status:{
+    paymentIntentId: {
         type: String
     },
-    product:[{
-        name:{
-            type:String
+    status: {
+        type: String
+    },
+    product: [{
+        name: {
+            type: String
         },
-        price:{
+        price: {
             type: Number
         },
-        currency:{
-            type:String
+        currency: {
+            type: String
         },
-        quantity:{
+        quantity: {
             type: Number
         }
-}]
+    }]
 
 }, { timestamps: true })
 

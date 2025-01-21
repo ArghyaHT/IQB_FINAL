@@ -724,7 +724,7 @@ app.post("/api/onboard-vendor-account", async (req, res, next) => {
         const accountLink = await stripe.accountLinks.create({
           account: vendorAccountId,
           refresh_url: 'http://localhost:5173',
-          return_url: 'http://localhost:5173/stripe',
+          return_url: 'http://localhost:5173/admin-dashboard/editprofile',
           type: 'account_onboarding',
         });
 
@@ -930,7 +930,19 @@ app.post("/api/vendor-loginlink", async (req, res) => {
 
 app.post("/api/vendor-create-checkout-session", async (req, res) => {
   try {
+
+    //appointmnet can only be possible if the salon has bought appointment feature
+
     const { productInfo } = req.body;
+
+    const salonappointment = await getSalonBySalonId(productInfo.salonId);
+    
+    if(salonappointment.isAppointments === true){
+      return res.status(400).json({
+        success: false,
+        message: "The salon has no appointment feature"
+      })
+    }
 
     if (!productInfo.customerName) {
       return res.status(400).json({ success: false, response: "Customer Name not present" });
