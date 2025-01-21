@@ -1126,6 +1126,8 @@ app.post("/api/vendor-create-checkout-session", async (req, res) => {
       })),
       success_url: "http://localhost:5173/mobilesuccess",
       cancel_url: "http://localhost:5173",
+      customer_email: productInfo.customerEmail, // Prefill customer email
+      customer_name: productInfo.customerName,
       payment_intent_data: {
         application_fee_amount: platformFee,
         transfer_data: { destination: productInfo.vendorAccountId },
