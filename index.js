@@ -346,7 +346,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     `;
 
       try {
-        sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, session, products);
+        sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
         console.log("Payment Email Sent")
         return
       } catch (error) {
@@ -486,7 +486,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     `;
 
       try {
-        sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, session, products);
+        sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
         console.log("Payment Email Sent")
         return
       } catch (error) {
@@ -627,7 +627,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       `;
   
         try {
-          sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, session, products);
+          sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
           console.log("Payment Email Sent")
           return
         } catch (error) {

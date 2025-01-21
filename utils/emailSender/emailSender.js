@@ -286,9 +286,9 @@ export const barberLeaveApproval = (email, emailSubject, emailBody) => {
 
 
 //DESC:SEND PAYMENT SUCCESS===========================
-export const sendPaymentSuccesEmail = async(email, emailSubject, emailBody, invoice, session, products) => {
+export const sendPaymentSuccesEmail = async(email, emailSubject, emailBody, invoice, paymentData, products) => {
 
-  const invoicePath = await generateInvoicePDF(invoice, session, products);
+  const invoicePath = await generateInvoicePDF(invoice, paymentData, products);
 
   if (!fs.existsSync(invoicePath)) {
     console.error('Invoice file does not exist:', invoicePath);

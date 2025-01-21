@@ -11,9 +11,9 @@ import SalonPayments from "../../models/salonPaymnetsModel.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const generateInvoicePDF = async (invoice, session, products) => {
+export const generateInvoicePDF = async (invoice, paymentData, products) => {
 
-  const salon = await getSalonBySalonId(session.metadata.salonId)
+  const salon = await getSalonBySalonId(paymentData.salonId)
 
   console.log(salon.currency)
 
@@ -35,8 +35,6 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   doc.text('Registration No.: 9919SGP29004OSJ', 50, headerY + 50);
 
 
-  console.log(session.amount_total)
-
   // Invoice Details (Right-aligned)
   const detailsX = 400;
   const detailsY = headerY;
@@ -44,7 +42,7 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   doc.fontSize(10)
     .text(`Invoice #: ${invoice}`, detailsX, detailsY + 15)
     .text(`Invoice Issued: ${moment().format('DD MMM, YYYY')}`, detailsX, detailsY + 30)
-    .text(`Invoice Amount: ${salon.currency}${(session.amount_total / 100).toFixed(2)}`, detailsX, detailsY + 45)
+    .text(`Invoice Amount: ${salon.currency}${(paymentData.amount).toFixed(2)}`, detailsX, detailsY + 45)
   // Print "Status: " without changing color
   doc.text('Status: ', detailsX, detailsY + 60);
 
@@ -52,7 +50,7 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   doc.fillColor('green') // Set color to green
     .fontSize(12) // Increase the font size
     .font('Helvetica-Bold') // Make it bold
-    .text(session.payment_status.toUpperCase(), detailsX+35, detailsY + 60); // Adjust X for proper alignment
+    .text(paymentData.status.toUpperCase(), detailsX+35, detailsY + 60); // Adjust X for proper alignment
 
   // Reset color to black and font back to default for subsequent text
   doc.fillColor('black')
@@ -66,8 +64,8 @@ export const generateInvoicePDF = async (invoice, session, products) => {
     .lineTo(550, billedToY + 5) // Keep the same Y-coordinate for a straight line
     .stroke();
   doc.fontSize(12).text('BILLED TO', 50, billedToY + 30, { underline: true });
-  doc.fontSize(10).text(session.customer_details.name, 50, billedToY + 50);
-  doc.text(session.customer_details.email, 50, billedToY + 65);
+  doc.fontSize(10).text(paymentData.customerName, 50, billedToY + 50);
+  doc.text(paymentData.customerEmail, 50, billedToY + 65);
 
   // Table Header
   const tableTop = billedToY + 120;
@@ -94,7 +92,7 @@ doc.font('Helvetica');
     const tax = product.price * 0.18;
     const totalWithTax = product.price + tax;
 
-    console.log(product.price)
+    console.log(product.price.typeOf())
 
     // Write product details in the table
     doc.text(product.name, 50, currentY, { width: colWidths.description, ellipsis: true })
