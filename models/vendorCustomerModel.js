@@ -37,20 +37,14 @@ const vendorCustomerSchema = new mongoose.Schema({
     status: {
         type: String
     },
-    product: [{
-        name: {
-            type: String
+    products: [
+        {
+          name: String,
+          quantity: Number,
+          price: Number,
+          currency: String,
         },
-        price: {
-            type: Number
-        },
-        currency: {
-            type: String
-        },
-        quantity: {
-            type: Number
-        }
-    }]
+      ],
 
 }, { timestamps: true })
 
