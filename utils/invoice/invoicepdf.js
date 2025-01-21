@@ -15,6 +15,8 @@ export const generateInvoicePDF = async (invoice, session, products) => {
 
   const salon = await getSalonBySalonId(session.metadata.salonId)
 
+  console.log(salon.currency)
+
   const doc = new PDFDocument({ margin: 50 });
   const invoicePath = path.resolve(__dirname, 'invoice.pdf');
   const writeStream = fs.createWriteStream(invoicePath);
@@ -31,6 +33,9 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   doc.fontSize(10).text('16 Raffles Quay, #33-02, Hong Leong Building, Singapore 48581', 50, headerY + 20);
   doc.text('Singapore', 50, headerY + 35);
   doc.text('Registration No.: 9919SGP29004OSJ', 50, headerY + 50);
+
+
+  console.log(session.amount_total)
 
   // Invoice Details (Right-aligned)
   const detailsX = 400;
@@ -88,6 +93,8 @@ doc.font('Helvetica');
     // Calculate tax and total (price + tax) for the product
     const tax = product.price * 0.18;
     const totalWithTax = product.price + tax;
+
+    console.log(product.price)
 
     // Write product details in the table
     doc.text(product.name, 50, currentY, { width: colWidths.description, ellipsis: true })
