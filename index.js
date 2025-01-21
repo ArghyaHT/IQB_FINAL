@@ -326,7 +326,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
                 <p>Thank you for your payment at <strong>${salon.salonName}</strong>. Below are the details of your transaction:</p>
                 <ul>
                     <li><strong>Purchase Date:</strong> ${moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD')}</li>
-                    <li><strong>Expiry Date:</strong> ${moment.unix(session.metadata.paymentExpiryDate).format('YYYY-MM-DD')}</li>
+                    <li><strong>Expiry Date:</strong> ${moment.unix(newExpiryDate).format('YYYY-MM-DD')}</li>
                     <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
                     <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
                 </ul>
@@ -466,7 +466,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
                 <p>Thank you for your payment at <strong>${salon.salonName}</strong>. Below are the details of your transaction:</p>
                 <ul>
                     <li><strong>Purchase Date:</strong> ${moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD')}</li>
-                    <li><strong>Expiry Date:</strong> ${moment.unix(session.metadata.paymentExpiryDate).format('YYYY-MM-DD')}</li>
+                    <li><strong>Expiry Date:</strong> ${moment.unix(newExpiryDate).format('YYYY-MM-DD')}</li>
                     <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
                     <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
                 </ul>
@@ -606,7 +606,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
                   <p>Thank you for your payment at <strong>${salon.salonName}</strong>. Below are the details of your transaction:</p>
                   <ul>
                       <li><strong>Purchase Date:</strong> ${moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD')}</li>
-                      <li><strong>Expiry Date:</strong> ${moment.unix(session.metadata.paymentExpiryDate).format('YYYY-MM-DD')}</li>
+                      <li><strong>Queueing Expiry Date:</strong> ${moment.unix(newQueuingExpiryDate).format('YYYY-MM-DD')}</li>
+                      <li><strong>Appointment Expiry Date:</strong> ${moment.unix(newAppointmentExpiryDate).format('YYYY-MM-DD')}</li>
                       <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
                       <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
                   </ul>
