@@ -92,8 +92,6 @@ doc.font('Helvetica');
     const tax = product.price * 0.18;
     const totalWithTax = product.price + tax;
 
-    console.log(product.price.typeOf())
-
     // Write product details in the table
     doc.text(product.name, 50, currentY, { width: colWidths.description, ellipsis: true })
       .text(`${salon.currency}${product.price.toFixed(2)}`, 150, currentY, { align: 'left' })
