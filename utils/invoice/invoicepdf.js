@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 
 export const generateInvoicePDF = async (invoice, session, products) => {
 
-  const salon = await getSalonBySalonId(session.metadata.salonId)
+  const salon = await getSalonBySalonId(session.salonId)
 
   const doc = new PDFDocument({ margin: 50 });
   const invoicePath = path.resolve(__dirname, 'invoice.pdf');
@@ -39,7 +39,7 @@ export const generateInvoicePDF = async (invoice, session, products) => {
   doc.fontSize(10)
     .text(`Invoice #: ${invoice}`, detailsX, detailsY + 15)
     .text(`Invoice Issued: ${moment().format('DD MMM, YYYY')}`, detailsX, detailsY + 30)
-    .text(`Invoice Amount: ${salon.currency}${(session.metadata.amount_total / 100).toFixed(2)}`, detailsX, detailsY + 45)
+    .text(`Invoice Amount: ${salon.currency}${(session.amount_total / 100).toFixed(2)}`, detailsX, detailsY + 45)
   // Print "Status: " without changing color
   doc.text('Status: ', detailsX, detailsY + 60);
 
@@ -61,8 +61,8 @@ export const generateInvoicePDF = async (invoice, session, products) => {
     .lineTo(550, billedToY + 5) // Keep the same Y-coordinate for a straight line
     .stroke();
   doc.fontSize(12).text('BILLED TO', 50, billedToY + 30, { underline: true });
-  doc.fontSize(10).text(session.metadata.customer_details.name, 50, billedToY + 50);
-  doc.text(session.metadata.customer_details.email, 50, billedToY + 65);
+  doc.fontSize(10).text(session.customer_details.name, 50, billedToY + 50);
+  doc.text(session.customer_details.email, 50, billedToY + 65);
 
   // Table Header
   const tableTop = billedToY + 120;
