@@ -714,7 +714,8 @@ export const getAllSalonsByAdmin = async (req, res, next) => {
             const salonWithSettings = {
                 ...salon.toObject(),  // Assuming `salon` is a Mongoose document, use `_doc` to get the plain object
                 appointmentSettings: settings ? settings.appointmentSettings : " ",
-                appointmentAdvanceDays:settings? settings.appointmentAdvanceDays: 0
+                appointmentAdvanceDays:settings? settings.appointmentAdvanceDays: 0,
+                salonOffDays: settings? settings.salonOffDays: []
             };
 
             // Add the merged salon object to the list
