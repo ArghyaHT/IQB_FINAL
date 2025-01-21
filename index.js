@@ -1107,6 +1107,12 @@ app.post("/api/vendor-create-checkout-session", async (req, res) => {
       return res.status(400).json({ success: false, response: "Vendor has no account created" });
     }
 
+        // Create or fetch a Stripe Customer
+        const customer = await stripe.customers.create({
+          name: productInfo.customerName,
+          email: productInfo.customerEmail,
+        });
+
     const totalAmount = productInfo.products.reduce(
       (total, item) => total + item.price * item.unit * 100,
       0
@@ -1116,6 +1122,7 @@ app.post("/api/vendor-create-checkout-session", async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
+      customer: customer.id,
       line_items: productInfo.products.map((item) => ({
         price_data: {
           currency: item.currency,
@@ -1126,8 +1133,6 @@ app.post("/api/vendor-create-checkout-session", async (req, res) => {
       })),
       success_url: "http://localhost:5173/mobilesuccess",
       cancel_url: "http://localhost:5173",
-      customer_email: productInfo.customerEmail, // Prefill customer email
-      customer_name: productInfo.customerName,
       payment_intent_data: {
         application_fee_amount: platformFee,
         transfer_data: { destination: productInfo.vendorAccountId },
