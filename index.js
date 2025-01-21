@@ -156,32 +156,30 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
         currency: session.currency,
       }));
 
-// Assuming session.amount_total is in cents (like 150000 for 1500.00 currency)
-const amount = session.amount_total / 100;  // Convert to dollars or the base currency unit
-console.log("Amount:", amount);  // Logs the actual amount
-console.log("Type of Amount:", typeof amount); 
-            // Access additional data from metadata
-            const paymentData = {
-              salonId: session.metadata.salonId,
-              salonName: session.metadata.salonName,
-              vendorEmail: session.metadata.adminEmail,
-              vendorAccountId: session.metadata.vendorAccountId,
-              purchaseDate: session.metadata.purchaseDate,
-              customerEmail: session.metadata.customerEmail,
-              customerName: session.metadata.customerName,
-              amount: session.amount_total / 100, // Convert from cents
-              isoCurrencyCode: session.metadata.isoCurrencyCode,
-              currency: session.metadata.currency,
-              paymentIntentId: session.payment_intent,
-              status: session.payment_status,
-              products: products,
-            };
+      const salonId = Number(session.metadata.salonId);
 
-            console.log(paymentData)
+      // Access additional data from metadata
+      const paymentData = {
+        salonId: salonId,
+        salonName: session.metadata.salonName,
+        vendorEmail: session.metadata.adminEmail,
+        vendorAccountId: session.metadata.vendorAccountId,
+        purchaseDate: session.metadata.purchaseDate,
+        customerEmail: session.metadata.customerEmail,
+        customerName: session.metadata.customerName,
+        amount: session.amount_total / 100, // Convert from cents
+        isoCurrencyCode: session.metadata.isoCurrencyCode,
+        currency: session.metadata.currency,
+        paymentIntentId: session.payment_intent,
+        status: session.payment_status,
+        products: products,
+      };
 
-            await vendorCustomerPayment(paymentData)
+      console.log(paymentData)
 
-            
+      await vendorCustomerPayment(paymentData)
+
+
 
     }
     else {

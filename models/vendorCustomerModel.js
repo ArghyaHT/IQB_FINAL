@@ -29,7 +29,7 @@ const vendorCustomerSchema = new mongoose.Schema({
         type: Date
     },
     amount:{
-        type: mongoose.Schema.Types.Mixed
+        type: Number
         },
     paymentIntentId:{
         type:String
@@ -37,7 +37,7 @@ const vendorCustomerSchema = new mongoose.Schema({
     status:{
         type: String
     },
-    product:{
+    product:[{
         name:{
             type:String
         },
@@ -50,9 +50,7 @@ const vendorCustomerSchema = new mongoose.Schema({
         quantity:{
             type: Number
         }
-    }
-
-
+}]
 
 }, { timestamps: true })
 
