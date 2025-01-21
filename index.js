@@ -1109,7 +1109,6 @@ app.post("/api/vendor-create-checkout-session", async (req, res) => {
 
         // Create or fetch a Stripe Customer
         const customer = await stripe.customers.create({
-          name: productInfo.customerName,
           email: productInfo.customerEmail,
         });
 
