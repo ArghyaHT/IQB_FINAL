@@ -25,6 +25,7 @@ import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/C
 import { ALLOWED_IMAGE_EXTENSIONS, IMAGE_FAILED_DELETE, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 import { qListByBarberId } from "../../../services/web/queue/joinQueueService.js";
 import { getSalonPaymentsBySalonId } from "../../../services/web/salonPayments/salonPaymentService.js";
+import moment from "moment";
 
 // Desc: Register Admin
 export const registerAdmin = async (req, res, next) => {
@@ -716,7 +717,10 @@ export const getAllSalonsByAdmin = async (req, res, next) => {
 
             // Merge the settings into the salon object
             const salonWithSettings = {
-                ...salon.toObject(),  // Assuming `salon` is a Mongoose document, use `_doc` to get the plain object
+                ...salon.toObject(),
+                trailExpiryDate: salon.trailExpiryDate 
+                ? moment.unix(salon.trailExpiryDate).format("YYYY-MM-DD") // Convert Unix timestamp to date
+                : null,  
                 appointmentSettings: settings ? settings.appointmentSettings : " ",
                 appointmentAdvanceDays:settings? settings.appointmentAdvanceDays: 0,
                 salonOffDays: settings? settings.salonOffDays: [],
