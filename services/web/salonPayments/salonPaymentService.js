@@ -1,7 +1,7 @@
 import SalonPaymentsHistory from "../../../models/salonPaymentsHistoryModel.js";
 import SalonPayments from "../../../models/salonPaymnetsModel.js";
 
-export const salonPayments = async(paymentData) =>{
+export const salonPayments = async(paymentData, newExpiryDate) =>{
     // Create a new SalonPayments document with the payment data as a single entity
 const newPayment = new SalonPayments({
     salonId: paymentData.salonId,
@@ -15,7 +15,7 @@ const newPayment = new SalonPayments({
     status: paymentData.status,
     paymentType: paymentData.paymentType,
     purchaseDate: paymentData.purchaseDate,
-    paymentExpiryDate: paymentData.paymentExpiryDate,
+    paymentExpiryDate: newExpiryDate,
     isQueuing: paymentData.isQueuing,
     isAppointments: paymentData.isAppointments,
     products: paymentData.products, // This will be an array of products

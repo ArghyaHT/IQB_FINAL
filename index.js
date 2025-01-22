@@ -250,7 +250,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
         //   }
         // )
 
-      await salonPayments(paymentData)
+      await salonPayments(paymentData, newExpiryDate)
 
       // const salon = await getSalonBySalonId(session.metadata.salonId)
 
@@ -390,7 +390,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
         //   }
         // )
 
-      await salonPayments(paymentData)
+      await salonPayments(paymentData, newExpiryDate)
 
       // const salon = await getSalonBySalonId(session.metadata.salonId)
 
@@ -530,7 +530,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
           }
         )
 
-        await salonPayments(paymentData)
+        await salonPayments(paymentData, newQueuingExpiryDate)
 
         // const salon = await getSalonBySalonId(session.metadata.salonId)
   
