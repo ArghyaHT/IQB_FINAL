@@ -427,3 +427,17 @@ export const checkAppointmentExpireDate = async() => {
   }
   return
 }
+
+
+export const changeAllSalonOnlineStatus = async () => {
+    // Fetch all salons
+    const salons = await Salon.find();
+
+    // Iterate through each salon and update its status
+    for (const salon of salons) {
+      salon.isOnline = false;
+      salon.mobileBookingAvailability = false;
+      salon.kioskAvailability = false
+      await salon.save(); // Save the updated document
+    }
+};

@@ -418,3 +418,14 @@ export const changeBarberStatusAtSalonOffline = async (salonId) => {
    );
    return barbers;
 };
+
+
+export const changeAllBarberOnlineStatus = async() => {
+   const barbers = await Barber.find()
+
+   for (const barber of barbers) {
+      barber.isOnline = false;
+      barber.isClockedIn = false;
+      await barber.save();
+   }
+}
