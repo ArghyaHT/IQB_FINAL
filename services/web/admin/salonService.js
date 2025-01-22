@@ -455,6 +455,7 @@ export const changeSalonTrailPeriodStatus = async() => {
     if (todayDate >= trailEndDate) {
 
       salon.isTrailEnabled = false; 
+      salon.trailExpiryDate = "true"
 
       if(!salon.queueingExpiryDate){
         salon.isQueuing = false
