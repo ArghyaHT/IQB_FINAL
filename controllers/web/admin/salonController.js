@@ -1328,7 +1328,9 @@ export const salonTrailPeriod = async(req, res, next) => {
 
       const salon = await getSalonBySalonId(salonId);
 
-      const trailEndDate = moment(trailStartDate).add(14, 'days').unix().toString();
+      // const trailEndDate = moment(trailStartDate).add(14, 'days').unix().toString();
+      const trailEndDate = moment(trailStartDate).add(1, 'minutes').unix().toString();
+
       
       if(isTrailEnabled){
         salon.isTrailEnabled = isTrailEnabled;
