@@ -221,7 +221,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
         
         const salon = await getSalonBySalonId(session.metadata.salonId)
 
-        const existingExpiryDate = parseInt(salon.queueingExpiryDate, 10); // Convert stored Unix timestamp to an integer
+        const existingExpiryDate = parseInt(salon.queueingExpiryDate, 10) || 0; // Convert stored Unix timestamp to an integer
         const paymentDaysToAdd = parseInt(session.metadata.paymentExpiryDate, 10); // Number of days to add
       
         // Calculate the new expiry date
@@ -359,7 +359,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
 
         const salon = await getSalonBySalonId(session.metadata.salonId)
 
-        const existingExpiryDate = parseInt(salon.appointmentExpiryDate, 10); // Convert stored Unix timestamp to an integer
+        const existingExpiryDate = parseInt(salon.appointmentExpiryDate, 10) || 0; // Convert stored Unix timestamp to an integer
         const paymentDaysToAdd = parseInt(session.metadata.paymentExpiryDate, 10); // Number of days to add
       
         // Calculate the new expiry date
@@ -499,8 +499,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
 
         const salon = await getSalonBySalonId(session.metadata.salonId)
 
-        const existingAppointmentExpiryDate = parseInt(salon.appointmentExpiryDate, 10); // Convert stored Unix timestamp to an integer
-        const existingQueuingExpiryDate = parseInt(salon.queueingExpiryDate, 10); // Convert stored Unix timestamp to an integer
+        const existingAppointmentExpiryDate = parseInt(salon.appointmentExpiryDate, 10) || 0; // Convert stored Unix timestamp to an integer
+        const existingQueuingExpiryDate = parseInt(salon.queueingExpiryDate, 10) || 0; // Convert stored Unix timestamp to an integer
         const paymentDaysToAdd = parseInt(session.metadata.paymentExpiryDate, 10); // Number of days to add
       
         // Calculate the new expiry date
