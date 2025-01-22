@@ -1180,7 +1180,7 @@ const PORT = 8001;
 updateCustomers()
 checkQueuingAndAppointmentExpire()
 checkPaymentsExpiry()
-salonShutdown()
+// salonShutdown()
 
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);

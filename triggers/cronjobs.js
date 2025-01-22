@@ -87,7 +87,7 @@ export const salonShutdown = (next) => {
 
     // For each timezone, schedule a cron job that runs at midnight
     timezones.forEach((timezone) => {
-        cron.schedule('* * * * *', async () => {
+        cron.schedule('0 0 * * *', async () => {
             try {
                 await changeAllSalonOnlineStatus()
                 await changeAllBarberOnlineStatus()
