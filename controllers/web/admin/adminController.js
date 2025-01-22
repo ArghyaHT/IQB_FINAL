@@ -24,6 +24,7 @@ import { ADMIN_EXISTS_ERROR, EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_FOUND
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
 import { ALLOWED_IMAGE_EXTENSIONS, IMAGE_FAILED_DELETE, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 import { qListByBarberId } from "../../../services/web/queue/joinQueueService.js";
+import { getSalonPaymentsBySalonId } from "../../../services/web/salonPayments/salonPaymentService.js";
 
 // Desc: Register Admin
 export const registerAdmin = async (req, res, next) => {
@@ -710,17 +711,30 @@ export const getAllSalonsByAdmin = async (req, res, next) => {
             // Fetch settings for each salon
             const settings = await findSalonSetingsBySalonId(salon.salonId);
 
+            const salonPayments = await getSalonPaymentsBySalonId(salon.salonId)
+
+
             // Merge the settings into the salon object
             const salonWithSettings = {
                 ...salon.toObject(),  // Assuming `salon` is a Mongoose document, use `_doc` to get the plain object
                 appointmentSettings: settings ? settings.appointmentSettings : " ",
                 appointmentAdvanceDays:settings? settings.appointmentAdvanceDays: 0,
-                salonOffDays: settings? settings.salonOffDays: []
+                salonOffDays: settings? settings.salonOffDays: [],
+                isRenew: salonPayments && salonPayments.length > 0 ? true : false, // Add `isRenew` field
+
             };
 
             // Add the merged salon object to the list
             salonsWithSettings.push(salonWithSettings);
         }
+
+
+        // 1. totals salons array.
+        // 2. totals.salons.map 
+        // 3. each salonID => query database. paymentStatus modele. 
+        // 4. Check korbi paymentStatus length > 0 ? reniew: true : reniew: false
+        // 5. Field take push koredibi {...rest,reniew }
+        // 6. Final array take return koredibi.
 
         return SuccessHandler(SALONS_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { salons: salonsWithSettings })
 
