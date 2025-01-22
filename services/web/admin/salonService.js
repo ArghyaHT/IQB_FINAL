@@ -441,3 +441,31 @@ export const changeAllSalonOnlineStatus = async () => {
       await salon.save(); // Save the updated document
     }
 };
+
+
+export const changeSalonTrailPeriodStatus = async() => {
+  const todayDate = Math.floor(Date.now() / 1000); // Current time in seconds
+
+  // Fetch all salons from the database
+  const salons = await Salon.find();
+
+  for (const salon of salons) {
+    const trailEndDate = parseInt(salon.trailExpiryDate, 10); // Convert expiry date to a number
+    
+    if (todayDate >= trailEndDate) {
+
+      salon.isTrailEnabled = false; 
+
+      if(!salon.queueingExpiryDate){
+        salon.isQueuing = false
+      }
+
+      if(!salon.appointmentExpiryDate){
+        salon.isAppointments = false
+      }
+      await salon.save(); // Save the updated salon to the database
+    }
+  }
+  return
+
+}

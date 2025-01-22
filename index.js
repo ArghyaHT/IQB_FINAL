@@ -44,7 +44,7 @@ import loggerRoutes from "./routes/loggerRoutes.js"
 import logger from "./utils/logger/logger.js";
 import { GlobalErrorHandler } from "./middlewares/GlobalErrorHandler.js";
 import { logMiddleware } from "./controllers/loggerController.js";
-import { checkPaymentsExpiry, checkQueuingAndAppointmentExpire, salonShutdown, updateCustomers } from "./triggers/cronjobs.js";
+import { checkPaymentsExpiry, checkQueuingAndAppointmentExpire, checkSalonTrailPeriod, salonShutdown, updateCustomers } from "./triggers/cronjobs.js";
 import Stripe from "stripe";
 import Salon from "./models/salonRegisterModel.js";
 import moment from "moment";
@@ -178,8 +178,6 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       console.log(paymentData)
 
       await vendorCustomerPayment(paymentData)
-
-
 
     }
     else {
@@ -1181,6 +1179,7 @@ updateCustomers()
 checkQueuingAndAppointmentExpire()
 checkPaymentsExpiry()
 // salonShutdown()
+checkSalonTrailPeriod()
 
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);

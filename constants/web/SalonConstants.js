@@ -71,6 +71,9 @@ export const SALON_DESCRIPTION_EMPTY_SUCCESS = "Salon description not present"
 export const SALON_DESCRIPTION_RETRIEVED_SUCCESS = "Salon information retrieved successfully"
 export const SALON_PAYMENTS_RETRIEVED_SUCCESS = "Salon payments retrieved successfully"
 
+export const SALON_TRAIL_ENABLED_SUCCESS = "Salon trail enabled successfully"
+
+
 
 
 
