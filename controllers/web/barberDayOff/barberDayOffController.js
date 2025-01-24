@@ -39,15 +39,15 @@ export const getBarberOffDays = async (req, res, next) => {
 
     const barberOffDays = await getBarberDayOffs(salonId, barberId)
 
-    // // Check if barberOffDays is empty or not available
-    // if (!barberOffDays || !barberOffDays.barberOffDays || barberOffDays.barberOffDays.length === 0) {
-    //   return SuccessHandler(
-    //     EMPTY_BARBER_OFFDAYS_SUCCESS,
-    //     SUCCESS_STATUS_CODE,
-    //     res,
-    //     { response: [] } // Return an empty array in the response
-    //   );
-    // }
+    // Check if barberOffDays is empty or not available
+    if (!barberOffDays || !barberOffDays.barberOffDays || barberOffDays.barberOffDays.length === 0) {
+      return SuccessHandler(
+        EMPTY_BARBER_OFFDAYS_SUCCESS,
+        SUCCESS_STATUS_CODE,
+        res,
+        { response: [] } // Return an empty array in the response
+      );
+    }
 
     // Extract and format the barberOffDays to only include the dates in YYYY-MM-DD format
     const barberOffDaysFormatted = barberOffDays.barberOffDays.map(day =>
