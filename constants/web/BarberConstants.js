@@ -30,5 +30,4 @@ export const CREATE_BARBER_SUCCESS = "Barber created successfully"
 export const BARBER_DAYOFFS_UPDATE_SUCCESS = "Barber dayoffs update successfully"
 export const BARBER_DAYOFFS_ADDED_SUCCESS = "Barber dayoffs added successfully" 
 export const BARBER_DAYOFFS_RETRIEVE_SUCCESS = "Barber dayoffs retrieved successfully" 
-
-
+export const EMPTY_BARBER_OFFDAYS_SUCCESS = "No day-offs found for the given barber."
