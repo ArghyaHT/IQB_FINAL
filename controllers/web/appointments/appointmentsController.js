@@ -1,33 +1,34 @@
 import { findAdminByEmailandRole } from "../../../services/web/admin/adminService.js";
-import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppointmentsBySalonId, allAppointmentsBySalonIdAndDate, createNewAppointment, deleteAppointmentById, findAppointmentById, getAppointmentbySalonId, getAppointmentsByDateAndBarberId, servedOrcancelAppointment, updateAppointmentById } from "../../../services/web/appointments/appointmentsService.js";
+import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppointmentsBySalonId, allAppointmentsBySalonIdAndDate,cancelAppointmentByBarber, createNewAppointment, deleteAppointmentById, findAppointmentById, getAllAppointmentsByBarberIdAndSalonId, getAppointmentbySalonId, getAppointmentsByDateAndBarberId, servedOrcancelAppointment, updateAppointmentById } from "../../../services/web/appointments/appointmentsService.js";
 import { getBarberbyId } from "../../../services/web/barber/barberService.js";
 import { getSalonSettings } from "../../../services/web/salonSettings/salonSettingsService.js";
-import { sendAppointmentsEmailAdmin, sendAppointmentsEmailBarber, sendAppointmentsEmailCustomer } from "../../../utils/emailSender/emailSender.js";
+import { sendAppointmentsEmailAdmin, sendAppointmentsEmailBarber, sendAppointmentsEmailCustomer, sendQueuePositionEmail } from "../../../utils/emailSender/emailSender.js";
 import moment from "moment";
 import { generateTimeSlots } from "../../../utils/timeSlots.js";
-import { addCancelAppointmentHistory, findOrCreateAppointmentHistory } from "../../../services/web/appointments/appointmentHistoryService.js";
+import { addCancelAppointmentHistory, addCancelAppointmentHistoryByBarber, findOrCreateAppointmentHistory } from "../../../services/web/appointments/appointmentHistoryService.js";
 import { RETRIEVE_TIMESLOT_SUCCESS, SELECT_BARBER_ERROR, SELECT_DATE_ERROR } from "../../../constants/web/AppointmentsConstants.js";
 
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
-import {SuccessHandler} from "../../../middlewares/SuccessHandler.js"
+import { SuccessHandler } from "../../../middlewares/SuccessHandler.js"
 import { SALON_NOT_FOUND_ERROR } from "../../../constants/web/SalonConstants.js";
+import { getSalonBySalonId } from "../../../services/mobile/salonServices.js";
 
 
 //DESC:CREATE APPOINTMENT ====================
 export const createAppointment = async (req, res, next) => {
     try {
         const { salonId, barberId, serviceId, appointmentDate, appointmentNotes, startTime, customerEmail, customerName, customerType, methodUsed } = req.body;
-    
+
         // // Check if required fields are missing
         // if (!salonId || !barberId || !serviceId || !appointmentDate || !startTime || !customerName) {
         //   return res.status(400).json({
         //     message: 'Please fill all the fields',
         //   });
         // }
-    
+
         // const email = customerEmail;
-    
+
         // // Validate email format
         // if (!email || !validateEmail(email)) {
         //   return res.status(400).json({
@@ -35,10 +36,10 @@ export const createAppointment = async (req, res, next) => {
         //     message: "Invalid Email "
         //   });
         // }
-    
+
         // Fetch barber information
         const barber = await getBarberbyId(barberId);
-    
+
         // Calculate total barberServiceEWT for all provided serviceIds
         let totalServiceEWT = 0;
         let serviceIds = [];
@@ -46,154 +47,154 @@ export const createAppointment = async (req, res, next) => {
         let servicePrices = [];
         let barberServiceEWTs = [];
         if (barber && barber.barberServices) {
-          // Convert single serviceId to an array if it's not already an array
-          const services = Array.isArray(serviceId) ? serviceId : [serviceId];
-    
-          services.forEach(id => {
-            const service = barber.barberServices.find(service => service.serviceId === id);
-            if (service) {
-              totalServiceEWT += service.barberServiceEWT || 0;
-              serviceIds.push(service.serviceId);
-              serviceNames.push(service.serviceName);
-              servicePrices.push(service.servicePrice);
-              barberServiceEWTs.push(service.barberServiceEWT);
-            }
-          });
+            // Convert single serviceId to an array if it's not already an array
+            const services = Array.isArray(serviceId) ? serviceId : [serviceId];
+
+            services.forEach(id => {
+                const service = barber.barberServices.find(service => service.serviceId === id);
+                if (service) {
+                    totalServiceEWT += service.barberServiceEWT || 0;
+                    serviceIds.push(service.serviceId);
+                    serviceNames.push(service.serviceName);
+                    servicePrices.push(service.servicePrice);
+                    barberServiceEWTs.push(service.barberServiceEWT);
+                }
+            });
         }
-    
+
         // Calculate totalServiceEWT in hours and minutes
         const hours = Math.floor(totalServiceEWT / 60);
         const minutes = totalServiceEWT % 60;
-    
+
         // const formattedTime = `${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
-    
+
         // Parse startTime from the request body into hours and minutes
         // const [startHours, startMinutes] = startTime.split(':').map(Number);
-    
+
         // Calculate endTime by adding formattedTime to startTime using Moment.js
         const startTimeMoment = moment(`${appointmentDate} ${startTime}`, 'YYYY-MM-DD HH:mm');
         const endTimeMoment = startTimeMoment.clone().add(hours, 'hours').add(minutes, 'minutes');
         const endTime = endTimeMoment.format('HH:mm');
-    
+
         const existingAppointmentList = await getAppointmentbySalonId(salonId);// make this call in appointmentService
         const newAppointment = {
-          barberId,
-          services: serviceIds.map((id, index) => ({
-            serviceId: id,
-            serviceName: serviceNames[index],
-            servicePrice: servicePrices[index],
-            barberServiceEWT: barberServiceEWTs[index],
-          })),
-          appointmentDate,
-          startTime,
-          endTime,
-          appointmentNotes,
-          timeSlots: `${startTime}-${endTime}`,
-          customerEmail,
-          customerName,
-          customerType,
-          methodUsed,
+            barberId,
+            services: serviceIds.map((id, index) => ({
+                serviceId: id,
+                serviceName: serviceNames[index],
+                servicePrice: servicePrices[index],
+                barberServiceEWT: barberServiceEWTs[index],
+            })),
+            appointmentDate,
+            startTime,
+            endTime,
+            appointmentNotes,
+            timeSlots: `${startTime}-${endTime}`,
+            customerEmail,
+            customerName,
+            customerType,
+            methodUsed,
         };
-    
+
         if (existingAppointmentList) {
-          existingAppointmentList.appointmentList.push(newAppointment);
-          await existingAppointmentList.save();
-          return res.status(200).json({
-            success: true,
-            message: "Appointment Confirmed",
-            response: existingAppointmentList,
-          });
-    
-        //   const adminEmail = await Admin.findOne({ salonId }).select("email")
-    
-        //   // Prepare email data for admin, barber, and customer
-        //   const adminEmailData = {
-        //     email: adminEmail, // Replace with the admin's email address
-        //     subject: 'New Appointment Created',
-        //     html: `
-        //     <h2>Hello Admin!</h2>
-        //     <p>A new appointment has been created at ${startTime} by ${customerName}.</p>
-        //     <!-- Add more details here -->
-        //   `,
-        //   };
-    
-        //   const barberEmailData = {
-        //     email: barber.email, // Replace with the barber's email address
-        //     subject: 'New Appointment Created',
-        //     html: `
-        //     <h2>Hello ${barber.name}!</h2>
-        //     <p>You have a new appointment scheduled at ${startTime}.</p>
-        //     <!-- Add more details here -->
-        //   `,
-        //   };
-    
-        //   const customerEmailData = {
-        //     email: customerEmail, // Replace with the customer's email address
-        //     subject: 'Appointment Confirmation',
-        //     html: `
-        //     <h2>Hello ${customerName}!</h2>
-        //     <p>Your appointment has been confirmed at ${startTime}.</p>
-        //     <!-- Add more details here -->
-        //   `,
-        //   };
-    
-        //   // Combine email data objects into an array
-        //   const emailDataArray = [adminEmailData, barberEmailData, customerEmailData];
-    
-        //   // Send emails to admin, barber, and customer
-        //   sendAppointmentsEmail(emailDataArray);
+            existingAppointmentList.appointmentList.push(newAppointment);
+            await existingAppointmentList.save();
+            return res.status(200).json({
+                success: true,
+                message: "Appointment Confirmed",
+                response: existingAppointmentList,
+            });
+
+            //   const adminEmail = await Admin.findOne({ salonId }).select("email")
+
+            //   // Prepare email data for admin, barber, and customer
+            //   const adminEmailData = {
+            //     email: adminEmail, // Replace with the admin's email address
+            //     subject: 'New Appointment Created',
+            //     html: `
+            //     <h2>Hello Admin!</h2>
+            //     <p>A new appointment has been created at ${startTime} by ${customerName}.</p>
+            //     <!-- Add more details here -->
+            //   `,
+            //   };
+
+            //   const barberEmailData = {
+            //     email: barber.email, // Replace with the barber's email address
+            //     subject: 'New Appointment Created',
+            //     html: `
+            //     <h2>Hello ${barber.name}!</h2>
+            //     <p>You have a new appointment scheduled at ${startTime}.</p>
+            //     <!-- Add more details here -->
+            //   `,
+            //   };
+
+            //   const customerEmailData = {
+            //     email: customerEmail, // Replace with the customer's email address
+            //     subject: 'Appointment Confirmation',
+            //     html: `
+            //     <h2>Hello ${customerName}!</h2>
+            //     <p>Your appointment has been confirmed at ${startTime}.</p>
+            //     <!-- Add more details here -->
+            //   `,
+            //   };
+
+            //   // Combine email data objects into an array
+            //   const emailDataArray = [adminEmailData, barberEmailData, customerEmailData];
+
+            //   // Send emails to admin, barber, and customer
+            //   sendAppointmentsEmail(emailDataArray);
         } else {
-          const newAppointmentData = await createNewAppointment(salonId, newAppointment)
-          const savedAppointment = await newAppointmentData.save();
-          res.status(200).json({
-            success: true,
-            message: "Appointment Confirmed",
-            response: savedAppointment,
-          });
-        //   const adminEmail = await Admin.findOne({ salonId }).select("email")
-    
-    
-        //   // Prepare email data for admin, barber, and customer
-        //   const adminEmailData = {
-        //     email: adminEmail, // Replace with the admin's email address
-        //     subject: 'New Appointment Created',
-        //     html: `
-        //           <h2>Hello Admin!</h2>
-        //           <p>A new appointment has been created at ${startTime} by ${customerName}.</p>
-        //           <!-- Add more details here -->
-        //         `,
-        //   };
-    
-        //   const barberEmailData = {
-        //     email: barber.email, // Replace with the barber's email address
-        //     subject: 'New Appointment Created',
-        //     html: `
-        //     <h2>Hello ${barber.name}!</h2>
-        //           <p>You have a new appointment scheduled at ${startTime}.</p>
-        //           <!-- Add more details here -->
-        //         `,
-        //   };
-    
-        //   const customerEmailData = {
-        //     email: customerEmail, // Replace with the customer's email address
-        //     subject: 'Appointment Confirmation',
-        //     html: `
-        //     <h2>Hello ${customerName}!</h2>
-        //           <p>Your appointment has been confirmed at ${startTime}.</p>
-        //           <!-- Add more details here -->
-        //         `,
-        //   };
-        //   // Combine email data objects into an array
-        //   const emailDataArray = [adminEmailData, barberEmailData, customerEmailData];
-    
-        //   // Send emails to admin, barber, and customer
-        //   sendAppointmentsEmail(emailDataArray);
-    
+            const newAppointmentData = await createNewAppointment(salonId, newAppointment)
+            const savedAppointment = await newAppointmentData.save();
+            res.status(200).json({
+                success: true,
+                message: "Appointment Confirmed",
+                response: savedAppointment,
+            });
+            //   const adminEmail = await Admin.findOne({ salonId }).select("email")
+
+
+            //   // Prepare email data for admin, barber, and customer
+            //   const adminEmailData = {
+            //     email: adminEmail, // Replace with the admin's email address
+            //     subject: 'New Appointment Created',
+            //     html: `
+            //           <h2>Hello Admin!</h2>
+            //           <p>A new appointment has been created at ${startTime} by ${customerName}.</p>
+            //           <!-- Add more details here -->
+            //         `,
+            //   };
+
+            //   const barberEmailData = {
+            //     email: barber.email, // Replace with the barber's email address
+            //     subject: 'New Appointment Created',
+            //     html: `
+            //     <h2>Hello ${barber.name}!</h2>
+            //           <p>You have a new appointment scheduled at ${startTime}.</p>
+            //           <!-- Add more details here -->
+            //         `,
+            //   };
+
+            //   const customerEmailData = {
+            //     email: customerEmail, // Replace with the customer's email address
+            //     subject: 'Appointment Confirmation',
+            //     html: `
+            //     <h2>Hello ${customerName}!</h2>
+            //           <p>Your appointment has been confirmed at ${startTime}.</p>
+            //           <!-- Add more details here -->
+            //         `,
+            //   };
+            //   // Combine email data objects into an array
+            //   const emailDataArray = [adminEmailData, barberEmailData, customerEmailData];
+
+            //   // Send emails to admin, barber, and customer
+            //   sendAppointmentsEmail(emailDataArray);
+
         }
-    
-      } catch (error) {
+
+    } catch (error) {
         next(error);
-      }
+    }
 };
 
 //DESC:EDIT APPOINTMENT ====================
@@ -297,11 +298,11 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
     try {
         const { salonId, barberId, date } = req.body;
 
-        if(!barberId){
+        if (!barberId) {
             return ErrorHandler(SELECT_BARBER_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        if(!date) {
+        if (!date) {
             return ErrorHandler(SELECT_DATE_ERROR, ERROR_STATUS_CODE, res)
         }
 
@@ -356,13 +357,13 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
             });
         }
 
-        return SuccessHandler(RETRIEVE_TIMESLOT_SUCCESS, SUCCESS_STATUS_CODE, res, {response: timeSlots})
+        return SuccessHandler(RETRIEVE_TIMESLOT_SUCCESS, SUCCESS_STATUS_CODE, res, { response: timeSlots })
 
         // res.status(200).json({
         //     message: "Time slots retrieved and matched successfully",
         //     timeSlots: timeSlots
         // });
-    }catch (error) {
+    } catch (error) {
         next(error);
     }
 };
@@ -372,8 +373,8 @@ export const getAllAppointmentsBySalonId = async (req, res, next) => {
     try {
         const { salonId } = req.body;
 
-        if(!salonId){
-            return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE,res)
+        if (!salonId) {
+            return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const appointments = await allAppointmentsBySalonId(salonId)
@@ -485,8 +486,8 @@ export const barberServedAppointment = async (req, res, next) => {
             });
         }
 
-          // Find or create the AppointmentHistory document for the salonId
-          const historyEntry = await findOrCreateAppointmentHistory(salonId, appointment);
+        // Find or create the AppointmentHistory document for the salonId
+        const historyEntry = await findOrCreateAppointmentHistory(salonId, appointment);
 
         // Remove the served appointment from the Appointment table
         await servedOrcancelAppointment(_id, barberId, appointmentDate, salonId);
@@ -516,8 +517,8 @@ export const customerCancelledAppointment = async (req, res, next) => {
             });
         }
 
-          // Find or create the AppointmentHistory document for the salonId
-          const historyEntry = await addCancelAppointmentHistory(salonId, appointment);
+        // Find or create the AppointmentHistory document for the salonId
+        const historyEntry = await addCancelAppointmentHistory(salonId, appointment);
 
         // Remove the served appointment from the Appointment table
         await servedOrcancelAppointment(_id, barberId, appointmentDate, salonId);
@@ -532,3 +533,122 @@ export const customerCancelledAppointment = async (req, res, next) => {
 };
 
 
+export const barberCancelAppointment = async (req, res, next) => {
+    try {
+        const { salonId, barberId, appointmentDate, idsToCancel } = req.body;
+
+        // Fetch the appointments to cancel
+        // const appointmentToCancel = await appointmentsToCancel(salonId, idsToCancel);
+
+        const barberAppointments = await getAllAppointmentsByBarberIdAndSalonId(salonId, barberId, appointmentDate);
+
+
+         // Filter the appointments by matching _id directly (if they are stored as strings)
+         const filteredAppointments = barberAppointments.filter(appointment => 
+            idsToCancel.includes(appointment._id.toString()) // Convert _id to string for comparison
+        );
+
+        if (filteredAppointments.length === 0) {
+            return ErrorHandler(
+                "No matching appointments found to cancel.",
+                ERROR_STATUS_CODE,
+                res
+            );
+        }
+
+        const cancelledAppointments = await cancelAppointmentByBarber(salonId, filteredAppointments)
+
+        // Add canceled appointments to history
+        await addCancelAppointmentHistoryByBarber(salonId, filteredAppointments);
+
+        const salon = await getSalonBySalonId(salonId)
+
+        for(const appointment of filteredAppointments){
+
+            const barberDetails = await getBarberbyId(appointment.barberId)
+
+            const emailSubject = 'Your appointment has been cancelled';
+            const emailBody = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Appointment Cancelled</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+                .logo {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                .logo img {
+                    max-width: 200px;
+                }
+                .email-content {
+                    background-color: #f8f8f8;
+                    padding: 20px;
+                    border-radius: 10px;
+                }
+                ul {
+                    padding-left: 20px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="email-content">
+                <div class="logo">
+                    <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
+                </div>
+                <h1 style="text-align: center;">Appointment Cancelled Details</h1>
+                <p>Dear ${appointment.customerName},</p>
+                <p>We regret to inform you that your appointment at our salon has been canceled. Below are the details of the canceled appointment:</p>
+                <ul>
+                    <li><strong>Barber Name:</strong> ${barberDetails.name}</li>
+                    <li><strong>Service(s):</strong> ${appointment.services.map(service => service.serviceName).join(', ')}</li>
+                    <li><strong>Appointment Date:</strong> ${appointmentDate}</li>
+                    <li><strong>Appointment Time:</strong> ${appointment.startTime} - ${appointment.endTime}</li>
+                    <li><strong>Service Estimated Time:</strong> ${appointment.services.reduce((total, service) => total + service.barberServiceEWT, 0)} minutes</li>
+                </ul>
+                <p>We apologize for any inconvenience caused. If you'd like to reschedule your appointment or have any questions, feel free to contact the salon.</p>
+                <p>Best regards,</p>
+                <p style="margin: 0; padding: 10px 0 5px;">
+                    ${salon.salonName}<br>
+                    Contact No.: ${salon.contactTel}<br>
+                    EmailId: ${salon.salonEmail}
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    `;
+    
+            try {
+              await sendQueuePositionEmail(appointment.customerEmail, emailSubject, emailBody);
+              console.log('Email sent successfully.');
+            } catch (error) {
+              console.error('Error sending email:', error);
+              // Handle error if email sending fails
+            }
+        }
+
+        // Success response
+        return SuccessHandler(
+            "Appointments canceled and added to history successfully.",
+            SUCCESS_STATUS_CODE,
+            res,
+        );
+    } catch (error) {
+        // Handle unexpected errors
+        next(error);
+    }
+};

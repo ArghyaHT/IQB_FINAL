@@ -259,7 +259,7 @@ export const createAppointment = async (req, res, next) => {
                     <div class="logo">
                     <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
                 </div>
-                        <h1 style="text-align: center;">Salon Queue Details</h1>
+                        <h1 style="text-align: center;">New Appointment Created</h1>
                         <p>Dear ${customerName},</p>
                         <p>Thank you for appointment at our salon. Here are your appointment details:</p>
                         <ul>

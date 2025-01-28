@@ -1,4 +1,5 @@
 import Appointment from "../../../models/appointmentsModel.js";
+import { ObjectId } from 'mongodb';
 
 
 //GET APPOINTMENT BY ID
@@ -578,3 +579,37 @@ return appointments;
     );
     return appointment;
  }
+
+
+ export const getAllAppointmentsByBarberIdAndSalonId = async(salonId, barberId, appointmentDate) => {
+    const barberAppointments = await Appointment.findOne({salonId})
+
+    if (!barberAppointments || !barberAppointments.appointmentList) {
+        return []; // Return an empty array if no data found
+    }
+
+    // Filter appointments for the specific barber and appointment date
+    const filteredAppointments = barberAppointments.appointmentList.filter(appointment =>
+        appointment.barberId === barberId &&
+        new Date(appointment.appointmentDate).toISOString() === new Date(appointmentDate).toISOString()
+    );
+
+    return filteredAppointments;
+ }
+
+ export const cancelAppointmentByBarber = async (salonId,filteredAppointments) => {
+   // After filtering appointments, use the IDs to perform the actual deletion in the DB
+const updatedAppointmentList = await Appointment.updateOne(
+    {
+        salonId, // Match the document by salonId
+        "appointmentList._id": { $in: filteredAppointments.map(appointment => appointment._id) } // Match appointments to cancel by their _id in appointmentList
+    },
+    {
+        $pull: {
+            appointmentList: { _id: { $in: filteredAppointments.map(appointment => appointment._id) } } // Remove the filtered appointments
+        }
+    }
+);
+
+return updatedAppointmentList
+};

@@ -1,5 +1,5 @@
 import express from "express";
-import { barberServedAppointment, createAppointment, customerCancelledAppointment, deleteAppointment, editAppointment, getAllAppointmentsByBarberId, getAllAppointmentsByBarberIdAndDate, getAllAppointmentsBySalonId, getAllAppointmentsBySalonIdAndDate, getEngageBarberTimeSlots } from "../../../controllers/web/appointments/appointmentsController.js";
+import { barberCancelAppointment, barberServedAppointment, createAppointment, customerCancelledAppointment, deleteAppointment, editAppointment, getAllAppointmentsByBarberId, getAllAppointmentsByBarberIdAndDate, getAllAppointmentsBySalonId, getAllAppointmentsBySalonIdAndDate, getEngageBarberTimeSlots } from "../../../controllers/web/appointments/appointmentsController.js";
 import { verifyRefreshTokenAdmin } from "../../../middlewares/web/VerifyRefreshTokenAdmin.js";
 import { verifyRefreshTokenBarber } from "../../../middlewares/web/VerifyRefreshTokenBarber.js";
 // import {  handleBarberProtectedRoute, handleProtectedRoute } from "../../middlewares/middlewares.js";
@@ -28,6 +28,8 @@ router.route("/getAllAppointmentsByBarberIdAndDate").post(verifyRefreshTokenBarb
 router.route("/barberServedAppointment").post(barberServedAppointment)
 
 router.route("/customerCancelAppointment").post(customerCancelledAppointment)
+
+router.route("/barberCancelAppointment").post(barberCancelAppointment)
 
 
 export default router;
