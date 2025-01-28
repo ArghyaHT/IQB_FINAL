@@ -380,51 +380,39 @@ return appointments;
  }
 
 
-  // GET ALL APPOINTMENTS BY BARBER ID AND DATE
-  export const allAppointmentsByBarberIdAndDate = async(salonId, barberId, appointmentDate) => {
+ export const allAppointmentsByBarberIdAndDate = async (salonId, barberId) => {
     const appointments = await Appointment.aggregate([
         {
             $match: {
                 salonId: salonId,
-                "appointmentList.appointmentDate": {
-                    $eq: new Date(appointmentDate)
-                },
                 "appointmentList.barberId": barberId
             }
         },
         { $unwind: "$appointmentList" },
         {
             $match: {
-                "appointmentList.appointmentDate": {
-                    $eq: new Date(appointmentDate)
-                },
                 "appointmentList.barberId": barberId
             }
         },
         {
             $group: {
-                _id: "$appointmentList.barberId",
-                appointmentDate: { 
-                    $first: { 
-                        $dateToString: { 
-                            format: "%Y-%m-%d", // Format to remove time and only keep date
-                            date: "$appointmentList.appointmentDate" 
-                        } 
-                    }
-                },                appointments: { $push: "$appointmentList" }
+                _id: "$appointmentList.appointmentDate", // Group by appointment date
+                appointmentDate: { $first: { $dateToString: { format: "%Y-%m-%d", date: "$appointmentList.appointmentDate" } } }, // Extract date without time
+                appointments: { $push: "$appointmentList" } // Push all appointments for the group
             }
         },
         {
             $project: {
-                _id: 0, // Exclude _id field 
-                appointmentDate: 1, // Include the appointmentDate    
-                barberId: 1,
-                appointments: 1
+                _id: 0, // Exclude _id field
+                appointmentDate: 1, // Include the formatted appointmentDate
+                appointments: 1 // Include the appointments array
             }
         }
     ]);
+
     return appointments;
- }
+}
+
 
 
  //GET DASHBOARD APPOINTMENT LIST 
