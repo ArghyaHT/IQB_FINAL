@@ -402,31 +402,22 @@ return appointments;
             }
         },
         {
-            $lookup: {
-                from: "barbers",
-                localField: "appointmentList.barberId",
-                foreignField: "barberId",
-                as: "barberInfo"
-            }
-        },
-        {
-            $addFields: {
-                "appointmentList.barberName": {
-                    $arrayElemAt: ["$barberInfo.name", 0]
-                }
-            }
-        },
-        {
             $group: {
                 _id: "$appointmentList.barberId",
-                barbername: { $first: "$appointmentList.barberName" },
-                appointments: { $push: "$appointmentList" }
+                appointmentDate: { 
+                    $first: { 
+                        $dateToString: { 
+                            format: "%Y-%m-%d", // Format to remove time and only keep date
+                            date: "$appointmentList.appointmentDate" 
+                        } 
+                    }
+                },                appointments: { $push: "$appointmentList" }
             }
         },
         {
             $project: {
-                _id: 0, // Exclude _id field
-                barbername: 1,
+                _id: 0, // Exclude _id field 
+                appointmentDate: 1, // Include the appointmentDate    
                 barberId: 1,
                 appointments: 1
             }
