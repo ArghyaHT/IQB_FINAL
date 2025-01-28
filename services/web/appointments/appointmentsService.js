@@ -239,7 +239,11 @@ export const allAppointmentsBySalonIdAndDate = async (salonId, appointmentDate) 
                 "appointmentList.customerProfile": {
                     $ifNull: [
                         { $arrayElemAt: ["$customerInfo.profile", 0] },
-                        "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg" // Default image URL
+                        [
+                            {
+                                "url": "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg",
+                            }
+                        ]                    
                     ]
                 },
                 // Map services to include service icons
@@ -410,9 +414,11 @@ export const allAppointmentsByBarberIdAndDate = async (salonId, barberId) => {
                 "appointmentList.customerProfile": {
                     $ifNull: [
                         { $arrayElemAt: ["$customerInfo.profile", 0] },
-                        {
-                            "url": "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg",
-                        }
+                        [
+                            {
+                                "url": "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg",
+                            }
+                        ]
                     ]
                 },
             }
