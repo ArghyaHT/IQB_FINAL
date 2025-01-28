@@ -1,5 +1,5 @@
 import { findAdminByEmailandRole } from "../../../services/web/admin/adminService.js";
-import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppointmentsBySalonId, allAppointmentsBySalonIdAndDate,cancelAppointmentByBarber, createNewAppointment, deleteAppointmentById, findAppointmentById, getAllAppointmentsByBarberIdAndSalonId, getAppointmentbySalonId, getAppointmentsByDateAndBarberId, servedOrcancelAppointment, updateAppointmentById } from "../../../services/web/appointments/appointmentsService.js";
+import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppointmentsBySalonId, allAppointmentsBySalonIdAndDate, cancelAppointmentByBarber, createNewAppointment, deleteAppointmentById, findAppointmentById, getAllAppointmentsByBarberIdAndSalonId, getAppointmentbySalonId, getAppointmentsByDateAndBarberId, servedOrcancelAppointment, updateAppointmentById } from "../../../services/web/appointments/appointmentsService.js";
 import { getBarberbyId } from "../../../services/web/barber/barberService.js";
 import { getSalonSettings } from "../../../services/web/salonSettings/salonSettingsService.js";
 import { sendAppointmentsEmailAdmin, sendAppointmentsEmailBarber, sendAppointmentsEmailCustomer, sendQueuePositionEmail } from "../../../utils/emailSender/emailSender.js";
@@ -537,14 +537,60 @@ export const barberCancelAppointment = async (req, res, next) => {
     try {
         const { salonId, barberId, appointmentDate, idsToCancel, subject, body } = req.body;
 
+        if (!salonId || salonId === 0) {
+            // Success response
+            return ErrorHandler(
+                "SalonId not present",
+                ERROR_STATUS_CODE,
+                res,
+            );
+        }
+
+        if (!barberId || barberId === 0) {
+            // Success response
+            return ErrorHandler(
+                "BarberId not present",
+                ERROR_STATUS_CODE,
+                res,
+            );
+        }
+
+        if (!appointmentDate) {
+            // Success response
+            return ErrorHandler(
+                "Appointment date not present",
+                ERROR_STATUS_CODE,
+                res,
+            );
+        }
+
+        if (!subject || !body) {
+            // Success response
+            return ErrorHandler(
+                "Subject or body not present",
+                ERROR_STATUS_CODE,
+                res,
+            );
+        }
+
+        if (!Array.isArray(idsToCancel) || idsToCancel.length === 0) {
+            // Return an error response indicating that 'idsToCancel' is missing or not an array
+            return ErrorHandler(
+                "'idsToCancel' is either missing or not a valid array.",
+                ERROR_STATUS_CODE,
+                res
+            );
+        }
+
+
         // Fetch the appointments to cancel
         // const appointmentToCancel = await appointmentsToCancel(salonId, idsToCancel);
 
         const barberAppointments = await getAllAppointmentsByBarberIdAndSalonId(salonId, barberId, appointmentDate);
 
 
-         // Filter the appointments by matching _id directly (if they are stored as strings)
-         const filteredAppointments = barberAppointments.filter(appointment => 
+        // Filter the appointments by matching _id directly (if they are stored as strings)
+        const filteredAppointments = barberAppointments.filter(appointment =>
             idsToCancel.includes(appointment._id.toString()) // Convert _id to string for comparison
         );
 
@@ -563,83 +609,83 @@ export const barberCancelAppointment = async (req, res, next) => {
 
         const salon = await getSalonBySalonId(salonId)
 
-        for(const appointment of filteredAppointments){
+        for (const appointment of filteredAppointments) {
 
             const barberDetails = await getBarberbyId(appointment.barberId)
 
             const emailSubject = subject;
-    //         const emailBody = `
-    //     <!DOCTYPE html>
-    //     <html lang="en">
-    //     <head>
-    //         <meta charset="UTF-8">
-    //         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    //         <title>Appointment Cancelled</title>
-    //         <style>
-    //             body {
-    //                 font-family: Arial, sans-serif;
-    //                 margin: 0;
-    //                 padding: 0;
-    //             }
-    //             .container {
-    //                 max-width: 600px;
-    //                 margin: 0 auto;
-    //                 padding: 20px;
-    //             }
-    //             .logo {
-    //                 text-align: center;
-    //                 margin-bottom: 20px;
-    //             }
-    //             .logo img {
-    //                 max-width: 200px;
-    //             }
-    //             .email-content {
-    //                 background-color: #f8f8f8;
-    //                 padding: 20px;
-    //                 border-radius: 10px;
-    //             }
-    //             ul {
-    //                 padding-left: 20px;
-    //             }
-    //         </style>
-    //     </head>
-    //     <body>
-    //         <div class="container">
-    //             <div class="email-content">
-    //             <div class="logo">
-    //                 <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
-    //             </div>
-    //             <h1 style="text-align: center;">Appointment Cancelled Details</h1>
-    //             <p>Dear ${appointment.customerName},</p>
-    //             <p>We regret to inform you that your appointment at our salon has been canceled. Below are the details of the canceled appointment:</p>
-    //             <ul>
-    //                 <li><strong>Barber Name:</strong> ${barberDetails.name}</li>
-    //                 <li><strong>Service(s):</strong> ${appointment.services.map(service => service.serviceName).join(', ')}</li>
-    //                 <li><strong>Appointment Date:</strong> ${appointmentDate}</li>
-    //                 <li><strong>Appointment Time:</strong> ${appointment.startTime} - ${appointment.endTime}</li>
-    //                 <li><strong>Service Estimated Time:</strong> ${appointment.services.reduce((total, service) => total + service.barberServiceEWT, 0)} minutes</li>
-    //             </ul>
-    //             <p>We apologize for any inconvenience caused. If you'd like to reschedule your appointment or have any questions, feel free to contact the salon.</p>
-    //             <p>Best regards,</p>
-    //             <p style="margin: 0; padding: 10px 0 5px;">
-    //                 ${salon.salonName}<br>
-    //                 Contact No.: ${salon.contactTel}<br>
-    //                 EmailId: ${salon.salonEmail}
-    //             </p>
-    //         </div>
-    //     </div>
-    // </body>
-    // </html>
-    // `;
+            //         const emailBody = `
+            //     <!DOCTYPE html>
+            //     <html lang="en">
+            //     <head>
+            //         <meta charset="UTF-8">
+            //         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            //         <title>Appointment Cancelled</title>
+            //         <style>
+            //             body {
+            //                 font-family: Arial, sans-serif;
+            //                 margin: 0;
+            //                 padding: 0;
+            //             }
+            //             .container {
+            //                 max-width: 600px;
+            //                 margin: 0 auto;
+            //                 padding: 20px;
+            //             }
+            //             .logo {
+            //                 text-align: center;
+            //                 margin-bottom: 20px;
+            //             }
+            //             .logo img {
+            //                 max-width: 200px;
+            //             }
+            //             .email-content {
+            //                 background-color: #f8f8f8;
+            //                 padding: 20px;
+            //                 border-radius: 10px;
+            //             }
+            //             ul {
+            //                 padding-left: 20px;
+            //             }
+            //         </style>
+            //     </head>
+            //     <body>
+            //         <div class="container">
+            //             <div class="email-content">
+            //             <div class="logo">
+            //                 <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
+            //             </div>
+            //             <h1 style="text-align: center;">Appointment Cancelled Details</h1>
+            //             <p>Dear ${appointment.customerName},</p>
+            //             <p>We regret to inform you that your appointment at our salon has been canceled. Below are the details of the canceled appointment:</p>
+            //             <ul>
+            //                 <li><strong>Barber Name:</strong> ${barberDetails.name}</li>
+            //                 <li><strong>Service(s):</strong> ${appointment.services.map(service => service.serviceName).join(', ')}</li>
+            //                 <li><strong>Appointment Date:</strong> ${appointmentDate}</li>
+            //                 <li><strong>Appointment Time:</strong> ${appointment.startTime} - ${appointment.endTime}</li>
+            //                 <li><strong>Service Estimated Time:</strong> ${appointment.services.reduce((total, service) => total + service.barberServiceEWT, 0)} minutes</li>
+            //             </ul>
+            //             <p>We apologize for any inconvenience caused. If you'd like to reschedule your appointment or have any questions, feel free to contact the salon.</p>
+            //             <p>Best regards,</p>
+            //             <p style="margin: 0; padding: 10px 0 5px;">
+            //                 ${salon.salonName}<br>
+            //                 Contact No.: ${salon.contactTel}<br>
+            //                 EmailId: ${salon.salonEmail}
+            //             </p>
+            //         </div>
+            //     </div>
+            // </body>
+            // </html>
+            // `;
 
-    const emailBody = body
-    
+            const emailBody = body
+
             try {
-              await sendQueuePositionEmail(appointment.customerEmail, emailSubject, emailBody);
-              console.log('Email sent successfully.');
+                await sendQueuePositionEmail(appointment.customerEmail, emailSubject, emailBody);
+                console.log('Email sent successfully.');
             } catch (error) {
-              console.error('Error sending email:', error);
-              // Handle error if email sending fails
+                console.error('Error sending email:', error);
+                // Handle error if email sending fails
             }
         }
 
