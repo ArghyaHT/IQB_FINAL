@@ -438,12 +438,36 @@ export const allAppointmentsByBarberIdAndDate = async (salonId, barberId) => {
             }
         },
         {
+            $addFields: {
+                appointments: {
+                    $map: {
+                        input: "$appointments",
+                        as: "appointment",
+                        in: {
+                            $mergeObjects: [
+                                "$$appointment",
+                                {
+                                    appointmentDate: {
+                                        $dateToString: {
+                                            format: "%Y-%m-%d", // Format to remove time and only keep date
+                                            date: "$$appointment.appointmentDate"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
             $project: {
                 _id: 0, // Exclude _id field
                 appointmentDate: 1, // Include the formatted appointmentDate
                 appointments: {
                     barberId: 1,
                     appointmentNotes: 1,
+                    appointmentDate: 1,
                     services: 1,
                     startTime: 1,
                     endTime: 1,
