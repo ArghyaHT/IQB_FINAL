@@ -535,7 +535,7 @@ export const customerCancelledAppointment = async (req, res, next) => {
 
 export const barberCancelAppointment = async (req, res, next) => {
     try {
-        const { salonId, barberId, appointmentDate, idsToCancel } = req.body;
+        const { salonId, barberId, appointmentDate, idsToCancel, subject, body } = req.body;
 
         // Fetch the appointments to cancel
         // const appointmentToCancel = await appointmentsToCancel(salonId, idsToCancel);
@@ -567,70 +567,72 @@ export const barberCancelAppointment = async (req, res, next) => {
 
             const barberDetails = await getBarberbyId(appointment.barberId)
 
-            const emailSubject = 'Your appointment has been cancelled';
-            const emailBody = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Appointment Cancelled</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    margin: 0;
-                    padding: 0;
-                }
-                .container {
-                    max-width: 600px;
-                    margin: 0 auto;
-                    padding: 20px;
-                }
-                .logo {
-                    text-align: center;
-                    margin-bottom: 20px;
-                }
-                .logo img {
-                    max-width: 200px;
-                }
-                .email-content {
-                    background-color: #f8f8f8;
-                    padding: 20px;
-                    border-radius: 10px;
-                }
-                ul {
-                    padding-left: 20px;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="email-content">
-                <div class="logo">
-                    <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
-                </div>
-                <h1 style="text-align: center;">Appointment Cancelled Details</h1>
-                <p>Dear ${appointment.customerName},</p>
-                <p>We regret to inform you that your appointment at our salon has been canceled. Below are the details of the canceled appointment:</p>
-                <ul>
-                    <li><strong>Barber Name:</strong> ${barberDetails.name}</li>
-                    <li><strong>Service(s):</strong> ${appointment.services.map(service => service.serviceName).join(', ')}</li>
-                    <li><strong>Appointment Date:</strong> ${appointmentDate}</li>
-                    <li><strong>Appointment Time:</strong> ${appointment.startTime} - ${appointment.endTime}</li>
-                    <li><strong>Service Estimated Time:</strong> ${appointment.services.reduce((total, service) => total + service.barberServiceEWT, 0)} minutes</li>
-                </ul>
-                <p>We apologize for any inconvenience caused. If you'd like to reschedule your appointment or have any questions, feel free to contact the salon.</p>
-                <p>Best regards,</p>
-                <p style="margin: 0; padding: 10px 0 5px;">
-                    ${salon.salonName}<br>
-                    Contact No.: ${salon.contactTel}<br>
-                    EmailId: ${salon.salonEmail}
-                </p>
-            </div>
-        </div>
-    </body>
-    </html>
-    `;
+            const emailSubject = subject;
+    //         const emailBody = `
+    //     <!DOCTYPE html>
+    //     <html lang="en">
+    //     <head>
+    //         <meta charset="UTF-8">
+    //         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    //         <title>Appointment Cancelled</title>
+    //         <style>
+    //             body {
+    //                 font-family: Arial, sans-serif;
+    //                 margin: 0;
+    //                 padding: 0;
+    //             }
+    //             .container {
+    //                 max-width: 600px;
+    //                 margin: 0 auto;
+    //                 padding: 20px;
+    //             }
+    //             .logo {
+    //                 text-align: center;
+    //                 margin-bottom: 20px;
+    //             }
+    //             .logo img {
+    //                 max-width: 200px;
+    //             }
+    //             .email-content {
+    //                 background-color: #f8f8f8;
+    //                 padding: 20px;
+    //                 border-radius: 10px;
+    //             }
+    //             ul {
+    //                 padding-left: 20px;
+    //             }
+    //         </style>
+    //     </head>
+    //     <body>
+    //         <div class="container">
+    //             <div class="email-content">
+    //             <div class="logo">
+    //                 <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
+    //             </div>
+    //             <h1 style="text-align: center;">Appointment Cancelled Details</h1>
+    //             <p>Dear ${appointment.customerName},</p>
+    //             <p>We regret to inform you that your appointment at our salon has been canceled. Below are the details of the canceled appointment:</p>
+    //             <ul>
+    //                 <li><strong>Barber Name:</strong> ${barberDetails.name}</li>
+    //                 <li><strong>Service(s):</strong> ${appointment.services.map(service => service.serviceName).join(', ')}</li>
+    //                 <li><strong>Appointment Date:</strong> ${appointmentDate}</li>
+    //                 <li><strong>Appointment Time:</strong> ${appointment.startTime} - ${appointment.endTime}</li>
+    //                 <li><strong>Service Estimated Time:</strong> ${appointment.services.reduce((total, service) => total + service.barberServiceEWT, 0)} minutes</li>
+    //             </ul>
+    //             <p>We apologize for any inconvenience caused. If you'd like to reschedule your appointment or have any questions, feel free to contact the salon.</p>
+    //             <p>Best regards,</p>
+    //             <p style="margin: 0; padding: 10px 0 5px;">
+    //                 ${salon.salonName}<br>
+    //                 Contact No.: ${salon.contactTel}<br>
+    //                 EmailId: ${salon.salonEmail}
+    //             </p>
+    //         </div>
+    //     </div>
+    // </body>
+    // </html>
+    // `;
+
+    const emailBody = body
     
             try {
               await sendQueuePositionEmail(appointment.customerEmail, emailSubject, emailBody);

@@ -3,24 +3,24 @@ import { ObjectId } from 'mongodb';
 
 
 //GET APPOINTMENT BY ID
-export const getAppointmentbySalonId = async(salonId)=>{
+export const getAppointmentbySalonId = async (salonId) => {
     const appointment = await Appointment.findOne({ salonId });
     return appointment;
- }
+}
 
- 
+
 
 //CREATE NEW APPOINTMENT
-export const createNewAppointment = async(salonId, newAppointment) => {
+export const createNewAppointment = async (salonId, newAppointment) => {
     const appointment = new Appointment({
         salonId: salonId,
         appointmentList: [newAppointment],
     });
-return appointment;
+    return appointment;
 }
 
 //UPDATE APPOINTMENT BY ID
- export const updateAppointmentById = async (salonId, appointmentId, updateFields) => {
+export const updateAppointmentById = async (salonId, appointmentId, updateFields) => {
     const {
         barberId,
         serviceIds,
@@ -31,28 +31,28 @@ return appointment;
     } = updateFields
 
     const updatedAppointment = await Appointment.findOneAndUpdate(
-       { salonId, 'appointmentList._id': appointmentId },
-       {
-         $set: {
-           'appointmentList.$.barberId': barberId,
-           'appointmentList.$.serviceId': serviceIds,
-           'appointmentList.$.appointmentDate': appointmentDate,
-           'appointmentList.$.appointmentNotes': appointmentNotes,
-           'appointmentList.$.startTime': startTime,
-           'appointmentList.$.endTime': endTime,
-           'appointmentList.$.timeSlots': `${startTime}-${endTime}`
-           // Update other fields as needed
-         },
-       },
-       { new: true }
-     );
- 
-     // Return the updated appointment
-     return updatedAppointment; 
- }
+        { salonId, 'appointmentList._id': appointmentId },
+        {
+            $set: {
+                'appointmentList.$.barberId': barberId,
+                'appointmentList.$.serviceId': serviceIds,
+                'appointmentList.$.appointmentDate': appointmentDate,
+                'appointmentList.$.appointmentNotes': appointmentNotes,
+                'appointmentList.$.startTime': startTime,
+                'appointmentList.$.endTime': endTime,
+                'appointmentList.$.timeSlots': `${startTime}-${endTime}`
+                // Update other fields as needed
+            },
+        },
+        { new: true }
+    );
 
- //DELETE APPOINTMENT BY ID
- export const deleteAppointmentById = async(salonId, appointmentId) => {
+    // Return the updated appointment
+    return updatedAppointment;
+}
+
+//DELETE APPOINTMENT BY ID
+export const deleteAppointmentById = async (salonId, appointmentId) => {
     const deleteAppointment = await Appointment.findOneAndUpdate(
         { salonId, 'appointmentList._id': appointmentId },
         {
@@ -62,11 +62,11 @@ return appointment;
         },
         { new: true }
     );
-        return deleteAppointment;
- }
+    return deleteAppointment;
+}
 
- //GET APPOINTMENTS BY DATE
- export const getAppointmentsByDateAndBarberId = async(salonId, date, barberId) =>{
+//GET APPOINTMENTS BY DATE
+export const getAppointmentsByDateAndBarberId = async (salonId, date, barberId) => {
     const appointments = await Appointment.aggregate([
         {
             $match: {
@@ -89,11 +89,11 @@ return appointment;
             }
         },
     ]);
-return appointments;
- }
+    return appointments;
+}
 
- // GET ALL APPOINTMENTS BY SALON ID
- export const allAppointmentsBySalonId = async(salonId) => {
+// GET ALL APPOINTMENTS BY SALON ID
+export const allAppointmentsBySalonId = async (salonId) => {
     const appointments = await Appointment.aggregate([
         { $match: { salonId: salonId } },
         { $unwind: "$appointmentList" },
@@ -136,10 +136,10 @@ return appointments;
         { $sort: { "appointmentList.appointmentDate": 1 } }
     ]);
     return appointments;
- }
+}
 
-  // GET ALL APPOINTMENTS BY SALON ID AND DATE
- export const allAppointmentsBySalonIdAndDate = async(salonId, appointmentDate ) => {
+// GET ALL APPOINTMENTS BY SALON ID AND DATE
+export const allAppointmentsBySalonIdAndDate = async (salonId, appointmentDate) => {
 
     // const appointments = await Appointment.findOne({ salonId }).lean();
 
@@ -165,19 +165,19 @@ return appointments;
     //             }
     //         ]
     //     }));
-    
+
     //     if (modifyAppointmentList) {
     //         const filteredAppointmentList = modifyAppointmentList.filter(item => item.appointments.a === appointmentDate);
-        
+
     //         return filteredAppointmentList
     //       }
 
     //     console.log(modifyAppointmentList)
-    
+
     //     // return filteredAppointmentList;
     // }
 
-    
+
     const appointments = await Appointment.aggregate([
         // Match appointments based on salonId and appointmentDate
         {
@@ -327,11 +327,11 @@ return appointments;
         }
     ]);
     return appointments;
- }    
+}
 
 
-  // GET ALL APPOINTMENTS BY BARBER ID
-  export const allAppointmentsByBarberId = async(salonId, barberId) => {
+// GET ALL APPOINTMENTS BY BARBER ID
+export const allAppointmentsByBarberId = async (salonId, barberId) => {
     const appointments = await Appointment.aggregate([
         { $match: { salonId: salonId } },
         { $unwind: "$appointmentList" },
@@ -377,10 +377,10 @@ return appointments;
         { $sort: { "appointmentList.appointmentDate": 1 } }
     ]);
     return appointments;
- }
+}
 
 
- export const allAppointmentsByBarberIdAndDate = async (salonId, barberId) => {
+export const allAppointmentsByBarberIdAndDate = async (salonId, barberId) => {
     const appointments = await Appointment.aggregate([
         {
             $match: {
@@ -388,16 +388,46 @@ return appointments;
                 "appointmentList.barberId": barberId
             }
         },
-        { $unwind: "$appointmentList" },
+        {
+            $unwind: "$appointmentList"
+        },
         {
             $match: {
                 "appointmentList.barberId": barberId
             }
         },
         {
+            // Lookup customer information from the "customers" collection
+            $lookup: {
+                from: "customers", // Replace with your customers collection name
+                localField: "appointmentList.customerEmail", // Match customerEmail from appointments
+                foreignField: "email", // Match this field in the customers collection
+                as: "customerInfo" // Output the result to customerInfo
+            }
+        },
+        {
+            $addFields: {
+                "appointmentList.customerProfile": {
+                    $ifNull: [
+                        { $arrayElemAt: ["$customerInfo.profile", 0] },
+                        {
+                            "url": "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg",
+                        }
+                    ]
+                },
+            }
+        },
+        {
             $group: {
                 _id: "$appointmentList.appointmentDate", // Group by appointment date
-                appointmentDate: { $first: { $dateToString: { format: "%Y-%m-%d", date: "$appointmentList.appointmentDate" } } }, // Extract date without time
+                appointmentDate: {
+                    $first: {
+                        $dateToString: {
+                            format: "%Y-%m-%d", // Format to remove time and only keep date
+                            date: "$appointmentList.appointmentDate"
+                        }
+                    }
+                },
                 appointments: { $push: "$appointmentList" } // Push all appointments for the group
             }
         },
@@ -405,8 +435,23 @@ return appointments;
             $project: {
                 _id: 0, // Exclude _id field
                 appointmentDate: 1, // Include the formatted appointmentDate
-                appointments: 1 // Include the appointments array
-            }
+                appointments: {
+                    barberId: 1,
+                    appointmentNotes: 1,
+                    services: 1,
+                    startTime: 1,
+                    endTime: 1,
+                    timeSlots: 1,
+                    customerEmail: 1,
+                    customerName: 1,
+                    customerProfile: 1,
+                    customerType: 1,
+                    methodUsed: 1,
+                    _id: 1,
+                    background: 1
+                },
+                _id: 0          
+              }
         }
     ]);
 
@@ -415,83 +460,85 @@ return appointments;
 
 
 
- //GET DASHBOARD APPOINTMENT LIST 
- export const dashboardAppointmentList = async(salonId, appointmentDate) => {
+
+
+//GET DASHBOARD APPOINTMENT LIST 
+export const dashboardAppointmentList = async (salonId, appointmentDate) => {
     const appointmentList = await Appointment.aggregate([
         {
-          $match: {
-            salonId: salonId,
-            "appointmentList.appointmentDate": {
-              $eq: new Date(appointmentDate)
+            $match: {
+                salonId: salonId,
+                "appointmentList.appointmentDate": {
+                    $eq: new Date(appointmentDate)
+                }
             }
-          }
         },
         {
-          $unwind: "$appointmentList"
+            $unwind: "$appointmentList"
         },
         {
-          $match: {
-            "appointmentList.appointmentDate": {
-              $eq: new Date(appointmentDate)
+            $match: {
+                "appointmentList.appointmentDate": {
+                    $eq: new Date(appointmentDate)
+                }
             }
-          }
         },
         {
-          $lookup: {
-            from: "barbers",
-            localField: "appointmentList.barberId",
-            foreignField: "barberId",
-            as: "barberInfo"
-          }
+            $lookup: {
+                from: "barbers",
+                localField: "appointmentList.barberId",
+                foreignField: "barberId",
+                as: "barberInfo"
+            }
         },
         {
-          $addFields: {
-            "appointmentList.barberName": {
-              $arrayElemAt: ["$barberInfo.name", 0]
-            },
-            "appointmentList.background": "#FFFFFF", // Set your default color here
-            "appointmentList.startTime": "$appointmentList.startTime",
-            "appointmentList.endTime": "$appointmentList.endTime"
-          }
+            $addFields: {
+                "appointmentList.barberName": {
+                    $arrayElemAt: ["$barberInfo.name", 0]
+                },
+                "appointmentList.background": "#FFFFFF", // Set your default color here
+                "appointmentList.startTime": "$appointmentList.startTime",
+                "appointmentList.endTime": "$appointmentList.endTime"
+            }
         },
         {
-          $project: {
-            _id: 0, // Exclude MongoDB generated _id field
-            barberId: "$appointmentList.barberId",
-            serviceId: "$appointmentList.serviceId",
-            appointmentName: "$appointmentList.appointmentName",
-            appointmentDate: {
-              $dateToString: {
-                format: "%Y-%m-%d", // Format the date as YYYY-MM-DD
-                date: "$appointmentList.appointmentDate"
-              }
-            },
-  
-            startTime: "$appointmentList.startTime",
-            endTime: "$appointmentList.endTime",
-            timeSlots: {
-              $concat: ["$appointmentList.startTime", "-", "$appointmentList.endTime"]
-            },
-            customerName: "$appointmentList.customerName",
-            customerType: "$appointmentList.customerType",
-            methodUsed: "$appointmentList.methodUsed",
-            barberName: "$appointmentList.barberName",
-            background: "$appointmentList.background"
-          }
+            $project: {
+                _id: 0, // Exclude MongoDB generated _id field
+                barberId: "$appointmentList.barberId",
+                serviceId: "$appointmentList.serviceId",
+                appointmentName: "$appointmentList.appointmentName",
+                appointmentDate: {
+                    $dateToString: {
+                        format: "%Y-%m-%d", // Format the date as YYYY-MM-DD
+                        date: "$appointmentList.appointmentDate"
+                    }
+                },
+
+                startTime: "$appointmentList.startTime",
+                endTime: "$appointmentList.endTime",
+                timeSlots: {
+                    $concat: ["$appointmentList.startTime", "-", "$appointmentList.endTime"]
+                },
+                customerName: "$appointmentList.customerName",
+                customerType: "$appointmentList.customerType",
+                methodUsed: "$appointmentList.methodUsed",
+                barberName: "$appointmentList.barberName",
+                background: "$appointmentList.background"
+            }
         },
         {
-          $sort: {
-            barberName: 1 // Sort by barberName in ascending order
-          }
+            $sort: {
+                barberName: 1 // Sort by barberName in ascending order
+            }
         }
-      ]);
+    ]);
 
-      return appointmentList;
- }
+    return appointmentList;
+}
 
 
- //GET APPOINTMENT BY CUSTOMER
- export const getCustomerAppointments = async(salonId, customerEmail) =>{
+//GET APPOINTMENT BY CUSTOMER
+export const getCustomerAppointments = async (salonId, customerEmail) => {
     const customerAppointments = await Appointment.aggregate([
         {
             $match: {
@@ -520,15 +567,15 @@ return appointments;
     } else {
         return [];
     }
- }
+}
 
 
- export const findAppointmentById = async (_id, barberId, appointmentDate, salonId) => {
+export const findAppointmentById = async (_id, barberId, appointmentDate, salonId) => {
     const appointment = await Appointment.findOne(
         {
             salonId,
             appointmentList: {
-                $elemMatch: { 
+                $elemMatch: {
                     _id: _id,
                     barberId: barberId,
                     appointmentDate: new Date(appointmentDate),
@@ -541,8 +588,8 @@ return appointments;
     return appointment;
 };
 
- //PULL SERVED APPOINTMENT 
- export const servedOrcancelAppointment = async(_id, barberId, appointmentDate, salonId) =>{
+//PULL SERVED APPOINTMENT 
+export const servedOrcancelAppointment = async (_id, barberId, appointmentDate, salonId) => {
     const appointment = await Appointment.findOneAndUpdate(
         { salonId },
         {
@@ -554,14 +601,14 @@ return appointments;
                 },
             },
         },
-        {new: true}
+        { new: true }
     );
     return appointment;
- }
+}
 
 
- export const getAllAppointmentsByBarberIdAndSalonId = async(salonId, barberId, appointmentDate) => {
-    const barberAppointments = await Appointment.findOne({salonId})
+export const getAllAppointmentsByBarberIdAndSalonId = async (salonId, barberId, appointmentDate) => {
+    const barberAppointments = await Appointment.findOne({ salonId })
 
     if (!barberAppointments || !barberAppointments.appointmentList) {
         return []; // Return an empty array if no data found
@@ -574,21 +621,21 @@ return appointments;
     );
 
     return filteredAppointments;
- }
+}
 
- export const cancelAppointmentByBarber = async (salonId,filteredAppointments) => {
-   // After filtering appointments, use the IDs to perform the actual deletion in the DB
-const updatedAppointmentList = await Appointment.updateOne(
-    {
-        salonId, // Match the document by salonId
-        "appointmentList._id": { $in: filteredAppointments.map(appointment => appointment._id) } // Match appointments to cancel by their _id in appointmentList
-    },
-    {
-        $pull: {
-            appointmentList: { _id: { $in: filteredAppointments.map(appointment => appointment._id) } } // Remove the filtered appointments
+export const cancelAppointmentByBarber = async (salonId, filteredAppointments) => {
+    // After filtering appointments, use the IDs to perform the actual deletion in the DB
+    const updatedAppointmentList = await Appointment.updateOne(
+        {
+            salonId, // Match the document by salonId
+            "appointmentList._id": { $in: filteredAppointments.map(appointment => appointment._id) } // Match appointments to cancel by their _id in appointmentList
+        },
+        {
+            $pull: {
+                appointmentList: { _id: { $in: filteredAppointments.map(appointment => appointment._id) } } // Remove the filtered appointments
+            }
         }
-    }
-);
+    );
 
-return updatedAppointmentList
+    return updatedAppointmentList
 };
