@@ -453,9 +453,9 @@ export const getAllAppointmentsByBarberIdAndDate = async (req, res, next) => {
         const appointments = await allAppointmentsByBarberIdAndDate(salonId, barberId, appointmentDate)
 
         if (!appointments || appointments.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'No appointments found for the provided salon ID, barber ID, and date',
+            return res.status(200).json({
+                success: true,
+                message: 'No appointments found for the provided salon Id, barber Id, and date',
                 response: [],
             });
         }
