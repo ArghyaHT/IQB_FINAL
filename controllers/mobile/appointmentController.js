@@ -893,7 +893,6 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
       // Generate time slots for the barber If have appointments
       const { appointmentSettings } = await getSalonSettings(salonId);
       const { appointmentStartTime, appointmentEndTime, intervalInMinutes } = appointmentSettings;
-      console.log(appointmentSettings)
 
       const start = moment(appointmentStartTime, 'HH:mm');
       const end = moment(appointmentEndTime, 'HH:mm');

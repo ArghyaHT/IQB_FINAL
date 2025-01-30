@@ -5,6 +5,10 @@ import { APPOINTMENT_DAYS_ARRAY_ERROR, BARBER_APPOINTMENT_DAYS_ADD_SUCCESS, BARB
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import { findSalonSetingsBySalonId } from "../../../services/web/salonSettings/salonSettingsService.js";
 import { getBarberDayOffs } from "../../../services/web/barberDayOff/barberDayOffService.js";
+import { getEngageBarberTimeSlots } from "../../mobile/appointmentController.js";
+import { getAppointmentsByDateAndBarberId } from "../../../services/mobile/appointmentService.js";
+import moment from "moment";
+import { generateTimeSlots } from "../../../utils/timeSlots.js";
 
 
 export const addBarberAppointmentDays = async (req, res, next) => {
@@ -138,30 +142,119 @@ export const getBarberMissingAppointmentDates = async (req, res, next) => {
 
         const barberDayOff = await getBarberDayOffs(salonId, barberId)
 
-        if(barberDayOff){
+        if (barberDayOff) {
             const daysOffs = barberDayOff.barberOffDays;
 
             const daysOffsFormatted = daysOffs.map(day => new Date(day).toISOString().split("T")[0]);
-    
+
             availableDates = availableDates.filter(date => !daysOffsFormatted.includes(date));
-    
+
             const disbaledDates = dates.filter(date => !availableDates.includes(date))
-    
+
             // Return the full response with the modified appointmentDays
             return SuccessHandler(BARBER_DISABLED_APPOINTMENT_DATES_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, {
                 response: disbaledDates
             });
         }
-        else{
+        else {
             const disbaledDates = dates.filter(date => !availableDates.includes(date))
-    
+
             // Return the full response with the modified appointmentDays
             return SuccessHandler(BARBER_DISABLED_APPOINTMENT_DATES_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, {
                 response: disbaledDates
             });
         }
-        
+
     } catch (error) {
         next(error);
     }
 };
+
+
+export const getFullyBookedDatesBySalonIdBarberId = async (req, res, next) => {
+    try {
+        const { salonId, barberId } = req.body;
+
+        if (!salonId || !barberId) {
+            return res.status(400).json({ success: false, message: "Salon ID and Barber ID are required." });
+        }
+
+        // Get salon settings
+        const getSalonSettings = await findSalonSetingsBySalonId(salonId);
+        const appointmentAdvanceDays = getSalonSettings.appointmentAdvanceDays;
+        const appointmentSettings = getSalonSettings.appointmentSettings;
+
+        if (!appointmentSettings) {
+            return res.status(400).json({ success: false, message: "Appointment settings not found." });
+        }
+
+        const { appointmentStartTime, appointmentEndTime, intervalInMinutes } = appointmentSettings;
+
+        // Generate available appointment dates
+        const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1));
+        const dates = Array.from({ length: appointmentAdvanceDays }, (_, index) => {
+            const date = new Date(tomorrow);
+            date.setDate(tomorrow.getDate() + index);
+            return date.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+        });
+
+        // Get barber's available days
+        const barber = await barberAppointmentDays(salonId, barberId);
+        const appointmentDays = barber.appointmentDays || [];
+
+        // Function to convert date string to weekday name
+        const getDayName = (dateString) => {
+            const date = new Date(dateString);
+            const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            return daysOfWeek[date.getDay()];
+        };
+
+        // Filter available dates
+        const availableDates = dates.filter(date => appointmentDays.includes(getDayName(date)));
+
+        let fullyBookedDates = [];
+
+        for (const date of availableDates) {
+            const appointments = await getAppointmentsByDateAndBarberId(salonId, date, barberId);
+
+            let timeSlots = [];
+
+            const appointmentList = appointments.map(appt => appt.appointmentList);
+
+            const start = moment(appointmentStartTime, 'HH:mm');
+            const end = moment(appointmentEndTime, 'HH:mm');
+
+            timeSlots = await generateTimeSlots(start, end, intervalInMinutes);
+
+            appointmentList.forEach(appointment => {
+                const slotsInRange = appointment.timeSlots.split('-');
+                const rangeStart = moment(slotsInRange[0], 'HH:mm');
+                const rangeEnd = moment(slotsInRange[1], 'HH:mm');
+
+                timeSlots = timeSlots.map(slot => {
+                    const slotTime = moment(slot.timeInterval, 'HH:mm');
+                    if (slotTime.isBetween(rangeStart, rangeEnd) || slotTime.isSame(rangeStart) || slotTime.isSame(rangeEnd)) {
+                        return { ...slot, disabled: true };
+                    }
+                    return slot;
+                });
+            });
+            // If all time slots are disabled, add the date to fully booked list
+            const isFullyBooked = timeSlots.length > 0 && timeSlots.every(slot => slot.disabled);
+
+            if (isFullyBooked) {
+                fullyBookedDates.push(date);
+            }
+
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Fully booked dates retrieved successfully.",
+            response: fullyBookedDates
+        });
+
+    } catch (error) {
+        next(error);
+    }
+}
