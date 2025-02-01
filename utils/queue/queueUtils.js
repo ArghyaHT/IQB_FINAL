@@ -1,7 +1,11 @@
+import { NEW_QUEUE_ADD } from "../../constants/mobile/NotificationConstants.js";
 import { getBarberByBarberId } from "../../services/kiosk/barber/barberService.js";
 import { addNewQueue, findSalonQueueList } from "../../services/kiosk/queue/queueService.js";
+import { getPushDevicesbyEmailId } from "../../services/mobile/pushDeviceTokensService.js";
+import { getSalonBySalonId } from "../../services/mobile/salonServices.js";
+import { sendQueueNotification } from "../pushNotifications/pushNotifications.js";
 
-export const addCustomerToQueue = async (salonId, newQueue, barberId) => {
+export const addCustomerToQueue = async (salonId, newQueue, barberId, customerEmail, customerName) => {
     let existingQueue = await findSalonQueueList(salonId);
 
     let customerEWT = 0;
@@ -96,8 +100,16 @@ export const addCustomerToQueue = async (salonId, newQueue, barberId) => {
         existingQueue.queueList.push(newQueue);
     }
 
+
     // Save the updated queue
     existingQueue = await existingQueue.save();
+
+    // const salon = await getSalonBySalonId(salonId)
+
+    // const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+
+    // await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType , NEW_QUEUE_ADD )
+
     return {
         queue: existingQueue,
         customerEWT,

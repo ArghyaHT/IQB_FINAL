@@ -71,8 +71,6 @@ export const singleJoinQueue = async (req, res, next) => {
             // Extracting the data after '+'
             const offset = timeZoneParts[1];
 
-            console.log(offset)
-
             // Parse offset into hours and minutes
             const [offsetHours, offsetMinutes] = offset.split(':').map(Number);
 
@@ -104,7 +102,7 @@ export const singleJoinQueue = async (req, res, next) => {
             };
 
 
-            existingQueue = await addCustomerToQueue(salonId, newQueue, barberId);
+            existingQueue = await addCustomerToQueue(salonId, newQueue, barberId, customerEmail, name);
 
 
             const emailSubject = 'Your Queue Information';
@@ -236,7 +234,7 @@ export const singleJoinQueue = async (req, res, next) => {
                 customerEWT: isVipServiceRequested ? 0 : (updatedBarber.barberEWT - totalServiceEWT),
             };
 
-            existingQueue = await addCustomerToQueue(salonId, newQueue, barberId);
+            existingQueue = await addCustomerToQueue(salonId, newQueue, barberId, customerEmail, name );
 
             const emailSubject = 'Your Queue Information';
             const emailBody = `
@@ -411,7 +409,6 @@ export const groupJoinQueue = async (req, res, next) => {
             const adjustedTime = moment(time, 'HH:mm:ss').add(offsetHours, 'hours').add(offsetMinutes, 'minutes').format('HH:mm:ss');
 
 
-            console.log(gcCode)
             // Create queue entry data for the group member
             const newQueue = {
                 customerName: member.name,
@@ -439,7 +436,7 @@ export const groupJoinQueue = async (req, res, next) => {
             };
 
 
-            existingQueue = await addCustomerToQueue(salonId, newQueue, member.barberId);
+            existingQueue = await addCustomerToQueue(salonId, newQueue, member.barberId, member[0].customerEmail, member[0].name);
 
             const emailSubject = 'Your Queue Information';
             const emailBody = `
