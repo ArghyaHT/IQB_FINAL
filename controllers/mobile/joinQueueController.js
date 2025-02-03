@@ -809,7 +809,7 @@ export const getAvailableBarbersForQ = async (req, res, next) => {
             // Insert anybarber at the beginning of availableBarbers array
             availableBarbers.unshift(anybarber);
 
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
                 message: 'All Barbers retrieved successfully',
                 response: availableBarbers

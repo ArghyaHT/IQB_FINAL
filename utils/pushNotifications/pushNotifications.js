@@ -6,10 +6,7 @@ export const sendQueueNotification = async(Token, SalonName, Current, FirstLastN
     let messageBody = `${SalonName} queue update!\n`;
     if (Token) {
         messageBody += `${FirstLastName}:${notificationMessage} ${Current}.`;
-    } else {
-        messageBody += `Your queue position has changed to ${Current}.`;
     }
-
     const title = "Queue Position Update";
     const additionalData = {
         DeviceType: DeviceType,
@@ -19,18 +16,19 @@ export const sendQueueNotification = async(Token, SalonName, Current, FirstLastN
     const response = await sendExpoPushNotification(deviceToken, title, messageBody, additionalData);
 
     // Check the response from Expo
+    // Return the response instead of using res.json()
     if (response.data && response.data.status === "ok") {
-        res.json({
+        return {
             StatusCode: 200,
             Response: { NotificationID: response.data.id },
             StatusMessage: "Notification sent successfully",
-        });
+        };
     } else {
-        res.json({
+        return {
             StatusCode: 201,
             Response: response,
             StatusMessage: "Notification failed",
-        });
+        };
     }
 }
 
