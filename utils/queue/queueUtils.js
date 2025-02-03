@@ -104,11 +104,11 @@ export const addCustomerToQueue = async (salonId, newQueue, barberId, customerEm
     // Save the updated queue
     existingQueue = await existingQueue.save();
 
-    // const salon = await getSalonBySalonId(salonId)
+    const salon = await getSalonBySalonId(salonId)
 
-    // const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+    const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-    // await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType , NEW_QUEUE_ADD )
+    await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType , NEW_QUEUE_ADD )
 
     return {
         queue: existingQueue,

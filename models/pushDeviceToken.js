@@ -13,7 +13,6 @@ const pushDeviceTokenSchema = new mongoose.Schema({
     deviceToken:{
         type:String
     },
-
     deviceType: {
         type: String,
         enum: ['android', 'ios'], // Allowed values
