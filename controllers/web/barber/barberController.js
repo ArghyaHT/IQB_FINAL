@@ -138,7 +138,7 @@ export const loginController = async (req, res, next) => {
                 "role": foundUser.role
             },
             process.env.JWT_BARBER_ACCESS_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '7d' }
         )
 
         // res.cookie('BarberToken', accessToken, {
@@ -383,7 +383,7 @@ export const googleBarberLogin = async (req, res, next) => {
                 "role": foundUser.role,
             },
             process.env.JWT_BARBER_ACCESS_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '7d' }
         )
 
         // let tokenType, tokenValue;
@@ -491,7 +491,7 @@ export const updateBarberInfo = async (req, res, next) => {
                 "role": foundUser.role,
             },
             process.env.JWT_BARBER_ACCESS_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '7d' }
         )
 
         // res.cookie('BarberToken', accessToken, {

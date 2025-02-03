@@ -118,7 +118,7 @@ export const loginAdmin = async (req, res, next) => {
                 "role": foundUser.role
             },
             process.env.JWT_ADMIN_ACCESS_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '7d' }
         )
 
         // res.cookie('AdminToken', accessToken, {
@@ -366,7 +366,7 @@ export const googleAdminLogin = async (req, res, next) => {
                 "role": foundUser.role,
             },
             process.env.JWT_ADMIN_ACCESS_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '7d' }
         )
 
 
@@ -480,7 +480,7 @@ export const updateAdminInfo = async (req, res, next) => {
                 "role": foundUser.role,
             },
             process.env.JWT_ADMIN_ACCESS_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '7d' }
         )
 
         // res.cookie('AdminToken', accessToken, {
