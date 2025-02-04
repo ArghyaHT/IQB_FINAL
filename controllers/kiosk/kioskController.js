@@ -27,6 +27,9 @@ import { QUEUE_CANCEL_SUCCESS, QUEUE_NOT_FOUND_ERROR, QUEUE_POSITION_ERROR, QUEU
 import { ADVERT_IMAGES_SUCCESS } from "../../constants/web/DashboardConstants.js";
 
 import SalonQueueListModel from "../../models/salonQueueListModel.js";
+import { getPushDevicesbyEmailId } from "../../services/mobile/pushDeviceTokensService.js";
+import { sendQueueNotification } from "../../utils/pushNotifications/pushNotifications.js";
+import { QUEUE_POSITION_CHANGE } from "../../constants/mobile/NotificationConstants.js";
 
 //DESC:LOGIN AN ADMIN =========================
 export const loginKiosk = async (req, res, next) => {
@@ -2210,6 +2213,12 @@ export const barberServedQueueTvApp = async (req, res, next) => {
                                         console.error('Error sending email:', error);
                                         // Handle error if email sending fails
                                     }
+
+                                    const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+
+                                    if(pushDevice.deviceToken){
+                                        await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType , QUEUE_POSITION_CHANGE )
+                                    }
                                 }
                             }
                         }
@@ -2526,6 +2535,12 @@ export const cancelQueueTvApp = async (req, res, next) => {
                         } catch (error) {
                             console.error('Error sending email:', error);
                             // Handle error if email sending fails
+                        }
+
+                        const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+
+                        if(pushDevice.deviceToken){
+                            await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType , QUEUE_POSITION_CHANGE )
                         }
                     }
                 }

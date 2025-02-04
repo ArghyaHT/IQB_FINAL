@@ -1,6 +1,9 @@
 import axios from "axios";
 
 export const sendQueueNotification = async(Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage) => {
+
+    console.log("Notification console",Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage)
+
     const deviceToken = `ExponentPushToken[${Token.trim()}]`;
 
     let messageBody = `${SalonName} queue update!\n`;
@@ -11,6 +14,42 @@ export const sendQueueNotification = async(Token, SalonName, Current, FirstLastN
     const additionalData = {
         DeviceType: DeviceType,
         QueuePosition: Current,
+    };
+
+    const response = await sendExpoPushNotification(deviceToken, title, messageBody, additionalData);
+
+    console.log("expo notification fired", response)
+
+    // Check the response from Expo
+    // Return the response instead of using res.json()
+    if (response.data && response.data.status === "ok") {
+
+        console.log(response.data)
+        return {
+            StatusCode: 200,
+            Response: { NotificationID: response.data.id },
+            StatusMessage: "Notification sent successfully",
+        };
+    } else {
+        return {
+            StatusCode: 201,
+            Response: response,
+            StatusMessage: "Notification failed",
+        };
+    }
+}
+
+
+export const sendAppointmentNotification = async(Token, SalonName, FirstLastName, DeviceType, notificationMessage) => {
+    const deviceToken = `ExponentPushToken[${Token.trim()}]`;
+
+    let messageBody = `${SalonName} Appointment update!\n`;
+    if (Token) {
+        messageBody += `${FirstLastName}:${notificationMessage}.`;
+    }
+    const title = "Appointment Update";
+    const additionalData = {
+        DeviceType: DeviceType,
     };
 
     const response = await sendExpoPushNotification(deviceToken, title, messageBody, additionalData);
@@ -34,6 +73,9 @@ export const sendQueueNotification = async(Token, SalonName, Current, FirstLastN
 
 // Function to send Expo push notifications
 export const sendExpoPushNotification = async(deviceToken, title, body, additionalData) =>  {
+
+    console.log("Expo notification data",deviceToken, title, body, additionalData)
+
     const url = "https://exp.host/--/api/v2/push/send";
     
     const message = {

@@ -19,6 +19,9 @@ import { NO_SALON_CONNECTED_ERROR, QUEUE_CANCEL_SUCCESS, QUEUE_NOT_FOUND_BY_ID_E
 import { BARBER_EXISTS_ERROR } from "../../../constants/web/BarberConstants.js";
 import SalonQueueList from "../../../models/salonQueueListModel.js";
 import { findBarberByEmailAndRole } from "../../../services/kiosk/barber/barberService.js";
+import { getPushDevicesbyEmailId } from "../../../services/mobile/pushDeviceTokensService.js";
+import { QUEUE_POSITION_CHANGE } from "../../../constants/mobile/NotificationConstants.js";
+import { sendQueueNotification } from "../../../utils/pushNotifications/pushNotifications.js";
 
 
 //DESC:GET SALON QUEUELIST ================
@@ -53,7 +56,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
         // }
         // else {
 
-            return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist })
+        return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist })
 
     }
     catch (error) {
@@ -229,9 +232,9 @@ export const barberServedQueue = async (req, res, next) => {
 
                         // Send email to the customer who is getting served
                         try {
-                            if(element.customerEmail){
+                            if (element.customerEmail) {
                                 await sendQueuePositionEmail(element.customerEmail, servedEmailSubject, servedEmailBody);
-                            }      
+                            }
                         } catch (error) {
                             console.error('Error sending email to the served customer:', error);
                             // Handle error if email sending fails
@@ -344,7 +347,7 @@ export const barberServedQueue = async (req, res, next) => {
                         `;
 
                                     try {
-                                        if(customerEmail){
+                                        if (customerEmail) {
                                             await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
                                         }
                                     } catch (error) {
@@ -405,7 +408,7 @@ export const barberServedQueue = async (req, res, next) => {
                                 updatedByBarberEmail: updatedByBarberEmail,
                                 barberName: servedBybarber.name,
                                 barberId: servedBybarber.barberId
-                            
+
                             });
                             await salon.save();
                         }
@@ -501,7 +504,7 @@ export const barberServedQueue = async (req, res, next) => {
 
                         // Send email to the customer who is getting served
                         try {
-                            if(element.customerEmail){
+                            if (element.customerEmail) {
                                 await sendQueuePositionEmail(element.customerEmail, servedEmailSubject, servedEmailBody);
                             }
                         } catch (error) {
@@ -616,12 +619,18 @@ export const barberServedQueue = async (req, res, next) => {
                         `;
 
                                     try {
-                                        if(customerEmail){
-                                        await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                                        if (customerEmail) {
+                                            await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
                                         }
                                     } catch (error) {
                                         console.error('Error sending email:', error);
                                         // Handle error if email sending fails
+                                    }
+
+                                    const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+
+                                    if (pushDevice.deviceToken) {
+                                        await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE)
                                     }
                                 }
                             }
@@ -770,8 +779,8 @@ export const cancelQueue = async (req, res, next) => {
         `;
 
         try {
-            if(canceledQueue.customerEmail){
-            await sendQueuePositionEmail(canceledQueue.customerEmail, servedEmailSubject, servedEmailBody);
+            if (canceledQueue.customerEmail) {
+                await sendQueuePositionEmail(canceledQueue.customerEmail, servedEmailSubject, servedEmailBody);
             }
         } catch (error) {
             console.error('Error sending email to the served customer:', error);
@@ -837,11 +846,17 @@ export const cancelQueue = async (req, res, next) => {
                         `;
 
                         try {
-                            if(customerEmail){
-                             await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                            if (customerEmail) {
+                                await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
                             }
                         } catch (error) {
                             console.error('Error sending email to the customer:', error);
+                        }
+
+                        const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+
+                        if (pushDevice.deviceToken) {
+                            await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE)
                         }
                     }
                 }

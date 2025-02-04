@@ -822,7 +822,6 @@ export const getAvailableBarbersForQ = async (req, res, next) => {
     }
 }
 
-
 //DESC:GET AVAILABLE BARBERS By MULTIPLE SERVICE IDS ================
 export const getBarberByServices = async (req, res, next) => {
     try {

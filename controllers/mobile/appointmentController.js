@@ -16,6 +16,9 @@ import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 import { ErrorHandler } from "../../middlewares/ErrorHandler.js";
 import { getBarberDayOffs } from "../../services/web/barberDayOff/barberDayOffService.js";
 import { sendQueuePositionEmail } from "../../utils/emailSender/emailSender.js";
+import { sendAppointmentNotification } from "../../utils/pushNotifications/pushNotifications.js";
+import { getPushDevicesbyEmailId } from "../../services/mobile/pushDeviceTokensService.js";
+import { CREATE_APPOINTMENT, EDIT_APPOINTMENT } from "../../constants/mobile/NotificationConstants.js"
 
 //Creating Appointment
 export const createAppointment = async (req, res, next) => {
@@ -289,6 +292,12 @@ export const createAppointment = async (req, res, next) => {
           // Handle error if email sending fails
         }
 
+        const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+
+        if(pushDevice.deviceToken){
+            await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType , CREATE_APPOINTMENT )
+        }
+
 
         const emailSubjectForBarber = 'New Appointment Created';
         const emailBodyForBarber = `
@@ -369,7 +378,9 @@ export const createAppointment = async (req, res, next) => {
           message: "Appointment Confirmed",
           response: existingAppointmentList,
         });
-      } else {
+      } 
+      else 
+      {
         const newAppointmentData = await createNewAppointment(salonId, newAppointment)
         const savedAppointment = await newAppointmentData.save();
 
@@ -445,6 +456,12 @@ export const createAppointment = async (req, res, next) => {
         } catch (error) {
           console.error('Error sending email:', error);
           // Handle error if email sending fails
+        }
+
+        const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+
+        if(pushDevice.deviceToken){
+            await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType , CREATE_APPOINTMENT )
         }
 
 
@@ -744,6 +761,12 @@ export const editAppointment = async (req, res, next) => {
         console.log('Email sent to customer successfully.');
       } catch (error) {
         console.error('Error sending email to customer:', error);
+      }
+
+      const pushDevice = await getPushDevicesbyEmailId(appointment.customerEmail)
+
+      if(pushDevice.deviceToken){
+          await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointment.customerName, pushDevice.deviceType , EDIT_APPOINTMENT )
       }
 
       // Send email to the barber about the rescheduled appointment
