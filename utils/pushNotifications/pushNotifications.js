@@ -85,6 +85,7 @@ export const sendExpoPushNotification = async(deviceToken, title, body, addition
         body: body,
         data: additionalData,
     };
+    console.log(message)
 
     try {
         const response = await axios.post(url, message, {
