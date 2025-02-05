@@ -196,7 +196,6 @@ export const checkPushNotifications = async(req, res, next) => {
         }
     }
     catch (error) {
-        console.error("FCM Push Notification Error:", error);
-        return { error: error.message };
+        next(error);
     }
 }
