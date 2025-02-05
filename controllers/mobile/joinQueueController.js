@@ -1,5 +1,5 @@
 import { availableBarberAutoJoin, decreaseBarberEWTWhenQCancel, getBarberByBarberId, getBarbersForQ, getBarbersWithMulServices, updateBarberEWT } from "../../services/mobile/barberService.js";
-import { findSalonQueueList, getSalonQlist, qListByBarberId } from "../../services/mobile/joinQueueService.js";
+import { addGroupJoin, findSalonQueueList, getSalonQlist, qListByBarberId } from "../../services/mobile/joinQueueService.js";
 import { allSalonServices, getSalonBySalonId } from "../../services/mobile/salonServices.js";
 import { sendQueuePositionEmail } from "../../utils/emailSender/emailSender.js";
 import moment from "moment";
@@ -435,8 +435,7 @@ export const groupJoinQueue = async (req, res, next) => {
                 timeJoinedQ: adjustedTime
             };
 
-
-            existingQueue = await addCustomerToQueue(salonId, newQueue, member.barberId, member[0].customerEmail, member[0].name);
+            existingQueue = await addCustomerToQueue(salonId, newQueue, member.barberId, member.customerEmail, member.name);
 
             const emailSubject = 'Your Queue Information';
             const emailBody = `
