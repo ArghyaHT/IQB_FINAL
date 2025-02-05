@@ -1,4 +1,4 @@
-import { findNotificationUserByEmail } from "../../services/mobile/notificationService.js";
+import { changeSeenStatus, findNotificationUserByEmail } from "../../services/mobile/notificationService.js";
 
   //DESC: GET ALL NOTIFICATION BY EMAIL
   export const getAllNotificationsByCustomerEmail = async (req, res) => {
@@ -32,3 +32,21 @@ import { findNotificationUserByEmail } from "../../services/mobile/notificationS
         next(error);
     }
   };
+
+
+  export const changeNotificationSeenStatus = async(req, res, next) =>{
+    try{
+        const {_id, email} = req.body;
+
+        const updatedNotifications = await changeSeenStatus(email, _id)
+
+        if (!updatedNotifications) {
+            return res.status(201).json({status: false,  message: "Notification not found" });
+        }
+
+        return res.status(200).json({ status: true, message: "Notification marked as seen", response: updatedNotifications });
+    }
+    catch (error) {
+        next(error);
+    }
+  }

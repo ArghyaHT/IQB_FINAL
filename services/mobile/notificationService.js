@@ -20,3 +20,14 @@ export const pushNotificationExistingUser = async(email, title, body, time, type
       );
       return user;
     }
+
+    export const changeSeenStatus = async(email, _id) => {
+         // Update the isRead status for the specified notification
+         const updatedNotifications = await Notification.findOneAndUpdate(
+            { email, "sentNotifications._id": _id },
+            { $set: { "sentNotifications.$.isSeen": true } },
+            { new: true }
+        );
+
+        return updatedNotifications
+    }

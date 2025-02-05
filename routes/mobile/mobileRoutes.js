@@ -9,7 +9,7 @@ import { getAllAdvertisements } from "../../controllers/mobile/advertisementCont
 import { getAppointmentHistorybyCustomerEmail } from "../../controllers/web/appointments/appointmentHistoryController.js";
 import { pushDeviceTokens, pushFcmDeviceTokens } from "../../controllers/mobile/pushDevicesController.js";
 import { checkPushNotifications } from "../../utils/pushNotifications/pushNotifications.js";
-import { getAllNotificationsByCustomerEmail } from "../../controllers/mobile/notificationController.js";
+import { changeNotificationSeenStatus, getAllNotificationsByCustomerEmail } from "../../controllers/mobile/notificationController.js";
 // import { getAllAdvertisements } from "../../controllers/dashboard/dashboardController.js";
 
 const router = express.Router();
@@ -100,6 +100,9 @@ router.route("/pushDevicesFcm").post(pushFcmDeviceTokens)
 router.route("/checkPushNotifications").post(checkPushNotifications)
 
 router.route("/getAllNotificationsByCustomerEmail").post(getAllNotificationsByCustomerEmail)
+
+router.route("/changeNotificationSeenStatus").post(changeNotificationSeenStatus)
+
 
 
 
