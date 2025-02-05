@@ -828,16 +828,16 @@ export const updateCustomer = async (req, res, next) => {
             // Convert email to lowercase
             email = email.toLowerCase();
 
-        // Validate password length
-        if (!password || password.length < 8) {
-            return res.status(201).json({
-                success: false,
-                message: "Password must be at least 8 characters long"
-            });
-        }
+        // // Validate password length
+        // if (!password || password.length < 8) {
+        //     return res.status(201).json({
+        //         success: false,
+        //         message: "Password must be at least 8 characters long"
+        //     });
+        // }
 
         //Hashing the Password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // const hashedPassword = await bcrypt.hash(password, 10);
 
         const customerData = {
             email,
@@ -847,7 +847,7 @@ export const updateCustomer = async (req, res, next) => {
             mobileCountryCode,
             countryFlag,
             countryCca2,
-            hashedPassword,
+            // hashedPassword,
             mobileNumber,
         }
 

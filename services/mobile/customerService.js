@@ -80,12 +80,12 @@ export const updateCustomerDetails = async (customerData) => {
       mobileCountryCode,
       countryFlag,
       countryCca2,
-      hashedPassword,
+      // hashedPassword,
       mobileNumber,
    } = customerData;
 
    const customer = await Customer.findOneAndUpdate({ email },
-      { name, gender, password: hashedPassword, dateOfBirth, mobileNumber, mobileCountryCode, countryFlag: countryFlag, countryCca2: countryCca2 },
+      { name, gender, dateOfBirth, mobileNumber, mobileCountryCode, countryFlag: countryFlag, countryCca2: countryCca2 },
       { new: true })
    return customer;
 }
