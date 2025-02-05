@@ -116,7 +116,7 @@ export const addCustomerToQueue = async (salonId, newQueue, barberId, customerEm
     if(pushDevice.deviceToken){
         await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType , NEW_QUEUE_ADD, customerEmail )
     }
-
+ 
     return {
         queue: existingQueue,
         customerEWT,

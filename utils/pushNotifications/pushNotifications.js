@@ -165,13 +165,14 @@ export const checkPushNotifications = async(req, res, next) => {
     try{
         const { Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage, customerEmail} = req.body;
 
-       await sendQueueNotification(Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage, customerEmail)
+      const response = await sendQueueNotification(Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage, customerEmail)
 
-       return res.status(200).json({
-        success:true,
-        message: "Notification Success"
-       })
-
+      if(response){
+        return res.status(200).json({
+            success:true,
+            message: "Notification Success"
+           })
+      }
         // const deviceToken = `ExponentPushToken[${Token.trim()}]`;
 
         // let messageBody = `${SalonName} queue update!\n`;
