@@ -160,3 +160,43 @@ export const sendFCMPushNotification = async (deviceToken, title, body, addition
         return { error: error.message };
     }
 };
+
+export const checkPushNotifications = async(req, res, next) => {
+    try{
+        const { Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage,} = req.body;
+
+        const deviceToken = `ExponentPushToken[${Token.trim()}]`;
+
+        let messageBody = `${SalonName} queue update!\n`;
+        if (Token) {
+            messageBody += `${FirstLastName}:${notificationMessage} ${Current}.`;
+        }
+        const title = "Queue Position Update";
+        const additionalData = {
+            DeviceType: DeviceType,
+            QueuePosition: Current,
+        };
+    
+        const response = await sendExpoPushNotification(deviceToken, title, messageBody, additionalData);
+
+        if (response.data && response.data.status === "ok") {
+
+            console.log(response.data)
+            return {
+                StatusCode: 200,
+                Response: { NotificationID: response.data.id},
+                StatusMessage: "Notification sent successfully",
+            };
+        } else {
+            return {
+                StatusCode: 201,
+                Response: response || responseFirebase,
+                StatusMessage: "Notification failed",
+            };
+        }
+    }
+    catch (error) {
+        console.error("FCM Push Notification Error:", error);
+        return { error: error.message };
+    }
+}
