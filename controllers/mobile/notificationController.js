@@ -1,18 +1,22 @@
 import { response } from "express";
 import { changeSeenStatus, findNotificationUserByEmail } from "../../services/mobile/notificationService.js";
+import { findCustomerByEmail } from "../../services/mobile/customerService.js";
 
 //DESC: GET ALL NOTIFICATION BY EMAIL
 export const getAllNotificationsByCustomerEmail = async (req, res) => {
   const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).json({
-      success: false,
-      message: 'Proper Email Id required'
-    });
-  }
   try {
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Proper Email Id required'
+      });
+    }
+
     const notifications = await findNotificationUserByEmail(email);
+
+    const getcustomer = await findCustomerByEmail(email)
 
     if (!notifications) {
       return res.status(200).json({
@@ -21,10 +25,13 @@ export const getAllNotificationsByCustomerEmail = async (req, res) => {
         response: []
       });
     }
-    
-    // Reverse the order of notifications
-    const latestnotifications = notifications.sentNotifications.reverse();
 
+    // Reverse the order of notifications
+// Reverse the order of notifications and attach customer profile to each
+const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
+  ...notification.toObject(),  // Convert Mongoose document to plain object
+  customerProfile: getcustomer.profile  // Attach customer details
+}));
     res.status(200).json({
       success: true,
       message: "Notifications retrieved successfully",
