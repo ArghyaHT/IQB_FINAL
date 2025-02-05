@@ -1,10 +1,9 @@
-import { response } from "express";
 import { changeSeenStatus, findNotificationUserByEmail } from "../../services/mobile/notificationService.js";
 import { findCustomerByEmail } from "../../services/mobile/customerService.js";
 import { findSalonBySalonId } from "../../services/mobile/salonServices.js";
 
 //DESC: GET ALL NOTIFICATION BY EMAIL
-export const getAllNotificationsByCustomerEmail = async (req, res) => {
+export const getAllNotificationsByCustomerEmail = async (req, res, next) => {
   const { email } = req.body;
   try {
 
@@ -35,7 +34,7 @@ const latestnotifications = notifications.sentNotifications.reverse().map(notifi
   ...notification.toObject(),  // Convert Mongoose document to plain object
   salonLogo: customerSalon.salonLogo  // Attach customer details
 }));
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Notifications retrieved successfully",
       response: latestnotifications
