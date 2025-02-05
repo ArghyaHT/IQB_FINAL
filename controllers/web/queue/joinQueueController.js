@@ -630,7 +630,7 @@ export const barberServedQueue = async (req, res, next) => {
                                     const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
                                     if (pushDevice.deviceToken) {
-                                        await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE)
+                                        await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail)
                                     }
                                 }
                             }
@@ -856,7 +856,7 @@ export const cancelQueue = async (req, res, next) => {
                         const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
                         if (pushDevice.deviceToken) {
-                            await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE)
+                            await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail)
                         }
                     }
                 }
