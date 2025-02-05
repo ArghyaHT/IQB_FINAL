@@ -7,7 +7,7 @@ import { getAllBarberbySalonId } from "../../controllers/mobile/barberController
 import { cancelQueueByCustomer, getAvailableBarbersForQ, getBarberByServices, getBarberServicesByBarberId, getQlistbyBarberId, getQueueListBySalonId, groupJoinQueue, singleJoinQueue } from "../../controllers/mobile/joinQueueController.js";
 import { getAllAdvertisements } from "../../controllers/mobile/advertisementController.js";
 import { getAppointmentHistorybyCustomerEmail } from "../../controllers/web/appointments/appointmentHistoryController.js";
-import { pushDeviceTokens } from "../../controllers/mobile/pushDevicesController.js";
+import { pushDeviceTokens, pushFcmDeviceTokens } from "../../controllers/mobile/pushDevicesController.js";
 // import { getAllAdvertisements } from "../../controllers/dashboard/dashboardController.js";
 
 const router = express.Router();
@@ -93,6 +93,7 @@ router.route("/getAdminByEmailTest").post(getAdminDetailsByAdminEmailTest)
 
 router.route("/pushDevices").post(pushDeviceTokens)
 
+router.route("/pushDevicesFcm").post(pushFcmDeviceTokens)
 
 
 export default router;
