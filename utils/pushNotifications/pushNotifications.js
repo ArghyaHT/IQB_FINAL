@@ -34,22 +34,22 @@ export const sendQueueNotification = async(Token, SalonName, Current, FirstLastN
        await createNewUserNotification(customerEmail, title, messageBody, time, type)
       }
 
-    const responseFirebase = await sendFCMPushNotification(deviceToken, title, messageBody, additionalData);
+    // const responseFirebase = await sendFCMPushNotification(deviceToken, title, messageBody, additionalData);
 
 
     console.log("expo notification fired", response)
 
-    console.log("firebase notification fired", responseFirebase)
+    // console.log("firebase notification fired", responseFirebase)
 
 
     // Check the response from Expo
     // Return the response instead of using res.json()
-    if (response.data && response.data.status === "ok" || responseFirebase.data && responseFirebase.data.status === "ok") {
+    if (response.data && response.data.status === "ok") {
 
-        console.log(response.data || responseFirebase.data)
+        console.log(response.data)
         return {
             StatusCode: 200,
-            Response: { NotificationID: response.data.id || responseFirebase.data.id },
+            Response: { NotificationID: response.data.id},
             StatusMessage: "Notification sent successfully",
         };
     } else {
