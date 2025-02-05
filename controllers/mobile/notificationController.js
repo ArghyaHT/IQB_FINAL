@@ -1,6 +1,7 @@
 import { response } from "express";
 import { changeSeenStatus, findNotificationUserByEmail } from "../../services/mobile/notificationService.js";
 import { findCustomerByEmail } from "../../services/mobile/customerService.js";
+import { findSalonBySalonId } from "../../services/mobile/salonServices.js";
 
 //DESC: GET ALL NOTIFICATION BY EMAIL
 export const getAllNotificationsByCustomerEmail = async (req, res) => {
@@ -18,6 +19,8 @@ export const getAllNotificationsByCustomerEmail = async (req, res) => {
 
     const getcustomer = await findCustomerByEmail(email)
 
+    const customerSalon = await findSalonBySalonId(getcustomer.salonId)
+
     if (!notifications) {
       return res.status(200).json({
         success: true,
@@ -30,7 +33,7 @@ export const getAllNotificationsByCustomerEmail = async (req, res) => {
 // Reverse the order of notifications and attach customer profile to each
 const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
   ...notification.toObject(),  // Convert Mongoose document to plain object
-  customerProfile: getcustomer.profile  // Attach customer details
+  salonLogo: customerSalon.salonLogo  // Attach customer details
 }));
     res.status(200).json({
       success: true,
