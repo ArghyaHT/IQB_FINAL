@@ -1,9 +1,8 @@
 import axios from "axios";
 import admin from "firebase-admin"
+import { createNewUserNotification, findNotificationUserByEmail, pushNotificationExistingUser } from "../../services/mobile/notificationService.js";
 
-export const sendQueueNotification = async(Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage) => {
-
-    console.log("Notification console",Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage)
+export const sendQueueNotification = async(Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage, customerEmail) => {
 
     const deviceToken = `ExponentPushToken[${Token.trim()}]`;
 
@@ -18,6 +17,20 @@ export const sendQueueNotification = async(Token, SalonName, Current, FirstLastN
     };
 
     const response = await sendExpoPushNotification(deviceToken, title, messageBody, additionalData);
+
+    const time = new Date()
+    const type = "Queueing"
+
+    const existingUser = await findNotificationUserByEmail(customerEmail)
+
+
+    if (existingNotification) {
+        // Email already exists, update the existing document
+        await pushNotificationExistingUser(existingUser.email, title, messageBody, time, type);
+      } else {
+      // Email doesn't exist, create a new document
+       await createNewUserNotification(existingUser.email, title, messageBody, time, type)
+      }
 
     const responseFirebase = await sendFCMPushNotification(deviceToken, title, messageBody, additionalData);
 

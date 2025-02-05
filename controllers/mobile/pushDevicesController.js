@@ -5,8 +5,6 @@ export const pushDeviceTokens = async(req, res, next) => {
 
         const {salonId, name, email, deviceToken, deviceType} = req.body
 
-        console.log(deviceToken)
-
         const extractedToken = deviceToken.replace(/^ExponentPushToken\[(.*)\]$/, "$1");
 
                 // Check if the email already exists

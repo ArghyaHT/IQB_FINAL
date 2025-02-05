@@ -12,7 +12,19 @@ const notificationSchema = new mongoose.Schema({
     body:{
         type: String,
          default:""
-    }
+    },
+    time:{
+        type: Date
+    },
+    type:{
+        type: String,
+        enum: ['Queueing','Appointment', 'Promotional']
+    },
+    isSeen:{
+        type: Boolean,
+        default: false
+    },
+
    }]
 },{ timestamps: true })
 
