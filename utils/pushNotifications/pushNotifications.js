@@ -23,13 +23,15 @@ export const sendQueueNotification = async(Token, SalonName, Current, FirstLastN
 
     const existingUser = await findNotificationUserByEmail(customerEmail)
 
+    console.log(existingUser)
+
 
     if (existingUser) {
         // Email already exists, update the existing document
         await pushNotificationExistingUser(existingUser.email, title, messageBody, time, type);
       } else {
       // Email doesn't exist, create a new document
-       await createNewUserNotification(existingUser.email, title, messageBody, time, type)
+       await createNewUserNotification(customerEmail, title, messageBody, time, type)
       }
 
     const responseFirebase = await sendFCMPushNotification(deviceToken, title, messageBody, additionalData);
