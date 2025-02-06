@@ -1,6 +1,6 @@
 import { getbarbersBySalonId } from "../../services/mobile/barberService.js";
 import { getAverageSalonRating } from "../../services/mobile/salonRatingService.js";
-import { allSalonServices, allSalons, getSalonRating, salonInfoDetails, searchSalonsByLocation, searchSalonsByNameAndCity } from "../../services/mobile/salonServices.js";
+import { allSalonServices, allSalons, getAllSalonsByCountry, getSalonRating, salonInfoDetails, searchSalonsByLocation, searchSalonsByNameAndCity } from "../../services/mobile/salonServices.js";
 import { findAdminByEmailandRoleTest } from "../../services/web/admin/adminService.js";
 
 ///DESC:GET ALL SALONS =====================
@@ -179,3 +179,24 @@ export const getAdminDetailsByAdminEmailTest = async(req, res, next) => {
     next(error);
 }
 }
+
+
+  export const getSalonCities = async(req, res, next) => {
+    try{
+      const {country} = req.body;
+
+      const salonsByCountry = await getAllSalonsByCountry(country)
+
+      const cities = [...new Set(salonsByCountry.map(salon => salon.city))];
+
+      return res.status(200).json({ 
+        success: true,
+        message: "All salon cities retrieved successfully",
+        response: cities 
+      });
+
+    }
+    catch (error) {
+      next(error);
+  }
+  }

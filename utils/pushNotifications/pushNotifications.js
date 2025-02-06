@@ -61,8 +61,7 @@ export const sendQueueNotification = async(Token, SalonName, Current, FirstLastN
     }
 }
 
-
-export const sendAppointmentNotification = async(Token, SalonName, FirstLastName, DeviceType, notificationMessage) => {
+export const sendAppointmentNotification = async(Token, SalonName, FirstLastName, DeviceType, notificationMessage, customerEmail) => {
     const deviceToken = `ExponentPushToken[${Token.trim()}]`;
 
     let messageBody = `${SalonName} Appointment update!\n`;
@@ -75,6 +74,23 @@ export const sendAppointmentNotification = async(Token, SalonName, FirstLastName
     };
 
     const response = await sendExpoPushNotification(deviceToken, title, messageBody, additionalData);
+
+    const time = new Date()
+    const type = "Appointment"
+
+    const existingUser = await findNotificationUserByEmail(customerEmail)
+
+    console.log(existingUser)
+
+    console.log("expo notification fired", response)
+
+    if (existingUser) {
+        // Email already exists, update the existing document
+        await pushNotificationExistingUser(existingUser.email, title, messageBody, time, type);
+      } else {
+      // Email doesn't exist, create a new document
+       await createNewUserNotification(customerEmail, title, messageBody, time, type)
+      }
 
     // Check the response from Expo
     // Return the response instead of using res.json()

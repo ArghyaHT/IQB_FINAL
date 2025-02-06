@@ -1,5 +1,5 @@
 import express from "express";
-import { getAdminDetailsByAdminEmailTest, getAllSalonServices, getAllSalons, getSalonInfo, getSalonsByLocation, getSalonsByNameAndCity, getallSalonsTest } from "../../controllers/mobile/salonController.js";
+import { getAdminDetailsByAdminEmailTest, getAllSalonServices, getAllSalons, getSalonCities, getSalonInfo, getSalonsByLocation, getSalonsByNameAndCity, getallSalonsTest } from "../../controllers/mobile/salonController.js";
 
 import { bookAppointmentBarbers, createAppointment, deleteAppointment, editAppointment, getAllAppointmentsByBarberId, getAllAppointmentsByBarberIdAndDate, getAllAppointmentsBySalonId, getAllAppointmentsBySalonIdAndDate, getEngageBarberTimeSlots } from "../../controllers/mobile/appointmentController.js";
 // import { verifyRefreshCustomerToken } from "../middlewares/VerifyRefreshCustomerToken.js";
@@ -102,6 +102,9 @@ router.route("/checkPushNotifications").post(checkPushNotifications)
 router.route("/getAllNotificationsByCustomerEmail").post(getAllNotificationsByCustomerEmail)
 
 router.route("/changeNotificationSeenStatus").post(changeNotificationSeenStatus)
+
+router.route("/getSalonCities").post(getSalonCities)
+
 
 
 

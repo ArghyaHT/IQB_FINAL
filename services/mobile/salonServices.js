@@ -86,3 +86,10 @@ export const getSalonBySalonId = async(salonId) => {
 
   return salonTimeZone;
 }
+
+
+export const getAllSalonsByCountry = async(country) => {
+  const salons = await Salon.find({country: country})
+
+  return salons;
+}
