@@ -25,6 +25,7 @@ import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/C
 import { ALLOWED_IMAGE_EXTENSIONS, IMAGE_FAILED_DELETE, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 import { qListByBarberId } from "../../../services/web/queue/joinQueueService.js";
 import { getSalonPaymentsBySalonId } from "../../../services/web/salonPayments/salonPaymentService.js";
+import moment from "moment";
 
 // Desc: Register Admin
 export const registerAdmin = async (req, res, next) => {
@@ -500,7 +501,6 @@ export const updateAdminInfo = async (req, res, next) => {
         next(error);
     }
 }
-
 
 // Desc: Update Account Details
 export const updateAdminAccountDetails = async (req, res, next) => {
@@ -1184,3 +1184,55 @@ export const adminchangepassword = async (req, res, next) => {
         next(error);
     }
 }
+
+
+
+// Desc: Get All Salons Subscriptions of that active admin
+export const getAllAdminSalonsSubcriptions = async (req, res, next) => {
+    try {
+        const { adminEmail } = req.body;
+
+        let email = adminEmail;
+
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res);
+        }
+
+        email = email.toLowerCase();
+
+        const admin = await findAdminByEmailandRole(email);
+
+        if (!admin) {
+            return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res);
+        }
+
+        // Fetch all salons associated with the admin from registeredSalons array
+        const salons = await allSalonsByAdmin(admin.registeredSalons);
+
+        // Select only specific fields from the salons and format date fields
+        const filteredSalons = salons.map(({ 
+            _id, salonId, salonName, adminEmail, salonLogo, currency, isoCurrencyCode, 
+            isQueuing, isAppointments, appointmentExpiryDate, queueingExpiryDate, 
+            isTrailEnabled, trailExpiryDate 
+        }) => ({
+            _id,
+            salonId, 
+            salonName, 
+            adminEmail, 
+            salonLogo, 
+            currency, 
+            isoCurrencyCode, 
+            isQueuing, 
+            isAppointments, 
+            appointmentExpiryDate: appointmentExpiryDate ? moment.unix(appointmentExpiryDate).format("D MMM, YYYY") : "", 
+            queueingExpiryDate: queueingExpiryDate ? moment.unix(queueingExpiryDate).format("D MMM, YYYY") : "", 
+            isTrailEnabled, 
+            trailExpiryDate: trailExpiryDate ? moment.unix(trailExpiryDate).format("D MMM, YYYY") : ""
+        }));
+
+        return SuccessHandler(SALONS_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: filteredSalons });
+
+    } catch (error) {
+        next(error);
+    }
+};

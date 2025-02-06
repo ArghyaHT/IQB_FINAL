@@ -180,7 +180,7 @@ export const getAdminDetailsByAdminEmailTest = async(req, res, next) => {
 }
 }
 
-
+//GET ALL SALON CITIES
   export const getSalonCities = async(req, res, next) => {
     try{
       const {country} = req.body;

@@ -1,5 +1,5 @@
 import express from "express";
-import { adminchangepassword, approveBarber, changeDefaultSalonIdOfAdmin, changeEmailVerifiedStatus, changeMobileVerifiedStatus, getAllSalonsByAdmin, getDefaultSalonByAdmin, googleAdminLogin, googleAdminSignup, handleForgetPasswordAdmin, handleLogoutAdmin, handleResetPasswordAdmin, loginAdmin, registerAdmin, sendVerificationCodeForAdminEmail, sendVerificationCodeForAdminMobile, updateAdminAccountDetails, updateAdminInfo, uploadAdminprofilePic } from "../../../controllers/web/admin/adminController.js";
+import { adminchangepassword, approveBarber, changeDefaultSalonIdOfAdmin, changeEmailVerifiedStatus, changeMobileVerifiedStatus, getAllAdminSalonsSubcriptions, getAllSalonsByAdmin, getDefaultSalonByAdmin, googleAdminLogin, googleAdminSignup, handleForgetPasswordAdmin, handleLogoutAdmin, handleResetPasswordAdmin, loginAdmin, registerAdmin, sendVerificationCodeForAdminEmail, sendVerificationCodeForAdminMobile, updateAdminAccountDetails, updateAdminInfo, uploadAdminprofilePic } from "../../../controllers/web/admin/adminController.js";
 import { AdminLoggedIn } from "../../../middlewares/web/middlewares.js";
 import { verifyRefreshTokenAdmin } from "../../../middlewares/web/VerifyRefreshTokenAdmin.js";
 import { getAllSalonServices } from "../../../controllers/web/admin/salonController.js";
@@ -69,6 +69,8 @@ router.route("/getBarberDetailsByEmail").post(verifyRefreshTokenAdmin ,getBarber
 router.route("/changeBarberOnlineStatus").post(verifyRefreshTokenAdmin, changeBarberOnlineStatus)
 
 router.route("/deleteBarberByEmail").post(verifyRefreshTokenAdmin, deleteBarber)
+
+router.route("/getAllAdminSalonsSubcriptions").post(getAllAdminSalonsSubcriptions)
 
 
 
