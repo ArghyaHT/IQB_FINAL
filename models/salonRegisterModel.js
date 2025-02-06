@@ -213,7 +213,8 @@ const salonsSchema = new mongoose.Schema({
         type: String
     },
     isTrailEnabled: {
-        type: Boolean
+        type: Boolean,
+        default: false
     },
     trailExpiryDate: {
         type: String
