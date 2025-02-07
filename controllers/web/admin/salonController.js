@@ -1328,6 +1328,8 @@ export const salonTrailPeriod = async(req, res, next) => {
 
       const salon = await getSalonBySalonId(salonId);
 
+      //Timeformat "Fri Feb 07 2025 12:25:28 GMT+0530 (India Standard Time)"
+
       const trailEndDate = moment(trailStartDate).add(14, 'days').unix().toString();
       // const trailEndDate = moment(trailStartDate).add(1, 'minutes').unix().toString();
 

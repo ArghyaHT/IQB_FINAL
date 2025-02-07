@@ -910,7 +910,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
           },
           quantity: product.quantity,
         })),
-        success_url: "https://iqb-final.netlify.app/admin-salon",
+        // success_url: "https://iqb-final.netlify.app/admin-salon",
+        success_url: "http://localhost:5173/admin-subscription",
         cancel_url: "https://iqb-final.netlify.app/admin-salon",
         metadata: {
           salonId: productInfo.salonId,
