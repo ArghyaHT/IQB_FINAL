@@ -1328,7 +1328,7 @@ export const salonTrailPeriod = async(req, res, next) => {
 
       const salon = await getSalonBySalonId(salonId);
 
-      if(salon.paymentType == "paid"){
+      if(salon.paymentType == "Paid"){
         return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res, { response: salon })
       }
 
@@ -1343,7 +1343,7 @@ export const salonTrailPeriod = async(req, res, next) => {
         salon.isAppointments = true;
         salon.isQueuing = true;
         salon.trailExpiryDate = trailEndDate
-        salon.paymentType = "free"
+        salon.paymentType = "Free"
 
         await salon.save();
       }
