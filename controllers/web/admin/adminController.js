@@ -1225,7 +1225,8 @@ export const getAllAdminSalonsSubcriptions = async (req, res, next) => {
             isQueuing, 
             isAppointments, 
             appointmentExpiryDate: appointmentExpiryDate === "" ? "" : appointmentExpiryDate ? moment.unix(appointmentExpiryDate).format("D MMM, YYYY h:mm A") : moment.unix(trailExpiryDate).format("D MMM, YYYY h:mm A"),
-            queueingExpiryDate: queueingExpiryDate === ""  ? "" : queueingExpiryDate ? moment.unix(queueingExpiryDate).format("D MMM, YYYY h:mm A") : moment.unix(trailExpiryDate).format("D MMM, YYYY h:mm A"),            isTrailEnabled, 
+            queueingExpiryDate: queueingExpiryDate === ""  ? "" : queueingExpiryDate ? moment.unix(queueingExpiryDate).format("D MMM, YYYY h:mm A") : moment.unix(trailExpiryDate).format("D MMM, YYYY h:mm A"),           
+            isTrailEnabled, 
             // trailExpiryDate: trailExpiryDate ? moment.unix(trailExpiryDate).format("D MMM, YYYY h:mm A") : "",
             paymentType
         }));

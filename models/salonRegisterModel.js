@@ -203,14 +203,16 @@ const salonsSchema = new mongoose.Schema({
         default: false
     },
     queueingExpiryDate: {
-        type: String
+        type: String,
+        default:""
     },
     isAppointments: {
         type: Boolean,
         default: false
     },    
     appointmentExpiryDate: {
-        type: String
+        type: String,
+        default: ""
     },
     isTrailEnabled: {
         type: Boolean,
@@ -220,7 +222,8 @@ const salonsSchema = new mongoose.Schema({
         type: String
     },
     trailExpiryDate: {
-        type: String
+        type: String,
+        default: ""
     },
     gallery: [
         {
