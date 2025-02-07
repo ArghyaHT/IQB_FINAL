@@ -1213,7 +1213,7 @@ export const getAllAdminSalonsSubcriptions = async (req, res, next) => {
         const filteredSalons = salons.map(({ 
             _id, salonId, salonName, adminEmail, salonLogo, currency, isoCurrencyCode, 
             isQueuing, isAppointments, appointmentExpiryDate, queueingExpiryDate, 
-            isTrailEnabled, trailExpiryDate 
+            isTrailEnabled, trailExpiryDate, paymentType 
         }) => ({
             _id,
             salonId, 
@@ -1227,7 +1227,8 @@ export const getAllAdminSalonsSubcriptions = async (req, res, next) => {
             appointmentExpiryDate: appointmentExpiryDate ? moment.unix(appointmentExpiryDate).format("D MMM, YYYY h:mm A") : "", 
             queueingExpiryDate: queueingExpiryDate ? moment.unix(queueingExpiryDate).format("D MMM, YYYY h:mm A") : "", 
             isTrailEnabled, 
-            trailExpiryDate: trailExpiryDate ? moment.unix(trailExpiryDate).format("D MMM, YYYY h:mm A") : ""
+            trailExpiryDate: trailExpiryDate ? moment.unix(trailExpiryDate).format("D MMM, YYYY h:mm A") : "",
+            paymentType
         }));
 
         return SuccessHandler(SALONS_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: filteredSalons });
