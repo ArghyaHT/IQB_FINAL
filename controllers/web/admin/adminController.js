@@ -1224,10 +1224,10 @@ export const getAllAdminSalonsSubcriptions = async (req, res, next) => {
             isoCurrencyCode, 
             isQueuing, 
             isAppointments, 
-            appointmentExpiryDate: appointmentExpiryDate ? moment.unix(appointmentExpiryDate).format("D MMM, YYYY h:mm A") : "", 
-            queueingExpiryDate: queueingExpiryDate ? moment.unix(queueingExpiryDate).format("D MMM, YYYY h:mm A") : "", 
+            appointmentExpiryDate: appointmentExpiryDate ? moment.unix(appointmentExpiryDate).format("D MMM, YYYY h:mm A") : moment.unix(trailExpiryDate).format("D MMM, YYYY h:mm A") , 
+            queueingExpiryDate: queueingExpiryDate ? moment.unix(queueingExpiryDate).format("D MMM, YYYY h:mm A") : moment.unix(trailExpiryDate).format("D MMM, YYYY h:mm A"), 
             isTrailEnabled, 
-            trailExpiryDate: trailExpiryDate ? moment.unix(trailExpiryDate).format("D MMM, YYYY h:mm A") : "",
+            // trailExpiryDate: trailExpiryDate ? moment.unix(trailExpiryDate).format("D MMM, YYYY h:mm A") : "",
             paymentType
         }));
 
