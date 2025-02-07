@@ -1228,13 +1228,13 @@ export const getAllAdminSalonsSubcriptions = async (req, res, next) => {
             appointmentExpiryDate: appointmentExpiryDate 
             ? moment.unix(appointmentExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
             : trailExpiryDate 
-                ? moment.unix(trailExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
+                ? moment.unix(trailExpiryDate).format("D MMM, YYYY h:mm A") 
                 : "",
         
         queueingExpiryDate: queueingExpiryDate  
             ? moment.unix(queueingExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
             : trailExpiryDate 
-                ? moment.unix(trailExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
+                ? moment.unix(trailExpiryDate).format("D MMM, YYYY h:mm A") 
                 : "",
 
             isTrailEnabled,
