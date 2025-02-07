@@ -216,6 +216,9 @@ const salonsSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    paymentType:{
+        type: String
+    },
     trailExpiryDate: {
         type: String
     },

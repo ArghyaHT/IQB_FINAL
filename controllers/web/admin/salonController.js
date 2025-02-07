@@ -1339,6 +1339,7 @@ export const salonTrailPeriod = async(req, res, next) => {
         salon.isAppointments = true;
         salon.isQueuing = true;
         salon.trailExpiryDate = trailEndDate
+        salon.paymentType = "free"
 
         await salon.save();
       }
