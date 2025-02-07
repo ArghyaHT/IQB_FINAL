@@ -1328,6 +1328,8 @@ export const salonTrailPeriod = async(req, res, next) => {
 
       const salon = await getSalonBySalonId(salonId);
 
+      console.log(trailStartDate)
+
       if(salon.trailExpiryDate){
         return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
       }
@@ -1342,6 +1344,7 @@ export const salonTrailPeriod = async(req, res, next) => {
       const trailEndDate = moment(trailStartDate).add(14, 'days').unix().toString();
       // const trailEndDate = moment(trailStartDate).add(1, 'minutes').unix().toString();
 
+     console.log(moment.unix(trailEndDate).format("D MMM, YYYY h:mm A"))
       
       if(isTrailEnabled){
         salon.isTrailEnabled = isTrailEnabled;
