@@ -37,6 +37,8 @@ export const SALON_LOGO_DELETE_ERROR = "Failed to delete salon logo"
 
 export const SALON_QUEUELIST_ERROR = "Salon cant be offline as customers in queue"
 
+export const SALON_TRAIL_ENABLED_ERROR = "Salon trail error"
+
 
 
 //SUCCESS
