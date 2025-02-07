@@ -1210,12 +1210,6 @@ export const getAllAdminSalonsSubcriptions = async (req, res, next) => {
         // Fetch all salons associated with the admin from registeredSalons array
         const salons = await allSalonsByAdmin(admin.registeredSalons);
 
-
-        const convertOffsetToIana = (offset) => {
-            const hours = parseInt(offset.replace("UTC", "").split(":")[0]);
-            return spacetime.now().goto(`Etc/GMT${hours > 0 ? `-${hours}` : `+${Math.abs(hours)}`}`).timezone().name;
-        };
-
         // Select only specific fields from the salons and format date fields
         const filteredSalons = salons.map(({
             _id, salonId, salonName, adminEmail, salonLogo, currency, isoCurrencyCode,
@@ -1231,17 +1225,17 @@ export const getAllAdminSalonsSubcriptions = async (req, res, next) => {
             isoCurrencyCode,
             isQueuing,
             isAppointments,
-            appointmentExpiryDate: appointmentExpiryDate === "" 
-    ? "" 
-    : appointmentExpiryDate 
-        ? moment.unix(appointmentExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
-        : moment.unix(trailExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A"),
-
-queueingExpiryDate: queueingExpiryDate === ""  
-    ? ""  
-    : queueingExpiryDate 
-        ? moment.unix(queueingExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
-        : moment.unix(trailExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A"),
+            appointmentExpiryDate: appointmentExpiryDate 
+            ? moment.unix(appointmentExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
+            : trailExpiryDate 
+                ? moment.unix(trailExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
+                : "",
+        
+        queueingExpiryDate: queueingExpiryDate  
+            ? moment.unix(queueingExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
+            : trailExpiryDate 
+                ? moment.unix(trailExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
+                : "",
 
             isTrailEnabled,
             paymentType
