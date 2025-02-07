@@ -1224,10 +1224,10 @@ export const getAllAdminSalonsSubcriptions = async (req, res, next) => {
             isoCurrencyCode, 
             isQueuing, 
             isAppointments, 
-            appointmentExpiryDate: appointmentExpiryDate ? moment.unix(appointmentExpiryDate).format("D MMM, YYYY") : "", 
-            queueingExpiryDate: queueingExpiryDate ? moment.unix(queueingExpiryDate).format("D MMM, YYYY") : "", 
+            appointmentExpiryDate: appointmentExpiryDate ? moment.unix(appointmentExpiryDate).format("D MMM, YYYY h:mm A") : "", 
+            queueingExpiryDate: queueingExpiryDate ? moment.unix(queueingExpiryDate).format("D MMM, YYYY h:mm A") : "", 
             isTrailEnabled, 
-            trailExpiryDate: trailExpiryDate ? moment.unix(trailExpiryDate).format("D MMM, YYYY") : ""
+            trailExpiryDate: trailExpiryDate ? moment.unix(trailExpiryDate).format("D MMM, YYYY h:mm A") : ""
         }));
 
         return SuccessHandler(SALONS_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: filteredSalons });
