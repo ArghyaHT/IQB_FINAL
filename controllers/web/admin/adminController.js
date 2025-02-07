@@ -26,6 +26,7 @@ import { ALLOWED_IMAGE_EXTENSIONS, IMAGE_FAILED_DELETE, MAX_FILE_SIZE } from "..
 import { qListByBarberId } from "../../../services/web/queue/joinQueueService.js";
 import { getSalonPaymentsBySalonId } from "../../../services/web/salonPayments/salonPaymentService.js";
 import moment from "moment";
+import spacetime from "spacetime";
 
 // Desc: Register Admin
 export const registerAdmin = async (req, res, next) => {
@@ -159,14 +160,14 @@ export const handleLogoutAdmin = async (req, res, next) => {
         //     secure: true
         // })
 
-         // Check if adminToken is present in request body
-         const token = req.body.token;
+        // Check if adminToken is present in request body
+        const token = req.body.token;
 
-         // Clear adminToken from request body if present
-         if (token) {
-             delete req.body.token; // Remove adminToken from request body
-             // Perform any additional action if needed (e.g., logging out from another system)
-         }
+        // Clear adminToken from request body if present
+        if (token) {
+            delete req.body.token; // Remove adminToken from request body
+            // Perform any additional action if needed (e.g., logging out from another system)
+        }
 
         return SuccessHandler(LOGOUT_SUCCESS, SUCCESS_STATUS_CODE, res)
 
@@ -391,7 +392,7 @@ export const googleAdminLogin = async (req, res, next) => {
 
 export const googleAdminSignup = async (req, res, next) => {
     try {
-       
+
         const email = req.body.email
 
         const existingUser = await findAdminByEmailandRole(email)
@@ -718,8 +719,8 @@ export const getAllSalonsByAdmin = async (req, res, next) => {
             const salonWithSettings = {
                 ...salon.toObject(),  // Assuming `salon` is a Mongoose document, use `_doc` to get the plain object
                 appointmentSettings: settings ? settings.appointmentSettings : " ",
-                appointmentAdvanceDays:settings? settings.appointmentAdvanceDays: 0,
-                salonOffDays: settings? settings.salonOffDays: [],
+                appointmentAdvanceDays: settings ? settings.appointmentAdvanceDays : 0,
+                salonOffDays: settings ? settings.salonOffDays : [],
                 isRenew: salonPayments && salonPayments.length > 0 ? true : false, // Add `isRenew` field
             };
 
@@ -768,8 +769,8 @@ export const getDefaultSalonByAdmin = async (req, res, next) => {
 
             const defaultSalonSettings = await getSalonSettings(admin.salonId)
 
-             // Include appointmentAdvanceDays in the response
-             const formattedDefaultSalon = {
+            // Include appointmentAdvanceDays in the response
+            const formattedDefaultSalon = {
                 ...defaultSalon.toObject(),
                 appointmentAdvanceDays: defaultSalonSettings?.appointmentAdvanceDays || 0 // Fallback to null if not found
             };
@@ -845,26 +846,26 @@ export const approveBarber = async (req, res, next) => {
         if (isApproved === false) {
             // Fetch barber details by email and salonId
             const barber = await findBarberByBarberEmailAndSalonId(email, salonId);
-        
+
             // Fetch barber's queue list
             const barberQlist = await qListByBarberId(salonId, barber.barberId);
-        
+
             // If queue list exists, return an error and stop further processing
             if (barberQlist.length > 0) {
                 return ErrorHandler(APPROVE_BARBER_ERROR, ERROR_STATUS_CODE, res);
             }
-        
+
             // If no queue exists, update the barber's clock-in and online status
             const barberApprovedStatus = await approveBarberByadmin(salonId, email, isApproved);
-        
+
             barberApprovedStatus.isClockedIn = false;
             barberApprovedStatus.isOnline = false;
-        
+
             // Save the updated status
             await barberApprovedStatus.save();
 
             const salon = await getSalonBySalonId(salonId);
-    
+
             const emailSubject = `${salon.salonName}-Your Request has been approved`;
             const emailBody = `
             <!DOCTYPE html>
@@ -926,29 +927,29 @@ export const approveBarber = async (req, res, next) => {
             </body>
             </html>
         `;
-    
+
             try {
                 await barberApprovalStatus(email, emailSubject, emailBody);
             } catch (error) {
                 console.error('Error sending email:', error);
             }
-    
+
             return SuccessHandler(APPROVE_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barberApprovedStatus })
 
         } else if (isApproved === true) {
             // Approve the barber
             const barberApprovedStatus = await approveBarberByadmin(salonId, email, isApproved);
-        
+
             // No additional checks needed; save the approved status
             barberApprovedStatus.isApproved = true;
-        
+
             // Save the updated status
             await barberApprovedStatus.save();
 
             const salon = await getSalonBySalonId(salonId);
 
             // const formattedDate = moment(dateJoined, 'YYYY-MM-DD').format('DD-MM-YYYY');
-    
+
             const emailSubject = `${salon.salonName}-Your Request has been approved`;
             const emailBody = `
             <!DOCTYPE html>
@@ -1010,13 +1011,13 @@ export const approveBarber = async (req, res, next) => {
             </body>
             </html>
         `;
-    
+
             try {
                 await barberApprovalStatus(email, emailSubject, emailBody);
             } catch (error) {
                 console.error('Error sending email:', error);
             }
-    
+
             return SuccessHandler(APPROVE_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barberApprovedStatus })
         }
 
@@ -1209,25 +1210,40 @@ export const getAllAdminSalonsSubcriptions = async (req, res, next) => {
         // Fetch all salons associated with the admin from registeredSalons array
         const salons = await allSalonsByAdmin(admin.registeredSalons);
 
+
+        const convertOffsetToIana = (offset) => {
+            const hours = parseInt(offset.replace("UTC", "").split(":")[0]);
+            return spacetime.now().goto(`Etc/GMT${hours > 0 ? `-${hours}` : `+${Math.abs(hours)}`}`).timezone().name;
+        };
+
         // Select only specific fields from the salons and format date fields
-        const filteredSalons = salons.map(({ 
-            _id, salonId, salonName, adminEmail, salonLogo, currency, isoCurrencyCode, 
-            isQueuing, isAppointments, appointmentExpiryDate, queueingExpiryDate, 
-            isTrailEnabled, trailExpiryDate, paymentType 
+        const filteredSalons = salons.map(({
+            _id, salonId, salonName, adminEmail, salonLogo, currency, isoCurrencyCode,
+            isQueuing, isAppointments, appointmentExpiryDate, queueingExpiryDate,
+            isTrailEnabled, trailExpiryDate, paymentType, timeZone
         }) => ({
             _id,
-            salonId, 
-            salonName, 
-            adminEmail, 
-            salonLogo, 
-            currency, 
-            isoCurrencyCode, 
-            isQueuing, 
-            isAppointments, 
-            appointmentExpiryDate: appointmentExpiryDate === "" ? "" : appointmentExpiryDate ? moment.unix(appointmentExpiryDate).format("D MMM, YYYY h:mm A") : moment.unix(trailExpiryDate).format("D MMM, YYYY h:mm A"),
-            queueingExpiryDate: queueingExpiryDate === ""  ? "" : queueingExpiryDate ? moment.unix(queueingExpiryDate).format("D MMM, YYYY h:mm A") : moment.unix(trailExpiryDate).format("D MMM, YYYY h:mm A"),           
-            isTrailEnabled, 
-            // trailExpiryDate: trailExpiryDate ? moment.unix(trailExpiryDate).format("D MMM, YYYY h:mm A") : "",
+            salonId,
+            salonName,
+            adminEmail,
+            salonLogo,
+            currency,
+            isoCurrencyCode,
+            isQueuing,
+            isAppointments,
+            appointmentExpiryDate: appointmentExpiryDate === "" 
+    ? "" 
+    : appointmentExpiryDate 
+        ? moment.unix(appointmentExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
+        : moment.unix(trailExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A"),
+
+queueingExpiryDate: queueingExpiryDate === ""  
+    ? ""  
+    : queueingExpiryDate 
+        ? moment.unix(queueingExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
+        : moment.unix(trailExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A"),
+
+            isTrailEnabled,
             paymentType
         }));
 
