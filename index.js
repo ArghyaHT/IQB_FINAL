@@ -234,7 +234,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
             $set: {
               isQueuing: isQueuingValue,
               queueingExpiryDate: newExpiryDate,
-              paymentType: paymentData.paymentType
+              paymentType: paymentData.paymentType,
+              appointmentExpiryDate: ""
             },
           }
         )
@@ -375,7 +376,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
             $set: {
               isAppointments: isAppointmentValue,
               appointmentExpiryDate: newExpiryDate,
-              paymentType: paymentData.paymentType
+              paymentType: paymentData.paymentType,
+              queueingExpiryDate: ""
             },
           }
         )
