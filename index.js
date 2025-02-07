@@ -235,7 +235,6 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
               isQueuing: isQueuingValue,
               queueingExpiryDate: newExpiryDate,
               paymentType: paymentData.paymentType,
-              appointmentExpiryDate: "",
               isTrailEnabled: false,
               trailExpiryDate: ""
             },
@@ -379,8 +378,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
               isAppointments: isAppointmentValue,
               appointmentExpiryDate: newExpiryDate,
               paymentType: paymentData.paymentType,
-              queueingExpiryDate: "",
-               isTrailEnabled: false,
+              isTrailEnabled: false,
               trailExpiryDate: ""
             },
           }
