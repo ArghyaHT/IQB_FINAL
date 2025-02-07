@@ -1328,7 +1328,7 @@ export const salonTrailPeriod = async(req, res, next) => {
 
       const salon = await getSalonBySalonId(salonId);
 
-      if(salon.paymentType == "Paid"){
+      if(salon.paymentType == "Paid" || salon.trailExpiryDate){
         return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res, { response: salon })
       }
 
