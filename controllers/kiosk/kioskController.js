@@ -36,6 +36,9 @@ export const loginKiosk = async (req, res, next) => {
     try {
         let { email, password, role } = req.body
 
+        console.log("email", email)
+        console.log("password", email)
+
         if (!email && !password) {
             return ErrorHandler(EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
