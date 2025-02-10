@@ -1,20 +1,24 @@
-import { getSalonCancelledQlist, getSalonServedQlist } from "../../../services/web/queue/joinQueueHistoryService.js";
+import { getSalonCancelledQlist, getSalonServedQlist, getTotalSalonQlist } from "../../../services/web/queue/joinQueueHistoryService.js";
 
 
-//DESC:SALON SERVED REPORT ================
 export const salonServedReport = async(req, res, next) => {
     try {
-        const { salonId, from, to } = req.body; // Expect only salonId, from and to dates
+        const { salonId, from, to, reportType, reportValue } = req.body;
 
-        // Validate required fields
-        if (!salonId || !from || !to) {
+        if (!salonId || !from || !to || !reportType) {
             return res.status(400).json({
                 success: false,
-                message: 'Missing required fields: salonId, from, or to date',
+                message: 'Missing required fields: salonId, from, to, or reportType',
             });
         }
 
-        // Validate and parse dates
+        if (!["daily", "weekly", "monthly"].includes(reportType)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid reportType. Allowed values: 'daily', 'weekly', 'monthly'."
+            });
+        }
+
         let fromDate = new Date(from);
         let toDate = new Date(to);
 
@@ -25,16 +29,25 @@ export const salonServedReport = async(req, res, next) => {
             });
         }
 
-        const getSalonServedReport = await getSalonServedQlist(salonId, fromDate, toDate);
+        if(reportValue === "queueserved"){
+            const getSalonServedReport = await getSalonServedQlist(salonId, fromDate, toDate, reportType);
 
-        return res.status(200).json({
-            success: true,
-            message: 'Report retrieved successfully.',
-            response: getSalonServedReport,
-        });
+            return res.status(200).json({
+                success: true,
+                message: 'Report retrieved successfully.',
+                response: getSalonServedReport,
+            });
+        }
+        else{
+            const getSalonCancelledReport = await getSalonCancelledQlist(salonId, fromDate, toDate, reportType);
+            return res.status(200).json({
+                success: true,
+                message: 'Report retrieved successfully.',
+                response: getSalonCancelledReport,
+            });
+        }   
 
     } catch (error) {
-        //console.log(error);
         next(error);
     }
 }
@@ -73,6 +86,27 @@ export const salonCancelledReport = async(req, res, next) => {
 
     } catch (error) {
         //console.log(error);
+        next(error);
+    }
+}
+
+
+export const dashboardReports = async(req, res, next) => {
+
+    try{
+
+        const { salonId, reportType } = req.body;
+
+        const getSalonQueueReport = await getTotalSalonQlist(salonId, reportType);
+        return res.status(200).json({
+            success: true,
+            message: 'Report retrieved successfully.',
+            response: getSalonQueueReport,
+        });
+
+    }
+
+    catch (error) {
         next(error);
     }
 }

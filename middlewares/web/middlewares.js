@@ -104,7 +104,7 @@ export const BarberLoggedIn = async (req, res, next) => {
       success: true,
       message: "Yes i am barber Logged in",
       user: [loggedinBarber],
-      currency: salon.currency
+      // currency: salon.currency
     })
 
 
