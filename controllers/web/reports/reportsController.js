@@ -90,9 +90,7 @@ export const salonCancelledReport = async(req, res, next) => {
     }
 }
 
-
 export const dashboardReports = async(req, res, next) => {
-
     try{
 
         const { salonId, reportType } = req.body;
@@ -103,9 +101,7 @@ export const dashboardReports = async(req, res, next) => {
             message: 'Report retrieved successfully.',
             response: getSalonQueueReport,
         });
-
     }
-
     catch (error) {
         next(error);
     }

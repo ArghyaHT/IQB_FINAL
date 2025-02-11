@@ -1119,16 +1119,26 @@ export const getCustomerDetails = async (req, res, next) => {
             // Convert email to lowercase
             email = email.toLowerCase();
         const customer = await findCustomerByEmail(email);
+
         if (!customer) {
             return res.status(201).json({
                 success: false,
                 message: "Customer not found",
             });
         }
-        res.status(200).json({
+
+        const salon = await findSalonBySalonId(customer.salonId);
+
+
+        const customerDetails = {
+            ...customer.toObject(),
+            salonInfo: salon
+        }
+
+        return res.status(200).json({
             success: true,
             message: "Customer details found successfully",
-            response: customer,
+            response: customerDetails,
         });
     }
     catch (error) {
