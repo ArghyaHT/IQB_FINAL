@@ -1,82 +1,101 @@
 import SalonQueueList from "../../models/salonQueueListModel.js";
 
 //Get salon queue list
-export const getSalonQlist = async(salonId) => {
-    const Qlist = await SalonQueueList.aggregate([
-        {
-          $match: { salonId } // Match the document based on salonId
-        },
-        {
-          $unwind: "$queueList" // Deconstruct queueList array
-        },
-        {
-          $sort: {
-            "queueList.qPosition": 1 // Sort by qPosition in ascending order (1)
-          }
-        },
-        {
-          $group: {
-            _id: "$_id", // Group by the document's _id field
-            queueList: { $push: "$queueList" } // Reconstruct the queueList array
-          }
-        },
-        //Changed for frontend 
-        {
-          $project: {
-            queueList: {
-              $map: {
-                input: "$queueList",
-                as: "list",
-                in: {
-                  $mergeObjects: [
-                    "$$list",
-                    { "name": "$$list.customerName" } // Rename customerName to name
-                  ]
-                }
-              }
-            }
-          }
-        },
-        {
-          $project: {
-            "queueList.customerName": 0 // Exclude the customerName field
-          }
-        }
-      ]);
+export const getSalonQlist = async (salonId, customerEmail) => {
+  const defaultProfileImage =
+    "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg";
 
-      return Qlist;
-}
+  const Qlist = await SalonQueueList.aggregate([
+    {
+      $match: { salonId }, // Match salonId
+    },
+    {
+      $unwind: "$queueList", // Unwind queueList array
+    },
+    {
+      $sort: {
+        "queueList.qPosition": 1, // Sort queue by qPosition
+      },
+    },
+    {
+      $lookup: {
+        from: "customers",
+        localField: "queueList.customerEmail",
+        foreignField: "email",
+        as: "customerData",
+      },
+    },
+    {
+      $addFields: {
+        "queueList.name": {
+          $cond: {
+            if: { $eq: ["$queueList.customerEmail", customerEmail] },
+            then: "$queueList.customerName",
+            else: "Client",
+          },
+        },
+        "queueList.customerProfile": {
+          $ifNull: [
+            {
+              $arrayElemAt: ["$customerData.profile", 0] // Extract the first profile
+            },
+            {   // Default profile object
+              "url": "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg"
+            }
+          ]
+        }
+      },
+    },
+    {
+      $project: {
+        "queueList.customerName": 0,
+        customerData: 0,
+      },
+    },
+    {
+      $group: {
+        _id: "$_id", // Group by original document ID
+        salonId: { $first: "$salonId" },
+        queueList: { $push: "$queueList" }, // Convert back to an array
+      },
+    },
+  ]);
+
+  return Qlist;
+};
+
+
 
 
 // Find existing SalonQueueList
-export const findSalonQueueList = async(salonId) => {
+export const findSalonQueueList = async (salonId) => {
   const queueList = await SalonQueueList.findOne({ salonId: salonId });
-  
-  return queueList;
-  }
 
-  //Adding members in group join
-export const addGroupJoin = async(salonId) => {
-  const existingQueue = new SalonQueueList({
-      salonId: salonId,
-      queueList: [],
-    });
-    await existingQueue.save();
-    return existingQueue;
+  return queueList;
 }
 
-  //Adding new queue document
-export const addNewQueue = async(salonId, newQueue) => {
+//Adding members in group join
+export const addGroupJoin = async (salonId) => {
+  const existingQueue = new SalonQueueList({
+    salonId: salonId,
+    queueList: [],
+  });
+  await existingQueue.save();
+  return existingQueue;
+}
+
+//Adding new queue document
+export const addNewQueue = async (salonId, newQueue) => {
   const newQueueData = new SalonQueueList({
-      salonId: salonId,
-      queueList: [newQueue],
-    });
-   await newQueueData.save();
-   return newQueueData;
+    salonId: salonId,
+    queueList: [newQueue],
+  });
+  await newQueueData.save();
+  return newQueueData;
 }
 
 //GET Q LIST BY BARBER ID
-export const qListByBarberId = async(salonId, barberId) => {
+export const qListByBarberId = async (salonId, barberId) => {
   const qList = await SalonQueueList.aggregate([
     {
       $match: {

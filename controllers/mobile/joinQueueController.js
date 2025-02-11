@@ -735,8 +735,10 @@ export const getQueueListBySalonId = async (req, res, next) => {
     try {
         const salonId = parseInt(req.query.salonId, 10);
 
+        const customerEmail = req.query.customerEmail;
+
         //To find the queueList according to salonId and sort it according to qposition
-        const getSalon = await getSalonQlist(salonId)
+        const getSalon = await getSalonQlist(salonId, customerEmail)
 
         if (getSalon.length > 0) {
             // Access the sorted queueList array from the result
