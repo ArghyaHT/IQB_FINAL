@@ -1,35 +1,57 @@
+import moment from "moment";
 import Appointment from "../../models/appointmentsModel.js";
 
 //GET APPOINTMENT BY CUSTOMER
 export const getCustomerAppointments = async (salonId, customerEmail) => {
-    const customerAppointments = await Appointment.aggregate([
-        {
-            $match: {
-                salonId: salonId,
-                "appointmentList.customerEmail": customerEmail
-            }
-        },
-        {
-            $unwind: "$appointmentList"
-        },
-        {
-            $match: {
-                "appointmentList.customerEmail": customerEmail
-            }
-        },
-        {
-            $group: {
-                _id: "$_id",
-                appointments: { $push: "$appointmentList" }
-            }
-        }
-    ]);
+    // const customerAppointments = await Appointment.aggregate([
+    //     {
+    //         $match: {
+    //             salonId: salonId,
+    //             "appointmentList.customerEmail": customerEmail
+    //         }
+    //     },
+    //     {
+    //         $unwind: "$appointmentList"
+    //     },
+    //     {
+    //         $match: {
+    //             "appointmentList.customerEmail": customerEmail
+    //         }
+    //     },
+    //     {
+    //         $group: {
+    //             _id: "$_id",
+    //             appointments: { $push: "$appointmentList" }
+    //         }
+    //     }
+    // ]);
 
-    if (customerAppointments.length > 0) {
-        return customerAppointments[0].appointments;
-    } else {
+    // if (customerAppointments.length > 0) {
+    //     return customerAppointments[0].appointments;
+    // } else {
+    //     return [];
+    // }
+    const getCustomerBookingBySalonId = await Appointment.findOne({ salonId });
+
+    if (!getCustomerBookingBySalonId) {
         return [];
     }
+
+    const filteredAppointments = getCustomerBookingBySalonId.appointmentList
+    .filter(item => item.customerEmail === customerEmail)
+    .map(appointment => {
+        // Convert time to 12-hour AM/PM format using moment.js
+        const formatTo12Hour = (time) => moment(time, "HH:mm").format("h:mm A");
+
+        return {
+            ...appointment.toObject(),
+            startTime: formatTo12Hour(appointment.startTime),
+            endTime: formatTo12Hour(appointment.endTime),
+            timeSlots: `${formatTo12Hour(appointment.startTime)} - ${formatTo12Hour(appointment.endTime)}`
+        };
+    });
+
+    return filteredAppointments;
 }
 
 export const getAppointmentbyId = async (salonId) => {
