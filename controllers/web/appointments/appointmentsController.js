@@ -13,6 +13,7 @@ import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js"
 import { SALON_NOT_FOUND_ERROR } from "../../../constants/web/SalonConstants.js";
 import { getSalonBySalonId } from "../../../services/mobile/salonServices.js";
+import { getBarberBreakTimes } from "../../../services/web/barberBreakTimes/barberBreakTimesService.js";
 
 
 //DESC:CREATE APPOINTMENT ====================
@@ -306,18 +307,9 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
             return ErrorHandler(SELECT_DATE_ERROR, ERROR_STATUS_CODE, res)
         }
 
-
-        // if (!date || !barberId) {
-        //     // If the date value is null, send a response to choose the date
-        //     return res.status(400).json({
-        //         message: 'Please choose a Date and Barber to fetch time slots'
-        //     });
-        // }
-
         // Getting the appointments for a Specific Barber
         const appointments = await getAppointmentsByDateAndBarberId(salonId, date, barberId);
 
-        let timeSlots = [];
 
         if (!appointments || appointments.length === 0) {
             // Generate time slots for the entire working hours as no appointments found
@@ -329,13 +321,13 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
             const end = moment(appointmentEndTime, 'HH:mm');
 
             timeSlots = await generateTimeSlots(start, end, intervalInMinutes);
+
         } else {
             const appointmentList = appointments.map(appt => appt.appointmentList);
 
             // Generate time slots for the barber If have appointments
             const { appointmentSettings } = await getSalonSettings(salonId);
             const { appointmentStartTime, appointmentEndTime, intervalInMinutes } = appointmentSettings;
-            console.log(appointmentSettings)
 
             const start = moment(appointmentStartTime, 'HH:mm');
             const end = moment(appointmentEndTime, 'HH:mm');

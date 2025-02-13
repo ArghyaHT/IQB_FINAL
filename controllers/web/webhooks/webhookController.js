@@ -15,7 +15,7 @@ const saveAccountEndpointSecret = "whsec_DI2vfnOkeWPhrsuIpX1S3gzNf5mw2ArF"
 
 
 export const handleStripeWebhook = async(request, response) => {
-    const sig = request.headers['stripe-signature'];
+  const sig = request.headers['stripe-signature'];
   let event;
 
   try {
@@ -125,7 +125,10 @@ export const handleStripeWebhook = async(request, response) => {
           {
             $set: {
               isQueuing: isQueuingValue,
-              queueingExpiryDate: newExpiryDate
+              queueingExpiryDate: newExpiryDate,
+              paymentType: paymentData.paymentType,
+              isTrailEnabled: false,
+              trailExpiryDate: ""
             },
           }
         )
@@ -265,7 +268,10 @@ export const handleStripeWebhook = async(request, response) => {
           {
             $set: {
               isAppointments: isAppointmentValue,
-              appointmentExpiryDate: newExpiryDate
+              appointmentExpiryDate: newExpiryDate,
+              paymentType: paymentData.paymentType,
+              isTrailEnabled: false,
+              trailExpiryDate: ""
             },
           }
         )
@@ -415,7 +421,11 @@ export const handleStripeWebhook = async(request, response) => {
               isQueuing: isQueuingValue,
               isAppointments: isAppointmentValue,
               queueingExpiryDate: newQueuingExpiryDate,
-              appointmentExpiryDate: newAppointmentExpiryDate
+              appointmentExpiryDate: newAppointmentExpiryDate,
+              paymentType: paymentData.paymentType,
+               isTrailEnabled: false,
+              trailExpiryDate: ""
+
             },
           }
         )

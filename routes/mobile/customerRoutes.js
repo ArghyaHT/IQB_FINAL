@@ -79,7 +79,7 @@ router.route("/customerDisconnectSalon").post(customerDisconnectSalon)
 router.route("/getCustomerDetails").post(getCustomerDetails)
 
 //Get all appointments by Customer
-router.route("/getAllAppointmentsByCustomerId").post(getAllAppointmentsByCustomer)
+router.route("/getAllAppointmentsByCustomerEmail").post(getAllAppointmentsByCustomer)
 
 
 // //Send Bulk Email to Customers

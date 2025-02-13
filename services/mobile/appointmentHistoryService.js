@@ -6,7 +6,5 @@ export const getAppointmentsByCustomerEmail = async(salonId, customerEmail) => {
 
     const filteredAppointmentList = getCustomerBookingBySalonId.appointmentList.filter(item => item.customerEmail === customerEmail);
     
-    console.log(filteredAppointmentList)
-
      return filteredAppointmentList
 }

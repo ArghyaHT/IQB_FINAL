@@ -53,7 +53,6 @@ router.route("/getCustomerDetails").post(getCustomerDetails)
 //Get all appointments by Customer
 router.route("/getAllAppointmentsByCustomerId").post(getAllAppointmentsByCustomer)
 
-
 //Send Bulk Email to Customers
 router.route("/sendBulkEmailToCustomers").post(sendBulkEmailToCustomers)
 

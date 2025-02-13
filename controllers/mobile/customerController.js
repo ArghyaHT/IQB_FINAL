@@ -1179,14 +1179,21 @@ export const getAllAppointmentsByCustomer = async (req, res, next) => {
     try {
         const { customerEmail, salonId } = req.body;
 
-        // Check if customerEmail and salonId are provided
-        if (!customerEmail || !salonId) {
-            return res.status(201).json({
-                success: false,
-                message: 'Both customerEmail and salonId are required.'
-            });
-        }
+    // Check if customerEmail and salonId are provided
+    if (!salonId) {
+        return res.status(201).json({
+            success: false,
+            message: 'SalonId is required.'
+        });
+    }
 
+    // Check if customerEmail and salonId are provided
+    if (!customerEmail ) {
+        return res.status(201).json({
+            success: false,
+            message: 'CustomerEmail is required.'
+        });
+    }
         // Find appointments based on customerEmail and salonId
         const appointments = await getCustomerAppointments(salonId, customerEmail)
 

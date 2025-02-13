@@ -19,6 +19,8 @@ import { sendQueuePositionEmail } from "../../utils/emailSender/emailSender.js";
 import { sendAppointmentNotification } from "../../utils/pushNotifications/pushNotifications.js";
 import { getPushDevicesbyEmailId } from "../../services/mobile/pushDeviceTokensService.js";
 import { CREATE_APPOINTMENT, EDIT_APPOINTMENT } from "../../constants/mobile/NotificationConstants.js"
+import { getBarberBreakTimes } from "../../services/web/barberBreakTimes/barberBreakTimesService.js";
+import { getBarberReservations } from "../../services/web/barberReservations/barberReservationsService.js";
 
 //Creating Appointment
 export const createAppointment = async (req, res, next) => {
@@ -900,6 +902,12 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
 
     let timeSlots = [];
 
+    const selectedDay = moment(date, "YYYY-MM-DD").format("dddd");
+
+    const barberBreaks = await getBarberBreakTimes(salonId, barberId, selectedDay)
+
+    const barberReservations = await getBarberReservations(salonId, barberId, date)
+
     if (!appointments || appointments.length === 0) {
       // Generate time slots for the entire working hours as no appointments found
       const { appointmentSettings } = await getSalonSettings(salonId);
@@ -910,6 +918,36 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
       const end = moment(appointmentEndTime, 'HH:mm');
 
       timeSlots = await generateTimeSlots(start, end, intervalInMinutes);
+
+      if(barberReservations){
+        timeSlots = timeSlots.map((slot) => {
+          const slotTime = moment(slot.timeInterval, "HH:mm");
+
+          // Check if the slot falls within any break time range
+          const isReserved = barberReservations.some((reservedTime) => {
+              const reservationStart = moment(reservedTime.startTime, "HH:mm");
+              const reservationEnd = moment(reservedTime.endTime, "HH:mm");
+              return slotTime.isBetween(reservationStart, reservationEnd, null, "[)");
+          });
+
+          return isReserved ? { ...slot, disabled: true } : slot;
+      });
+      }
+
+      if (barberBreaks && barberBreaks.length > 0) {
+        timeSlots = timeSlots.map((slot) => {
+            const slotTime = moment(slot.timeInterval, "HH:mm");
+
+            // Check if the slot falls within any break time range
+            const isBreakTime = barberBreaks.some((breakTime) => {
+                const breakStart = moment(breakTime.startTime, "HH:mm");
+                const breakEnd = moment(breakTime.endTime, "HH:mm");
+                return slotTime.isBetween(breakStart, breakEnd, null, "[)");
+            });
+
+            return isBreakTime ? { ...slot, disabled: true } : slot;
+        });
+    }
     } else {
       const appointmentList = appointments.map(appt => appt.appointmentList);
 
@@ -935,6 +973,36 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
           return slot;
         });
       });
+
+      if(barberReservations){
+        timeSlots = timeSlots.map((slot) => {
+          const slotTime = moment(slot.timeInterval, "HH:mm");
+
+          // Check if the slot falls within any break time range
+          const isReserved = barberReservations.some((reservedTime) => {
+              const reservationStart = moment(reservedTime.startTime, "HH:mm");
+              const reservationEnd = moment(reservedTime.endTime, "HH:mm");
+              return slotTime.isBetween(reservationStart, reservationEnd, null, "[)");
+          });
+
+          return isReserved ? { ...slot, disabled: true } : slot;
+      });
+      }
+
+      if (barberBreaks && barberBreaks.length > 0) {
+        timeSlots = timeSlots.map((slot) => {
+            const slotTime = moment(slot.timeInterval, "HH:mm");
+
+            // Check if the slot falls within any break time range
+            const isBreakTime = barberBreaks.some((breakTime) => {
+                const breakStart = moment(breakTime.startTime, "HH:mm");
+                const breakEnd = moment(breakTime.endTime, "HH:mm");
+                return slotTime.isBetween(breakStart, breakEnd, null, "[)");
+            });
+
+            return isBreakTime ? { ...slot, disabled: true } : slot;
+        });
+      }
     }
     res.status(200).json({
       success: true,

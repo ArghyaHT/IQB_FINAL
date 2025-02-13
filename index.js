@@ -35,6 +35,8 @@ import queuehistoryRoutes from "./routes/web/queue/queueHistoryRoutes.js"
 import barberDayOffRoutes from "./routes/web/barberDayOff/barberDayoffRoutes.js"
 import barberAppointmentDays from "./routes/web/barberAppointmentDays/barberAppointmentDaysRoutes.js"
 import salonPaymentRoutes from "./routes/web/salonPayment/salonPaymentGatewayRoutes.js"
+import barberBreakTimes from "./routes/web/barberBreakTimes/barberBreakTimeRoutes.js"
+import barberReservations from "./routes/web/barberReservations/barberReservationsRoutes.js"
 
 // import { setupCronJobs } from "./triggers/cronJobs.js";
 // import { storeCountries } from "./utils/countries.js";
@@ -833,8 +835,8 @@ app.use("/api/queueHistory", queuehistoryRoutes)
 app.use("/api/barberDayOff", barberDayOffRoutes)
 app.use("/api/barberAppointmentDays", barberAppointmentDays)
 app.use('/api/salonPayments', salonPaymentRoutes);
-
-
+app.use("/api/barberBreakTimes", barberBreakTimes)
+app.use("/api/barberReservations", barberReservations)
 
 
 
