@@ -22,6 +22,7 @@ import { ERROR_STATUS_CODE_201 } from "../../constants/mobile/StatusCodeConstant
 import {ErrorHandler} from "../../middlewares/ErrorHandler.js"
 import { SUCCESS_STATUS_CODE } from "../../constants/web/Common/StatusCodeConstant.js";
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
+import { getSalonSettings } from "../../services/mobile/salonSettingsService.js";
 
 
 //DESC:CHECK WEATHER THE EMAIL ALREADY EXISTS IN THE DATABASE =======
@@ -1128,11 +1129,13 @@ export const getCustomerDetails = async (req, res, next) => {
         }
 
         const salon = await findSalonBySalonId(customer.salonId);
+        const salonSettings = await getSalonSettings(customer.salonId)
 
 
         const customerDetails = {
             ...customer.toObject(),
-            salonInfo: salon
+            salonInfo: salon,
+            salonSettings: salonSettings
         }
 
         return res.status(200).json({

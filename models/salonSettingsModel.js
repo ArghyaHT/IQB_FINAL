@@ -17,20 +17,6 @@ const salonSettingsSchema  = new mongoose.Schema({
             "Sunday",
         ],
     },
-    isQueuing: {
-        type: Boolean,
-        default: false
-    },
-    queueingExpiryDate: {
-        type: String
-    },
-    isAppointments: {
-        type: Boolean,
-        default: false
-    },
-    appointmentExpiryDate:{
-        type: String
-    },
     advertisements: [
         {
             public_id: {

@@ -10,6 +10,7 @@ import { getAppointmentHistorybyCustomerEmail } from "../../controllers/web/appo
 import { pushDeviceTokens, pushFcmDeviceTokens } from "../../controllers/mobile/pushDevicesController.js";
 import { checkPushNotifications } from "../../utils/pushNotifications/pushNotifications.js";
 import { changeNotificationSeenStatus, getAllNotificationsByCustomerEmail } from "../../controllers/mobile/notificationController.js";
+import { getBarberMissingAppointmentDates, getFullyBookedDatesBySalonIdBarberId } from "../../controllers/web/barberAppointmentDays/barberAppointmentController.js";
 // import { getAllAdvertisements } from "../../controllers/dashboard/dashboardController.js";
 
 const router = express.Router();
@@ -104,6 +105,10 @@ router.route("/getAllNotificationsByCustomerEmail").post(getAllNotificationsByCu
 router.route("/changeNotificationSeenStatus").post(changeNotificationSeenStatus)
 
 router.route("/getSalonCities").post(getSalonCities)
+
+router.route("/getBarberDisabledAppointmentDates").post(getBarberMissingAppointmentDates)
+
+router.route("/getFullyBookedDatesBySalonIdBarberId").post(getFullyBookedDatesBySalonIdBarberId)
 
 
 
