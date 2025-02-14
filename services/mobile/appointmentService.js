@@ -38,18 +38,18 @@ export const getCustomerAppointments = async (salonId, customerEmail) => {
     }
 
     const filteredAppointments = getCustomerBookingBySalonId.appointmentList
-    .filter(item => item.customerEmail === customerEmail)
-    .map(appointment => {
-        // Convert time to 12-hour AM/PM format using moment.js
-        const formatTo12Hour = (time) => moment(time, "HH:mm").format("h:mm A");
+        .filter(item => item.customerEmail === customerEmail)
+        .map(appointment => {
+            // Convert time to 12-hour AM/PM format using moment.js
+            const formatTo12Hour = (time) => moment(time, "HH:mm").format("h:mm A");
 
-        return {
-            ...appointment.toObject(),
-            startTime: formatTo12Hour(appointment.startTime),
-            endTime: formatTo12Hour(appointment.endTime),
-            timeSlots: `${formatTo12Hour(appointment.startTime)} - ${formatTo12Hour(appointment.endTime)}`
-        };
-    });
+            return {
+                ...appointment.toObject(),
+                startTime: formatTo12Hour(appointment.startTime),
+                endTime: formatTo12Hour(appointment.endTime),
+                timeSlots: `${formatTo12Hour(appointment.startTime)} - ${formatTo12Hour(appointment.endTime)}`
+            };
+        });
 
     return filteredAppointments;
 }
@@ -60,23 +60,23 @@ export const getAppointmentbyId = async (salonId) => {
 }
 
 //CREATE NEW APPOINTMENT
-export const createNewAppointment = async(salonId, newAppointment) => {
+export const createNewAppointment = async (salonId, newAppointment) => {
     const appointment = new Appointment({
         salonId: salonId,
         appointmentList: [newAppointment],
     });
-return appointment;
+    return appointment;
 }
 
-export const getAppointmentsByAppointmentId = async(salonId, appointmentId) => {
+export const getAppointmentsByAppointmentId = async (salonId, appointmentId) => {
     const appointment = await Appointment.findOne({
         salonId
     })
 
- // Filter the appointment list to find the appointment by its ID
- const filteredAppointment = appointment.appointmentList.find(
-    (appointment) => appointment._id.toString() === appointmentId
-  );
+    // Filter the appointment list to find the appointment by its ID
+    const filteredAppointment = appointment.appointmentList.find(
+        (appointment) => appointment._id.toString() === appointmentId
+    );
     return filteredAppointment;
 }
 
@@ -160,6 +160,10 @@ export const allAppointmentsBySalonId = async (salonId) => {
                 "appointmentList.barberName": {
                     $arrayElemAt: ["$barberInfo.name", 0]
                 },
+
+                "appointmentList.barberProfile": {
+                    $arrayElemAt: ["$barberInfo.profile", 0]
+                },
                 "appointmentList.appointmentDate": {
                     $dateToString: {
                         format: "%Y-%m-%d",
@@ -177,7 +181,8 @@ export const allAppointmentsBySalonId = async (salonId) => {
                 "appointmentList.startTime": 1,
                 "appointmentList.endTime": 1,
                 "appointmentList.timeSlots": 1,
-                "appointmentList.barberName": 1
+                "appointmentList.barberName": 1,
+                "appointmentList.barberProfile": 1
                 // Include other fields if needed
             }
         },

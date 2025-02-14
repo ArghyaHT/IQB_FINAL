@@ -296,8 +296,8 @@ export const createAppointment = async (req, res, next) => {
 
         const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-        if(pushDevice.deviceToken){
-            await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType , CREATE_APPOINTMENT, customerEmail )
+        if (pushDevice.deviceToken) {
+          await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail)
         }
 
 
@@ -380,13 +380,10 @@ export const createAppointment = async (req, res, next) => {
           message: "Appointment Confirmed",
           response: existingAppointmentList,
         });
-      } 
-      else 
-      {
+      }
+      else {
         const newAppointmentData = await createNewAppointment(salonId, newAppointment)
         const savedAppointment = await newAppointmentData.save();
-
-
 
         const emailSubject = 'Appointment Created';
         const emailBody = `
@@ -462,10 +459,9 @@ export const createAppointment = async (req, res, next) => {
 
         const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-        if(pushDevice.deviceToken){
-            await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType , CREATE_APPOINTMENT, customerEmail )
+        if (pushDevice.deviceToken) {
+          await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail)
         }
-
 
         const emailSubjectForBarber = 'New Appointment Created';
         const emailBodyForBarber = `
@@ -767,8 +763,8 @@ export const editAppointment = async (req, res, next) => {
 
       const pushDevice = await getPushDevicesbyEmailId(appointment.customerEmail)
 
-      if(pushDevice.deviceToken){
-          await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointment.customerName, pushDevice.deviceType , EDIT_APPOINTMENT, appointment.customerEmail )
+      if (pushDevice.deviceToken) {
+        await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointment.customerName, pushDevice.deviceType, EDIT_APPOINTMENT, appointment.customerEmail)
       }
 
       // Send email to the barber about the rescheduled appointment
@@ -843,7 +839,7 @@ export const editAppointment = async (req, res, next) => {
         console.error('Error sending email to barber:', error);
       }
 
-     return res.status(200).json({
+      return res.status(200).json({
         success: true,
         message: 'Appointment updated successfully',
         response: existingAppointment,
@@ -919,35 +915,35 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
 
       timeSlots = await generateTimeSlots(start, end, intervalInMinutes);
 
-      if(barberReservations){
+      if (barberReservations) {
         timeSlots = timeSlots.map((slot) => {
           const slotTime = moment(slot.timeInterval, "HH:mm");
 
           // Check if the slot falls within any break time range
           const isReserved = barberReservations.some((reservedTime) => {
-              const reservationStart = moment(reservedTime.startTime, "HH:mm");
-              const reservationEnd = moment(reservedTime.endTime, "HH:mm");
-              return slotTime.isBetween(reservationStart, reservationEnd, null, "[)");
+            const reservationStart = moment(reservedTime.startTime, "HH:mm");
+            const reservationEnd = moment(reservedTime.endTime, "HH:mm");
+            return slotTime.isBetween(reservationStart, reservationEnd, null, "[)");
           });
 
           return isReserved ? { ...slot, disabled: true } : slot;
-      });
+        });
       }
 
       if (barberBreaks && barberBreaks.length > 0) {
         timeSlots = timeSlots.map((slot) => {
-            const slotTime = moment(slot.timeInterval, "HH:mm");
+          const slotTime = moment(slot.timeInterval, "HH:mm");
 
-            // Check if the slot falls within any break time range
-            const isBreakTime = barberBreaks.some((breakTime) => {
-                const breakStart = moment(breakTime.startTime, "HH:mm");
-                const breakEnd = moment(breakTime.endTime, "HH:mm");
-                return slotTime.isBetween(breakStart, breakEnd, null, "[)");
-            });
+          // Check if the slot falls within any break time range
+          const isBreakTime = barberBreaks.some((breakTime) => {
+            const breakStart = moment(breakTime.startTime, "HH:mm");
+            const breakEnd = moment(breakTime.endTime, "HH:mm");
+            return slotTime.isBetween(breakStart, breakEnd, null, "[)");
+          });
 
-            return isBreakTime ? { ...slot, disabled: true } : slot;
+          return isBreakTime ? { ...slot, disabled: true } : slot;
         });
-    }
+      }
     } else {
       const appointmentList = appointments.map(appt => appt.appointmentList);
 
@@ -974,33 +970,33 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
         });
       });
 
-      if(barberReservations){
+      if (barberReservations) {
         timeSlots = timeSlots.map((slot) => {
           const slotTime = moment(slot.timeInterval, "HH:mm");
 
           // Check if the slot falls within any break time range
           const isReserved = barberReservations.some((reservedTime) => {
-              const reservationStart = moment(reservedTime.startTime, "HH:mm");
-              const reservationEnd = moment(reservedTime.endTime, "HH:mm");
-              return slotTime.isBetween(reservationStart, reservationEnd, null, "[)");
+            const reservationStart = moment(reservedTime.startTime, "HH:mm");
+            const reservationEnd = moment(reservedTime.endTime, "HH:mm");
+            return slotTime.isBetween(reservationStart, reservationEnd, null, "[)");
           });
 
           return isReserved ? { ...slot, disabled: true } : slot;
-      });
+        });
       }
 
       if (barberBreaks && barberBreaks.length > 0) {
         timeSlots = timeSlots.map((slot) => {
-            const slotTime = moment(slot.timeInterval, "HH:mm");
+          const slotTime = moment(slot.timeInterval, "HH:mm");
 
-            // Check if the slot falls within any break time range
-            const isBreakTime = barberBreaks.some((breakTime) => {
-                const breakStart = moment(breakTime.startTime, "HH:mm");
-                const breakEnd = moment(breakTime.endTime, "HH:mm");
-                return slotTime.isBetween(breakStart, breakEnd, null, "[)");
-            });
+          // Check if the slot falls within any break time range
+          const isBreakTime = barberBreaks.some((breakTime) => {
+            const breakStart = moment(breakTime.startTime, "HH:mm");
+            const breakEnd = moment(breakTime.endTime, "HH:mm");
+            return slotTime.isBetween(breakStart, breakEnd, null, "[)");
+          });
 
-            return isBreakTime ? { ...slot, disabled: true } : slot;
+          return isBreakTime ? { ...slot, disabled: true } : slot;
         });
       }
     }
