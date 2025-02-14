@@ -37,6 +37,7 @@ import barberAppointmentDays from "./routes/web/barberAppointmentDays/barberAppo
 import salonPaymentRoutes from "./routes/web/salonPayment/salonPaymentGatewayRoutes.js"
 import barberBreakTimes from "./routes/web/barberBreakTimes/barberBreakTimeRoutes.js"
 import barberReservations from "./routes/web/barberReservations/barberReservationsRoutes.js"
+import webhookRoutes from "./routes/web/webhookRoutes/webhookRoutes.js"
 
 // import { setupCronJobs } from "./triggers/cronJobs.js";
 // import { storeCountries } from "./utils/countries.js";
@@ -123,601 +124,604 @@ const stripe = Stripe("sk_test_51QiEoiBFW0Etpz0PlD0VAk8LaCcjOtaTDJ5vOpRYT5UqwNzu
 
 const endpointSecret = "whsec_pKv2A3YHgbW0MkJOKVgISTXZjtLoBNYX"; // Replace with your actual webhook secret
 
+app.use("/api", webhookRoutes)
 
-app.post('/api/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
-  const sig = request.headers['stripe-signature'];
-  let event;
 
-  try {
-    event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
-  } catch (err) {
-    console.error('Webhook signature verification failed:', err.message);
-    return response.status(400).send(`Webhook Error: ${err.message}`);
-  }
+// app.post('/api/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
+//   const sig = request.headers['stripe-signature'];
+//   let event;
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object;
+//   try {
 
-    // console.log(session)
+//     event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+//   } catch (err) {
+//     console.error('Webhook signature verification failed:', err.message);
+//     return response.status(400).send(`Webhook Error: ${err.message}`);
+//   }
 
-    const paymentIntentId = session.payment_intent;
+//   if (event.type === "checkout.session.completed") {
+//     const session = event.data.object;
 
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+//     // console.log(session)
 
-    const vendorAccountId = session.metadata.vendorAccountId
-    const paymentStatus = paymentIntent.status
+//     const paymentIntentId = session.payment_intent;
 
-    if (vendorAccountId && paymentStatus === "succeeded") {
+//     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-      const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+//     const vendorAccountId = session.metadata.vendorAccountId
+//     const paymentStatus = paymentIntent.status
 
-      const products = lineItems.data.map((item) => ({
-        name: item.description,
-        quantity: item.quantity,
-        price: item.amount_total / 100, // Amount in dollars (converted from cents)
-        currency: session.currency,
-      }));
+//     if (vendorAccountId && paymentStatus === "succeeded") {
 
-      const salonId = Number(session.metadata.salonId);
+//       const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
-      // Access additional data from metadata
-      const paymentData = {
-        salonId: salonId,
-        salonName: session.metadata.salonName,
-        vendorEmail: session.metadata.adminEmail,
-        vendorAccountId: session.metadata.vendorAccountId,
-        purchaseDate: session.metadata.purchaseDate,
-        customerEmail: session.metadata.customerEmail,
-        customerName: session.metadata.customerName,
-        amount: session.amount_total / 100, // Convert from cents
-        isoCurrencyCode: session.metadata.isoCurrencyCode,
-        currency: session.metadata.currency,
-        paymentIntentId: session.payment_intent,
-        status: session.payment_status,
-        products: products,
-      };
+//       const products = lineItems.data.map((item) => ({
+//         name: item.description,
+//         quantity: item.quantity,
+//         price: item.amount_total / 100, // Amount in dollars (converted from cents)
+//         currency: session.currency,
+//       }));
 
-      console.log(paymentData)
+//       const salonId = Number(session.metadata.salonId);
 
-      await vendorCustomerPayment(paymentData)
+//       // Access additional data from metadata
+//       const paymentData = {
+//         salonId: salonId,
+//         salonName: session.metadata.salonName,
+//         vendorEmail: session.metadata.adminEmail,
+//         vendorAccountId: session.metadata.vendorAccountId,
+//         purchaseDate: session.metadata.purchaseDate,
+//         customerEmail: session.metadata.customerEmail,
+//         customerName: session.metadata.customerName,
+//         amount: session.amount_total / 100, // Convert from cents
+//         isoCurrencyCode: session.metadata.isoCurrencyCode,
+//         currency: session.metadata.currency,
+//         paymentIntentId: session.payment_intent,
+//         status: session.payment_status,
+//         products: products,
+//       };
 
-    }
-    else {
+//       console.log(paymentData)
 
-      const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+//       await vendorCustomerPayment(paymentData)
 
-      const products = lineItems.data.map((item) => ({
-        name: item.description,
-        quantity: item.quantity,
-        price: item.amount_total / 100, // Amount in dollars (converted from cents)
-        currency: session.currency,
-      }));
+//     }
+//     else {
 
-      const invoice = await generateInvoiceNumber()
+//       const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
-      // Access additional data from metadata
-      const paymentData = {
-        salonId: session.metadata.salonId,
-        adminEmail: session.metadata.adminEmail,
-        invoiceNumber: invoice,
-        paymentType: session.metadata.paymentType,
-        purchaseDate: session.metadata.purchaseDate,
-        paymentExpiryDate: session.metadata.paymentExpiryDate,
-        isQueuing: session.metadata.isQueuing,
-        isAppointments: session.metadata.isAppointments,
-        customerEmail: session.customer_details.email,
-        customerName: session.customer_details.name,
-        amount: session.amount_total / 100, // Convert from cents
-        currency: session.currency,
-        paymentIntentId: session.payment_intent,
-        status: session.payment_status,
-        products: products,
-      };
+//       const products = lineItems.data.map((item) => ({
+//         name: item.description,
+//         quantity: item.quantity,
+//         price: item.amount_total / 100, // Amount in dollars (converted from cents)
+//         currency: session.currency,
+//       }));
 
-      const isQueueing = session.metadata.isQueuing;
-      const isAppointment = session.metadata.isAppointments;
+//       const invoice = await generateInvoiceNumber()
 
-      if (isQueueing === "true" && isAppointment === "false") {
+//       // Access additional data from metadata
+//       const paymentData = {
+//         salonId: session.metadata.salonId,
+//         adminEmail: session.metadata.adminEmail,
+//         invoiceNumber: invoice,
+//         paymentType: session.metadata.paymentType,
+//         purchaseDate: session.metadata.purchaseDate,
+//         paymentExpiryDate: session.metadata.paymentExpiryDate,
+//         isQueuing: session.metadata.isQueuing,
+//         isAppointments: session.metadata.isAppointments,
+//         customerEmail: session.customer_details.email,
+//         customerName: session.customer_details.name,
+//         amount: session.amount_total / 100, // Convert from cents
+//         currency: session.currency,
+//         paymentIntentId: session.payment_intent,
+//         status: session.payment_status,
+//         products: products,
+//       };
+
+//       const isQueueing = session.metadata.isQueuing;
+//       const isAppointment = session.metadata.isAppointments;
+
+//       if (isQueueing === "true" && isAppointment === "false") {
         
-        const salon = await getSalonBySalonId(session.metadata.salonId)
+//         const salon = await getSalonBySalonId(session.metadata.salonId)
 
-        const existingExpiryDate = parseInt(salon.queueingExpiryDate, 10) ||  parseInt(session.metadata.purchaseDate, 10); // Convert stored Unix timestamp to an integer
-        const paymentDaysToAdd = parseInt(session.metadata.paymentExpiryDate, 10); // Number of days to add
+//         const existingExpiryDate = parseInt(salon.queueingExpiryDate, 10) ||  parseInt(session.metadata.purchaseDate, 10); // Convert stored Unix timestamp to an integer
+//         const paymentDaysToAdd = parseInt(session.metadata.paymentExpiryDate, 10); // Number of days to add
       
-        // Calculate the new expiry date
-        const newExpiryDate = moment.unix(existingExpiryDate) // Convert existing Unix timestamp to a moment object
-          .add(paymentDaysToAdd, 'days') // Add the payment expiry days
-          .unix(); 
+//         // Calculate the new expiry date
+//         const newExpiryDate = moment.unix(existingExpiryDate) // Convert existing Unix timestamp to a moment object
+//           .add(paymentDaysToAdd, 'days') // Add the payment expiry days
+//           .unix(); 
 
-        const isQueuingValue = Boolean(session.metadata.isQueuing)
-        await Salon.updateOne(
-          { salonId: session.metadata.salonId },
-          {
-            $set: {
-              isQueuing: isQueuingValue,
-              queueingExpiryDate: newExpiryDate,
-              paymentType: paymentData.paymentType,
-              isTrailEnabled: false,
-              trailExpiryDate: ""
-            },
-          }
-        )
+//         const isQueuingValue = Boolean(session.metadata.isQueuing)
+//         await Salon.updateOne(
+//           { salonId: session.metadata.salonId },
+//           {
+//             $set: {
+//               isQueuing: isQueuingValue,
+//               queueingExpiryDate: newExpiryDate,
+//               paymentType: paymentData.paymentType,
+//               isTrailEnabled: false,
+//               trailExpiryDate: ""
+//             },
+//           }
+//         )
 
-        // await SalonSettings.updateOne(
-        //   { salonId: session.metadata.salonId },
-        //   {
-        //     $set: {
-        //       isQueuing: isQueuingValue,
-        //       queueingExpiryDate: session.metadata.paymentExpiryDate
-        //     },
-        //   }
-        // )
+//         // await SalonSettings.updateOne(
+//         //   { salonId: session.metadata.salonId },
+//         //   {
+//         //     $set: {
+//         //       isQueuing: isQueuingValue,
+//         //       queueingExpiryDate: session.metadata.paymentExpiryDate
+//         //     },
+//         //   }
+//         // )
 
-      await salonPayments(paymentData, newExpiryDate)
+//       await salonPayments(paymentData, newExpiryDate)
 
-      // const salon = await getSalonBySalonId(session.metadata.salonId)
+//       // const salon = await getSalonBySalonId(session.metadata.salonId)
 
-      const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
-      const emailBody = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Payment Confirmation</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto&display=swap" rel="stylesheet">
+//       const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
+//       const emailBody = `
+//     <!DOCTYPE html>
+//     <html lang="en">
+//     <head>
+//         <meta charset="UTF-8">
+//         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//         <title>Payment Confirmation</title>
+//         <link rel="preconnect" href="https://fonts.googleapis.com">
+// <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+// <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto&display=swap" rel="stylesheet">
 
-        <style>
-        body {
-               font-family: 'Poppins', sans-serif;
-               margin: 0;
-               padding: 0;
-               background-color: #f9f9f9;
-               color: #000,
-            }
-            .container {
-                max-width: 600px;
-                margin: 20px auto;
-                padding: 20px;
-                background-color: #ffffff;
-                border-radius: 10px;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            }
-            .header {
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            .logo img {
-                max-width: 150px;
-                border-radius: 50%;
-                width: 150px;
-                height: 150px;
-                object-fit: cover;
-            }
-            .email-content {
-                padding: 20px;
-                background-color: #f8f8f8;
-                font-size: 1rem;
-                border-radius: 10px;
-            }
-            ul {
-                padding-left: 20px;
-            }
-            li {
-                margin-bottom: 8px;
-            }
-            p {
-                line-height: 1.6;
-            }
-            .footer {
-                margin-top: 20px;
-                font-size: 0.9em;
-                text-align: center;
-                color: #888888;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="email-content">
-            <div class="header">
-                <h1>Payment Confirmation</h1>
-            </div>
-                <p>Dear ${session.customer_details.name},</p>
-                <p>Thank you for your payment at <strong>${salon.salonName}</strong>. Below are the details of your transaction:</p>
-                <ul>
-                    <li><strong>Purchase Date:</strong> ${moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD')}</li>
-                    <li><strong>Expiry Date:</strong> ${moment.unix(newExpiryDate).format('YYYY-MM-DD')}</li>
-                    <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
-                    <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
-                </ul>
-                <p>If you have any questions or need further assistance, feel free to contact us.</p>
-                <p>Best regards,</p>
-                <p>
-                    <strong>IQueueBook</strong><br>
-                    <strong>support@iqueuebarbers.com</strong> 
-                </p>
-            </div>
-            <div class="footer">
-                &copy; ${new Date().getFullYear()} IQueueBook. All rights reserved.
-            </div>
-        </div>
-    </body>
-    </html>
-    `;
+//         <style>
+//         body {
+//                font-family: 'Poppins', sans-serif;
+//                margin: 0;
+//                padding: 0;
+//                background-color: #f9f9f9;
+//                color: #000,
+//             }
+//             .container {
+//                 max-width: 600px;
+//                 margin: 20px auto;
+//                 padding: 20px;
+//                 background-color: #ffffff;
+//                 border-radius: 10px;
+//                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+//             }
+//             .header {
+//                 text-align: center;
+//                 margin-bottom: 20px;
+//             }
+//             .logo img {
+//                 max-width: 150px;
+//                 border-radius: 50%;
+//                 width: 150px;
+//                 height: 150px;
+//                 object-fit: cover;
+//             }
+//             .email-content {
+//                 padding: 20px;
+//                 background-color: #f8f8f8;
+//                 font-size: 1rem;
+//                 border-radius: 10px;
+//             }
+//             ul {
+//                 padding-left: 20px;
+//             }
+//             li {
+//                 margin-bottom: 8px;
+//             }
+//             p {
+//                 line-height: 1.6;
+//             }
+//             .footer {
+//                 margin-top: 20px;
+//                 font-size: 0.9em;
+//                 text-align: center;
+//                 color: #888888;
+//             }
+//         </style>
+//     </head>
+//     <body>
+//         <div class="container">
+//             <div class="email-content">
+//             <div class="header">
+//                 <h1>Payment Confirmation</h1>
+//             </div>
+//                 <p>Dear ${session.customer_details.name},</p>
+//                 <p>Thank you for your payment at <strong>${salon.salonName}</strong>. Below are the details of your transaction:</p>
+//                 <ul>
+//                     <li><strong>Purchase Date:</strong> ${moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD')}</li>
+//                     <li><strong>Expiry Date:</strong> ${moment.unix(newExpiryDate).format('YYYY-MM-DD')}</li>
+//                     <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
+//                     <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
+//                 </ul>
+//                 <p>If you have any questions or need further assistance, feel free to contact us.</p>
+//                 <p>Best regards,</p>
+//                 <p>
+//                     <strong>IQueueBook</strong><br>
+//                     <strong>support@iqueuebarbers.com</strong> 
+//                 </p>
+//             </div>
+//             <div class="footer">
+//                 &copy; ${new Date().getFullYear()} IQueueBook. All rights reserved.
+//             </div>
+//         </div>
+//     </body>
+//     </html>
+//     `;
 
-      try {
-        sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
-        console.log("Payment Email Sent")
-        return
-      } catch (error) {
-        console.error('Error sending email:', error);
-        return
-      }
-      }
+//       try {
+//         sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
+//         console.log("Payment Email Sent")
+//         return
+//       } catch (error) {
+//         console.error('Error sending email:', error);
+//         return
+//       }
+//       }
 
-      if (isAppointment === "true" && isQueueing === "false") {
+//       if (isAppointment === "true" && isQueueing === "false") {
 
-        const salon = await getSalonBySalonId(session.metadata.salonId)
+//         const salon = await getSalonBySalonId(session.metadata.salonId)
 
-        const existingExpiryDate = parseInt(salon.appointmentExpiryDate, 10) || parseInt(session.metadata.purchaseDate, 10); // Convert stored Unix timestamp to an integer
-        const paymentDaysToAdd = parseInt(session.metadata.paymentExpiryDate, 10); // Number of days to add
+//         const existingExpiryDate = parseInt(salon.appointmentExpiryDate, 10) || parseInt(session.metadata.purchaseDate, 10); // Convert stored Unix timestamp to an integer
+//         const paymentDaysToAdd = parseInt(session.metadata.paymentExpiryDate, 10); // Number of days to add
       
-        // Calculate the new expiry date
-        const newExpiryDate = moment.unix(existingExpiryDate) // Convert existing Unix timestamp to a moment object
-          .add(paymentDaysToAdd, 'days') // Add the payment expiry days
-          .unix(); 
+//         // Calculate the new expiry date
+//         const newExpiryDate = moment.unix(existingExpiryDate) // Convert existing Unix timestamp to a moment object
+//           .add(paymentDaysToAdd, 'days') // Add the payment expiry days
+//           .unix(); 
 
 
-        const isAppointmentValue = Boolean(session.metadata.isAppointments)
+//         const isAppointmentValue = Boolean(session.metadata.isAppointments)
 
-        await Salon.updateOne(
-          { salonId: session.metadata.salonId },
-          {
-            $set: {
-              isAppointments: isAppointmentValue,
-              appointmentExpiryDate: newExpiryDate,
-              paymentType: paymentData.paymentType,
-              isTrailEnabled: false,
-              trailExpiryDate: ""
-            },
-          }
-        )
+//         await Salon.updateOne(
+//           { salonId: session.metadata.salonId },
+//           {
+//             $set: {
+//               isAppointments: isAppointmentValue,
+//               appointmentExpiryDate: newExpiryDate,
+//               paymentType: paymentData.paymentType,
+//               isTrailEnabled: false,
+//               trailExpiryDate: ""
+//             },
+//           }
+//         )
 
-        // await SalonSettings.updateOne(
-        //   { salonId: session.metadata.salonId },
-        //   {
-        //     $set: {
-        //       isAppointments: isAppointmentValue,
-        //       appointmentExpiryDate: session.metadata.paymentExpiryDate
-        //     },
-        //   }
-        // )
+//         // await SalonSettings.updateOne(
+//         //   { salonId: session.metadata.salonId },
+//         //   {
+//         //     $set: {
+//         //       isAppointments: isAppointmentValue,
+//         //       appointmentExpiryDate: session.metadata.paymentExpiryDate
+//         //     },
+//         //   }
+//         // )
 
-      await salonPayments(paymentData, newExpiryDate)
+//       await salonPayments(paymentData, newExpiryDate)
 
-      // const salon = await getSalonBySalonId(session.metadata.salonId)
+//       // const salon = await getSalonBySalonId(session.metadata.salonId)
 
-      const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
-      const emailBody = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Payment Confirmation</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto&display=swap" rel="stylesheet">
+//       const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
+//       const emailBody = `
+//     <!DOCTYPE html>
+//     <html lang="en">
+//     <head>
+//         <meta charset="UTF-8">
+//         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//         <title>Payment Confirmation</title>
+//         <link rel="preconnect" href="https://fonts.googleapis.com">
+// <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+// <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto&display=swap" rel="stylesheet">
 
-        <style>
-        body {
-               font-family: 'Poppins', sans-serif;
-               margin: 0;
-               padding: 0;
-               background-color: #f9f9f9;
-               color: #000,
-            }
-            .container {
-                max-width: 600px;
-                margin: 20px auto;
-                padding: 20px;
-                background-color: #ffffff;
-                border-radius: 10px;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            }
-            .header {
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            .logo img {
-                max-width: 150px;
-                border-radius: 50%;
-                width: 150px;
-                height: 150px;
-                object-fit: cover;
-            }
-            .email-content {
-                padding: 20px;
-                background-color: #f8f8f8;
-                font-size: 1rem;
-                border-radius: 10px;
-            }
-            ul {
-                padding-left: 20px;
-            }
-            li {
-                margin-bottom: 8px;
-            }
-            p {
-                line-height: 1.6;
-            }
-            .footer {
-                margin-top: 20px;
-                font-size: 0.9em;
-                text-align: center;
-                color: #888888;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="email-content">
-            <div class="header">
-                <h1>Payment Confirmation</h1>
-            </div>
-                <p>Dear ${session.customer_details.name},</p>
-                <p>Thank you for your payment at <strong>${salon.salonName}</strong>. Below are the details of your transaction:</p>
-                <ul>
-                    <li><strong>Purchase Date:</strong> ${moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD')}</li>
-                    <li><strong>Expiry Date:</strong> ${moment.unix(newExpiryDate).format('YYYY-MM-DD')}</li>
-                    <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
-                    <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
-                </ul>
-                <p>If you have any questions or need further assistance, feel free to contact us.</p>
-                <p>Best regards,</p>
-                <p>
-                    <strong>IQueueBook</strong><br>
-                    <strong>support@iqueuebarbers.com</strong> 
-                </p>
-            </div>
-            <div class="footer">
-                &copy; ${new Date().getFullYear()} IQueueBook. All rights reserved.
-            </div>
-        </div>
-    </body>
-    </html>
-    `;
+//         <style>
+//         body {
+//                font-family: 'Poppins', sans-serif;
+//                margin: 0;
+//                padding: 0;
+//                background-color: #f9f9f9;
+//                color: #000,
+//             }
+//             .container {
+//                 max-width: 600px;
+//                 margin: 20px auto;
+//                 padding: 20px;
+//                 background-color: #ffffff;
+//                 border-radius: 10px;
+//                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+//             }
+//             .header {
+//                 text-align: center;
+//                 margin-bottom: 20px;
+//             }
+//             .logo img {
+//                 max-width: 150px;
+//                 border-radius: 50%;
+//                 width: 150px;
+//                 height: 150px;
+//                 object-fit: cover;
+//             }
+//             .email-content {
+//                 padding: 20px;
+//                 background-color: #f8f8f8;
+//                 font-size: 1rem;
+//                 border-radius: 10px;
+//             }
+//             ul {
+//                 padding-left: 20px;
+//             }
+//             li {
+//                 margin-bottom: 8px;
+//             }
+//             p {
+//                 line-height: 1.6;
+//             }
+//             .footer {
+//                 margin-top: 20px;
+//                 font-size: 0.9em;
+//                 text-align: center;
+//                 color: #888888;
+//             }
+//         </style>
+//     </head>
+//     <body>
+//         <div class="container">
+//             <div class="email-content">
+//             <div class="header">
+//                 <h1>Payment Confirmation</h1>
+//             </div>
+//                 <p>Dear ${session.customer_details.name},</p>
+//                 <p>Thank you for your payment at <strong>${salon.salonName}</strong>. Below are the details of your transaction:</p>
+//                 <ul>
+//                     <li><strong>Purchase Date:</strong> ${moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD')}</li>
+//                     <li><strong>Expiry Date:</strong> ${moment.unix(newExpiryDate).format('YYYY-MM-DD')}</li>
+//                     <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
+//                     <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
+//                 </ul>
+//                 <p>If you have any questions or need further assistance, feel free to contact us.</p>
+//                 <p>Best regards,</p>
+//                 <p>
+//                     <strong>IQueueBook</strong><br>
+//                     <strong>support@iqueuebarbers.com</strong> 
+//                 </p>
+//             </div>
+//             <div class="footer">
+//                 &copy; ${new Date().getFullYear()} IQueueBook. All rights reserved.
+//             </div>
+//         </div>
+//     </body>
+//     </html>
+//     `;
 
-      try {
-        sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
-        console.log("Payment Email Sent")
-        return
-      } catch (error) {
-        console.error('Error sending email:', error);
-        return
-      }
-      }
+//       try {
+//         sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
+//         console.log("Payment Email Sent")
+//         return
+//       } catch (error) {
+//         console.error('Error sending email:', error);
+//         return
+//       }
+//       }
 
-      if (isAppointment === "true" && isQueueing === "true") {
+//       if (isAppointment === "true" && isQueueing === "true") {
 
-        const salon = await getSalonBySalonId(session.metadata.salonId)
+//         const salon = await getSalonBySalonId(session.metadata.salonId)
 
-        const existingAppointmentExpiryDate = parseInt(salon.appointmentExpiryDate, 10) || parseInt(session.metadata.purchaseDate, 10); // Convert stored Unix timestamp to an integer
-        const existingQueuingExpiryDate = parseInt(salon.queueingExpiryDate, 10) || parseInt(session.metadata.purchaseDate, 10); // Convert stored Unix timestamp to an integer
-        const paymentDaysToAdd = parseInt(session.metadata.paymentExpiryDate, 10); // Number of days to add
+//         const existingAppointmentExpiryDate = parseInt(salon.appointmentExpiryDate, 10) || parseInt(session.metadata.purchaseDate, 10); // Convert stored Unix timestamp to an integer
+//         const existingQueuingExpiryDate = parseInt(salon.queueingExpiryDate, 10) || parseInt(session.metadata.purchaseDate, 10); // Convert stored Unix timestamp to an integer
+//         const paymentDaysToAdd = parseInt(session.metadata.paymentExpiryDate, 10); // Number of days to add
       
-        // Calculate the new expiry date
-        const newAppointmentExpiryDate = moment.unix(existingAppointmentExpiryDate) // Convert existing Unix timestamp to a moment object
-          .add(paymentDaysToAdd, 'days') // Add the payment expiry days
-          .unix(); 
+//         // Calculate the new expiry date
+//         const newAppointmentExpiryDate = moment.unix(existingAppointmentExpiryDate) // Convert existing Unix timestamp to a moment object
+//           .add(paymentDaysToAdd, 'days') // Add the payment expiry days
+//           .unix(); 
 
-            // Calculate the new expiry date
-        const newQueuingExpiryDate = moment.unix(existingQueuingExpiryDate) // Convert existing Unix timestamp to a moment object
-        .add(paymentDaysToAdd, 'days') // Add the payment expiry days
-        .unix(); 
+//             // Calculate the new expiry date
+//         const newQueuingExpiryDate = moment.unix(existingQueuingExpiryDate) // Convert existing Unix timestamp to a moment object
+//         .add(paymentDaysToAdd, 'days') // Add the payment expiry days
+//         .unix(); 
 
 
 
-        const isQueuingValue = Boolean(session.metadata.isQueuing)
-        const isAppointmentValue = Boolean(session.metadata.isAppointments)
+//         const isQueuingValue = Boolean(session.metadata.isQueuing)
+//         const isAppointmentValue = Boolean(session.metadata.isAppointments)
 
-        await Salon.updateOne(
-          { salonId: session.metadata.salonId },
-          {
-            $set: {
-              isQueuing: isQueuingValue,
-              isAppointments: isAppointmentValue,
-              queueingExpiryDate: newQueuingExpiryDate,
-              appointmentExpiryDate: newAppointmentExpiryDate,
-              paymentType: paymentData.paymentType,
-               isTrailEnabled: false,
-              trailExpiryDate: ""
+//         await Salon.updateOne(
+//           { salonId: session.metadata.salonId },
+//           {
+//             $set: {
+//               isQueuing: isQueuingValue,
+//               isAppointments: isAppointmentValue,
+//               queueingExpiryDate: newQueuingExpiryDate,
+//               appointmentExpiryDate: newAppointmentExpiryDate,
+//               paymentType: paymentData.paymentType,
+//                isTrailEnabled: false,
+//               trailExpiryDate: ""
 
-            },
-          }
-        )
+//             },
+//           }
+//         )
 
-        await salonPayments(paymentData, newQueuingExpiryDate)
+//         await salonPayments(paymentData, newQueuingExpiryDate)
 
-        // const salon = await getSalonBySalonId(session.metadata.salonId)
+//         // const salon = await getSalonBySalonId(session.metadata.salonId)
   
-        const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
-        const emailBody = `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Payment Confirmation</title>
-          <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto&display=swap" rel="stylesheet">
+//         const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
+//         const emailBody = `
+//       <!DOCTYPE html>
+//       <html lang="en">
+//       <head>
+//           <meta charset="UTF-8">
+//           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//           <title>Payment Confirmation</title>
+//           <link rel="preconnect" href="https://fonts.googleapis.com">
+//   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+//   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto&display=swap" rel="stylesheet">
   
-          <style>
-          body {
-                 font-family: 'Poppins', sans-serif;
-                 margin: 0;
-                 padding: 0;
-                 background-color: #f9f9f9;
-                 color: #000,
-              }
-              .container {
-                  max-width: 600px;
-                  margin: 20px auto;
-                  padding: 20px;
-                  background-color: #ffffff;
-                  border-radius: 10px;
-                  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-              }
-              .header {
-                  text-align: center;
-                  margin-bottom: 20px;
-              }
-              .logo img {
-                  max-width: 150px;
-                  border-radius: 50%;
-                  width: 150px;
-                  height: 150px;
-                  object-fit: cover;
-              }
-              .email-content {
-                  padding: 20px;
-                  background-color: #f8f8f8;
-                  font-size: 1rem;
-                  border-radius: 10px;
-              }
-              ul {
-                  padding-left: 20px;
-              }
-              li {
-                  margin-bottom: 8px;
-              }
-              p {
-                  line-height: 1.6;
-              }
-              .footer {
-                  margin-top: 20px;
-                  font-size: 0.9em;
-                  text-align: center;
-                  color: #888888;
-              }
-          </style>
-      </head>
-      <body>
-          <div class="container">
-              <div class="email-content">
-              <div class="header">
-                  <h1>Payment Confirmation</h1>
-              </div>
-                  <p>Dear ${session.customer_details.name},</p>
-                  <p>Thank you for your payment at <strong>${salon.salonName}</strong>. Below are the details of your transaction:</p>
-                  <ul>
-                      <li><strong>Purchase Date:</strong> ${moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD')}</li>
-                      <li><strong>Queueing Expiry Date:</strong> ${moment.unix(newQueuingExpiryDate).format('YYYY-MM-DD')}</li>
-                      <li><strong>Appointment Expiry Date:</strong> ${moment.unix(newAppointmentExpiryDate).format('YYYY-MM-DD')}</li>
-                      <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
-                      <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
-                  </ul>
-                  <p>If you have any questions or need further assistance, feel free to contact us.</p>
-                  <p>Best regards,</p>
-                  <p>
-                      <strong>IQueueBook</strong><br>
-                      <strong>support@iqueuebarbers.com</strong> 
-                  </p>
-              </div>
-              <div class="footer">
-                  &copy; ${new Date().getFullYear()} IQueueBook. All rights reserved.
-              </div>
-          </div>
-      </body>
-      </html>
-      `;
+//           <style>
+//           body {
+//                  font-family: 'Poppins', sans-serif;
+//                  margin: 0;
+//                  padding: 0;
+//                  background-color: #f9f9f9;
+//                  color: #000,
+//               }
+//               .container {
+//                   max-width: 600px;
+//                   margin: 20px auto;
+//                   padding: 20px;
+//                   background-color: #ffffff;
+//                   border-radius: 10px;
+//                   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+//               }
+//               .header {
+//                   text-align: center;
+//                   margin-bottom: 20px;
+//               }
+//               .logo img {
+//                   max-width: 150px;
+//                   border-radius: 50%;
+//                   width: 150px;
+//                   height: 150px;
+//                   object-fit: cover;
+//               }
+//               .email-content {
+//                   padding: 20px;
+//                   background-color: #f8f8f8;
+//                   font-size: 1rem;
+//                   border-radius: 10px;
+//               }
+//               ul {
+//                   padding-left: 20px;
+//               }
+//               li {
+//                   margin-bottom: 8px;
+//               }
+//               p {
+//                   line-height: 1.6;
+//               }
+//               .footer {
+//                   margin-top: 20px;
+//                   font-size: 0.9em;
+//                   text-align: center;
+//                   color: #888888;
+//               }
+//           </style>
+//       </head>
+//       <body>
+//           <div class="container">
+//               <div class="email-content">
+//               <div class="header">
+//                   <h1>Payment Confirmation</h1>
+//               </div>
+//                   <p>Dear ${session.customer_details.name},</p>
+//                   <p>Thank you for your payment at <strong>${salon.salonName}</strong>. Below are the details of your transaction:</p>
+//                   <ul>
+//                       <li><strong>Purchase Date:</strong> ${moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD')}</li>
+//                       <li><strong>Queueing Expiry Date:</strong> ${moment.unix(newQueuingExpiryDate).format('YYYY-MM-DD')}</li>
+//                       <li><strong>Appointment Expiry Date:</strong> ${moment.unix(newAppointmentExpiryDate).format('YYYY-MM-DD')}</li>
+//                       <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
+//                       <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
+//                   </ul>
+//                   <p>If you have any questions or need further assistance, feel free to contact us.</p>
+//                   <p>Best regards,</p>
+//                   <p>
+//                       <strong>IQueueBook</strong><br>
+//                       <strong>support@iqueuebarbers.com</strong> 
+//                   </p>
+//               </div>
+//               <div class="footer">
+//                   &copy; ${new Date().getFullYear()} IQueueBook. All rights reserved.
+//               </div>
+//           </div>
+//       </body>
+//       </html>
+//       `;
   
-        try {
-          sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
-          console.log("Payment Email Sent")
-          return
-        } catch (error) {
-          console.error('Error sending email:', error);
-          return
-        }
+//         try {
+//           sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
+//           console.log("Payment Email Sent")
+//           return
+//         } catch (error) {
+//           console.error('Error sending email:', error);
+//           return
+//         }
 
-        // await SalonSettings.updateOne(
-        //   { salonId: session.metadata.salonId },
-        //   {
-        //     $set: {
-        //       isQueuing: isQueuingValue,
-        //       isAppointments: isAppointmentValue,
-        //       queueingExpiryDate: session.metadata.paymentExpiryDate,
-        //       appointmentExpiryDate: session.metadata.paymentExpiryDate
-        //     },
-        //   }
-        // )
-      }
-    }
-  }
-  response.status(200).json({ received: true });
-});
+//         // await SalonSettings.updateOne(
+//         //   { salonId: session.metadata.salonId },
+//         //   {
+//         //     $set: {
+//         //       isQueuing: isQueuingValue,
+//         //       isAppointments: isAppointmentValue,
+//         //       queueingExpiryDate: session.metadata.paymentExpiryDate,
+//         //       appointmentExpiryDate: session.metadata.paymentExpiryDate
+//         //     },
+//         //   }
+//         // )
+//       }
+//     }
+//   }
+//   response.status(200).json({ received: true });
+// });
 
 const saveAccountEndpointSecret = "whsec_DI2vfnOkeWPhrsuIpX1S3gzNf5mw2ArF"
 
-app.post('/api/saveaccountid', express.raw({ type: 'application/json' }), async (req, res) => {
-  let event;
+// app.post('/api/saveaccountid', express.raw({ type: 'application/json' }), async (req, res) => {
+//   let event;
 
-  try {
-    // Verify the webhook signature to ensure it's from Stripe
-    const signature = req.headers['stripe-signature'];
-    event = stripe.webhooks.constructEvent(req.body, signature, saveAccountEndpointSecret);
-  } catch (err) {
-    console.error('Error verifying webhook signature:', err);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-
-  if (event.type === 'account.updated') {
-    const account = event.data.object;
-
-    if (
-      account.requirements.currently_due.length === 0 && // No remaining requirements
-      account.capabilities.transfers === 'active' // Account is fully activated for transfers
-    ) {
-
-      const vendorEmail = account.email
-      const vendorAccountId = account.id
-      const vendorCountry = account.country
-      const vendorCurrency = account.default_currency
-      const vendorCardPaymentStatus = account.capabilities.card_payments
-      const vendorTransferStatus = account.capabilities.transfers
+//   try {
+//     // Verify the webhook signature to ensure it's from Stripe
+//     const signature = req.headers['stripe-signature'];
+//     event = stripe.webhooks.constructEvent(req.body, signature, saveAccountEndpointSecret);
+//   } catch (err) {
+//     console.error('Error verifying webhook signature:', err);
+//     return res.status(400).send(`Webhook Error: ${err.message}`);
+//   }
 
 
-      const updatedAdminVendorDetails = await Admin.findOneAndUpdate(
-        { email: vendorEmail }, // Match condition
-        {
-          $set: {
-            "vendorAccountDetails.vendorEmail": vendorEmail,
-            "vendorAccountDetails.vendorAccountId": vendorAccountId,
-            "vendorAccountDetails.vendorCountry": vendorCountry,
-            "vendorAccountDetails.vendorCurrency": vendorCurrency,
-            "vendorAccountDetails.vendorCardPaymentStatus": vendorCardPaymentStatus,
-            "vendorAccountDetails.vendorTransferStatus": vendorTransferStatus
-          }
-        },
-        { new: true, upsert: true } // Options to return updated document and insert if not found
-      );
+//   if (event.type === 'account.updated') {
+//     const account = event.data.object;
 
-      return
-    }
+//     if (
+//       account.requirements.currently_due.length === 0 && // No remaining requirements
+//       account.capabilities.transfers === 'active' // Account is fully activated for transfers
+//     ) {
 
-    return res.status(200).send('Webhook processed');
-  } else {
-    // Ignore other events
-    return res.status(200).send('Event ignored');
-  }
+//       const vendorEmail = account.email
+//       const vendorAccountId = account.id
+//       const vendorCountry = account.country
+//       const vendorCurrency = account.default_currency
+//       const vendorCardPaymentStatus = account.capabilities.card_payments
+//       const vendorTransferStatus = account.capabilities.transfers
 
-});
+
+//       const updatedAdminVendorDetails = await Admin.findOneAndUpdate(
+//         { email: vendorEmail }, // Match condition
+//         {
+//           $set: {
+//             "vendorAccountDetails.vendorEmail": vendorEmail,
+//             "vendorAccountDetails.vendorAccountId": vendorAccountId,
+//             "vendorAccountDetails.vendorCountry": vendorCountry,
+//             "vendorAccountDetails.vendorCurrency": vendorCurrency,
+//             "vendorAccountDetails.vendorCardPaymentStatus": vendorCardPaymentStatus,
+//             "vendorAccountDetails.vendorTransferStatus": vendorTransferStatus
+//           }
+//         },
+//         { new: true, upsert: true } // Options to return updated document and insert if not found
+//       );
+
+//       return
+//     }
+
+//     return res.status(200).send('Webhook processed');
+//   } else {
+//     // Ignore other events
+//     return res.status(200).send('Event ignored');
+//   }
+
+// });
 
 
 

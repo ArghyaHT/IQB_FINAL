@@ -111,8 +111,4 @@ router.route("/getBarberDisabledAppointmentDates").post(getBarberMissingAppointm
 router.route("/getFullyBookedDatesBySalonIdBarberId").post(getFullyBookedDatesBySalonIdBarberId)
 
 
-
-
-
-
 export default router;
