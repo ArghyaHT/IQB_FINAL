@@ -2,6 +2,7 @@ import moment from "moment";
 import Stripe from "stripe"
 import { validateEmail } from "../../../middlewares/validator.js";
 import Admin from "../../../models/adminRegisterModel.js";
+import { getSalonBySalonId } from "../../../services/mobile/salonServices.js";
 
 const stripe = Stripe("sk_test_51QiEoiBFW0Etpz0PlD0VAk8LaCcjOtaTDJ5vOpRYT5UqwNzuMmacWYRAl9Gzvf4HGXH9Lbva9BOWEaH9WHvz1qNb00nkfkXPna")
 
