@@ -186,7 +186,6 @@ export const vendorloginLink = async(req, res, next) => {
 
 export const vendorCreateCheckOutSession = async(req, res, next) => {
     try {
-
         //appointmnet can only be possible if the salon has bought appointment feature
     
         const { productInfo } = req.body;
