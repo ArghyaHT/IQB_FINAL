@@ -6,6 +6,7 @@ import Salon from "../../../models/salonRegisterModel.js";
 import { salonPayments } from "../../../services/web/salonPayments/salonPaymentService.js";
 import { sendPaymentSuccesEmail } from "../../../utils/emailSender/emailSender.js";
 import Admin from "../../../models/adminRegisterModel.js";
+import moment from "moment";
 
 const stripe = Stripe("sk_test_51QiEoiBFW0Etpz0PlD0VAk8LaCcjOtaTDJ5vOpRYT5UqwNzuMmacWYRAl9Gzvf4HGXH9Lbva9BOWEaH9WHvz1qNb00nkfkXPna")
 
