@@ -161,23 +161,44 @@ export const getSalonServedQlist = async (salonId, reportType) => {
 };
 
 //Reports cancelled q list
-export const getSalonCancelledQlist = async (salonId, fromDate, toDate, reportType) => {
-    const from = new Date(fromDate);
-    from.setUTCHours(0, 0, 0, 0); // Start of the day in UTC
-    const to = new Date(toDate);
-    to.setUTCHours(23, 59, 59, 999); // End of the day in UTC
+export const getSalonCancelledQlist = async (salonId,reportType) => {
+    // const from = new Date(fromDate);
+    // from.setUTCHours(0, 0, 0, 0); // Start of the day in UTC
+    // const to = new Date(toDate);
+    // to.setUTCHours(23, 59, 59, 999); // End of the day in UTC
 
-    // Determine the date format based on report type
-    let dateFormat;
+    const today = new Date();
+    let from = new Date(today);
+    let to = new Date(today);
+
     if (reportType === "daily") {
-        dateFormat = "%Y-%m-%d"; // Group by day
+        from.setUTCDate(today.getUTCDate() - 30); // Get last 30 days
+        from.setUTCHours(0, 0, 0, 0);
+        to.setUTCHours(23, 59, 59, 999);
     } else if (reportType === "weekly") {
-        dateFormat = "%Y-%U"; // Group by week number (Year-Week)
+        from.setUTCDate(today.getUTCDate() - 7 * 12); // Get last 12 weeks
+        from.setUTCHours(0, 0, 0, 0);
+        to.setUTCHours(23, 59, 59, 999);
     } else if (reportType === "monthly") {
-        dateFormat = "%Y-%m"; // Group by month (Year-Month)
-    } else {
-        throw new Error("Invalid report type. Must be 'daily', 'weekly', or 'monthly'.");
+        const currentYear = today.getUTCFullYear();
+        const currentMonth = today.getUTCMonth(); // 0-based (Jan = 0, Feb = 1, ...)
+        
+        from = new Date(Date.UTC(currentYear, 0, 1, 0, 0, 0, 0)); // Start from Jan 1st, 00:00 UTC
+        to = new Date(Date.UTC(currentYear, currentMonth, today.getUTCDate(), 23, 59, 59, 999)); // End at today's date
     }
+    
+
+        // Determine the date format based on report type
+        let dateFormat;
+        if (reportType === "daily") {
+            dateFormat = "%Y-%m-%d"; // Group by day
+        } else if (reportType === "weekly") {
+            dateFormat = "%Y-%U"; // Group by week number (Year-Week)
+        } else if (reportType === "monthly") {
+            dateFormat = "%Y-%m"; // Group by month (Year-Month)
+        } else {
+            throw new Error("Invalid report type. Must be 'daily', 'weekly', or 'monthly'.");
+        }
 
     const qHistory = await JoinedQueueHistory.aggregate([
         {
@@ -300,7 +321,7 @@ export const getTotalSalonQlist = async (salonId, reportType) => {
         from.setUTCHours(0, 0, 0, 0);
         to.setUTCHours(23, 59, 59, 999);
     } else if (reportType === "weekly") {
-        from.setUTCDate(today.getUTCDate() - 7 * 12); // Get last 12 weeks
+        from.setUTCDate(today.getUTCDate() - 7 * 4); // Get last 12 weeks
         from.setUTCHours(0, 0, 0, 0);
         to.setUTCHours(23, 59, 59, 999);
     } else if (reportType === "monthly") {

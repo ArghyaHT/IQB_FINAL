@@ -56,19 +56,102 @@ export const salonServedReport = async(req, res, next) => {
             }
 
 
-            return res.status(200).json({
-                success: true,
-                message: 'Report retrieved successfully.',
-                response: getSalonServedReport,
-            });
+            if (reportType === "weekly") {
+                return res.status(200).json({
+                    success: true,
+                    message: "Report retrieved successfully.",
+                    response: getSalonServedReport.map(item => {
+                        // Convert "YYYY-WW" to a Date (assuming the first day of the week)
+                        const [year, week] = item.week.split("-").map(Number);
+                        const { startOfWeek, endOfWeek } = getWeekDateRange(year, week); // Get week start & end dates
+            
+                        return {
+                            week: `${startOfWeek} - ${endOfWeek}`, // Format: "Week 1 (Jan 1 - Jan 7)"
+                            totalQueue: item.totalQueue
+                        };
+                    })
+                });
+            
+                function getWeekDateRange(year, week) {
+                    const firstDayOfYear = new Date(Date.UTC(year, 0, 1)); // Jan 1st of the year
+                    const firstDayOfWeek = new Date(firstDayOfYear);
+                    firstDayOfWeek.setUTCDate(firstDayOfYear.getUTCDate() + (week - 1) * 7); // Calculate first day of the week
+            
+                    // End of the week (6 days after start)
+                    const lastDayOfWeek = new Date(firstDayOfWeek);
+                    lastDayOfWeek.setUTCDate(firstDayOfWeek.getUTCDate() + 6);
+            
+                    return {
+                        startOfWeek: firstDayOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+                        endOfWeek: lastDayOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                    };
+                }
+            }
         }
         else{
-            const getSalonCancelledReport = await getSalonCancelledQlist(salonId, fromDate, toDate, reportType);
-            return res.status(200).json({
-                success: true,
-                message: 'Report retrieved successfully.',
-                response: getSalonCancelledReport,
-            });
+            const getSalonCancelledReport = await getSalonCancelledQlist(salonId, reportType);
+
+            if(reportType === "daily"){
+                return res.status(200).json({
+                    success: true,
+                    message: 'Report retrieved successfully.',
+                    response: getSalonCancelledReport.map(item => ({
+                        date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
+                        totalQueue: item.totalQueue
+                    }))
+                });
+            }
+
+            if(reportType === "monthly"){
+                return res.status(200).json({
+                    success: true,
+                    message: 'Report retrieved successfully.',
+                    response: getSalonCancelledReport.map(item => ({
+                        month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                        totalQueue: item.totalQueue
+                    }))
+                });
+            }
+
+
+            if (reportType === "weekly") {
+                return res.status(200).json({
+                    success: true,
+                    message: "Report retrieved successfully.",
+                    response: getSalonCancelledReport.map(item => {
+                        // Convert "YYYY-WW" to a Date (assuming the first day of the week)
+                        const [year, week] = item.week.split("-").map(Number);
+                        const { startOfWeek, endOfWeek } = getWeekDateRange(year, week); // Get week start & end dates
+            
+                        return {
+                            week: `${startOfWeek} - ${endOfWeek}`, // Format: "Week 1 (Jan 1 - Jan 7)"
+                            totalQueue: item.totalQueue
+                        };
+                    })
+                });
+            
+                function getWeekDateRange(year, week) {
+                    const firstDayOfYear = new Date(Date.UTC(year, 0, 1)); // Jan 1st of the year
+                    const firstDayOfWeek = new Date(firstDayOfYear);
+                    firstDayOfWeek.setUTCDate(firstDayOfYear.getUTCDate() + (week - 1) * 7); // Calculate first day of the week
+            
+                    // End of the week (6 days after start)
+                    const lastDayOfWeek = new Date(firstDayOfWeek);
+                    lastDayOfWeek.setUTCDate(firstDayOfWeek.getUTCDate() + 6);
+            
+                    return {
+                        startOfWeek: firstDayOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+                        endOfWeek: lastDayOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                    };
+                }
+            }
+
+
+            // return res.status(200).json({
+            //     success: true,
+            //     message: 'Report retrieved successfully.',
+            //     response: getSalonCancelledReport,
+            // });
         }   
 
     } catch (error) {
@@ -143,11 +226,37 @@ export const dashboardReports = async(req, res, next) => {
         });
     }
 
-    return res.status(200).json({
-        success: true,
-        message: 'Report retrieved successfully.',
-        response: getSalonQueueReport
-    });
+    if (reportType === "weekly") {
+        return res.status(200).json({
+            success: true,
+            message: "Report retrieved successfully.",
+            response: getSalonQueueReport.map(item => {
+                // Convert "YYYY-WW" to a Date (assuming the first day of the week)
+                const [year, week] = item.week.split("-").map(Number);
+                const { startOfWeek, endOfWeek } = getWeekDateRange(year, week); // Get week start & end dates
+    
+                return {
+                    week: `${startOfWeek} - ${endOfWeek}`, // Format: "Week 1 (Jan 1 - Jan 7)"
+                    totalQueue: item.totalQueue
+                };
+            })
+        });
+    
+        function getWeekDateRange(year, week) {
+            const firstDayOfYear = new Date(Date.UTC(year, 0, 1)); // Jan 1st of the year
+            const firstDayOfWeek = new Date(firstDayOfYear);
+            firstDayOfWeek.setUTCDate(firstDayOfYear.getUTCDate() + (week - 1) * 7); // Calculate first day of the week
+    
+            // End of the week (6 days after start)
+            const lastDayOfWeek = new Date(firstDayOfWeek);
+            lastDayOfWeek.setUTCDate(firstDayOfWeek.getUTCDate() + 6);
+    
+            return {
+                startOfWeek: firstDayOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+                endOfWeek: lastDayOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+            };
+        }
+    }
     }
     catch (error) {
         next(error);
