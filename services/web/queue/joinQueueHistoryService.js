@@ -95,9 +95,8 @@ export const getSalonServedQlist = async (salonId, reportType) => {
         from.setUTCHours(0, 0, 0, 0);
         to.setUTCHours(23, 59, 59, 999);
     } else if (reportType === "weekly") {
-        from.setUTCDate(today.getUTCDate() - 7 * 12); // Get last 12 weeks
-        from.setUTCHours(0, 0, 0, 0);
-        to.setUTCHours(23, 59, 59, 999);
+        from = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1)); // First day of the month
+        to.setUTCHours(23, 59, 59, 999); // Last second of today
     } else if (reportType === "monthly") {
         const currentYear = today.getUTCFullYear();
         const currentMonth = today.getUTCMonth(); // 0-based (Jan = 0, Feb = 1, ...)
@@ -176,9 +175,8 @@ export const getSalonCancelledQlist = async (salonId,reportType) => {
         from.setUTCHours(0, 0, 0, 0);
         to.setUTCHours(23, 59, 59, 999);
     } else if (reportType === "weekly") {
-        from.setUTCDate(today.getUTCDate() - 7 * 12); // Get last 12 weeks
-        from.setUTCHours(0, 0, 0, 0);
-        to.setUTCHours(23, 59, 59, 999);
+        from = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1)); // First day of the month
+        to.setUTCHours(23, 59, 59, 999); // Last second of today
     } else if (reportType === "monthly") {
         const currentYear = today.getUTCFullYear();
         const currentMonth = today.getUTCMonth(); // 0-based (Jan = 0, Feb = 1, ...)
@@ -321,9 +319,8 @@ export const getTotalSalonQlist = async (salonId, reportType) => {
         from.setUTCHours(0, 0, 0, 0);
         to.setUTCHours(23, 59, 59, 999);
     } else if (reportType === "weekly") {
-        from.setUTCDate(today.getUTCDate() - 7 * 4); // Get last 12 weeks
-        from.setUTCHours(0, 0, 0, 0);
-        to.setUTCHours(23, 59, 59, 999);
+        from = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1)); // First day of the month
+        to.setUTCHours(23, 59, 59, 999); // Last second of today
     } else if (reportType === "monthly") {
         const currentYear = today.getUTCFullYear();
         const currentMonth = today.getUTCMonth(); // 0-based (Jan = 0, Feb = 1, ...)
@@ -361,7 +358,7 @@ export const getTotalSalonQlist = async (salonId, reportType) => {
         {
             $group: {
                 _id: {
-                    $dateToString: { format: dateFormat, date: "$queueList.dateJoinedQ" }
+                    $dateToString: { format: "%G-%V", date: "$queueList.dateJoinedQ" }
                 },
                 count: { $sum: 1 }
             }
@@ -399,7 +396,7 @@ export const fillMissingDates = (data, fromDate, toDate, reportType) => {
             const year = currentDate.getUTCFullYear();
             const weekNumber = getWeekNumber(currentDate);
             formattedDate = `${year}-${String(weekNumber).padStart(2, '0')}`; // YYYY-WW
-            currentDate.setDate(currentDate.getDate() + 7); // Move to next week
+            currentDate.setDate(currentDate.getDate() + 7);
         } else if (reportType === "monthly") {
             key = "month";
             formattedDate = `${currentDate.getUTCFullYear()}-${String(currentDate.getUTCMonth() + 1).padStart(2, '0')}`;
@@ -428,6 +425,10 @@ export const fillMissingDates = (data, fromDate, toDate, reportType) => {
 
 // Helper function to get week number of the year
 const getWeekNumber = (date) => {
+    if (!date || isNaN(date.getTime())) {
+        throw new Error("Invalid date provided to getWeekNumber");
+    }
+
     const firstDayOfYear = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
     const pastDays = Math.floor((date - firstDayOfYear) / (24 * 60 * 60 * 1000));
     return Math.ceil((pastDays + firstDayOfYear.getUTCDay() + 1) / 7);
