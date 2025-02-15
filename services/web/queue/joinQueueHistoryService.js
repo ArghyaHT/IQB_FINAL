@@ -1,102 +1,123 @@
 import JoinedQueueHistory from "../../../models/joinQueueHistoryModel.js"
 
 // FIND SALON IN HISTORY
-export const findSalonQueueListHistory = async(salonId) => {
-  const salon = await JoinedQueueHistory.findOne({ salonId });
-  return salon;
+export const findSalonQueueListHistory = async (salonId) => {
+    const salon = await JoinedQueueHistory.findOne({ salonId });
+    return salon;
 }
 
 //ADD SERVED Q TO HISTORY
-export const addQueueHistory = async(salonId, element, updatedByBarberEmail,servedByBarberEmail, barberId, name, isAdmin) => {
+export const addQueueHistory = async (salonId, element, updatedByBarberEmail, servedByBarberEmail, barberId, name, isAdmin) => {
 
-  const newElement = {
-    ...element.toObject(), // Convert Mongoose document to plain JavaScript object
-    servedByBarberEmail: servedByBarberEmail,
-    updatedByBarberEmail: updatedByBarberEmail,
-    barberId: barberId,
-    barberName: name,
-    isAdmin: isAdmin
-};
+    const newElement = {
+        ...element.toObject(), // Convert Mongoose document to plain JavaScript object
+        servedByBarberEmail: servedByBarberEmail,
+        updatedByBarberEmail: updatedByBarberEmail,
+        barberId: barberId,
+        barberName: name,
+        isAdmin: isAdmin
+    };
 
-const newSalonHistory = new JoinedQueueHistory({
-  salonId,
-  queueList: [newElement],
-});
-await newSalonHistory.save();
+    const newSalonHistory = new JoinedQueueHistory({
+        salonId,
+        queueList: [newElement],
+    });
+    await newSalonHistory.save();
 }
 
 
-export const addQueueHistoryWhenCanceled = async(salonId, canceledQueue, updatedByBarberEmail) => {
+export const addQueueHistoryWhenCanceled = async (salonId, canceledQueue, updatedByBarberEmail) => {
 
-  const newElement = {
-    ...canceledQueue.toObject(), // Convert Mongoose document to plain JavaScript object
-    updatedByBarberEmail,
-};
+    const newElement = {
+        ...canceledQueue.toObject(), // Convert Mongoose document to plain JavaScript object
+        updatedByBarberEmail,
+    };
 
 
-   const salon = new JoinedQueueHistory({
+    const salon = new JoinedQueueHistory({
         salonId,
         queueList: [newElement],
-      });
+    });
 
-      return salon;
- }
+    return salon;
+}
 
 //UPDATE THE STATUS FIELD IF SERVED
-export const updateServed = async(salonId, _id) => {
-  const updatedValue =   await JoinedQueueHistory.updateOne(
-      { salonId, 'queueList._id': _id },
-      { $set: { 'queueList.$.status': 'served' } }
+export const updateServed = async (salonId, _id) => {
+    const updatedValue = await JoinedQueueHistory.updateOne(
+        { salonId, 'queueList._id': _id },
+        { $set: { 'queueList.$.status': 'served' } }
     );
     return updatedValue;
 }
 
 //UPDATE THE STATUS FIELD IF CANCELED
-export const statusCancelQ = async(salonId, _id) => {
-  const updatedValue =   await JoinedQueueHistory.updateOne(
-      { salonId, 'queueList._id': _id },
-      { $set: { 'queueList.$.status': 'cancelled' } }
+export const statusCancelQ = async (salonId, _id) => {
+    const updatedValue = await JoinedQueueHistory.updateOne(
+        { salonId, 'queueList._id': _id },
+        { $set: { 'queueList.$.status': 'cancelled' } }
     );
     return updatedValue;
 }
 
 //GET Q HISTORY BY CUSTOMER EMAIL 
-export const qhistoryByCustomer = async(salonId, customerEmail) => {
-  const qHistory = await JoinedQueueHistory.aggregate([
-      {
-          $match: {
-              salonId: salonId,
-          },
-      },
-      {
-          $unwind: "$queueList",
-      },
-      {
-          $match: {
-              'queueList.customerEmail': customerEmail,
-          },
-      },
-  ]);
-return qHistory;  
+export const qhistoryByCustomer = async (salonId, customerEmail) => {
+    const qHistory = await JoinedQueueHistory.aggregate([
+        {
+            $match: {
+                salonId: salonId,
+            },
+        },
+        {
+            $unwind: "$queueList",
+        },
+        {
+            $match: {
+                'queueList.customerEmail': customerEmail,
+            },
+        },
+    ]);
+    return qHistory;
 }
 
-export const getSalonServedQlist = async (salonId, fromDate, toDate, reportType) => {
-    const from = new Date(fromDate);
-    from.setUTCHours(0, 0, 0, 0); // Start of the day in UTC
-    const to = new Date(toDate);
-    to.setUTCHours(23, 59, 59, 999); // End of the day in UTC
+export const getSalonServedQlist = async (salonId, reportType) => {
+    // const from = new Date(fromDate);
+    // from.setUTCHours(0, 0, 0, 0); // Start of the day in UTC
+    // const to = new Date(toDate);
+    // to.setUTCHours(23, 59, 59, 999); // End of the day in UTC
 
-    // Determine the date format based on report type
-    let dateFormat;
+    const today = new Date();
+    let from = new Date(today);
+    let to = new Date(today);
+
     if (reportType === "daily") {
-        dateFormat = "%Y-%m-%d"; // Group by day
+        from.setUTCDate(today.getUTCDate() - 30); // Get last 30 days
+        from.setUTCHours(0, 0, 0, 0);
+        to.setUTCHours(23, 59, 59, 999);
     } else if (reportType === "weekly") {
-        dateFormat = "%Y-%U"; // Group by week number (Year-Week)
+        from.setUTCDate(today.getUTCDate() - 7 * 12); // Get last 12 weeks
+        from.setUTCHours(0, 0, 0, 0);
+        to.setUTCHours(23, 59, 59, 999);
     } else if (reportType === "monthly") {
-        dateFormat = "%Y-%m"; // Group by month (Year-Month)
-    } else {
-        throw new Error("Invalid report type. Must be 'daily', 'weekly', or 'monthly'.");
+        const currentYear = today.getUTCFullYear();
+        const currentMonth = today.getUTCMonth(); // 0-based (Jan = 0, Feb = 1, ...)
+        
+        from = new Date(Date.UTC(currentYear, 0, 1, 0, 0, 0, 0)); // Start from Jan 1st, 00:00 UTC
+        to = new Date(Date.UTC(currentYear, currentMonth, today.getUTCDate(), 23, 59, 59, 999)); // End at today's date
     }
+    
+
+        // Determine the date format based on report type
+        let dateFormat;
+        if (reportType === "daily") {
+            dateFormat = "%Y-%m-%d"; // Group by day
+        } else if (reportType === "weekly") {
+            dateFormat = "%Y-%U"; // Group by week number (Year-Week)
+        } else if (reportType === "monthly") {
+            dateFormat = "%Y-%m"; // Group by month (Year-Month)
+        } else {
+            throw new Error("Invalid report type. Must be 'daily', 'weekly', or 'monthly'.");
+        }
 
     const qHistory = await JoinedQueueHistory.aggregate([
         {
@@ -126,7 +147,7 @@ export const getSalonServedQlist = async (salonId, fromDate, toDate, reportType)
         },
         {
             $project: {
-                _id: 0, 
+                _id: 0,
                 date: "$_id",
                 count: 1
             }
@@ -163,7 +184,7 @@ export const getSalonCancelledQlist = async (salonId, fromDate, toDate, reportTy
             $match: {
                 salonId: salonId,
                 'queueList.dateJoinedQ': {
-                    $gte: from, 
+                    $gte: from,
                     $lte: to
                 }
             }
@@ -186,7 +207,7 @@ export const getSalonCancelledQlist = async (salonId, fromDate, toDate, reportTy
         },
         {
             $project: {
-                _id: 0, 
+                _id: 0,
                 date: "$_id",
                 count: 1
             }
@@ -201,71 +222,71 @@ export const getSalonCancelledQlist = async (salonId, fromDate, toDate, reportTy
 
 
 export const getBarberServedQlist = async (salonId, barberId, fromDate, toDate) => {
-  // Parse the input dates, they should be in ISO format.
-  const from = new Date(fromDate);
-  from.setUTCHours(0, 0, 0, 0); // Start of the day in UTC
-  const to = new Date(toDate);
-  to.setUTCHours(23, 59, 59, 999); // End of the day in UTC
+    // Parse the input dates, they should be in ISO format.
+    const from = new Date(fromDate);
+    from.setUTCHours(0, 0, 0, 0); // Start of the day in UTC
+    const to = new Date(toDate);
+    to.setUTCHours(23, 59, 59, 999); // End of the day in UTC
 
-  const qHistory = await JoinedQueueHistory.aggregate([
-      {
-          $match: {
-              salonId: salonId,
-              'queueList.dateJoinedQ': {
-                  $gte: from, // Compare in UTC
-                  $lte: to    // Compare in UTC
-              },
-              'queueList.barberId': barberId // Add barberId check
-          }
-      },
-      {
-          $unwind: "$queueList"
-      },
-      {
-          $match: {
-              'queueList.status': "served",
-          }
-      },
-      {
-          $group: {
-              _id: {
-                  date: {
-                      $dateToString: { format: "%Y-%m-%d", date: "$queueList.dateJoinedQ" } // Group by day
-                  }
-              },
-              count: { $sum: 1 } // Count the number of served customers per day
-          }
-      },
-      {
-          $sort: { "_id.date": 1 } // Sort by date ascending
-      }
-  ]);
+    const qHistory = await JoinedQueueHistory.aggregate([
+        {
+            $match: {
+                salonId: salonId,
+                'queueList.dateJoinedQ': {
+                    $gte: from, // Compare in UTC
+                    $lte: to    // Compare in UTC
+                },
+                'queueList.barberId': barberId // Add barberId check
+            }
+        },
+        {
+            $unwind: "$queueList"
+        },
+        {
+            $match: {
+                'queueList.status': "served",
+            }
+        },
+        {
+            $group: {
+                _id: {
+                    date: {
+                        $dateToString: { format: "%Y-%m-%d", date: "$queueList.dateJoinedQ" } // Group by day
+                    }
+                },
+                count: { $sum: 1 } // Count the number of served customers per day
+            }
+        },
+        {
+            $sort: { "_id.date": 1 } // Sort by date ascending
+        }
+    ]);
 
-  // Fill in missing dates with count 0 (optional)
-  const result = await fillMissingDates(qHistory, from, to);
+    // Fill in missing dates with count 0 (optional)
+    const result = await fillMissingDates(qHistory, from, to);
 
-  return result;
+    return result;
 };
 
-export const getSalonQueueHistory = async(salonId) => {
-    const salonQueueListHistory = await JoinedQueueHistory.findOne({salonId})
+export const getSalonQueueHistory = async (salonId) => {
+    const salonQueueListHistory = await JoinedQueueHistory.findOne({ salonId })
 
     if (!salonQueueListHistory || !salonQueueListHistory.queueList || salonQueueListHistory.queueList.length === 0) {
         return [];
     }
 
-      return salonQueueListHistory.queueList
-} 
+    return salonQueueListHistory.queueList
+}
 
-export const getQueueHistoryByBarber = async(salonId, barberId) => {
-    const barberQueuelisthistory = await JoinedQueueHistory.findOne({salonId});
+export const getQueueHistoryByBarber = async (salonId, barberId) => {
+    const barberQueuelisthistory = await JoinedQueueHistory.findOne({ salonId });
 
 
-    if(barberQueuelisthistory){
+    if (barberQueuelisthistory) {
         const filteredQueueList = barberQueuelisthistory.queueList.filter(item => item.barberId === barberId);
-      
+
         return filteredQueueList
-      }
+    }
 
 }
 
@@ -273,7 +294,7 @@ export const getTotalSalonQlist = async (salonId, reportType) => {
     const today = new Date();
     let from = new Date(today);
     let to = new Date(today);
-    
+
     if (reportType === "daily") {
         from.setUTCDate(today.getUTCDate() - 7); // Get last 7 days
         from.setUTCHours(0, 0, 0, 0);
@@ -283,12 +304,11 @@ export const getTotalSalonQlist = async (salonId, reportType) => {
         from.setUTCHours(0, 0, 0, 0);
         to.setUTCHours(23, 59, 59, 999);
     } else if (reportType === "monthly") {
-        from.setUTCMonth(today.getUTCMonth() - 12); // Get last 12 months
-        from.setUTCDate(1); // Start from the first day of the month
-        from.setUTCHours(0, 0, 0, 0);
-        to.setUTCHours(23, 59, 59, 999);
-    } else {
-        throw new Error("Invalid report type. Must be 'daily', 'weekly', or 'monthly'.");
+        const currentYear = today.getUTCFullYear();
+        const currentMonth = today.getUTCMonth(); // 0-based (Jan = 0, Feb = 1, ...)
+        
+        from = new Date(Date.UTC(currentYear, 0, 1, 0, 0, 0, 0)); // Start from Jan 1st, 00:00 UTC
+        to = new Date(Date.UTC(currentYear, currentMonth, today.getUTCDate(), 23, 59, 59, 999)); // End at today's date
     }
 
 
@@ -309,7 +329,7 @@ export const getTotalSalonQlist = async (salonId, reportType) => {
             $match: {
                 salonId: salonId,
                 'queueList.dateJoinedQ': {
-                    $gte: from, 
+                    $gte: from,
                     $lte: to
                 }
             }
@@ -327,7 +347,7 @@ export const getTotalSalonQlist = async (salonId, reportType) => {
         },
         {
             $project: {
-                _id: 0, 
+                _id: 0,
                 date: "$_id",
                 count: 1
             }
@@ -351,7 +371,7 @@ export const fillMissingDates = (data, fromDate, toDate, reportType) => {
         if (reportType === "daily") {
             key = "date";
             formattedDate = currentDate.toISOString().split("T")[0]; // YYYY-MM-DD
-            
+
             currentDate.setDate(currentDate.getDate() + 1); // Move to next day
         } else if (reportType === "weekly") {
             key = "week";
@@ -361,12 +381,21 @@ export const fillMissingDates = (data, fromDate, toDate, reportType) => {
             currentDate.setDate(currentDate.getDate() + 7); // Move to next week
         } else if (reportType === "monthly") {
             key = "month";
-            formattedDate = `${currentDate.getUTCFullYear()}-${String(currentDate.getUTCMonth() + 1).padStart(2, '0')}`; // YYYY-MM
-            currentDate.setMonth(currentDate.getMonth() + 1); // Move to next month
+            formattedDate = `${currentDate.getUTCFullYear()}-${String(currentDate.getUTCMonth() + 1).padStart(2, '0')}`;
+            
+            // Stop if the generated month exceeds today's month
+            if (
+                currentDate.getUTCFullYear() > toDate.getUTCFullYear() || 
+                (currentDate.getUTCFullYear() === toDate.getUTCFullYear() && currentDate.getUTCMonth() > toDate.getUTCMonth())
+            ) {
+                break;
+            }
+
+            currentDate.setMonth(currentDate.getMonth() + 1);
         }
 
         const existingEntry = data.find(entry => entry.date === formattedDate);
-        
+
         result.push({
             [key]: formattedDate, // Dynamically assign key
             totalQueue: existingEntry ? existingEntry.count : 0

@@ -22,15 +22,39 @@ export const salonServedReport = async(req, res, next) => {
         let fromDate = new Date(from);
         let toDate = new Date(to);
 
-        if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
-            return res.status(400).json({
-                success: false,
-                message: 'Invalid date format for from or to date',
-            });
-        }
+        // if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Invalid date format for from or to date',
+        //     });
+        // }
 
         if(reportValue === "queueserved"){
-            const getSalonServedReport = await getSalonServedQlist(salonId, fromDate, toDate, reportType);
+
+            const getSalonServedReport = await getSalonServedQlist(salonId, reportType);
+
+            if(reportType === "daily"){
+                return res.status(200).json({
+                    success: true,
+                    message: 'Report retrieved successfully.',
+                    response: getSalonServedReport.map(item => ({
+                        date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
+                        totalQueue: item.totalQueue
+                    }))
+                });
+            }
+
+            if(reportType === "monthly"){
+                return res.status(200).json({
+                    success: true,
+                    message: 'Report retrieved successfully.',
+                    response: getSalonServedReport.map(item => ({
+                        month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                        totalQueue: item.totalQueue
+                    }))
+                });
+            }
+
 
             return res.status(200).json({
                 success: true,
@@ -103,6 +127,17 @@ export const dashboardReports = async(req, res, next) => {
             message: 'Report retrieved successfully.',
             response: getSalonQueueReport.map(item => ({
                 date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
+                totalQueue: item.totalQueue
+            }))
+        });
+    }
+
+    if(reportType === "monthly") {
+        return res.status(200).json({
+            success: true,
+            message: 'Report retrieved successfully.',
+            response: getSalonQueueReport.map(item => ({
+                month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
                 totalQueue: item.totalQueue
             }))
         });
