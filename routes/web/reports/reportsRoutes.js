@@ -5,10 +5,7 @@ const router = express.Router()
 
 
 //Get Salon Served Report
-router.route("/getSalonServedReports").post(salonServedReport)
-
-//Get Salon Cancelled Report
-router.route("/getSalonCancelledReports").post(salonCancelledReport)
+router.route("/getSalonReports").post(salonServedReport)
 
 router.route("/getdashboardReports").post(dashboardReports)
 

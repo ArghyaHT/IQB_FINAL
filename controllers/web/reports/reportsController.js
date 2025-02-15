@@ -5,7 +5,7 @@ export const salonServedReport = async(req, res, next) => {
     try {
         const { salonId, from, to, reportType, reportValue } = req.body;
 
-        if (!salonId || !from || !to || !reportType) {
+        if (!salonId || !reportType) {
             return res.status(400).json({
                 success: false,
                 message: 'Missing required fields: salonId, from, to, or reportType',
