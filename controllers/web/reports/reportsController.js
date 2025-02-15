@@ -187,10 +187,11 @@ export const dashboardReports = async(req, res, next) => {
         return res.status(200).json({
             success: true,
             message: 'Report retrieved successfully.',
-            response: getSalonQueueReport.map(item => ({
-                date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
-                totalQueue: item.totalQueue
-            }))
+            response: getSalonQueueReport
+            // response: getSalonQueueReport.map(item => ({
+            //     date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
+            //     totalQueue: item.totalQueue
+            // }))
         });
     }
 

@@ -315,7 +315,7 @@ export const getTotalSalonQlist = async (salonId, reportType) => {
     let to = new Date(today);
 
     if (reportType === "daily") {
-        from.setUTCDate(today.getUTCDate() - 7); // Get last 7 days
+        from.setUTCDate(today.getUTCDate() - 7); // Get last 30 days
         from.setUTCHours(0, 0, 0, 0);
         to.setUTCHours(23, 59, 59, 999);
     } else if (reportType === "weekly") {
@@ -358,7 +358,7 @@ export const getTotalSalonQlist = async (salonId, reportType) => {
         {
             $group: {
                 _id: {
-                    $dateToString: { format: "%G-%V", date: "$queueList.dateJoinedQ" }
+                    $dateToString: { format: dateFormat, date: "$queueList.dateJoinedQ" }
                 },
                 count: { $sum: 1 }
             }
@@ -389,7 +389,6 @@ export const fillMissingDates = (data, fromDate, toDate, reportType) => {
         if (reportType === "daily") {
             key = "date";
             formattedDate = currentDate.toISOString().split("T")[0]; // YYYY-MM-DD
-
             currentDate.setDate(currentDate.getDate() + 1); // Move to next day
         } else if (reportType === "weekly") {
             key = "week";
