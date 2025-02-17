@@ -99,13 +99,11 @@ export const getSalonServedQlist = async (salonId, reportType) => {
         to.setUTCHours(23, 59, 59, 999); // Last second of today
     } else if (reportType === "monthly") {
         const currentYear = today.getUTCFullYear();
-        const currentMonth = today.getUTCMonth(); // 0-based (Jan = 0, Feb = 1, ...)
         
         from = new Date(Date.UTC(currentYear, 0, 1, 0, 0, 0, 0)); // Start from Jan 1st, 00:00 UTC
-        to = new Date(Date.UTC(currentYear, currentMonth, today.getUTCDate(), 23, 59, 59, 999)); // End at today's date
+        to = new Date(Date.UTC(currentYear, 11, 31, 23, 59, 59, 999)); // End at Dec 31st, 23:59:59 UTC
     }
     
-
         // Determine the date format based on report type
         let dateFormat;
         if (reportType === "daily") {

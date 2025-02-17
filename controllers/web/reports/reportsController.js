@@ -19,16 +19,6 @@ export const salonServedReport = async(req, res, next) => {
             });
         }
 
-        let fromDate = new Date(from);
-        let toDate = new Date(to);
-
-        // if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: 'Invalid date format for from or to date',
-        //     });
-        // }
-
         if(reportValue === "queueserved"){
 
             const getSalonServedReport = await getSalonServedQlist(salonId, reportType);
@@ -58,43 +48,61 @@ export const salonServedReport = async(req, res, next) => {
 
             if (reportType === "weekly") {
                 const today = new Date();
-            today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
-        
-            return res.status(200).json({
-                success: true,
-                message: "Report retrieved successfully.",
-                // response: getSalonQueueReport
-                response: getSalonServedReport.map(item => {
-                    // Extract year & week number
-                    const [year, week] = item.week.split("-").map(Number);
-                    const { startOfWeek, endOfWeek } = getWeekDateRange(year, week, today);
-        
+                today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
+
+                // return res.status(200).json({
+                //     success: true,
+                //     message: "Report retrieved successfully.",
+                //     response: getSalonServedReport
+                // })
+            
+                return res.status(200).json({
+                    success: true,
+                    message: "Report retrieved successfully.",
+                    response: getSalonServedReport.map(item => {
+                        // Extract year & week number
+                        const [year, week] = item.week.split("-").map(Number);
+                        const { startOfWeek, endOfWeek } = getWeekDateRange(year, week, today);
+            
+                        return {
+                            week: `${startOfWeek} - ${endOfWeek}`,
+                            totalQueue: item.totalQueue
+                        };
+                    })
+                });
+
+                function getWeekDateRange(year, week, today) {
+                    // Get the first day of the year
+                    const firstDayOfYear = new Date(Date.UTC(year, 0, 1)); // Jan 1st
+                    const firstDayOfWeek = new Date(firstDayOfYear);
+                    
+                    // Adjust to the first Monday of the year if Jan 1st isn't a Monday
+                    const dayOfWeek = firstDayOfYear.getUTCDay(); 
+                    const daysToAdd = (dayOfWeek <= 1 ? 1 - dayOfWeek : 8 - dayOfWeek); // Ensure we get Monday
+                    firstDayOfWeek.setUTCDate(firstDayOfYear.getUTCDate() + daysToAdd);
+                
+                    // Now, get the start of the week based on the given 'week' number
+                    const startOfWeek = new Date(firstDayOfWeek);
+                    startOfWeek.setUTCDate(firstDayOfWeek.getUTCDate() + (week - 1) * 7); // Adjust to the correct week
+                
+                    // Get the last day of the week (6 days after the start of the week)
+                    let endOfWeek = new Date(startOfWeek);
+                    endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 6);
+                
+                    // 🔹 Find the last day of the month (this ensures we do not go beyond the month)
+                    const lastDayOfMonth = new Date(Date.UTC(year, startOfWeek.getUTCMonth() + 1, 0, 23, 59, 59, 999)); // End of the month
+                
+                    // Ensure the end of the week does not exceed the last day of the month
+                    if (endOfWeek > lastDayOfMonth) {
+                        endOfWeek = lastDayOfMonth;
+                    }
+                
                     return {
-                        week: `${startOfWeek} - ${endOfWeek}`,
-                        totalQueue: item.totalQueue
+                        startOfWeek: startOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+                        endOfWeek: endOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" })
                     };
-                })
-            });
-        
-            function getWeekDateRange(year, week, today) {
-                const firstDayOfYear = new Date(Date.UTC(year, 0, 1)); // Jan 1st
-                const firstDayOfWeek = new Date(firstDayOfYear);
-                firstDayOfWeek.setUTCDate(firstDayOfYear.getUTCDate() + (week - 1) * 7); // Week start
-        
-                let lastDayOfWeek = new Date(firstDayOfWeek);
-                lastDayOfWeek.setUTCDate(firstDayOfWeek.getUTCDate() + 6); // Normally end of week
-        
-                // 🔹 If last week exceeds today, limit it to today's date
-                if (lastDayOfWeek > today) {
-                    lastDayOfWeek = today;
                 }
-        
-                return {
-                    startOfWeek: firstDayOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-                    endOfWeek: lastDayOfWeek.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-                };
-            }
-        
+                
             }
         }
         else{
