@@ -238,7 +238,7 @@ export const getWeeklySalonServedReport = async (salonId, week) => {
         weeklyData = groupByWeeks(dailyData, startOfMonth, endOfMonth);
     } else {
         // Otherwise, show data for the last 'n' weeks based on a 7-day interval
-        const weeksAgo = today.clone().subtract(week - 1, "weeks");
+        const weeksAgo = today.clone().subtract(week, "weeks");
         const startOfLastNWeeks = weeksAgo.clone().startOf("day");  // Start of the current day
         const endOfLastNWeeks = today.clone().endOf("day");  // End of today
 
@@ -400,7 +400,7 @@ export const getWeeklySalonCancelledReport = async (salonId, week) => {
         weeklyData = groupByWeeks(dailyData, startOfMonth, endOfMonth);
     } else {
         // Otherwise, show data for the last 'n' weeks based on a 7-day interval
-        const weeksAgo = today.clone().subtract(week - 1, "weeks");
+        const weeksAgo = today.clone().subtract(week, "weeks");
         const startOfLastNWeeks = weeksAgo.clone().startOf("day");  // Start of the current day
         const endOfLastNWeeks = today.clone().endOf("day");  // End of today
 
