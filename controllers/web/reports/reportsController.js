@@ -189,7 +189,7 @@ export const salonServedReport = async (req, res, next) => {
             
                         return {
                             week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
-                            totalQueue: item.totalQueue
+                            TotalQueue: item.totalQueue
                         };
                     })
                 });
