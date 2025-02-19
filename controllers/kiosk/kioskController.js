@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken"
 
 
 import { connectAdminKiosk, findAdminByEmailandRole, findAdminByEmailandSalonId } from "../../services/kiosk/admin/adminServices.js";
-import { availableBarberAutoJoin, barberClockInStatus, barberOnlineStatus, changeBarberStatusAtSalonOffline, decreaseBarberEWT, decreaseBarberEWTWhenQCancel, fetchedBarbers, findBaberByBarberId, findBarberByBarberEmailAndSalonId, findBarberByEmailAndRole, findBarberByEmailAndSalonId, getAllSalonBarbers, getBarberByBarberId, getBarbersForQ, getBarbersWithMulServices, updateBarberEWT } from "../../services/kiosk/barber/barberService.js";
+import { availableBarberAutoJoin, barberClockInStatus, barberOnlineStatus, changeBarberStatusAtSalonOffline, decreaseBarberEWT, decreaseBarberEWTWhenQCancel, fetchedBarbers, findBaberByBarberId, findBarberByBarberEmailAndSalonId, findBarberByEmailAndRole, findBarberByEmailAndSalonId, findBarbersBySalonId, getAllSalonBarbers, getBarberByBarberId, getBarbersForQ, getBarbersWithMulServices, updateBarberEWT } from "../../services/kiosk/barber/barberService.js";
 import { allSalonsByAdmin, allSalonServices, checkSalonExists, getDefaultSalonDetailsEmail, getSalonBySalonId, getSalonOnlineStatus, getSalonTimeZone, kioskAvailabilityStatus, mobileBookingAvailabilityStatus, salonOnlineStatus } from "../../services/kiosk/salon/salonServices.js";
 import { findCustomersToMail, findSalonQueueList, getSalonQlist, qListByBarberId } from "../../services/kiosk/queue/queueService.js";
 import { addCustomerToQueue } from "../../utils/queue/queueUtils.js";
@@ -78,7 +78,7 @@ export const loginKiosk = async (req, res, next) => {
 
             const getDefaultAdminSalon = await getDefaultSalonDetailsEmail(foundUser.salonId)
 
-            if(getDefaultAdminSalon.isQueuing){
+            if (getDefaultAdminSalon.isQueuing) {
                 const adminKioskToken = jwt.sign(
                     {
                         "email": foundUser.email,
@@ -93,10 +93,10 @@ export const loginKiosk = async (req, res, next) => {
                     foundUser
                 })
             }
-            else{
-             return ErrorHandler(ADMIN_LOGIN_QUEUE_ERROR, ERROR_STATUS_CODE, res)
+            else {
+                return ErrorHandler(ADMIN_LOGIN_QUEUE_ERROR, ERROR_STATUS_CODE, res)
             }
-            
+
         }
         else {
             const foundUser = await findBarberByEmailAndRole(email)
@@ -114,7 +114,7 @@ export const loginKiosk = async (req, res, next) => {
 
             const getDefaultBarberSalon = await getDefaultSalonDetailsEmail(foundUser.salonId)
 
-            if(getDefaultBarberSalon.isQueuing){
+            if (getDefaultBarberSalon.isQueuing) {
 
                 const barberKioskToken = jwt.sign(
                     {
@@ -124,7 +124,7 @@ export const loginKiosk = async (req, res, next) => {
                     process.env.JWT_BARBER_ACCESS_SECRET,
                     { expiresIn: '1d' }
                 )
-    
+
                 // Send accessToken containing username and roles 
                 return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
                     token: barberKioskToken,
@@ -132,8 +132,8 @@ export const loginKiosk = async (req, res, next) => {
                 })
 
             }
-            else{
-            return ErrorHandler(BARBER_LOGIN_QUEUE_ERROR, ERROR_STATUS_CODE, res)
+            else {
+                return ErrorHandler(BARBER_LOGIN_QUEUE_ERROR, ERROR_STATUS_CODE, res)
             }
         }
     }
@@ -229,8 +229,49 @@ export const getDefaultSalon = async (req, res, next) => {
             else {
                 const defaultSalon = await getDefaultSalonDetailsEmail(admin.salonId)
 
-                return SuccessHandler(DEFAULT_SALON_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: defaultSalon })
+                // Find associated barbers using salonId
+                const barbers = await findBarbersBySalonId(admin.salonId);
+                const barberCount = barbers.length;
 
+                // Initialize least queue count tracking
+                let minQueueCount = Infinity;
+                let leastQueueBarbers = [];
+
+                // Find the minimum queue count first
+                barbers.forEach(barber => {
+                    if (barber.queueCount < minQueueCount) {
+                        minQueueCount = barber.queueCount;
+                    }
+                });
+
+                // Collect all barbers who have this minimum queue count
+                leastQueueBarbers = barbers.filter(barber => barber.queueCount === minQueueCount);
+
+                // Find queues associated with the salonId
+                const salonQueues = await getSalonQlist(admin.salonId);
+
+                let totalQueueCount = 0;
+
+                totalQueueCount = salonQueues.length
+
+
+                return SuccessHandler(DEFAULT_SALON_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, {
+                    response: {
+                        defaultSalon: {
+                            ...defaultSalon.toObject(),  // Spread existing defaultSalon properties
+                            barbersOnDuty: barberCount,    // Add barbers on duty count inside defaultSalon
+                            totalQueueCount: totalQueueCount,  // Add total queue count inside defaultSalon
+                            // leastQueueCount: minQueueCountAsInteger   // Add least queue count inside defaultSalon
+                            leastQueueBarbers: leastQueueBarbers.map(barber => ({  // Add least queue barbers
+                                barberId: barber._id,
+                                name: barber.name,
+                                profile: barber.profile,
+                                queueCount: barber.queueCount,
+                                barberEWT: barber.barberEWT
+                            }))
+                        }
+                    }
+                });
             }
         }
         else {
@@ -242,7 +283,46 @@ export const getDefaultSalon = async (req, res, next) => {
             else {
                 const defaultSalon = await getDefaultSalonDetailsEmail(barber.salonId)
 
-                return SuccessHandler(DEFAULT_SALON_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: defaultSalon })
+                // Find associated barbers using salonId
+                const barbers = await findBarbersBySalonId(barber.salonId);
+                const barberCount = barbers.length;
+
+                // Initialize least queue count tracking
+                let minQueueCount = Infinity;
+                let leastQueueBarbers = [];
+
+                // Find the minimum queue count first
+                barbers.forEach(barber => {
+                    if (barber.queueCount < minQueueCount) {
+                        minQueueCount = barber.queueCount;
+                    }
+                });
+
+                // Collect all barbers who have this minimum queue count
+                leastQueueBarbers = barbers.filter(barber => barber.queueCount === minQueueCount);
+
+                // Find queues associated with the salonId
+                const salonQueues = await getSalonQlist(barber.salonId);
+
+                let totalQueueCount = 0;
+
+                totalQueueCount = salonQueues.length
+
+                return SuccessHandler(DEFAULT_SALON_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, {  response: {
+                    defaultSalon: {
+                        ...defaultSalon.toObject(),  // Spread existing defaultSalon properties
+                        barbersOnDuty: barberCount,    // Add barbers on duty count inside defaultSalon
+                        totalQueueCount: totalQueueCount,  // Add total queue count inside defaultSalon
+                        // leastQueueCount: minQueueCountAsInteger   // Add least queue count inside defaultSalon
+                        leastQueueBarbers: leastQueueBarbers.map(barber => ({  // Add least queue barbers
+                            barberId: barber._id,
+                            name: barber.name,
+                            profile: barber.profile,
+                            queueCount: barber.queueCount,
+                            barberEWT: barber.barberEWT
+                        }))
+                    }
+                } })
             }
         }
     }
@@ -259,17 +339,17 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
         // const salonQueueList = await SalonQueueListModel.findOne({ salonId });
 
         // if (salonQueueList.queueList.length > 0 && isOnline === false) {
-    
+
         //   return ErrorHandler(SALON_QUEUELIST_ERROR, ERROR_STATUS_CODE, res)
-    
+
         // }
 
         const salonQueueList = await SalonQueueListModel.findOne({ salonId });
 
         if (salonQueueList?.queueList?.length > 0 && isOnline === false) {
-          return ErrorHandler(SALON_QUEUELIST_ERROR, ERROR_STATUS_CODE, res);
+            return ErrorHandler(SALON_QUEUELIST_ERROR, ERROR_STATUS_CODE, res);
         }
-       
+
         const updatedSalon = await salonOnlineStatus(salonId, isOnline);
 
         if (!updatedSalon) {
@@ -300,7 +380,7 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 export const getAllBarberbySalonIdKiosk = async (req, res, next) => {
     try {
         const { salonId, email } = req.query;
-        let query = {isApproved: true}; // Filter for isDeleted set to false
+        let query = { isApproved: true }; // Filter for isDeleted set to false
 
         const searchRegExpEmail = new RegExp('.*' + email + ".*", 'i');
 
@@ -459,7 +539,7 @@ export const joinQueueKiosk = async (req, res, next) => {
             return ErrorHandler(SALON_JOIN_QUEUE_ERROR, ERROR_STATUS_CODE_404, res)
         }
 
-        if(salon.kioskAvailability === false){
+        if (salon.kioskAvailability === false) {
             return ErrorHandler(SALON_KIOSK_ERROR, ERROR_STATUS_CODE, res)
         }
 
@@ -788,7 +868,7 @@ export const joinQueueKiosk = async (req, res, next) => {
                 // Handle error if email sending fails
             }
 
-            if(mobileNumber){
+            if (mobileNumber) {
 
             }
         }
@@ -809,7 +889,7 @@ export const getAllSalonServices = async (req, res, next) => {
 
         const getSalon = await getSalonBySalonId(salonId)
 
-        if(getSalon.isOnline === false){
+        if (getSalon.isOnline === false) {
             return ErrorHandler(SALON_OFFLINE_ERROR, ERROR_STATUS_CODE, res)
 
         }
@@ -827,7 +907,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
     try {
         const salonId = parseInt(req.query.salonId, 10);
 
-        
+
         if (Number(salonId) === 0) {
             return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res)
         }
@@ -843,17 +923,17 @@ export const getQueueListBySalonId = async (req, res, next) => {
         //To find the queueList according to salonId and sort it according to qposition
         const getSalon = await getSalonQlist(salonId)
 
-    
+
         if (getSalon) {
             getSalon.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
-          }
-          
-          const sortedQlist = getSalon;
+        }
 
-            return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist? sortedQlist: [] })
+        const sortedQlist = getSalon;
+
+        return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist ? sortedQlist : [] })
 
 
-         // if (getSalon.length > 0) {
+        // if (getSalon.length > 0) {
         //     // Access the sorted queueList array from the result
         //     const sortedQueueList = getSalon[0].queueList;
 
@@ -878,7 +958,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
         // else {
         //     return SuccessHandler(RETRIVE_EMPTY_QUEUELIST_SUCCESS, ERROR_STATUS_CODE_404, res, { response: [] })
         // }
-        
+
 
     }
     catch (error) {
@@ -893,7 +973,7 @@ export const getAvailableBarbersForQKiosk = async (req, res, next) => {
 
         const getSalon = await getSalonBySalonId(salonId)
 
-        if(getSalon.isOnline === false){
+        if (getSalon.isOnline === false) {
             return ErrorHandler(SALON_OFFLINE_ERROR, ERROR_STATUS_CODE, res)
 
         }
@@ -1082,8 +1162,8 @@ export const barberServedQueueKiosk = async (req, res, next) => {
                             ...element.toObject(), // Convert Mongoose document to plain object
                             servedByBarberEmail: servedByBarberEmail,
                             updatedByBarberEmail: updatedByBarberEmail,
-                            barberName:servedBybarber.name,
-                            barberId:servedBybarber.barberId,
+                            barberName: servedBybarber.name,
+                            barberId: servedBybarber.barberId,
                         });
                         await salon.save();
                     }
@@ -1179,10 +1259,10 @@ export const barberServedQueueKiosk = async (req, res, next) => {
 
                     // Send email to the customer who is getting served
                     try {
-                        if(element.customerEmail){
+                        if (element.customerEmail) {
                             await sendQueuePositionEmail(element.customerEmail, servedEmailSubject, servedEmailBody);
                             console.log('Email sent to the served customer successfully.');
-                        }    
+                        }
                     } catch (error) {
                         console.error('Error sending email to the served customer:', error);
                         // Handle error if email sending fails
@@ -1295,10 +1375,10 @@ export const barberServedQueueKiosk = async (req, res, next) => {
                         </html>
                     `;
                                 try {
-                                    if(customerEmail){
+                                    if (customerEmail) {
                                         await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
                                         console.log('Email sent successfully.');
-                                    }         
+                                    }
                                 } catch (error) {
                                     console.error('Error sending email:', error);
                                 }
@@ -1498,8 +1578,8 @@ export const cancelQueueKiosk = async (req, res, next) => {
 
         // Send email to the customer who is getting cancelled
         try {
-            if(canceledQueue.customerEmail){
-           await sendQueuePositionEmail(canceledQueue.customerEmail, servedEmailSubject, servedEmailBody);
+            if (canceledQueue.customerEmail) {
+                await sendQueuePositionEmail(canceledQueue.customerEmail, servedEmailSubject, servedEmailBody);
             }
         } catch (error) {
             console.error('Error sending email to the served customer:', error);
@@ -1594,7 +1674,7 @@ export const cancelQueueKiosk = async (req, res, next) => {
                         `;
 
                         try {
-                            if(customerEmail){
+                            if (customerEmail) {
                                 await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
                                 console.log('Email sent successfully.');
                             }
@@ -1661,7 +1741,7 @@ export const getAttendenceByBarberIdKiosk = async (req, res, next) => {
         // });
 
         return SuccessHandler(BARBER_ATTENDENCE_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: attendance })
-        
+
     } catch (error) {
         next(error);
     }
@@ -1724,14 +1804,14 @@ export const changeBarberClockInStatus = async (req, res, next) => {
                             return ErrorHandler(BARBER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_404, res)
                         }
                         await barberLogOutTime(updatedBarber.salonId, updatedBarber.barberId, updatedBarber.updatedAt);
-                
+
                         return SuccessHandler(BARBER_CLOCKOUT_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
                     }
                     else {
                         return ErrorHandler(CUSTOMERS_IN_QUEUE_ERROR, ERROR_STATUS_CODE_404, res)
 
                     }
-               }
+                }
             }
         );
     } catch (error) {
@@ -1797,7 +1877,7 @@ export const changeSalonKioskStatus = async (req, res, next) => {
             return ErrorHandler(KIOSK_AVAILABILITY_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        if ( kioskAvailability === true) {
+        if (kioskAvailability === true) {
             return SuccessHandler(KIOSK_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
 
         }
@@ -1855,9 +1935,9 @@ export const salonAccountLogin = async (req, res, next) => {
                 return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
 
             }
-            
-               // Send accessToken containing username and roles 
-               return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+
+            // Send accessToken containing username and roles 
+            return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
                 foundUser
             })
         }
@@ -1865,21 +1945,21 @@ export const salonAccountLogin = async (req, res, next) => {
             const foundUser = await findBarberByEmailAndSalonId(email, salonId)
 
             if (!foundUser) {
-             return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
+                return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
 
             }
 
             const match = await bcrypt.compare(password, foundUser.password)
 
-            if (!match){
-            return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
+            if (!match) {
+                return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
 
             }
 
-               // Send accessToken containing username and roles 
-        return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
-            foundUser
-        })
+            // Send accessToken containing username and roles 
+            return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+                foundUser
+            })
         }
 
     }
@@ -1894,9 +1974,9 @@ export const getAllBarberbySalonId = async (req, res, next) => {
         const { salonId, email } = req.query;
 
         if (Number(salonId) === 0) {
-        return SuccessHandler(NO_BARBERS_AVAILABLE_SUCCESS, SUCCESS_STATUS_CODE, res, {
-            getAllBarbers: []
-        })          
+            return SuccessHandler(NO_BARBERS_AVAILABLE_SUCCESS, SUCCESS_STATUS_CODE, res, {
+                getAllBarbers: []
+            })
         }
 
         // Check if the salon exists in the database
@@ -1910,14 +1990,14 @@ export const getAllBarberbySalonId = async (req, res, next) => {
         const getAllBarbers = await getAllSalonBarbers(salonId, email);
 
         if (getAllBarbers && getAllBarbers.length > 0) {
-        return SuccessHandler(BARBER_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, {
-            getAllBarbers: getAllBarbers,
-        })
-            
+            return SuccessHandler(BARBER_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, {
+                getAllBarbers: getAllBarbers,
+            })
+
         } else {
             return SuccessHandler(NO_BARBERS_AVAILABLE_SUCCESS, SUCCESS_STATUS_CODE, res, {
                 getAllBarbers: []
-            })  
+            })
         }
 
     } catch (error) {
@@ -1989,7 +2069,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
                         const salon = await findSalonQueueListHistory(salonId);
 
                         if (!salon) {
-                            await addQueueHistory(salonId, element,updatedByBarberEmail, servedByBarber.email, servedByBarber.barberId, servedByBarber.name, true)
+                            await addQueueHistory(salonId, element, updatedByBarberEmail, servedByBarber.email, servedByBarber.barberId, servedByBarber.name, true)
                         } else {
                             salon.queueList.push({
                                 ...element.toObject(), // Convert Mongoose document to plain object
@@ -2093,7 +2173,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
 
                         // Send email to the customer who is getting served
                         try {
-                            if(element.customerEmail){
+                            if (element.customerEmail) {
                                 await sendQueuePositionEmail(element.customerEmail, servedEmailSubject, servedEmailBody);
                             }
                         } catch (error) {
@@ -2209,8 +2289,8 @@ export const barberServedQueueTvApp = async (req, res, next) => {
                         `;
 
                                     try {
-                                        if(customerEmail){
-                                        await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                                        if (customerEmail) {
+                                            await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
                                         }
                                     } catch (error) {
                                         console.error('Error sending email:', error);
@@ -2219,8 +2299,8 @@ export const barberServedQueueTvApp = async (req, res, next) => {
 
                                     const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-                                    if(pushDevice.deviceToken){
-                                        await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType , QUEUE_POSITION_CHANGE, customerEmail )
+                                    if (pushDevice.deviceToken) {
+                                        await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail)
                                     }
                                 }
                             }
@@ -2434,9 +2514,8 @@ export const cancelQueueTvApp = async (req, res, next) => {
 
         // Send email to the customer who is getting cancelled
         try {
-            if(canceledQueue.customerEmail)
-            {
-            await sendQueuePositionEmail(canceledQueue.customerEmail, servedEmailSubject, servedEmailBody);
+            if (canceledQueue.customerEmail) {
+                await sendQueuePositionEmail(canceledQueue.customerEmail, servedEmailSubject, servedEmailBody);
             }
         } catch (error) {
             console.error('Error sending email to the served customer:', error);
@@ -2532,8 +2611,8 @@ export const cancelQueueTvApp = async (req, res, next) => {
                         `;
 
                         try {
-                            if(customerEmail){
-                            await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                            if (customerEmail) {
+                                await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
                             }
                         } catch (error) {
                             console.error('Error sending email:', error);
@@ -2542,8 +2621,8 @@ export const cancelQueueTvApp = async (req, res, next) => {
 
                         const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-                        if(pushDevice.deviceToken){
-                            await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType , QUEUE_POSITION_CHANGE, customerEmail )
+                        if (pushDevice.deviceToken) {
+                            await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail)
                         }
                     }
                 }

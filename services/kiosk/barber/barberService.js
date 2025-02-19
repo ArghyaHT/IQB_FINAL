@@ -170,3 +170,10 @@ export const getAllSalonBarbers = async (salonId, email ) => {
   return barbers;
 
 }
+
+
+//FIND BARBERS BY SALONID
+export const findBarbersBySalonId = async (salonId) => {
+   const barbers = await Barber.find({ salonId, isClockedIn: true });
+   return barbers;
+}
