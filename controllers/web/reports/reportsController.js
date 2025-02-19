@@ -1,10 +1,11 @@
 import moment from "moment";
-import { getDailyBarberCancelledReport, getDailyBarberServedReport, getDailySalonCancelledReport, getDailySalonServedReport, getMonthlyBarberCancelledReport, getMonthlyBarberServedReport, getMonthlySalonCancelledReport, getMonthlySalonServedReport, getSalonCancelledQlist, getSalonServedQlist, getTotalSalonQlist, getWeeklyBarberCancelledReport, getWeeklyBarberServedReport, getWeeklySalonCancelledReport, getWeeklySalonServedReport } from "../../../services/web/queue/joinQueueHistoryService.js";
+import { getDailyBarberCancelledReport, getDailyBarberCancelledReportByDateRange, getDailyBarberServedReport, getDailyBarberServedReportByDateRange, getDailySalonCancelledReport, getDailySalonCancelledReportByDateRange, getDailySalonServedReport, getDailySalonServedReportByDateRange, getMonthlyBarberCancelledReport, getMonthlyBarberCancelledReportByDateRange, getMonthlyBarberServedReport, getMonthlyBarberServedReportByDateRange, getMonthlySalonCancelledReport, getMonthlySalonCancelledReportByDateRange, getMonthlySalonServedReport, getMonthlySalonServedReportByDateRange, getSalonCancelledQlist, getSalonServedQlist, getTotalSalonQlist, getWeeklyBarberCancelledReport, getWeeklyBarberCancelledReportByDateRange, getWeeklyBarberServedReport, getWeeklyBarberServedReportByDateRange, getWeeklySalonCancelledReport, getWeeklySalonCancelledReportByDateRange, getWeeklySalonServedReport, getWeeklySalonServedReportByDateRange } from "../../../services/web/queue/joinQueueHistoryService.js";
 
 
 export const salonServedReport = async (req, res, next) => {
     try {
         const { salonId, from, to, days, barberId, barberEmail, month, week, reportType, reportValue } = req.body;
+
 
         if (!salonId || !reportType) {
             return res.status(400).json({
@@ -20,7 +21,270 @@ export const salonServedReport = async (req, res, next) => {
             });
         }
 
-        if (barberEmail) {
+
+        if (from && to) {
+            if (barberEmail) {
+                if (reportValue === "queueserved") {
+
+                    if (reportType === "daily") {
+
+                        // Convert 'from' and 'to' to Date objects
+                        const fromDate = new Date(from);
+                        const toDate = new Date(to);
+
+                        // Calculate the difference in days
+                        const timeDiff = toDate - fromDate;
+                        const dayDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert milliseconds to days
+
+                        // Validate date range (should not exceed 20 days)
+                        if (dayDiff > 20) {
+                            return res.status(400).json({
+                                success: false,
+                                message: "Date range should not exceed 20 days."
+                            });
+                        }
+                        const getSalonServedReport = await getDailyBarberServedReportByDateRange(salonId, barberEmail, from, to);
+
+                        return res.status(200).json({
+                            success: true,
+                            message: 'Report retrieved successfully.',
+                            response: getSalonServedReport.map(item => ({
+                                date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
+                                TotalQueue: item.totalQueue
+                            }))
+                        });
+                    }
+                    if (reportType === "monthly") {
+                        const getSalonServedReport = await getMonthlyBarberServedReportByDateRange(salonId, barberEmail, from, to);
+
+                        // Log the entire report data to inspect its structure and values                
+                        return res.status(200).json({
+                            success: true,
+                            message: 'Report retrieved successfully.',
+                            response: getSalonServedReport.map(item => {
+                                return {
+                                    month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                                    TotalQueue: item.count // Use item.count instead of item.totalQueue
+                                };
+                            })
+                        });
+                    }
+                    if (reportType === "weekly") {
+                        const today = new Date();
+                        today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
+
+                        const getSalonServedReport = await getWeeklyBarberServedReportByDateRange(salonId, barberEmail, from, to);
+
+                        return res.status(200).json({
+                            success: true,
+                            message: "Report retrieved successfully.",
+                            response: getSalonServedReport.map(item => {
+                                // Format the week range (e.g., "Jan 1 - Jan 7")
+                                const weekStart = moment(item.weekStart).format("MMM D");
+                                const weekEnd = moment(item.weekEnd).format("MMM D");
+
+                                return {
+                                    week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                                    TotalQueue: item.totalQueue
+                                };
+                            })
+                        });
+                    }
+                }
+            }
+
+            if (barberId) {
+                if (reportType === "daily") {
+
+                    // Convert 'from' and 'to' to Date objects
+                    const fromDate = new Date(from);
+                    const toDate = new Date(to);
+
+                    // Calculate the difference in days
+                    const timeDiff = toDate - fromDate;
+                    const dayDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert milliseconds to days
+
+                    // Validate date range (should not exceed 20 days)
+                    if (dayDiff > 20) {
+                        return res.status(400).json({
+                            success: false,
+                            message: "Date range should not exceed 20 days."
+                        });
+                    }
+
+                    const getSalonCancelledReport = await getDailyBarberCancelledReportByDateRange(salonId, barberId, from, to);
+
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Report retrieved successfully.',
+                        response: getSalonCancelledReport.map(item => ({
+                            date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
+                            TotalQueue: item.totalQueue
+                        }))
+                    });
+
+                }
+                if (reportType === "monthly") {
+                    const getSalonCancelledReport = await getMonthlyBarberCancelledReportByDateRange(salonId, barberId, from, to);
+
+                    // Log the entire report data to inspect its structure and values                
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Report retrieved successfully.',
+                        response: getSalonCancelledReport.map(item => {
+                            return {
+                                month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                                TotalQueue: item.count // Use item.count instead of item.totalQueue
+                            };
+                        })
+                    });
+                }
+                if (reportType === "weekly") {
+                    const today = new Date();
+                    today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
+
+                    const getSalonCancelledReport = await getWeeklyBarberCancelledReportByDateRange(salonId, barberId, from, to);
+
+                    return res.status(200).json({
+                        success: true,
+                        message: "Report retrieved successfully.",
+                        response: getSalonCancelledReport.map(item => {
+                            // Format the week range (e.g., "Jan 1 - Jan 7")
+                            const weekStart = moment(item.weekStart).format("MMM D");
+                            const weekEnd = moment(item.weekEnd).format("MMM D");
+
+                            return {
+                                week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                                TotalQueue: item.totalQueue
+                            };
+                        })
+                    });
+                }
+            }
+
+            if (reportValue === "queueserved") {
+                if (reportType === "daily") {
+
+                    // Convert 'from' and 'to' to Date objects
+                    const fromDate = new Date(from);
+                    const toDate = new Date(to);
+
+                    // Calculate the difference in days
+                    const timeDiff = toDate - fromDate;
+                    const dayDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert milliseconds to days
+
+                    // Validate date range (should not exceed 20 days)
+                    if (dayDiff > 20) {
+                        return res.status(400).json({
+                            success: false,
+                            message: "Date range should not exceed 20 days."
+                        });
+                    }
+                    const getSalonServedReport = await getDailySalonServedReportByDateRange(salonId, from, to);
+
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Report retrieved successfully.',
+                        response: getSalonServedReport.map(item => ({
+                            date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
+                            TotalQueue: item.totalQueue
+                        }))
+                    });
+
+                }
+                if (reportType === "monthly") {
+                    const getSalonServedReport = await getMonthlySalonServedReportByDateRange(salonId, from, to);
+
+                    // Log the entire report data to inspect its structure and values                
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Report retrieved successfully.',
+                        response: getSalonServedReport.map(item => {
+                            return {
+                                month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                                TotalQueue: item.count // Use item.count instead of item.totalQueue
+                            };
+                        })
+                    });
+                }
+                if (reportType === "weekly") {
+                    const today = new Date();
+                    today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
+
+                    const getSalonServedReport = await getWeeklySalonServedReportByDateRange(salonId, from, to);
+
+                    return res.status(200).json({
+                        success: true,
+                        message: "Report retrieved successfully.",
+                        response: getSalonServedReport.map(item => {
+                            // Format the week range (e.g., "Jan 1 - Jan 7")
+                            const weekStart = moment(item.weekStart).format("MMM D");
+                            const weekEnd = moment(item.weekEnd).format("MMM D");
+
+                            return {
+                                week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                                TotalQueue: item.totalQueue
+                            };
+                        })
+                    });
+                }
+
+            }
+            else {
+                if (reportType === "daily") {
+                    const getSalonCancelledReport = await getDailySalonCancelledReportByDateRange(salonId, from, to);
+
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Report retrieved successfully.',
+                        response: getSalonCancelledReport.map(item => ({
+                            date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
+                            TotalQueue: item.totalQueue
+                        }))
+                    });
+
+                }
+                if (reportType === "monthly") {
+                    const getSalonCancelledReport = await getMonthlySalonCancelledReportByDateRange(salonId, from, to);
+
+                    // Log the entire report data to inspect its structure and values                
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Report retrieved successfully.',
+                        response: getSalonCancelledReport.map(item => {
+                            return {
+                                month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                                TotalQueue: item.count // Use item.count instead of item.totalQueue
+                            };
+                        })
+                    });
+                }
+                if (reportType === "weekly") {
+                    const today = new Date();
+                    today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
+
+                    const getSalonCancelledReport = await getWeeklySalonCancelledReportByDateRange(salonId, from, to);
+
+                    return res.status(200).json({
+                        success: true,
+                        message: "Report retrieved successfully.",
+                        response: getSalonCancelledReport.map(item => {
+                            // Format the week range (e.g., "Jan 1 - Jan 7")
+                            const weekStart = moment(item.weekStart).format("MMM D");
+                            const weekEnd = moment(item.weekEnd).format("MMM D");
+
+                            return {
+                                week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                                TotalQueue: item.totalQueue
+                            };
+                        })
+                    });
+                }
+
+            }
+        }
+
+        else if (barberEmail) {
             if (reportValue === "queueserved") {
 
                 if (reportType === "daily") {
@@ -63,7 +327,7 @@ export const salonServedReport = async (req, res, next) => {
                             // Format the week range (e.g., "Jan 1 - Jan 7")
                             const weekStart = moment(item.weekStart).format("MMM D");
                             const weekEnd = moment(item.weekEnd).format("MMM D");
-                
+
                             return {
                                 week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
                                 TotalQueue: item.totalQueue
@@ -74,7 +338,7 @@ export const salonServedReport = async (req, res, next) => {
             }
         }
 
-        if(barberId){
+       else if (barberId) {
             if (reportType === "daily") {
                 const getSalonCancelledReport = await getDailyBarberCancelledReport(salonId, barberId, days);
 
@@ -117,7 +381,7 @@ export const salonServedReport = async (req, res, next) => {
                         // Format the week range (e.g., "Jan 1 - Jan 7")
                         const weekStart = moment(item.weekStart).format("MMM D");
                         const weekEnd = moment(item.weekEnd).format("MMM D");
-            
+
                         return {
                             week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
                             TotalQueue: item.totalQueue
@@ -126,112 +390,110 @@ export const salonServedReport = async (req, res, next) => {
                 });
             }
         }
-
-        if (reportValue === "queueserved") {
-            if (reportType === "daily") {
-                const getSalonServedReport = await getDailySalonServedReport(salonId, days);
-
-                return res.status(200).json({
-                    success: true,
-                    message: 'Report retrieved successfully.',
-                    response: getSalonServedReport.map(item => ({
-                        date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
-                        TotalQueue: item.totalQueue
-                    }))
-                });
-
-            }
-            if (reportType === "monthly") {
-                const getSalonServedReport = await getMonthlySalonServedReport(salonId, month);
-
-                // Log the entire report data to inspect its structure and values                
-                return res.status(200).json({
-                    success: true,
-                    message: 'Report retrieved successfully.',
-                    response: getSalonServedReport.map(item => {
-                        return {
-                            month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
-                            TotalQueue: item.count // Use item.count instead of item.totalQueue
-                        };
-                    })
-                });
-            }
-            if (reportType === "weekly") {
-                const today = new Date();
-                today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
-            
-                const getSalonServedReport = await getWeeklySalonServedReport(salonId, week);
-            
-                return res.status(200).json({
-                    success: true,
-                    message: "Report retrieved successfully.",
-                    response: getSalonServedReport.map(item => {
-                        // Format the week range (e.g., "Jan 1 - Jan 7")
-                        const weekStart = moment(item.weekStart).format("MMM D");
-                        const weekEnd = moment(item.weekEnd).format("MMM D");
-            
-                        return {
-                            week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+        else{
+            if (reportValue === "queueserved") {
+                if (reportType === "daily") {
+                    const getSalonServedReport = await getDailySalonServedReport(salonId, days);
+    
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Report retrieved successfully.',
+                        response: getSalonServedReport.map(item => ({
+                            date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
                             TotalQueue: item.totalQueue
-                        };
-                    })
-                });
+                        }))
+                    });
+    
+                }
+                if (reportType === "monthly") {
+                    const getSalonServedReport = await getMonthlySalonServedReport(salonId, month);
+    
+                    // Log the entire report data to inspect its structure and values                
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Report retrieved successfully.',
+                        response: getSalonServedReport.map(item => {
+                            return {
+                                month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                                TotalQueue: item.count // Use item.count instead of item.totalQueue
+                            };
+                        })
+                    });
+                }
+                if (reportType === "weekly") {
+                    const today = new Date();
+                    today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
+    
+                    const getSalonServedReport = await getWeeklySalonServedReport(salonId, week);
+    
+                    return res.status(200).json({
+                        success: true,
+                        message: "Report retrieved successfully.",
+                        response: getSalonServedReport.map(item => {
+                            // Format the week range (e.g., "Jan 1 - Jan 7")
+                            const weekStart = moment(item.weekStart).format("MMM D");
+                            const weekEnd = moment(item.weekEnd).format("MMM D");
+    
+                            return {
+                                week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                                TotalQueue: item.totalQueue
+                            };
+                        })
+                    });
+                }
+    
             }
-            
-        }
-        else {
-            if (reportType === "daily") {
-                const getSalonCancelledReport = await getDailySalonCancelledReport(salonId, days);
-
-                return res.status(200).json({
-                    success: true,
-                    message: 'Report retrieved successfully.',
-                    response: getSalonCancelledReport.map(item => ({
-                        date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
-                        TotalQueue: item.totalQueue
-                    }))
-                });
-
-            }
-            if (reportType === "monthly") {
-                const getSalonCancelledReport = await getMonthlySalonCancelledReport(salonId, month);
-
-                // Log the entire report data to inspect its structure and values                
-                return res.status(200).json({
-                    success: true,
-                    message: 'Report retrieved successfully.',
-                    response: getSalonCancelledReport.map(item => {
-                        return {
-                            month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
-                            TotalQueue: item.count // Use item.count instead of item.totalQueue
-                        };
-                    })
-                });
-            }
-            if (reportType === "weekly") {
-                const today = new Date();
-                today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
-            
-                const getSalonCancelledReport = await getWeeklySalonCancelledReport(salonId, week);
-            
-                return res.status(200).json({
-                    success: true,
-                    message: "Report retrieved successfully.",
-                    response: getSalonCancelledReport.map(item => {
-                        // Format the week range (e.g., "Jan 1 - Jan 7")
-                        const weekStart = moment(item.weekStart).format("MMM D");
-                        const weekEnd = moment(item.weekEnd).format("MMM D");
-            
-                        return {
-                            week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+            else {
+                if (reportType === "daily") {
+                    const getSalonCancelledReport = await getDailySalonCancelledReport(salonId, days);
+    
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Report retrieved successfully.',
+                        response: getSalonCancelledReport.map(item => ({
+                            date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
                             TotalQueue: item.totalQueue
-                        };
-                    })
-                });
+                        }))
+                    });
+    
+                }
+                if (reportType === "monthly") {
+                    const getSalonCancelledReport = await getMonthlySalonCancelledReport(salonId, month);
+    
+                    // Log the entire report data to inspect its structure and values                
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Report retrieved successfully.',
+                        response: getSalonCancelledReport.map(item => {
+                            return {
+                                month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                                TotalQueue: item.count // Use item.count instead of item.totalQueue
+                            };
+                        })
+                    });
+                }
+                if (reportType === "weekly") {
+                    const today = new Date();
+                    today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
+    
+                    const getSalonCancelledReport = await getWeeklySalonCancelledReport(salonId, week);
+    
+                    return res.status(200).json({
+                        success: true,
+                        message: "Report retrieved successfully.",
+                        response: getSalonCancelledReport.map(item => {
+                            // Format the week range (e.g., "Jan 1 - Jan 7")
+                            const weekStart = moment(item.weekStart).format("MMM D");
+                            const weekEnd = moment(item.weekEnd).format("MMM D");
+    
+                            return {
+                                week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                                TotalQueue: item.totalQueue
+                            };
+                        })
+                    });
+                }
             }
-            
-            
-            
         }
 
     } catch (error) {

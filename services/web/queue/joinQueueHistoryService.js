@@ -272,7 +272,6 @@ export const getWeeklySalonServedReport = async (salonId, week) => {
     return weeklyData;
 };
 
-
 export const getMonthlySalonServedReport = async (salonId, months) => {
     const today = moment().utc();
     let startOfMonth, endOfMonth, dateFormat = "YYYY-MM"; // Group by month
@@ -969,6 +968,706 @@ export const getMonthlyBarberCancelledReport = async (salonId, barberId, months)
     // Return the final monthly data
     return monthlyData;
 };
+
+
+
+//SALON SERVED REPORT BY DATE RANGE
+export const getDailySalonServedReportByDateRange = async (salonId, from, to ) => {
+    let startDate = moment.utc(from).startOf("day");
+    let endDate = moment.utc(to).endOf("day");
+    let dateFormat = "YYYY-MM-DD"; // Group by day
+
+    // Fetch served queue data from the database
+    const queueHistory = await JoinedQueueHistory.find({
+        salonId: salonId,
+        "queueList.dateJoinedQ": { $gte: startDate.toDate(), $lte: endDate.toDate() },
+        "queueList.status": "served"
+    });
+
+    // Process and group data by day
+    let dailyData = {};
+    queueHistory.forEach(entry => {
+        entry.queueList.forEach(queue => {
+            if (queue.status === "served") {
+                const dateKey = moment(queue.dateJoinedQ).utc().format(dateFormat);
+                dailyData[dateKey] = (dailyData[dateKey] || 0) + 1;
+            }
+        });
+    });
+
+    // Convert the daily data into an array
+    let result = Object.keys(dailyData).map(date => ({
+        date,
+        count: dailyData[date]
+    }));
+
+    return fillMissingDates(result, from, to, 'daily');
+};
+
+export const getWeeklySalonServedReportByDateRange = async (salonId, from, to) => {
+    const startDate = moment.utc(from, "YYYY-MM-DD").startOf("day"); // Ensures exact date
+    const endDate = moment.utc(to, "YYYY-MM-DD").endOf("day");
+
+    // Fetch served queue data within the date range
+    const queueHistory = await JoinedQueueHistory.find({
+        salonId: salonId,
+        "queueList.dateJoinedQ": { $gte: startDate.toDate(), $lte: endDate.toDate() },
+        "queueList.status": "served"
+    });
+
+    // Process and group data by day
+    let dailyData = {};
+    queueHistory.forEach(entry => {
+        entry.queueList.forEach(queue => {
+            if (queue.status === "served") {
+                const dateKey = moment(queue.dateJoinedQ).utc().format("YYYY-MM-DD");
+                dailyData[dateKey] = (dailyData[dateKey] || 0) + 1;
+            }
+        });
+    });
+
+    // Manually group data into weeks from the `from` date
+    const weeklyData = [];
+    let currentStart = startDate.clone();
+    
+    while (currentStart.isBefore(endDate)) {
+        let currentEnd = currentStart.clone().add(6, "days"); // Move forward 6 days
+    
+        // Ensure the week does not go beyond 'to' date
+        if (currentEnd.isAfter(endDate)) {
+            // Skip adding the last partial week
+            break;
+        }
+    
+        let totalQueue = 0;
+    
+        // Sum up queue counts within the week range
+        Object.keys(dailyData).forEach(date => {
+            let momentDate = moment.utc(date, "YYYY-MM-DD");
+            if (momentDate.isBetween(currentStart, currentEnd, "day", "[]")) {
+                totalQueue += dailyData[date];
+            }
+        });
+    
+        weeklyData.push({
+            weekStart: currentStart,
+            weekEnd: currentEnd,
+            totalQueue: totalQueue
+        });
+    
+        // Move to the next week
+        currentStart = currentEnd.clone().add(1, "day");
+    }
+    
+
+    return weeklyData;
+};
+
+export const getMonthlySalonServedReportByDateRange = async (salonId, from, to) => {
+    const startOfMonth = moment.utc(from, "YYYY-MM-DD").startOf("month"); // Start of the month
+    const endOfMonth = moment.utc(to, "YYYY-MM-DD").endOf("month"); // End of the month
+    
+
+    // Fetch served queue data for the entire date range (month or last n months)
+    const queueHistory = await JoinedQueueHistory.find({
+        salonId: salonId,
+        "queueList.dateJoinedQ": { $gte: startOfMonth.toDate(), $lte: endOfMonth.toDate() },
+        "queueList.status": "served"
+    });
+
+    // Process and group data by day
+    let dailyData = {};
+    queueHistory.forEach(entry => {
+        entry.queueList.forEach(queue => {
+            if (queue.status === "served") {
+                const dateKey = moment(queue.dateJoinedQ).utc().format("YYYY-MM"); // Group by month
+                dailyData[dateKey] = (dailyData[dateKey] || 0) + 1;
+            }
+        });
+    });
+
+    // Group data by month
+    let monthlyData;
+
+    // Helper function to group by months
+    const groupByMonths = (dailyData, startOfMonth, endOfMonth) => {
+        const monthlyData = [];
+        let currentMonth = startOfMonth.clone().startOf('month'); // Start of the first month in the range
+
+        // Loop through each month in the range
+        while (currentMonth.isBefore(endOfMonth) || currentMonth.isSame(endOfMonth, "month")) {
+            const monthKey = currentMonth.format("YYYY-MM"); // Group by year and month
+            const monthlyCount = dailyData[monthKey] || 0;
+
+            // Add month data to the result
+            monthlyData.push({ month: monthKey, count: monthlyCount });
+
+            // Move to the next month
+            currentMonth.add(1, 'month');
+        }
+        return monthlyData;
+    };
+
+    // Use the helper function to group data by month
+    monthlyData = groupByMonths(dailyData, startOfMonth, endOfMonth);
+
+    // Return the final monthly data
+    return monthlyData;
+};
+
+
+//SALON CANCELLED REPORT BY DATE RANGE
+export const getDailySalonCancelledReportByDateRange = async (salonId, from, to) => {
+    let startDate = moment.utc(from).startOf("day");
+    let endDate = moment.utc(to).endOf("day");
+    let dateFormat = "YYYY-MM-DD"; // Group by day
+
+    // Fetch served queue data from the database
+    const queueHistory = await JoinedQueueHistory.find({
+        salonId: salonId,
+        "queueList.dateJoinedQ": { $gte: startDate.toDate(), $lte: endDate.toDate() },
+        "queueList.status": "cancelled"
+    });
+
+    // Process and group data by day
+    let dailyData = {};
+    queueHistory.forEach(entry => {
+        entry.queueList.forEach(queue => {
+            if (queue.status === "cancelled") {
+                const dateKey = moment(queue.dateJoinedQ).utc().format(dateFormat);
+                dailyData[dateKey] = (dailyData[dateKey] || 0) + 1;
+            }
+        });
+    });
+
+    // Convert the daily data into an array
+    let result = Object.keys(dailyData).map(date => ({
+        date,
+        count: dailyData[date]
+    }));
+
+    return fillMissingDates(result, from, to, 'daily');
+};
+
+export const getWeeklySalonCancelledReportByDateRange = async (salonId, from, to) => {
+    const startDate = moment.utc(from, "YYYY-MM-DD").startOf("day"); // Ensures exact date
+    const endDate = moment.utc(to, "YYYY-MM-DD").endOf("day");
+
+    // Fetch served queue data within the date range
+    const queueHistory = await JoinedQueueHistory.find({
+        salonId: salonId,
+        "queueList.dateJoinedQ": { $gte: startDate.toDate(), $lte: endDate.toDate() },
+        "queueList.status": "cancelled"
+    });
+
+    // Process and group data by day
+    let dailyData = {};
+    queueHistory.forEach(entry => {
+        entry.queueList.forEach(queue => {
+            if (queue.status === "cancelled") {
+                const dateKey = moment(queue.dateJoinedQ).utc().format("YYYY-MM-DD");
+                dailyData[dateKey] = (dailyData[dateKey] || 0) + 1;
+            }
+        });
+    });
+
+    // Manually group data into weeks from the `from` date
+    const weeklyData = [];
+    let currentStart = startDate.clone();
+    
+    while (currentStart.isBefore(endDate)) {
+        let currentEnd = currentStart.clone().add(6, "days"); // Move forward 6 days
+    
+        // Ensure the week does not go beyond 'to' date
+        if (currentEnd.isAfter(endDate)) {
+            // Skip adding the last partial week
+            break;
+        }
+    
+        let totalQueue = 0;
+    
+        // Sum up queue counts within the week range
+        Object.keys(dailyData).forEach(date => {
+            let momentDate = moment.utc(date, "YYYY-MM-DD");
+            if (momentDate.isBetween(currentStart, currentEnd, "day", "[]")) {
+                totalQueue += dailyData[date];
+            }
+        });
+    
+        weeklyData.push({
+            weekStart: currentStart,
+            weekEnd: currentEnd,
+            totalQueue: totalQueue
+        });
+    
+        // Move to the next week
+        currentStart = currentEnd.clone().add(1, "day");
+    }
+    
+
+    return weeklyData;
+};
+
+export const getMonthlySalonCancelledReportByDateRange = async (salonId, from, to) => {
+    const startOfMonth = moment.utc(from, "YYYY-MM-DD").startOf("month"); // Start of the month
+    const endOfMonth = moment.utc(to, "YYYY-MM-DD").endOf("month"); // End of the month
+
+    // Fetch served queue data for the entire date range (month or last n months)
+    const queueHistory = await JoinedQueueHistory.find({
+        salonId: salonId,
+        "queueList.dateJoinedQ": { $gte: startOfMonth.toDate(), $lte: endOfMonth.toDate() },
+        "queueList.status": "cancelled"
+    });
+
+    // Process and group data by day
+    let dailyData = {};
+    queueHistory.forEach(entry => {
+        entry.queueList.forEach(queue => {
+            if (queue.status === "cancelled") {
+                const dateKey = moment(queue.dateJoinedQ).utc().format("YYYY-MM"); // Group by month
+                dailyData[dateKey] = (dailyData[dateKey] || 0) + 1;
+            }
+        });
+    });
+
+    // Group data by month
+    let monthlyData;
+
+    // Helper function to group by months
+    const groupByMonths = (dailyData, startOfMonth, endOfMonth) => {
+        const monthlyData = [];
+        let currentMonth = startOfMonth.clone().startOf('month'); // Start of the first month in the range
+
+        // Loop through each month in the range
+        while (currentMonth.isBefore(endOfMonth) || currentMonth.isSame(endOfMonth, "month")) {
+            const monthKey = currentMonth.format("YYYY-MM"); // Group by year and month
+            const monthlyCount = dailyData[monthKey] || 0;
+
+            // Add month data to the result
+            monthlyData.push({ month: monthKey, count: monthlyCount });
+
+            // Move to the next month
+            currentMonth.add(1, 'month');
+        }
+        return monthlyData;
+    };
+
+    // Use the helper function to group data by month
+    monthlyData = groupByMonths(dailyData, startOfMonth, endOfMonth);
+
+    // Return the final monthly data
+    return monthlyData;
+};
+
+
+
+//BARBER SERVED REPORT BY DATE RANGE
+export const getDailyBarberServedReportByDateRange = async (salonId, barberEmail, from, to) => {
+    let startDate = moment.utc(from).startOf("day");
+    let endDate = moment.utc(to).endOf("day");
+    let dateFormat = "YYYY-MM-DD"; // Group by day
+
+    const queueHistory = await JoinedQueueHistory.aggregate([
+        { $match: { salonId: salonId } },  // Match salonId
+        {
+            $project: {
+                queueList: {
+                    $filter: {
+                        input: "$queueList",
+                        as: "queue",
+                        cond: {
+                            $and: [
+                                { $gte: ["$$queue.dateJoinedQ", startDate.toDate()] },
+                                { $lte: ["$$queue.dateJoinedQ", endDate.toDate()] },
+                                { $eq: ["$$queue.servedByBarberEmail", barberEmail] },
+                                { $eq: ["$$queue.status", "served"] }
+                            ]
+                        }
+                    }
+                },
+                salonId: 1,  // Keep salonId in the result
+                createdAt: 1,
+                updatedAt: 1
+            }
+        }
+    ]);
+
+    // Process and group data by day
+    let dailyData = {};
+    queueHistory.forEach(entry => {
+        entry.queueList.forEach(queue => {
+            if (queue.status === "served") {
+                const dateKey = moment(queue.dateJoinedQ).utc().format(dateFormat);
+                dailyData[dateKey] = (dailyData[dateKey] || 0) + 1;
+            }
+        });
+    });
+
+    // Convert the daily data into an array
+    let result = Object.keys(dailyData).map(date => ({
+        date,
+        count: dailyData[date]
+    }));
+
+    return fillMissingDates(result, from, to, 'daily');
+};
+
+export const getWeeklyBarberServedReportByDateRange = async (salonId, barberEmail, from, to) => {
+    const startDate = moment.utc(from, "YYYY-MM-DD").startOf("day"); // Ensures exact date
+    const endDate = moment.utc(to, "YYYY-MM-DD").endOf("day");
+
+    const queueHistory = await JoinedQueueHistory.aggregate([
+        { $match: { salonId: salonId } },  // Match salonId
+        {
+            $project: {
+                queueList: {
+                    $filter: {
+                        input: "$queueList",
+                        as: "queue",
+                        cond: {
+                            $and: [
+                                { $gte: ["$$queue.dateJoinedQ", startDate.toDate()] },
+                                { $lte: ["$$queue.dateJoinedQ", endDate.toDate()] },
+                                { $eq: ["$$queue.servedByBarberEmail", barberEmail] },
+                                { $eq: ["$$queue.status", "served"] }
+                            ]
+                        }
+                    }
+                },
+                salonId: 1,  // Keep salonId in the result
+                createdAt: 1,
+                updatedAt: 1
+            }
+        }
+    ]);
+
+    // Process and group data by day
+    let dailyData = {};
+    queueHistory.forEach(entry => {
+        entry.queueList.forEach(queue => {
+            if (queue.status === "served") {
+                const dateKey = moment(queue.dateJoinedQ).utc().format("YYYY-MM-DD");
+                dailyData[dateKey] = (dailyData[dateKey] || 0) + 1;
+            }
+        });
+    });
+
+    // Manually group data into weeks from the `from` date
+    const weeklyData = [];
+    let currentStart = startDate.clone();
+    
+    while (currentStart.isBefore(endDate)) {
+        let currentEnd = currentStart.clone().add(6, "days"); // Move forward 6 days
+    
+        // Ensure the week does not go beyond 'to' date
+        if (currentEnd.isAfter(endDate)) {
+            // Skip adding the last partial week
+            break;
+        }
+    
+        let totalQueue = 0;
+    
+        // Sum up queue counts within the week range
+        Object.keys(dailyData).forEach(date => {
+            let momentDate = moment.utc(date, "YYYY-MM-DD");
+            if (momentDate.isBetween(currentStart, currentEnd, "day", "[]")) {
+                totalQueue += dailyData[date];
+            }
+        });
+    
+        weeklyData.push({
+            weekStart: currentStart,
+            weekEnd: currentEnd,
+            totalQueue: totalQueue
+        });
+    
+        // Move to the next week
+        currentStart = currentEnd.clone().add(1, "day");
+    }
+    
+
+    return weeklyData;
+};
+
+export const getMonthlyBarberServedReportByDateRange = async (salonId, barberEmail, from, to) => {
+    const startOfMonth = moment.utc(from, "YYYY-MM-DD").startOf("month"); // Start of the month
+    const endOfMonth = moment.utc(to, "YYYY-MM-DD").endOf("month"); // End of the month
+
+
+    // Fetch served queue data for the entire date range (month or last n months)
+    const queueHistory = await JoinedQueueHistory.aggregate([
+        { $match: { salonId: salonId } },  // Match salonId
+        {
+            $project: {
+                queueList: {
+                    $filter: {
+                        input: "$queueList",
+                        as: "queue",
+                        cond: {
+                            $and: [
+                                { $gte: ["$$queue.dateJoinedQ", startOfMonth.toDate()] },
+                                { $lte: ["$$queue.dateJoinedQ", endOfMonth.toDate()] },
+                                { $eq: ["$$queue.servedByBarberEmail", barberEmail] },
+                                { $eq: ["$$queue.status", "served"] }
+                            ]
+                        }
+                    }
+                },
+                salonId: 1,  // Keep salonId in the result
+                createdAt: 1,
+                updatedAt: 1
+            }
+        }
+    ]);
+
+    // Process and group data by day
+    let dailyData = {};
+    queueHistory.forEach(entry => {
+        entry.queueList.forEach(queue => {
+            if (queue.status === "served") {
+                const dateKey = moment(queue.dateJoinedQ).utc().format("YYYY-MM"); // Group by month
+                dailyData[dateKey] = (dailyData[dateKey] || 0) + 1;
+            }
+        });
+    });
+
+    // Group data by month
+    let monthlyData;
+
+    // Helper function to group by months
+    const groupByMonths = (dailyData, startOfMonth, endOfMonth) => {
+        const monthlyData = [];
+        let currentMonth = startOfMonth.clone().startOf('month'); // Start of the first month in the range
+
+        // Loop through each month in the range
+        while (currentMonth.isBefore(endOfMonth) || currentMonth.isSame(endOfMonth, "month")) {
+            const monthKey = currentMonth.format("YYYY-MM"); // Group by year and month
+            const monthlyCount = dailyData[monthKey] || 0;
+
+            // Add month data to the result
+            monthlyData.push({ month: monthKey, count: monthlyCount });
+
+            // Move to the next month
+            currentMonth.add(1, 'month');
+        }
+        return monthlyData;
+    };
+
+    // Use the helper function to group data by month
+    monthlyData = groupByMonths(dailyData, startOfMonth, endOfMonth);
+
+    // Return the final monthly data
+    return monthlyData;
+};
+
+
+
+//BARBER CANCELLED REPORT
+export const getDailyBarberCancelledReportByDateRange = async (salonId, barberId, from, to) => {
+    let startDate = moment.utc(from).startOf("day");
+    let endDate = moment.utc(to).endOf("day");
+    let dateFormat = "YYYY-MM-DD"; // Group by day
+
+    // Fetch served queue data from the database
+    const queueHistory = await JoinedQueueHistory.aggregate([
+        { $match: { salonId: salonId } },  // Match salonId
+        {
+            $project: {
+                queueList: {
+                    $filter: {
+                        input: "$queueList",
+                        as: "queue",
+                        cond: {
+                            $and: [
+                                { $gte: ["$$queue.dateJoinedQ", startDate.toDate()] },
+                                { $lte: ["$$queue.dateJoinedQ", endDate.toDate()] },
+                                { $eq: ["$$queue.barberId", barberId] },
+                                { $eq: ["$$queue.status", "cancelled"] }
+                            ]
+                        }
+                    }
+                },
+                salonId: 1,  // Keep salonId in the result
+                createdAt: 1,
+                updatedAt: 1
+            }
+        }
+    ]);
+
+    // Process and group data by day
+    let dailyData = {};
+    queueHistory.forEach(entry => {
+        entry.queueList.forEach(queue => {
+            if (queue.status === "cancelled") {
+                const dateKey = moment(queue.dateJoinedQ).utc().format(dateFormat);
+                dailyData[dateKey] = (dailyData[dateKey] || 0) + 1;
+            }
+        });
+    });
+
+    // Convert the daily data into an array
+    let result = Object.keys(dailyData).map(date => ({
+        date,
+        count: dailyData[date]
+    }));
+
+    return fillMissingDates(result, from, to, 'daily');
+};
+
+export const getWeeklyBarberCancelledReportByDateRange = async (salonId, barberId, from, to) => {
+    const startDate = moment.utc(from, "YYYY-MM-DD").startOf("day"); // Ensures exact date
+    const endDate = moment.utc(to, "YYYY-MM-DD").endOf("day");
+
+    const queueHistory = await JoinedQueueHistory.aggregate([
+        { $match: { salonId: salonId } },  // Match salonId
+        {
+            $project: {
+                queueList: {
+                    $filter: {
+                        input: "$queueList",
+                        as: "queue",
+                        cond: {
+                            $and: [
+                                { $gte: ["$$queue.dateJoinedQ", startDate.toDate()] },
+                                { $lte: ["$$queue.dateJoinedQ", endDate.toDate()] },
+                                { $eq: ["$$queue.barberId", barberId] },
+                                { $eq: ["$$queue.status", "cancelled"] }
+                            ]
+                        }
+                    }
+                },
+                salonId: 1,  // Keep salonId in the result
+                createdAt: 1,
+                updatedAt: 1
+            }
+        }
+    ]);
+
+    // Process and group data by day
+    let dailyData = {};
+    queueHistory.forEach(entry => {
+        entry.queueList.forEach(queue => {
+            if (queue.status === "cancelled") {
+                const dateKey = moment(queue.dateJoinedQ).utc().format("YYYY-MM-DD");
+                dailyData[dateKey] = (dailyData[dateKey] || 0) + 1;
+            }
+        });
+    });
+
+    // Manually group data into weeks from the `from` date
+    const weeklyData = [];
+    let currentStart = startDate.clone();
+    
+    while (currentStart.isBefore(endDate)) {
+        let currentEnd = currentStart.clone().add(6, "days"); // Move forward 6 days
+    
+        // Ensure the week does not go beyond 'to' date
+        if (currentEnd.isAfter(endDate)) {
+            // Skip adding the last partial week
+            break;
+        }
+    
+        let totalQueue = 0;
+    
+        // Sum up queue counts within the week range
+        Object.keys(dailyData).forEach(date => {
+            let momentDate = moment.utc(date, "YYYY-MM-DD");
+            if (momentDate.isBetween(currentStart, currentEnd, "day", "[]")) {
+                totalQueue += dailyData[date];
+            }
+        });
+    
+        weeklyData.push({
+            weekStart: currentStart,
+            weekEnd: currentEnd,
+            totalQueue: totalQueue
+        });
+    
+        // Move to the next week
+        currentStart = currentEnd.clone().add(1, "day");
+    }
+    
+
+    return weeklyData;
+};
+
+export const getMonthlyBarberCancelledReportByDateRange = async (salonId, barberId, from, to) => {
+    const startOfMonth = moment.utc(from, "YYYY-MM-DD").startOf("month"); // Start of the month
+    const endOfMonth = moment.utc(to, "YYYY-MM-DD").endOf("month"); // End of the month
+
+
+    // Fetch served queue data for the entire date range (month or last n months)
+    const queueHistory = await JoinedQueueHistory.aggregate([
+        { $match: { salonId: salonId } },  // Match salonId
+        {
+            $project: {
+                queueList: {
+                    $filter: {
+                        input: "$queueList",
+                        as: "queue",
+                        cond: {
+                            $and: [
+                                { $gte: ["$$queue.dateJoinedQ", startOfMonth.toDate()] },
+                                { $lte: ["$$queue.dateJoinedQ", endOfMonth.toDate()] },
+                                { $eq: ["$$queue.barberId", barberId] },
+                                { $eq: ["$$queue.status", "cancelled"] }
+                            ]
+                        }
+                    }
+                },
+                salonId: 1,  // Keep salonId in the result
+                createdAt: 1,
+                updatedAt: 1
+            }
+        }
+    ]);
+
+    // Process and group data by day
+    let dailyData = {};
+    queueHistory.forEach(entry => {
+        entry.queueList.forEach(queue => {
+            if (queue.status === "cancelled") {
+                const dateKey = moment(queue.dateJoinedQ).utc().format("YYYY-MM"); // Group by month
+                dailyData[dateKey] = (dailyData[dateKey] || 0) + 1;
+            }
+        });
+    });
+
+    // Group data by month
+    let monthlyData;
+
+    // Helper function to group by months
+    const groupByMonths = (dailyData, startOfMonth, endOfMonth) => {
+        const monthlyData = [];
+        let currentMonth = startOfMonth.clone().startOf('month'); // Start of the first month in the range
+
+        // Loop through each month in the range
+        while (currentMonth.isBefore(endOfMonth) || currentMonth.isSame(endOfMonth, "month")) {
+            const monthKey = currentMonth.format("YYYY-MM"); // Group by year and month
+            const monthlyCount = dailyData[monthKey] || 0;
+
+            // Add month data to the result
+            monthlyData.push({ month: monthKey, count: monthlyCount });
+
+            // Move to the next month
+            currentMonth.add(1, 'month');
+        }
+        return monthlyData;
+    };
+
+    // Use the helper function to group data by month
+    monthlyData = groupByMonths(dailyData, startOfMonth, endOfMonth);
+
+    // Return the final monthly data
+    return monthlyData;
+};
+
+
+
+
+
+
+
 
 
 
