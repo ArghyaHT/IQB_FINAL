@@ -60,23 +60,14 @@ export const salonServedReport = async (req, res, next) => {
                         success: true,
                         message: "Report retrieved successfully.",
                         response: getSalonServedReport.map(item => {
-                            // Check if item.week is an array
-                            if (Array.isArray(item.week) && item.week.length > 0) {
-                                // Get the start and end date of the week based on the first and last day of the week
-                                const startOfWeek = moment(item.week[0].date).format("MMM D");
-                                const endOfWeek = moment(item.week[item.week.length - 1].date).format("MMM D");
-
-                                return {
-                                    week: `${startOfWeek} - ${endOfWeek}`,
-                                    TotalQueue: item.totalQueue
-                                };
-                            } else {
-                                console.error("Invalid week format:", item.week);
-                                return {
-                                    week: "Invalid Week Format",
-                                    TotalQueue: item.totalQueue
-                                };
-                            }
+                            // Format the week range (e.g., "Jan 1 - Jan 7")
+                            const weekStart = moment(item.weekStart).format("MMM D");
+                            const weekEnd = moment(item.weekEnd).format("MMM D");
+                
+                            return {
+                                week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                                TotalQueue: item.totalQueue
+                            };
                         })
                     });
                 }
@@ -100,6 +91,7 @@ export const salonServedReport = async (req, res, next) => {
             if (reportType === "monthly") {
                 const getSalonCancelledReport = await getMonthlyBarberCancelledReport(salonId, barberId, month);
 
+                console.log(getSalonCancelledReport)
                 // Log the entire report data to inspect its structure and values                
                 return res.status(200).json({
                     success: true,
@@ -122,23 +114,14 @@ export const salonServedReport = async (req, res, next) => {
                     success: true,
                     message: "Report retrieved successfully.",
                     response: getSalonCancelledReport.map(item => {
-                        // Check if item.week is an array
-                        if (Array.isArray(item.week) && item.week.length > 0) {
-                            // Get the start and end date of the week based on the first and last day of the week
-                            const startOfWeek = moment(item.week[0].date).format("MMM D");
-                            const endOfWeek = moment(item.week[item.week.length - 1].date).format("MMM D");
-
-                            return {
-                                week: `${startOfWeek} - ${endOfWeek}`,
-                                TotalQueue: item.totalQueue
-                            };
-                        } else {
-                            console.error("Invalid week format:", item.week);
-                            return {
-                                week: "Invalid Week Format",
-                                TotalQueue: item.totalQueue
-                            };
-                        }
+                        // Format the week range (e.g., "Jan 1 - Jan 7")
+                        const weekStart = moment(item.weekStart).format("MMM D");
+                        const weekEnd = moment(item.weekEnd).format("MMM D");
+            
+                        return {
+                            week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                            TotalQueue: item.totalQueue
+                        };
                     })
                 });
             }

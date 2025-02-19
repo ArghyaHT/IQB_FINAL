@@ -174,6 +174,7 @@ export const getSalonServedQlist = async (salonId, reportType, days, month) => {
     return fillMissingDates(result, from, to, reportType);
 };
 
+//SALON SERVED REPORT
 export const getDailySalonServedReport = async (salonId, days) => {
     const today = moment().utc();
     let from = today.clone().subtract(days - 1, "days").startOf("day");
@@ -267,7 +268,6 @@ export const getWeeklySalonServedReport = async (salonId, week) => {
     // Remove the entry where the weekStart is the same as weekEnd (single-day entry)
     weeklyData = weeklyData.filter(week => week.weekStart !== week.weekEnd);
 
-    console.log(weeklyData)
     // Convert the weekly data into an array
     return weeklyData;
 };
@@ -336,6 +336,7 @@ export const getMonthlySalonServedReport = async (salonId, months) => {
 };
 
 
+//SALON CANCELLED REPORT
 export const getDailySalonCancelledReport = async (salonId, days) => {
     const today = moment().utc();
     let from = today.clone().subtract(days - 1, "days").startOf("day");
@@ -497,6 +498,8 @@ export const getMonthlySalonCancelledReport = async (salonId, months) => {
 };
 
 
+
+//BARBER SERVED REPORT
 export const getDailyBarberServedReport = async (salonId, barberEmail, days) => {
     const today = moment().utc();
     let from = today.clone().subtract(days - 1, "days").startOf("day");
@@ -564,8 +567,8 @@ export const getWeeklyBarberServedReport = async (salonId,barberEmail, week) => 
                         as: "queue",
                         cond: {
                             $and: [
-                                { $gte: ["$$queue.dateJoinedQ", from.toDate()] },
-                                { $lte: ["$$queue.dateJoinedQ", to.toDate()] },
+                                { $gte: ["$$queue.dateJoinedQ", startOfMonth.toDate()] },
+                                { $lte: ["$$queue.dateJoinedQ", endOfMonth.toDate()] },
                                 { $eq: ["$$queue.servedByBarberEmail", barberEmail] },
                                 { $eq: ["$$queue.status", "served"] }
                             ]
@@ -596,12 +599,12 @@ export const getWeeklyBarberServedReport = async (salonId,barberEmail, week) => 
         // If week value is 0, show present month's weeks
         weeklyData = groupByWeeks(dailyData, startOfMonth, endOfMonth);
     } else {
-        // Otherwise, show data for the last 'n' weeks
-        const weeksAgo = today.clone().subtract(week - 1, "weeks");
-        const startOfLastNWeeks = weeksAgo.clone().startOf("isoWeek");
-        const endOfLastNWeeks = today.clone().endOf("isoWeek");
+        // Otherwise, show data for the last 'n' weeks based on a 7-day interval
+        const weeksAgo = today.clone().subtract(week, "weeks");
+        const startOfLastNWeeks = weeksAgo.clone().startOf("day");  // Start of the current day
+        const endOfLastNWeeks = today.clone().endOf("day");  // End of today
 
-        // Fetch served queue data for the last 'n' weeks
+        // Fetch served queue data for the last 'n' weeks based on the last 7-day periods
         const lastNWeeksQueueHistory = await JoinedQueueHistory.aggregate([
             { $match: { salonId: salonId } },  // Match salonId
             {
@@ -612,8 +615,8 @@ export const getWeeklyBarberServedReport = async (salonId,barberEmail, week) => 
                             as: "queue",
                             cond: {
                                 $and: [
-                                    { $gte: ["$$queue.dateJoinedQ", from.toDate()] },
-                                    { $lte: ["$$queue.dateJoinedQ", to.toDate()] },
+                                    { $gte: ["$$queue.dateJoinedQ", startOfLastNWeeks.toDate()] },
+                                    { $lte: ["$$queue.dateJoinedQ", endOfLastNWeeks.toDate()] },
                                     { $eq: ["$$queue.servedByBarberEmail", barberEmail] },
                                     { $eq: ["$$queue.status", "served"] }
                                 ]
@@ -638,9 +641,12 @@ export const getWeeklyBarberServedReport = async (salonId,barberEmail, week) => 
             });
         });
 
-        // Now, group daily data of last 'n' weeks into weekly data
+        // Now, group daily data of last 'n' weeks into weekly data by 7-day intervals
         weeklyData = groupByWeeks(lastNWeeksData, startOfLastNWeeks, endOfLastNWeeks);
     }
+
+    // Remove the entry where the weekStart is the same as weekEnd (single-day entry)
+    weeklyData = weeklyData.filter(week => week.weekStart !== week.weekEnd);
 
     // Convert the weekly data into an array
     return weeklyData;
@@ -672,8 +678,8 @@ export const getMonthlyBarberServedReport = async (salonId, barberEmail, months)
                         as: "queue",
                         cond: {
                             $and: [
-                                { $gte: ["$$queue.dateJoinedQ", from.toDate()] },
-                                { $lte: ["$$queue.dateJoinedQ", to.toDate()] },
+                                { $gte: ["$$queue.dateJoinedQ", startOfMonth.toDate()] },
+                                { $lte: ["$$queue.dateJoinedQ", endOfMonth.toDate()] },
                                 { $eq: ["$$queue.servedByBarberEmail", barberEmail] },
                                 { $eq: ["$$queue.status", "served"] }
                             ]
@@ -728,6 +734,8 @@ export const getMonthlyBarberServedReport = async (salonId, barberEmail, months)
 };
 
 
+
+//BARBER CANCELLED REPORT
 export const getDailyBarberCancelledReport = async (salonId, barberId, days) => {
     const today = moment().utc();
     let from = today.clone().subtract(days - 1, "days").startOf("day");
@@ -786,7 +794,6 @@ export const getWeeklyBarberCancelledReport = async (salonId, barberId, week) =>
     const endOfMonth = today.clone().endOf("month");
     let dateFormat = "YYYY-WW"; // Group by week
 
-    // Fetch served queue data for the entire month
     const queueHistory = await JoinedQueueHistory.aggregate([
         { $match: { salonId: salonId } },  // Match salonId
         {
@@ -797,10 +804,10 @@ export const getWeeklyBarberCancelledReport = async (salonId, barberId, week) =>
                         as: "queue",
                         cond: {
                             $and: [
-                                { $gte: ["$$queue.dateJoinedQ", from.toDate()] },
-                                { $lte: ["$$queue.dateJoinedQ", to.toDate()] },
+                                { $gte: ["$$queue.dateJoinedQ", startOfMonth.toDate()] },
+                                { $lte: ["$$queue.dateJoinedQ", endOfMonth.toDate()] },
                                 { $eq: ["$$queue.barberId", barberId] },
-                                { $eq: ["$$queue.status", "served"] }
+                                { $eq: ["$$queue.status", "cancelled"] }
                             ]
                         }
                     }
@@ -829,18 +836,36 @@ export const getWeeklyBarberCancelledReport = async (salonId, barberId, week) =>
         // If week value is 0, show present month's weeks
         weeklyData = groupByWeeks(dailyData, startOfMonth, endOfMonth);
     } else {
-        // Otherwise, show data for the last 'n' weeks
-        const weeksAgo = today.clone().subtract(week - 1, "weeks");
-        const startOfLastNWeeks = weeksAgo.clone().startOf("isoWeek");
-        const endOfLastNWeeks = today.clone().endOf("isoWeek");
+        // Otherwise, show data for the last 'n' weeks based on a 7-day interval
+        const weeksAgo = today.clone().subtract(week, "weeks");
+        const startOfLastNWeeks = weeksAgo.clone().startOf("day");  // Start of the current day
+        const endOfLastNWeeks = today.clone().endOf("day");  // End of today
 
-        // Fetch served queue data for the last 'n' weeks
-        const lastNWeeksQueueHistory = await JoinedQueueHistory.find({
-            salonId: salonId,
-            "queueList.dateJoinedQ": { $gte: startOfLastNWeeks.toDate(), $lte: endOfLastNWeeks.toDate() },
-            "queueList.barberId": barberId,
-            "queueList.status": "cancelled"
-        });
+        // Fetch served queue data for the last 'n' weeks based on the last 7-day periods
+        const lastNWeeksQueueHistory = await JoinedQueueHistory.aggregate([
+            { $match: { salonId: salonId } },  // Match salonId
+            {
+                $project: {
+                    queueList: {
+                        $filter: {
+                            input: "$queueList",
+                            as: "queue",
+                            cond: {
+                                $and: [
+                                    { $gte: ["$$queue.dateJoinedQ", startOfLastNWeeks.toDate()] },
+                                    { $lte: ["$$queue.dateJoinedQ", endOfLastNWeeks.toDate()] },
+                                    { $eq: ["$$queue.barberId", barberId] },
+                                    { $eq: ["$$queue.status", "cancelled"] }
+                                ]
+                            }
+                        }
+                    },
+                    salonId: 1,  // Keep salonId in the result
+                    createdAt: 1,
+                    updatedAt: 1
+                }
+            }
+        ]);
 
         // Process and group data by day for the last 'n' weeks
         let lastNWeeksData = {};
@@ -853,9 +878,12 @@ export const getWeeklyBarberCancelledReport = async (salonId, barberId, week) =>
             });
         });
 
-        // Now, group daily data of last 'n' weeks into weekly data
+        // Now, group daily data of last 'n' weeks into weekly data by 7-day intervals
         weeklyData = groupByWeeks(lastNWeeksData, startOfLastNWeeks, endOfLastNWeeks);
     }
+
+    // Remove the entry where the weekStart is the same as weekEnd (single-day entry)
+    weeklyData = weeklyData.filter(week => week.weekStart !== week.weekEnd);
 
     // Convert the weekly data into an array
     return weeklyData;
@@ -877,12 +905,30 @@ export const getMonthlyBarberCancelledReport = async (salonId, barberId, months)
     }
 
     // Fetch served queue data for the entire date range (month or last n months)
-    const queueHistory = await JoinedQueueHistory.find({
-        salonId: salonId,
-        "queueList.dateJoinedQ": { $gte: startOfMonth.toDate(), $lte: endOfMonth.toDate() },
-        "queueList.barberId": barberId,
-        "queueList.status": "cancellled"
-    });
+    const queueHistory = await JoinedQueueHistory.aggregate([
+        { $match: { salonId: salonId } },  // Match salonId
+        {
+            $project: {
+                queueList: {
+                    $filter: {
+                        input: "$queueList",
+                        as: "queue",
+                        cond: {
+                            $and: [
+                                { $gte: ["$$queue.dateJoinedQ", startOfMonth.toDate()] },
+                                { $lte: ["$$queue.dateJoinedQ", endOfMonth.toDate()] },
+                                { $eq: ["$$queue.barberId", barberId] },
+                                { $eq: ["$$queue.status", "cancelled"] }
+                            ]
+                        }
+                    }
+                },
+                salonId: 1,  // Keep salonId in the result
+                createdAt: 1,
+                updatedAt: 1
+            }
+        }
+    ]);
 
     // Process and group data by day
     let dailyData = {};
@@ -923,7 +969,6 @@ export const getMonthlyBarberCancelledReport = async (salonId, barberId, months)
     // Return the final monthly data
     return monthlyData;
 };
-
 
 
 
@@ -1211,3 +1256,6 @@ const groupByWeeks = (dailyData, startDate, endDate) => {
 
     return weeklyData;
 };
+
+
+
