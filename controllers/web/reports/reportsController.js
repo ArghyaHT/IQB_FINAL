@@ -55,6 +55,20 @@ export const salonServedReport = async (req, res, next) => {
                         });
                     }
                     if (reportType === "monthly") {
+
+                        const startDate = moment.utc(from, "YYYY-MM-DD").startOf("month");
+                        const endDate = moment.utc(to, "YYYY-MM-DD").endOf("month");
+                    
+                        // Calculate the total number of months in the range
+                        const totalMonths = endDate.diff(startDate, "months") + 1; // +1 to include the last month
+                    
+                        // If the range exceeds 24 months, return an error response
+                        if (totalMonths > 24) {
+                            return res.status(400).json({
+                                success: false,
+                                message: "Date range exceeds the allowed limit of 24 months. Please select a shorter range."
+                            });
+                        }
                         const getSalonServedReport = await getMonthlyBarberServedReportByDateRange(salonId, barberEmail, from, to);
 
                         // Log the entire report data to inspect its structure and values                
@@ -72,6 +86,20 @@ export const salonServedReport = async (req, res, next) => {
                     if (reportType === "weekly") {
                         const today = new Date();
                         today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
+
+                        const startDate = moment.utc(from, "YYYY-MM-DD").startOf("day");
+                        const endDate = moment.utc(to, "YYYY-MM-DD").endOf("day");
+
+                        // Calculate the number of weeks in the range
+                        const totalWeeks = Math.ceil(endDate.diff(startDate, 'days') / 7);
+
+                        // If the range exceeds 20 weeks, return an error response
+                        if (totalWeeks > 20) {
+                            return res.status(400).json({
+                                success: false,
+                                message: "Date range exceeds the allowed limit of 20 weeks. Please select a shorter range."
+                            });
+                        }
 
                         const getSalonServedReport = await getWeeklyBarberServedReportByDateRange(salonId, barberEmail, from, to);
 
@@ -125,6 +153,20 @@ export const salonServedReport = async (req, res, next) => {
 
                 }
                 if (reportType === "monthly") {
+
+                    const startDate = moment.utc(from, "YYYY-MM-DD").startOf("month");
+                    const endDate = moment.utc(to, "YYYY-MM-DD").endOf("month");
+                
+                    // Calculate the total number of months in the range
+                    const totalMonths = endDate.diff(startDate, "months") + 1; // +1 to include the last month
+                
+                    // If the range exceeds 24 months, return an error response
+                    if (totalMonths > 24) {
+                        return res.status(400).json({
+                            success: false,
+                            message: "Date range exceeds the allowed limit of 24 months. Please select a shorter range."
+                        });
+                    }
                     const getSalonCancelledReport = await getMonthlyBarberCancelledReportByDateRange(salonId, barberId, from, to);
 
                     // Log the entire report data to inspect its structure and values                
@@ -142,6 +184,20 @@ export const salonServedReport = async (req, res, next) => {
                 if (reportType === "weekly") {
                     const today = new Date();
                     today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
+
+                    const startDate = moment.utc(from, "YYYY-MM-DD").startOf("day");
+                    const endDate = moment.utc(to, "YYYY-MM-DD").endOf("day");
+
+                    // Calculate the number of weeks in the range
+                    const totalWeeks = Math.ceil(endDate.diff(startDate, 'days') / 7);
+
+                    // If the range exceeds 20 weeks, return an error response
+                    if (totalWeeks > 20) {
+                        return res.status(400).json({
+                            success: false,
+                            message: "Date range exceeds the allowed limit of 20 weeks. Please select a shorter range."
+                        });
+                    }
 
                     const getSalonCancelledReport = await getWeeklyBarberCancelledReportByDateRange(salonId, barberId, from, to);
 
@@ -193,6 +249,20 @@ export const salonServedReport = async (req, res, next) => {
 
                 }
                 if (reportType === "monthly") {
+
+                    const startDate = moment.utc(from, "YYYY-MM-DD").startOf("month");
+                    const endDate = moment.utc(to, "YYYY-MM-DD").endOf("month");
+                
+                    // Calculate the total number of months in the range
+                    const totalMonths = endDate.diff(startDate, "months") + 1; // +1 to include the last month
+                
+                    // If the range exceeds 24 months, return an error response
+                    if (totalMonths > 24) {
+                        return res.status(400).json({
+                            success: false,
+                            message: "Date range exceeds the allowed limit of 24 months. Please select a shorter range."
+                        });
+                    }
                     const getSalonServedReport = await getMonthlySalonServedReportByDateRange(salonId, from, to);
 
                     // Log the entire report data to inspect its structure and values                
@@ -210,6 +280,20 @@ export const salonServedReport = async (req, res, next) => {
                 if (reportType === "weekly") {
                     const today = new Date();
                     today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
+
+                    const startDate = moment.utc(from, "YYYY-MM-DD").startOf("day");
+                    const endDate = moment.utc(to, "YYYY-MM-DD").endOf("day");
+
+                    // Calculate the number of weeks in the range
+                    const totalWeeks = Math.ceil(endDate.diff(startDate, 'days') / 7);
+
+                    // If the range exceeds 20 weeks, return an error response
+                    if (totalWeeks > 20) {
+                        return res.status(400).json({
+                            success: false,
+                            message: "Date range exceeds the allowed limit of 20 weeks. Please select a shorter range."
+                        });
+                    }
 
                     const getSalonServedReport = await getWeeklySalonServedReportByDateRange(salonId, from, to);
 
@@ -245,6 +329,20 @@ export const salonServedReport = async (req, res, next) => {
 
                 }
                 if (reportType === "monthly") {
+
+                    const startDate = moment.utc(from, "YYYY-MM-DD").startOf("month");
+                    const endDate = moment.utc(to, "YYYY-MM-DD").endOf("month");
+                
+                    // Calculate the total number of months in the range
+                    const totalMonths = endDate.diff(startDate, "months") + 1; // +1 to include the last month
+                
+                    // If the range exceeds 24 months, return an error response
+                    if (totalMonths > 24) {
+                        return res.status(400).json({
+                            success: false,
+                            message: "Date range exceeds the allowed limit of 24 months. Please select a shorter range."
+                        });
+                    }
                     const getSalonCancelledReport = await getMonthlySalonCancelledReportByDateRange(salonId, from, to);
 
                     // Log the entire report data to inspect its structure and values                
@@ -262,6 +360,20 @@ export const salonServedReport = async (req, res, next) => {
                 if (reportType === "weekly") {
                     const today = new Date();
                     today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
+
+                    const startDate = moment.utc(from, "YYYY-MM-DD").startOf("day");
+                    const endDate = moment.utc(to, "YYYY-MM-DD").endOf("day");
+
+                    // Calculate the number of weeks in the range
+                    const totalWeeks = Math.ceil(endDate.diff(startDate, 'days') / 7);
+
+                    // If the range exceeds 20 weeks, return an error response
+                    if (totalWeeks > 20) {
+                        return res.status(400).json({
+                            success: false,
+                            message: "Date range exceeds the allowed limit of 20 weeks. Please select a shorter range."
+                        });
+                    }
 
                     const getSalonCancelledReport = await getWeeklySalonCancelledReportByDateRange(salonId, from, to);
 
@@ -338,7 +450,7 @@ export const salonServedReport = async (req, res, next) => {
             }
         }
 
-       else if (barberId) {
+        else if (barberId) {
             if (reportType === "daily") {
                 const getSalonCancelledReport = await getDailyBarberCancelledReport(salonId, barberId, days);
 
@@ -390,11 +502,11 @@ export const salonServedReport = async (req, res, next) => {
                 });
             }
         }
-        else{
+        else {
             if (reportValue === "queueserved") {
                 if (reportType === "daily") {
                     const getSalonServedReport = await getDailySalonServedReport(salonId, days);
-    
+
                     return res.status(200).json({
                         success: true,
                         message: 'Report retrieved successfully.',
@@ -403,11 +515,11 @@ export const salonServedReport = async (req, res, next) => {
                             TotalQueue: item.totalQueue
                         }))
                     });
-    
+
                 }
                 if (reportType === "monthly") {
                     const getSalonServedReport = await getMonthlySalonServedReport(salonId, month);
-    
+
                     // Log the entire report data to inspect its structure and values                
                     return res.status(200).json({
                         success: true,
@@ -423,9 +535,9 @@ export const salonServedReport = async (req, res, next) => {
                 if (reportType === "weekly") {
                     const today = new Date();
                     today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
-    
+
                     const getSalonServedReport = await getWeeklySalonServedReport(salonId, week);
-    
+
                     return res.status(200).json({
                         success: true,
                         message: "Report retrieved successfully.",
@@ -433,7 +545,7 @@ export const salonServedReport = async (req, res, next) => {
                             // Format the week range (e.g., "Jan 1 - Jan 7")
                             const weekStart = moment(item.weekStart).format("MMM D");
                             const weekEnd = moment(item.weekEnd).format("MMM D");
-    
+
                             return {
                                 week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
                                 TotalQueue: item.totalQueue
@@ -441,12 +553,12 @@ export const salonServedReport = async (req, res, next) => {
                         })
                     });
                 }
-    
+
             }
             else {
                 if (reportType === "daily") {
                     const getSalonCancelledReport = await getDailySalonCancelledReport(salonId, days);
-    
+
                     return res.status(200).json({
                         success: true,
                         message: 'Report retrieved successfully.',
@@ -455,11 +567,11 @@ export const salonServedReport = async (req, res, next) => {
                             TotalQueue: item.totalQueue
                         }))
                     });
-    
+
                 }
                 if (reportType === "monthly") {
                     const getSalonCancelledReport = await getMonthlySalonCancelledReport(salonId, month);
-    
+
                     // Log the entire report data to inspect its structure and values                
                     return res.status(200).json({
                         success: true,
@@ -475,9 +587,9 @@ export const salonServedReport = async (req, res, next) => {
                 if (reportType === "weekly") {
                     const today = new Date();
                     today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
-    
+
                     const getSalonCancelledReport = await getWeeklySalonCancelledReport(salonId, week);
-    
+
                     return res.status(200).json({
                         success: true,
                         message: "Report retrieved successfully.",
@@ -485,7 +597,7 @@ export const salonServedReport = async (req, res, next) => {
                             // Format the week range (e.g., "Jan 1 - Jan 7")
                             const weekStart = moment(item.weekStart).format("MMM D");
                             const weekEnd = moment(item.weekEnd).format("MMM D");
-    
+
                             return {
                                 week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
                                 TotalQueue: item.totalQueue

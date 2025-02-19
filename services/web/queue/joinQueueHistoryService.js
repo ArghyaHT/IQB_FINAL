@@ -1032,11 +1032,10 @@ export const getWeeklySalonServedReportByDateRange = async (salonId, from, to) =
     
     while (currentStart.isBefore(endDate)) {
         let currentEnd = currentStart.clone().add(6, "days"); // Move forward 6 days
-    
-        // Ensure the week does not go beyond 'to' date
+
+        // Ensure the last week doesn't exceed the 'to' date
         if (currentEnd.isAfter(endDate)) {
-            // Skip adding the last partial week
-            break;
+            currentEnd = endDate.clone(); // Adjust the last week's end date
         }
     
         let totalQueue = 0;
@@ -1177,11 +1176,10 @@ export const getWeeklySalonCancelledReportByDateRange = async (salonId, from, to
     
     while (currentStart.isBefore(endDate)) {
         let currentEnd = currentStart.clone().add(6, "days"); // Move forward 6 days
-    
-        // Ensure the week does not go beyond 'to' date
+
+        // Ensure the last week doesn't exceed the 'to' date
         if (currentEnd.isAfter(endDate)) {
-            // Skip adding the last partial week
-            break;
+            currentEnd = endDate.clone(); // Adjust the last week's end date
         }
     
         let totalQueue = 0;
@@ -1358,11 +1356,10 @@ export const getWeeklyBarberServedReportByDateRange = async (salonId, barberEmai
     
     while (currentStart.isBefore(endDate)) {
         let currentEnd = currentStart.clone().add(6, "days"); // Move forward 6 days
-    
-        // Ensure the week does not go beyond 'to' date
+
+        // Ensure the last week doesn't exceed the 'to' date
         if (currentEnd.isAfter(endDate)) {
-            // Skip adding the last partial week
-            break;
+            currentEnd = endDate.clone(); // Adjust the last week's end date
         }
     
         let totalQueue = 0;
@@ -1560,11 +1557,10 @@ export const getWeeklyBarberCancelledReportByDateRange = async (salonId, barberI
     
     while (currentStart.isBefore(endDate)) {
         let currentEnd = currentStart.clone().add(6, "days"); // Move forward 6 days
-    
-        // Ensure the week does not go beyond 'to' date
+
+        // Ensure the last week doesn't exceed the 'to' date
         if (currentEnd.isAfter(endDate)) {
-            // Skip adding the last partial week
-            break;
+            currentEnd = endDate.clone(); // Adjust the last week's end date
         }
     
         let totalQueue = 0;
