@@ -1,5 +1,5 @@
 import express from "express";
-import { dashboardReports, salonCancelledReport, salonServedReport } from "../../../controllers/web/reports/reportsController.js";
+import { dashboardReports, salonAppointmentReport, salonServedReport } from "../../../controllers/web/reports/reportsController.js";
 
 const router = express.Router()
 
@@ -8,6 +8,9 @@ const router = express.Router()
 router.route("/getSalonReports").post(salonServedReport)
 
 router.route("/getdashboardReports").post(dashboardReports)
+
+
+router.route("/getSalonAppointmentReports").post(salonAppointmentReport)
 
 
 
