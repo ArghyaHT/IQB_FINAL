@@ -257,7 +257,6 @@ export const getDefaultSalon = async (req, res, next) => {
 
                 return SuccessHandler(DEFAULT_SALON_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, {
                     response: {
-                        defaultSalon: {
                             ...defaultSalon.toObject(),  // Spread existing defaultSalon properties
                             barbersOnDuty: barberCount,    // Add barbers on duty count inside defaultSalon
                             totalQueueCount: totalQueueCount,  // Add total queue count inside defaultSalon
@@ -270,7 +269,6 @@ export const getDefaultSalon = async (req, res, next) => {
                                 barberEWT: barber.barberEWT
                             }))
                         }
-                    }
                 });
             }
         }
@@ -309,7 +307,6 @@ export const getDefaultSalon = async (req, res, next) => {
                 totalQueueCount = salonQueues.length
 
                 return SuccessHandler(DEFAULT_SALON_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, {  response: {
-                    defaultSalon: {
                         ...defaultSalon.toObject(),  // Spread existing defaultSalon properties
                         barbersOnDuty: barberCount,    // Add barbers on duty count inside defaultSalon
                         totalQueueCount: totalQueueCount,  // Add total queue count inside defaultSalon
@@ -321,8 +318,8 @@ export const getDefaultSalon = async (req, res, next) => {
                             queueCount: barber.queueCount,
                             barberEWT: barber.barberEWT
                         }))
-                    }
-                } })
+                } 
+            })
             }
         }
     }

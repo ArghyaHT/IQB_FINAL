@@ -214,17 +214,44 @@ const salonsSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
-    isTrailEnabled: {
-        type: Boolean,
+
+    isQueueingTrailEnabled:{
+        type: String,
         default: false
     },
-    paymentType:{
+    isAppointmentTrailEnabled:{
+        type: String,
+        default: false
+    },
+    // isTrailEnabled: {
+    //     type: Boolean,
+    //     default: false
+    // },
+   
+    queueingPaymentType:{
         type: String
     },
-    trailExpiryDate: {
+    appointmentPaymentType:{
+        type: String
+    },
+   
+    // paymentType:{
+    //     type: String
+    // },
+
+    queueTrailExpiryDate: {
         type: String,
         default: ""
     },
+
+    appointmentTrailExpiryDate: {
+        type: String,
+        default: ""
+    },
+    // trailExpiryDate: {
+    //     type: String,
+    //     default: ""
+    // },
     gallery: [
         {
             public_id: {
