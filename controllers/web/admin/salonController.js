@@ -1324,11 +1324,9 @@ export const getSalonPaymentsBySalonId = async(req, res, next) =>{
 
 export const salonTrailPeriod = async(req, res, next) => {
   try{
-      const {salonId, trailStartDate, isTrailEnabled } = req.body;
+      const {salonId, products, trailStartDate, isTrailEnabled } = req.body;
 
       const salon = await getSalonBySalonId(salonId);
-
-      console.log("trail start date from body", trailStartDate)
       
       if(salon.appointmentTrailExpiryDate){
         return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
@@ -1338,11 +1336,6 @@ export const salonTrailPeriod = async(req, res, next) => {
         return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
       }
 
-
-
-      // if(salon.paymentType == "Paid"){
-      //   return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
-      // }
 
       if(salon.queueingPaymentType == "Paid"){
         return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
@@ -1357,19 +1350,38 @@ export const salonTrailPeriod = async(req, res, next) => {
 
       const trailEndDate = moment(trailStartDate).add(14, 'days').unix().toString();
       // const trailEndDate = moment(trailStartDate).add(1, 'minutes').unix().toString();
-      
-      if(isTrailEnabled){
-        salon.isQueueingTrailEnabled = isTrailEnabled
-        salon.isAppointmentTrailEnabled = isTrailEnabled
-        // salon.isTrailEnabled = isTrailEnabled;
-        salon.isAppointments = true;
+
+      // Check which product is included in the request
+    const hasAppointment = products.some(product => product.productName === "Appointment");
+    const hasQueueing = products.some(product => product.productName === "Queue");
+
+    if (isTrailEnabled) {
+      if (hasQueueing) {
+        salon.isQueueingTrailEnabled = true;
         salon.isQueuing = true;
-        salon.queueTrailExpiryDate = trailEndDate,
-        salon.appointmentTrailExpiryDate = trailEndDate,
-        // salon.trailExpiryDate = trailEndDate
-        salon.appointmentPaymentType = "Free"
-        salon.queueingPaymentType = "Free"
-        // salon.paymentType = "Free"
+        salon.queueTrailExpiryDate = trailEndDate;
+        salon.queueingPaymentType = "Free";
+      }
+
+      if (hasAppointment) {
+        salon.isAppointmentTrailEnabled = true;
+        salon.isAppointments = true;
+        salon.appointmentTrailExpiryDate = trailEndDate;
+        salon.appointmentPaymentType = "Free";
+      }
+      
+      // if(isTrailEnabled){
+      //   salon.isQueueingTrailEnabled = isTrailEnabled
+      //   salon.isAppointmentTrailEnabled = isTrailEnabled
+      //   // salon.isTrailEnabled = isTrailEnabled;
+      //   salon.isAppointments = true;
+      //   salon.isQueuing = true;
+      //   salon.queueTrailExpiryDate = trailEndDate,
+      //   salon.appointmentTrailExpiryDate = trailEndDate,
+      //   // salon.trailExpiryDate = trailEndDate
+      //   salon.appointmentPaymentType = "Free"
+      //   salon.queueingPaymentType = "Free"
+      //   // salon.paymentType = "Free"
 
         await salon.save();
       }
