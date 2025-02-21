@@ -1330,22 +1330,8 @@ export const salonTrailPeriod = async (req, res, next) => {
 
     const salon = await getSalonBySalonId(salonId);
 
-    if (salon.appointmentTrailExpiryDate) {
-      return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-    if (salon.queueTrailExpiryDate) {
-      return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-
-    if (salon.queueingPaymentType == "Paid") {
-      return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-    if (salon.appointmentPaymentType == "Paid") {
-      return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
-    }
+    /// 1. Query salon subscription model
+    // find the salon and then check if Queue.istrialEnabled like this checking
 
 
     //Timeformat "Fri Feb 07 2025 12:25:28 GMT+0530 (India Standard Time)"
@@ -1359,6 +1345,14 @@ export const salonTrailPeriod = async (req, res, next) => {
 
     if (isTrailEnabled) {
       if (hasQueueing) {
+
+    if (salon.queueingExpiryDate) {
+      return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
+    }
+
+    if (salon.queueingPaymentType == "Paid") {
+      return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
+    }
         salon.isQueueingTrailEnabled = true;
         salon.isQueuing = true;
         salon.queueTrailExpiryDate = trailEndDate;
@@ -1366,6 +1360,15 @@ export const salonTrailPeriod = async (req, res, next) => {
       }
 
       if (hasAppointment) {
+
+    if (salon.appointmentExpiryDate) {
+      return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
+    }
+
+    if (salon.appointmentPaymentType == "Paid") {
+      return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
+    }
+
         salon.isAppointmentTrailEnabled = true;
         salon.isAppointments = true;
         salon.appointmentTrailExpiryDate = trailEndDate;
@@ -1400,10 +1403,20 @@ export const salonTrailPaidPeriod = async (req, res, next) => {
       return ErrorHandler(PRODUCTS_REQUIRED_ERROR, ERROR_STATUS_CODE, res);
     }
 
-    // Convert stored Unix timestamp to an integer (fallback to trailStartDate if expiry date is missing)
-    const existingExpiryDate = parseInt(salon.queueingExpiryDate, 10) || parseInt(trailStartDate, 10);
-    const paymentDaysToAdd = parseInt(planValidityDate, 10); // Convert plan validity days to integer
-    const newExpiryDate = moment.unix(existingExpiryDate).add(paymentDaysToAdd, 'days').unix();
+    const purchaseDate = new Date();
+    console.log(purchaseDate);
+
+    const existingExpiryDate = parseInt(salon.queueingExpiryDate, 10) ||  parseInt(purchaseDate, 10); // Convert stored Unix timestamp to an integer
+    const paymentDaysToAdd = parseInt(planValidityDate, 10); // Number of days to add
+
+    console.log(paymentDaysToAdd)
+  
+    // Calculate the new expiry date
+    const newExpiryDate = moment.unix(existingExpiryDate) // Convert existing Unix timestamp to a moment object
+      .add(paymentDaysToAdd, 'days') // Add the payment expiry days
+      .unix(); 
+
+      console.log(newExpiryDate)
 
     // Determine which fields to update based on the product type
 
@@ -1425,8 +1438,8 @@ export const salonTrailPaidPeriod = async (req, res, next) => {
 
 
 
-    // Update salon details
-    await salon.save()
+    // // Update salon details
+    // await salon.save()
 
     const newPayment = new SalonPayments({
       salonId: salonId,
@@ -1446,7 +1459,7 @@ export const salonTrailPaidPeriod = async (req, res, next) => {
 
     // Save the new payment document directly
     try {
-      const savedPayment = await newPayment.save();
+      // const savedPayment = await newPayment.save();
       console.log("Saved Payment:", savedPayment);
     } catch (error) {
       console.error("Error saving payment:", error);
