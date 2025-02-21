@@ -1330,7 +1330,7 @@ export const salonTrailPeriod = async (req, res, next) => {
 
     const salon = await getSalonBySalonId(salonId);
 
-    if (salon.appointmentExpiryDate) {
+    if (salon.appointmentTrailExpiryDate) {
       return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
     }
 
@@ -1338,7 +1338,7 @@ export const salonTrailPeriod = async (req, res, next) => {
       return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    if (salon.queueingExpiryDate) {
+    if (salon.queueTrailExpiryDate) {
       return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
     }
 
@@ -1409,7 +1409,6 @@ export const salonTrailPaidPeriod = async (req, res, next) => {
     const existingExpiryDate = parseInt(salon.queueingExpiryDate, 10) ||  parseInt(purchaseDate, 10); // Convert stored Unix timestamp to an integer
     const paymentDaysToAdd = parseInt(planValidityDate, 10); // Number of days to add
 
-    console.log(paymentDaysToAdd)
   
     // Calculate the new expiry date
     const newExpiryDate = moment.unix(existingExpiryDate) // Convert existing Unix timestamp to a moment object
