@@ -1330,22 +1330,6 @@ export const salonTrailPeriod = async (req, res, next) => {
 
     const salon = await getSalonBySalonId(salonId);
 
-    if (salon.appointmentTrailExpiryDate) {
-      return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-    if (salon.appointmentPaymentType == "Paid") {
-      return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-    if (salon.queueTrailExpiryDate) {
-      return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-    if (salon.queueingPaymentType == "Paid") {
-      return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
-    }
-
     /// 1. Query salon subscription model
     // find the salon and then check if Queue.istrialEnabled like this checking
 
@@ -1361,6 +1345,13 @@ export const salonTrailPeriod = async (req, res, next) => {
 
     if (isTrailEnabled) {
       if (hasQueueing) {
+        if (salon.queueTrailExpiryDate) {
+          return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
+        }
+    
+        if (salon.queueingPaymentType == "Paid") {
+          return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
+        }
         salon.isQueueingTrailEnabled = true;
         salon.isQueuing = true;
         salon.queueTrailExpiryDate = trailEndDate;
@@ -1368,6 +1359,15 @@ export const salonTrailPeriod = async (req, res, next) => {
       }
 
       if (hasAppointment) {
+
+
+    if (salon.appointmentTrailExpiryDate) {
+      return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
+    }
+
+    if (salon.appointmentPaymentType == "Paid") {
+      return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
+    }
 
         salon.isAppointmentTrailEnabled = true;
         salon.isAppointments = true;
