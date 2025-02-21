@@ -1345,11 +1345,17 @@ export const salonTrailPeriod = async(req, res, next) => {
       // const trailEndDate = moment(trailStartDate).add(1, 'minutes').unix().toString();
       
       if(isTrailEnabled){
-        salon.isTrailEnabled = isTrailEnabled;
+        salon.isQueueingTrailEnabled = isTrailEnabled
+        salon.isAppointmentTrailEnabled = isTrailEnabled
+        // salon.isTrailEnabled = isTrailEnabled;
         salon.isAppointments = true;
         salon.isQueuing = true;
-        salon.trailExpiryDate = trailEndDate
-        salon.paymentType = "Free"
+        salon.queueTrailExpiryDate = trailEndDate,
+        salon.appointmentTrailExpiryDate = trailEndDate,
+        // salon.trailExpiryDate = trailEndDate
+        salon.appointmentPaymentType = "Free"
+        salon.queueingPaymentType = "Free"
+        // salon.paymentType = "Free"
 
         await salon.save();
       }

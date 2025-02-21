@@ -1210,11 +1210,12 @@ export const getAllAdminSalonsSubcriptions = async (req, res, next) => {
         // Fetch all salons associated with the admin from registeredSalons array
         const salons = await allSalonsByAdmin(admin.registeredSalons);
 
-        // Select only specific fields from the salons and format date fields
         const filteredSalons = salons.map(({
             _id, salonId, salonName, adminEmail, salonLogo, currency, isoCurrencyCode,
             isQueuing, isAppointments, appointmentExpiryDate, queueingExpiryDate,
-            isTrailEnabled, trailExpiryDate, paymentType, timeZone
+            isTrailEnabled, timeZone,
+            appointmentTrailExpiryDate, isAppointmentTrailEnabled,
+            isQueueingTrailEnabled, queueTrailExpiryDate, queueingPaymentType, appointmentPaymentType
         }) => ({
             _id,
             salonId,
@@ -1223,25 +1224,37 @@ export const getAllAdminSalonsSubcriptions = async (req, res, next) => {
             salonLogo,
             currency,
             isoCurrencyCode,
-            isQueuing,
-            isAppointments,
-            appointmentExpiryDate: appointmentExpiryDate 
-            ? moment.unix(appointmentExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
-            : trailExpiryDate 
-                ? moment.unix(trailExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
-                : "",
         
-        queueingExpiryDate: queueingExpiryDate  
-            ? moment.unix(queueingExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
-            : trailExpiryDate 
-                ? moment.unix(trailExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
-                : "",
+            queueSubscriptions: {
+                isQueuing,
+                isQueueingTrailEnabled,
+                queueingPaymentType,
+                queueingExpiryDate: queueingExpiryDate  
+                    ? moment.unix(queueingExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
+                    : queueTrailExpiryDate 
+                        ? moment.unix(queueTrailExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
+                        : "",
+                 bought: queueingPaymentType === "Paid" ? "renewal" : ""
 
-            isTrailEnabled,
-            paymentType
+            },
+        
+            appointmentSubscriptions: {
+                isAppointments,
+                isAppointmentTrailEnabled,
+                appointmentPaymentType,
+                appointmentExpiryDate: appointmentExpiryDate 
+                    ? moment.unix(appointmentExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
+                    : appointmentTrailExpiryDate 
+                        ? moment.unix(appointmentTrailExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
+                        : "",
+                bought: appointmentPaymentType === "Paid" ? "renewal" : ""
+            },
+        
+            
         }));
-
+        
         return SuccessHandler(SALONS_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: filteredSalons });
+        
 
     } catch (error) {
         next(error);

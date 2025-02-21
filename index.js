@@ -237,9 +237,12 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
             $set: {
               isQueuing: isQueuingValue,
               queueingExpiryDate: newExpiryDate,
-              paymentType: paymentData.paymentType,
-              isTrailEnabled: false,
-              trailExpiryDate: ""
+              queueingPaymentType: paymentData.paymentType,
+              // paymentType: paymentData.paymentType,
+              // isTrailEnabled: false,
+              isQueueingTrailEnabled: false,
+              queueTrailExpiryDate: ""
+              // trailExpiryDate: ""
             },
           }
         )
@@ -380,9 +383,12 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
             $set: {
               isAppointments: isAppointmentValue,
               appointmentExpiryDate: newExpiryDate,
-              paymentType: paymentData.paymentType,
-              isTrailEnabled: false,
-              trailExpiryDate: ""
+              appointmentPaymentType: paymentData.paymentType,
+              // paymentType: paymentData.paymentType,
+              isAppointmentTrailEnabled: false,
+              // isTrailEnabled: false,
+              appointmentTrailExpiryDate: ""
+              // trailExpiryDate: ""
             },
           }
         )
@@ -533,11 +539,17 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
               isAppointments: isAppointmentValue,
               queueingExpiryDate: newQueuingExpiryDate,
               appointmentExpiryDate: newAppointmentExpiryDate,
-              paymentType: paymentData.paymentType,
-               isTrailEnabled: false,
-              trailExpiryDate: ""
+              appointmentPaymentType: paymentData.paymentType,
+              queueingPaymentType: paymentData.paymentType,
+              // paymentType: paymentData.paymentType,
+              isAppointmentTrailEnabled: false,
+              isQueueingTrailEnabled: false,
+              //  isTrailEnabled: false,
+              appointmentTrailExpiryDate: "",
+              queueTrailExpiryDate: ""
+              // trailExpiryDate: "" 
 
-            },
+            },  
           }
         )
 
