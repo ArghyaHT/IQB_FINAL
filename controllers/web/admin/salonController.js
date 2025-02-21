@@ -1439,7 +1439,7 @@ export const salonTrailPaidPeriod = async (req, res, next) => {
 
 
     // // Update salon details
-    // await salon.save()
+    await salon.save()
 
     const newPayment = new SalonPayments({
       salonId: salonId,
@@ -1459,7 +1459,7 @@ export const salonTrailPaidPeriod = async (req, res, next) => {
 
     // Save the new payment document directly
     try {
-      // const savedPayment = await newPayment.save();
+      const savedPayment = await newPayment.save();
       console.log("Saved Payment:", savedPayment);
     } catch (error) {
       console.error("Error saving payment:", error);
