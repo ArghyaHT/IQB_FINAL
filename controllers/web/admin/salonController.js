@@ -24,6 +24,8 @@ import { findCountryByName } from "../../../services/web/countries/countryServic
 import { City } from "country-state-city";
 import { CITY_NOT_FOUND_ERROR, COUNTRY_NOT_FOUND_ERROR } from "../../../constants/web/CountriesConstants.js";
 import moment from "moment";
+import Salon from "../../../models/salonRegisterModel.js";
+import SalonPayments from "../../../models/salonPaymnetsModel.js";
 
 
 //DESC:CREATE SALON BY ADMIN============================
@@ -246,7 +248,7 @@ export const createSalonByAdmin = async (req, res, next) => {
     // savedSalon.trailEndDate = moment(savedSalon.createdAt).add(14, 'days');
 
     // await savedSalon.save();
-    
+
     const admin = await findAdminByEmailandRole(adminEmail);
 
     if (admin) {
@@ -1308,9 +1310,9 @@ export const getSalonInfoBySalonId = async (req, res, next) => {
 // }
 
 
-export const getSalonPaymentsBySalonId = async(req, res, next) =>{
-  try{
-    const {salonId} = req.body;
+export const getSalonPaymentsBySalonId = async (req, res, next) => {
+  try {
+    const { salonId } = req.body;
 
     const salonPayments = await getSalonPayments(salonId);
 
@@ -1322,36 +1324,36 @@ export const getSalonPaymentsBySalonId = async(req, res, next) =>{
 }
 
 
-export const salonTrailPeriod = async(req, res, next) => {
-  try{
-      const {salonId, products, trailStartDate, isTrailEnabled } = req.body;
+export const salonTrailPeriod = async (req, res, next) => {
+  try {
+    const { salonId, products, trailStartDate, isTrailEnabled } = req.body;
 
-      const salon = await getSalonBySalonId(salonId);
-      
-      if(salon.appointmentTrailExpiryDate){
-        return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
-      }
+    const salon = await getSalonBySalonId(salonId);
 
-      if(salon.queueTrailExpiryDate){
-        return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
-      }
+    if (salon.appointmentTrailExpiryDate) {
+      return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
+    }
 
-
-      if(salon.queueingPaymentType == "Paid"){
-        return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
-      }
-
-      if(salon.appointmentPaymentType == "Paid"){
-        return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
-      }
+    if (salon.queueTrailExpiryDate) {
+      return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
+    }
 
 
-      //Timeformat "Fri Feb 07 2025 12:25:28 GMT+0530 (India Standard Time)"
+    if (salon.queueingPaymentType == "Paid") {
+      return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
+    }
 
-      const trailEndDate = moment(trailStartDate).add(14, 'days').unix().toString();
-      // const trailEndDate = moment(trailStartDate).add(1, 'minutes').unix().toString();
+    if (salon.appointmentPaymentType == "Paid") {
+      return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
+    }
 
-      // Check which product is included in the request
+
+    //Timeformat "Fri Feb 07 2025 12:25:28 GMT+0530 (India Standard Time)"
+
+    const trailEndDate = moment(trailStartDate).add(14, 'days').unix().toString();
+    // const trailEndDate = moment(trailStartDate).add(1, 'minutes').unix().toString();
+
+    // Check which product is included in the request
     const hasAppointment = products.some(product => product.productName === "Appointment");
     const hasQueueing = products.some(product => product.productName === "Queue");
 
@@ -1369,27 +1371,93 @@ export const salonTrailPeriod = async(req, res, next) => {
         salon.appointmentTrailExpiryDate = trailEndDate;
         salon.appointmentPaymentType = "Free";
       }
-      
-      // if(isTrailEnabled){
-      //   salon.isQueueingTrailEnabled = isTrailEnabled
-      //   salon.isAppointmentTrailEnabled = isTrailEnabled
-      //   // salon.isTrailEnabled = isTrailEnabled;
-      //   salon.isAppointments = true;
-      //   salon.isQueuing = true;
-      //   salon.queueTrailExpiryDate = trailEndDate,
-      //   salon.appointmentTrailExpiryDate = trailEndDate,
-      //   // salon.trailExpiryDate = trailEndDate
-      //   salon.appointmentPaymentType = "Free"
-      //   salon.queueingPaymentType = "Free"
-      //   // salon.paymentType = "Free"
 
-        await salon.save();
-      }
+      await salon.save();
+    }
 
-      return SuccessHandler(SALON_TRAIL_ENABLED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: salon })
-      
+    return SuccessHandler(SALON_TRAIL_ENABLED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: salon })
+
   }
   catch (error) {
-      next(error);
+    next(error);
+  }
+}
+
+
+
+export const salonTrailPaidPeriod = async (req, res, next) => {
+  try {
+    const { salonId, isTrailEnabled, adminEmail, trailStartDate, paymentType, planValidityDate, products } = req.body;
+
+    // Fetch salon details
+    const salon = await getSalonBySalonId(salonId);
+    if (!salon) {
+      return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res);
+    }
+
+    // Ensure products is an array and has at least one product
+    if (!Array.isArray(products) || products.length === 0) {
+      return ErrorHandler(PRODUCTS_REQUIRED_ERROR, ERROR_STATUS_CODE, res);
+    }
+
+    // Convert stored Unix timestamp to an integer (fallback to trailStartDate if expiry date is missing)
+    const existingExpiryDate = parseInt(salon.queueingExpiryDate, 10) || parseInt(trailStartDate, 10);
+    const paymentDaysToAdd = parseInt(planValidityDate, 10); // Convert plan validity days to integer
+    const newExpiryDate = moment.unix(existingExpiryDate).add(paymentDaysToAdd, 'days').unix();
+
+    // Determine which fields to update based on the product type
+
+    products.forEach(product => {
+      if (product.productName === "Queue") {
+        salon.isQueuing = true;
+        salon.queueingExpiryDate = newExpiryDate;
+        salon.queueingPaymentType = paymentType;
+        salon.isQueueingTrailEnabled = isTrailEnabled;
+        salon.queueTrailExpiryDate = "";
+      } else if (product.productName === "Appointment") {
+        salon.isAppointments = true;
+        salon.appointmentExpiryDate = newExpiryDate;
+        salon.appointmentPaymentType = paymentType;
+        salon.isAppointmentTrailEnabled = isTrailEnabled;
+        salon.appointmentTrailExpiryDate = "";
+      }
+    });
+
+
+
+    // Update salon details
+    await salon.save()
+
+    const newPayment = new SalonPayments({
+      salonId: salonId,
+      adminEmail: adminEmail,
+      amount: products.productPrice,
+      currency: products.isoCurrencyCode,
+      paymentType: products.paymentType,
+      purchaseDate: products.trailStartDate,
+      paymentExpiryDate: newExpiryDate,
+      products: products.map(product => ({
+        name: product.productName,
+        quantity: 1, // Assuming quantity is always 1 (since not provided in payload)
+        price: product.productPrice,
+        currency: product.isoCurrencyCode
+      }))
+    });
+
+    // Save the new payment document directly
+    try {
+      const savedPayment = await newPayment.save();
+      console.log("Saved Payment:", savedPayment);
+    } catch (error) {
+      console.error("Error saving payment:", error);
+    }
+
+
+
+    return SuccessHandler(SALON_TRAIL_ENABLED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: salon })
+
+  }
+  catch (error) {
+    next(error);
   }
 }
