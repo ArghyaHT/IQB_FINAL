@@ -217,11 +217,11 @@ const salonsSchema = new mongoose.Schema({
 
     isQueueingTrailEnabled:{
         type: String,
-        default: false
+        default: "initial"
     },
     isAppointmentTrailEnabled:{
         type: String,
-        default: false
+        default: "intial"
     },
     // isTrailEnabled: {
     //     type: Boolean,

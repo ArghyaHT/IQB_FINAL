@@ -1213,7 +1213,7 @@ export const getAllAdminSalonsSubcriptions = async (req, res, next) => {
         const filteredSalons = salons.map(({
             _id, salonId, salonName, adminEmail, salonLogo, currency, isoCurrencyCode,
             isQueuing, isAppointments, appointmentExpiryDate, queueingExpiryDate,
-            isTrailEnabled, timeZone,
+            timeZone,
             appointmentTrailExpiryDate, isAppointmentTrailEnabled,
             isQueueingTrailEnabled, queueTrailExpiryDate, queueingPaymentType, appointmentPaymentType
         }) => ({
