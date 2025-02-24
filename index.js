@@ -185,6 +185,9 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
     }
     else {
 
+      // akhane pae 
+      //paymentIntentId: session.payment_intent,
+
       const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
       const products = lineItems.data.map((item) => ({
@@ -198,307 +201,311 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
 
       // Access additional data from metadata
       const paymentData = {
-        salonId: session.metadata.salonId,
+        salonId: Number(session.metadata.salonId),
         adminEmail: session.metadata.adminEmail,
         invoiceNumber: invoice,
         paymentType: session.metadata.paymentType,
-        purchaseDate: session.metadata.purchaseDate,
-        planValidity: session.metadata.planValidityDate,
+        // purchaseDate: session.metadata.purchaseDate,
+        planValidity: Number(session.metadata.planValidityDate),
         customerEmail: session.customer_details.email,
         customerName: session.customer_details.name,
-        amount: session.amount_total / 100, // Convert from cents
+        // amount: session.amount_total / 100, // Convert from cents
         currency: session.currency,
         paymentIntentId: session.payment_intent,
         status: session.payment_status,
         products: products,
       };
 
-      // Fetch the salon
-      const salon = await getSalonBySalonId(session.metadata.salonId);
-      if (!salon) {
-        throw new Error("Salon not found");
-      }
+      console.log(paymentData)
 
-      // Ensure `subscriptions` array exists
-      if (!Array.isArray(salon.subscriptions)) {
-        salon.subscriptions = [];
-      }
+      // // Fetch the salon
+      // const salon = await getSalonBySalonId(session.metadata.salonId);
+      // if (!salon) {
+      //   throw new Error("Salon not found");
+      // }
 
-      // Ensure products is an array and has at least one product
-      if (!Array.isArray(products) || products.length === 0) {
-        return ErrorHandler(PRODUCTS_REQUIRED_ERROR, ERROR_STATUS_CODE, res);
-      }
+      // // Ensure `subscriptions` array exists
+      // if (!Array.isArray(salon.subscriptions)) {
+      //   salon.subscriptions = [];
+      // }
 
-      const purchaseDate = Math.floor(Date.now() / 1000); // Convert to Unix timestamp
+      // // Ensure products is an array and has at least one product
+      // if (!Array.isArray(products) || products.length === 0) {
+      //   return ErrorHandler(PRODUCTS_REQUIRED_ERROR, ERROR_STATUS_CODE, res);
+      // }
 
-      const paymentDaysToAdd = parseInt(session.metadata.paymentExpiryDate, 10); // Number of days to add
+      // const purchaseDate = Math.floor(Date.now() / 1000); // Convert to Unix timestamp
 
-      // Iterate through products and update subscriptions separately
-      for (const product of products) {
-        if (product.productName === "Queue") {
-          salon.isQueuing = true;
+      // const paymentDaysToAdd = parseInt(session.metadata.paymentExpiryDate, 10); // Number of days to add
+
+      // // Iterate through products and update subscriptions separately
+      // for (const product of products) {
+      //   if (product.productName === "Queue") {
+      //     salon.isQueuing = true;
       
-          const queueSubscription = salon.subscriptions.find(sub => sub.name === "Queue");
-          const existingQueueExpiryDate = queueSubscription && queueSubscription.trial !== "Free"
-            ? (queueSubscription.expirydate ? parseInt(queueSubscription.expirydate, 10) : purchaseDate)
-            : purchaseDate;
+      //     const queueSubscription = salon.subscriptions.find(sub => sub.name === "Queue");
+      //     const existingQueueExpiryDate = queueSubscription && queueSubscription.trial !== "Free"
+      //       ? (queueSubscription.expirydate ? parseInt(queueSubscription.expirydate, 10) : purchaseDate)
+      //       : purchaseDate;
       
-          const newQueueExpiryDate = moment.unix(existingQueueExpiryDate).add(paymentDaysToAdd, 'days').unix();
+      //     const newQueueExpiryDate = moment.unix(existingQueueExpiryDate).add(paymentDaysToAdd, 'days').unix();
       
-          if (queueSubscription) {
-            queueSubscription.trial = paymentType;
-            queueSubscription.planValidity = paymentDaysToAdd;
-            queueSubscription.expirydate = newQueueExpiryDate;
-            queueSubscription.paymentIntentId = paymentIntentId;
-            queueSubscription.bought = "Renewal";
-          } else {
-            salon.subscriptions.push({
-              name: "Queue",
-              trial: paymentType,
-              planValidity: paymentDaysToAdd,
-              paymentIntentId: paymentIntentId,
-              expirydate: newQueueExpiryDate,
-              bought: "Renewal"
-            });
-          }
+      //     if (queueSubscription) {
+      //       queueSubscription.trial = paymentType;
+      //       queueSubscription.planValidity = paymentDaysToAdd;
+      //       queueSubscription.expirydate = newQueueExpiryDate;
+      //       queueSubscription.paymentIntentId = paymentIntentId;
+      //       queueSubscription.bought = "Renewal";
+      //     } else {
+      //       salon.subscriptions.push({
+      //         name: "Queue",
+      //         trial: paymentType,
+      //         planValidity: paymentDaysToAdd,
+      //         paymentIntentId: paymentIntentId,
+      //         expirydate: newQueueExpiryDate,
+      //         bought: "Renewal"
+      //       });
+      //     }
       
-          // Save Queue payment
-          await salonPayments(paymentData, newQueueExpiryDate);
+      //     // Save Queue payment
+      //     await salonPayments(paymentData, newQueueExpiryDate);
 
-                   const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
-              const emailBody = `
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Payment Confirmation</title>
-              <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto&display=swap" rel="stylesheet">
+      //              const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
+      //         const emailBody = `
+      //     <!DOCTYPE html>
+      //     <html lang="en">
+      //     <head>
+      //         <meta charset="UTF-8">
+      //         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      //         <title>Payment Confirmation</title>
+      //         <link rel="preconnect" href="https://fonts.googleapis.com">
+      // <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      // <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto&display=swap" rel="stylesheet">
 
-              <style>
-              body {
-                     font-family: 'Poppins', sans-serif;
-                     margin: 0;
-                     padding: 0;
-                     background-color: #f9f9f9;
-                     color: #000,
-                  }
-                  .container {
-                      max-width: 600px;
-                      margin: 20px auto;
-                      padding: 20px;
-                      background-color: #ffffff;
-                      border-radius: 10px;
-                      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                  }
-                  .header {
-                      text-align: center;
-                      margin-bottom: 20px;
-                  }
-                  .logo img {
-                      max-width: 150px;
-                      border-radius: 50%;
-                      width: 150px;
-                      height: 150px;
-                      object-fit: cover;
-                  }
-                  .email-content {
-                      padding: 20px;
-                      background-color: #f8f8f8;
-                      font-size: 1rem;
-                      border-radius: 10px;
-                  }
-                  ul {
-                      padding-left: 20px;
-                  }
-                  li {
-                      margin-bottom: 8px;
-                  }
-                  p {
-                      line-height: 1.6;
-                  }
-                  .footer {
-                      margin-top: 20px;
-                      font-size: 0.9em;
-                      text-align: center;
-                      color: #888888;
-                  }
-              </style>
-          </head>
-          <body>
-              <div class="container">
-                  <div class="email-content">
-                  <div class="header">
-                      <h1>Payment Confirmation</h1>
-                  </div>
-                      <p>Dear ${session.customer_details.name},</p>
-                      <p>Thank you for your payment at <strong>${salon.salonName}</strong>. Below are the details of your transaction:</p>
-                      <ul>
-                          <li><strong>Purchase Date:</strong> ${moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD')}</li>
-                          <li><strong>Expiry Date:</strong> ${moment.unix(newExpiryDate).format('YYYY-MM-DD')}</li>
-                          <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
-                          <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
-                      </ul>
-                      <p>If you have any questions or need further assistance, feel free to contact us.</p>
-                      <p>Best regards,</p>
-                      <p>
-                          <strong>IQueueBook</strong><br>
-                          <strong>support@iqueuebarbers.com</strong> 
-                      </p>
-                  </div>
-                  <div class="footer">
-                      &copy; ${new Date().getFullYear()} IQueueBook. All rights reserved.
-                  </div>
-              </div>
-          </body>
-          </html>
-          `;
+      //         <style>
+      //         body {
+      //                font-family: 'Poppins', sans-serif;
+      //                margin: 0;
+      //                padding: 0;
+      //                background-color: #f9f9f9;
+      //                color: #000,
+      //             }
+      //             .container {
+      //                 max-width: 600px;
+      //                 margin: 20px auto;
+      //                 padding: 20px;
+      //                 background-color: #ffffff;
+      //                 border-radius: 10px;
+      //                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      //             }
+      //             .header {
+      //                 text-align: center;
+      //                 margin-bottom: 20px;
+      //             }
+      //             .logo img {
+      //                 max-width: 150px;
+      //                 border-radius: 50%;
+      //                 width: 150px;
+      //                 height: 150px;
+      //                 object-fit: cover;
+      //             }
+      //             .email-content {
+      //                 padding: 20px;
+      //                 background-color: #f8f8f8;
+      //                 font-size: 1rem;
+      //                 border-radius: 10px;
+      //             }
+      //             ul {
+      //                 padding-left: 20px;
+      //             }
+      //             li {
+      //                 margin-bottom: 8px;
+      //             }
+      //             p {
+      //                 line-height: 1.6;
+      //             }
+      //             .footer {
+      //                 margin-top: 20px;
+      //                 font-size: 0.9em;
+      //                 text-align: center;
+      //                 color: #888888;
+      //             }
+      //         </style>
+      //     </head>
+      //     <body>
+      //         <div class="container">
+      //             <div class="email-content">
+      //             <div class="header">
+      //                 <h1>Payment Confirmation</h1>
+      //             </div>
+      //                 <p>Dear ${session.customer_details.name},</p>
+      //                 <p>Thank you for your payment at <strong>${salon.salonName}</strong>. Below are the details of your transaction:</p>
+      //                 <ul>
+      //                     <li><strong>Purchase Date:</strong> ${moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD')}</li>
+      //                     <li><strong>Expiry Date:</strong> ${moment.unix(newExpiryDate).format('YYYY-MM-DD')}</li>
+      //                     <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
+      //                     <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
+      //                 </ul>
+      //                 <p>If you have any questions or need further assistance, feel free to contact us.</p>
+      //                 <p>Best regards,</p>
+      //                 <p>
+      //                     <strong>IQueueBook</strong><br>
+      //                     <strong>support@iqueuebarbers.com</strong> 
+      //                 </p>
+      //             </div>
+      //             <div class="footer">
+      //                 &copy; ${new Date().getFullYear()} IQueueBook. All rights reserved.
+      //             </div>
+      //         </div>
+      //     </body>
+      //     </html>
+      //     `;
 
-              try {
-                sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
-                console.log("Payment Email Sent")
-                return
-              } catch (error) {
-                console.error('Error sending email:', error);
-                return
-              }
+      //         try {
+      //           sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
+      //           console.log("Payment Email Sent")
+      //           return
+      //         } catch (error) {
+      //           console.error('Error sending email:', error);
+      //           return
+      //         }
       
-        } else if (product.productName === "Appointment") {
-          salon.isAppointments = true;
+      //   } else if (product.productName === "Appointment") {
+      //     salon.isAppointments = true;
       
-          const appointmentSubscription = salon.subscriptions.find(sub => sub.name === "Appointment");
-          const existingAppointmentExpiryDate = appointmentSubscription && appointmentSubscription.trial !== "Free"
-            ? (appointmentSubscription.expirydate ? parseInt(appointmentSubscription.expirydate, 10) : purchaseDate)
-            : purchaseDate;
+      //     const appointmentSubscription = salon.subscriptions.find(sub => sub.name === "Appointment");
+      //     const existingAppointmentExpiryDate = appointmentSubscription && appointmentSubscription.trial !== "Free"
+      //       ? (appointmentSubscription.expirydate ? parseInt(appointmentSubscription.expirydate, 10) : purchaseDate)
+      //       : purchaseDate;
       
-          const newAppointmentExpiryDate = moment.unix(existingAppointmentExpiryDate).add(paymentDaysToAdd, 'days').unix();
+      //     const newAppointmentExpiryDate = moment.unix(existingAppointmentExpiryDate).add(paymentDaysToAdd, 'days').unix();
       
-          if (appointmentSubscription) {
-            appointmentSubscription.trial = paymentType;
-            appointmentSubscription.planValidity = paymentDaysToAdd;
-            appointmentSubscription.expirydate = newAppointmentExpiryDate;
-            appointmentSubscription.paymentIntentId = paymentIntentId;
-            appointmentSubscription.bought = "Renewal";
-          } else {
-            salon.subscriptions.push({
-              name: "Appointment",
-              trial: paymentType,
-              planValidity: paymentDaysToAdd,
-              paymentIntentId: paymentIntentId,
-              expirydate: newAppointmentExpiryDate,
-              bought: "Renewal"
-            });
-          }
+      //     if (appointmentSubscription) {
+      //       appointmentSubscription.trial = paymentType;
+      //       appointmentSubscription.planValidity = paymentDaysToAdd;
+      //       appointmentSubscription.expirydate = newAppointmentExpiryDate;
+      //       appointmentSubscription.paymentIntentId = paymentIntentId;
+      //       appointmentSubscription.bought = "Renewal";
+      //     } else {
+      //       salon.subscriptions.push({
+      //         name: "Appointment",
+      //         trial: paymentType,
+      //         planValidity: paymentDaysToAdd,
+      //         paymentIntentId: paymentIntentId,
+      //         expirydate: newAppointmentExpiryDate,
+      //         bought: "Renewal"
+      //       });
+      //     }
       
-          // Save Appointment payment
-          await salonPayments(paymentData, newAppointmentExpiryDate);
+      //     // Save Appointment payment
+      //     await salonPayments(paymentData, newAppointmentExpiryDate);
 
-                   const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
-              const emailBody = `
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Payment Confirmation</title>
-              <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto&display=swap" rel="stylesheet">
+      //              const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
+      //         const emailBody = `
+      //     <!DOCTYPE html>
+      //     <html lang="en">
+      //     <head>
+      //         <meta charset="UTF-8">
+      //         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      //         <title>Payment Confirmation</title>
+      //         <link rel="preconnect" href="https://fonts.googleapis.com">
+      // <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      // <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto&display=swap" rel="stylesheet">
 
-              <style>
-              body {
-                     font-family: 'Poppins', sans-serif;
-                     margin: 0;
-                     padding: 0;
-                     background-color: #f9f9f9;
-                     color: #000,
-                  }
-                  .container {
-                      max-width: 600px;
-                      margin: 20px auto;
-                      padding: 20px;
-                      background-color: #ffffff;
-                      border-radius: 10px;
-                      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                  }
-                  .header {
-                      text-align: center;
-                      margin-bottom: 20px;
-                  }
-                  .logo img {
-                      max-width: 150px;
-                      border-radius: 50%;
-                      width: 150px;
-                      height: 150px;
-                      object-fit: cover;
-                  }
-                  .email-content {
-                      padding: 20px;
-                      background-color: #f8f8f8;
-                      font-size: 1rem;
-                      border-radius: 10px;
-                  }
-                  ul {
-                      padding-left: 20px;
-                  }
-                  li {
-                      margin-bottom: 8px;
-                  }
-                  p {
-                      line-height: 1.6;
-                  }
-                  .footer {
-                      margin-top: 20px;
-                      font-size: 0.9em;
-                      text-align: center;
-                      color: #888888;
-                  }
-              </style>
-          </head>
-          <body>
-              <div class="container">
-                  <div class="email-content">
-                  <div class="header">
-                      <h1>Payment Confirmation</h1>
-                  </div>
-                      <p>Dear ${session.customer_details.name},</p>
-                      <p>Thank you for your payment at <strong>${salon.salonName}</strong>. Below are the details of your transaction:</p>
-                      <ul>
-                          <li><strong>Purchase Date:</strong> ${moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD')}</li>
-                          <li><strong>Expiry Date:</strong> ${moment.unix(newExpiryDate).format('YYYY-MM-DD')}</li>
-                          <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
-                          <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
-                      </ul>
-                      <p>If you have any questions or need further assistance, feel free to contact us.</p>
-                      <p>Best regards,</p>
-                      <p>
-                          <strong>IQueueBook</strong><br>
-                          <strong>support@iqueuebarbers.com</strong> 
-                      </p>
-                  </div>
-                  <div class="footer">
-                      &copy; ${new Date().getFullYear()} IQueueBook. All rights reserved.
-                  </div>
-              </div>
-          </body>
-          </html>
-          `;
+      //         <style>
+      //         body {
+      //                font-family: 'Poppins', sans-serif;
+      //                margin: 0;
+      //                padding: 0;
+      //                background-color: #f9f9f9;
+      //                color: #000,
+      //             }
+      //             .container {
+      //                 max-width: 600px;
+      //                 margin: 20px auto;
+      //                 padding: 20px;
+      //                 background-color: #ffffff;
+      //                 border-radius: 10px;
+      //                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      //             }
+      //             .header {
+      //                 text-align: center;
+      //                 margin-bottom: 20px;
+      //             }
+      //             .logo img {
+      //                 max-width: 150px;
+      //                 border-radius: 50%;
+      //                 width: 150px;
+      //                 height: 150px;
+      //                 object-fit: cover;
+      //             }
+      //             .email-content {
+      //                 padding: 20px;
+      //                 background-color: #f8f8f8;
+      //                 font-size: 1rem;
+      //                 border-radius: 10px;
+      //             }
+      //             ul {
+      //                 padding-left: 20px;
+      //             }
+      //             li {
+      //                 margin-bottom: 8px;
+      //             }
+      //             p {
+      //                 line-height: 1.6;
+      //             }
+      //             .footer {
+      //                 margin-top: 20px;
+      //                 font-size: 0.9em;
+      //                 text-align: center;
+      //                 color: #888888;
+      //             }
+      //         </style>
+      //     </head>
+      //     <body>
+      //         <div class="container">
+      //             <div class="email-content">
+      //             <div class="header">
+      //                 <h1>Payment Confirmation</h1>
+      //             </div>
+      //                 <p>Dear ${session.customer_details.name},</p>
+      //                 <p>Thank you for your payment at <strong>${salon.salonName}</strong>. Below are the details of your transaction:</p>
+      //                 <ul>
+      //                     <li><strong>Purchase Date:</strong> ${moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD')}</li>
+      //                     <li><strong>Expiry Date:</strong> ${moment.unix(newExpiryDate).format('YYYY-MM-DD')}</li>
+      //                     <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
+      //                     <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
+      //                 </ul>
+      //                 <p>If you have any questions or need further assistance, feel free to contact us.</p>
+      //                 <p>Best regards,</p>
+      //                 <p>
+      //                     <strong>IQueueBook</strong><br>
+      //                     <strong>support@iqueuebarbers.com</strong> 
+      //                 </p>
+      //             </div>
+      //             <div class="footer">
+      //                 &copy; ${new Date().getFullYear()} IQueueBook. All rights reserved.
+      //             </div>
+      //         </div>
+      //     </body>
+      //     </html>
+      //     `;
 
-              try {
-                sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
-                console.log("Payment Email Sent")
-                return
-              } catch (error) {
-                console.error('Error sending email:', error);
-                return
-              }
-        }
-      }
+      //         try {
+      //           sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
+      //           console.log("Payment Email Sent")
+      //           return
+      //         } catch (error) {
+      //           console.error('Error sending email:', error);
+      //           return
+      //         }
+      //   }
+      // }
       
-      // Save updated salon details
-      await salon.save();
+      // // Save updated salon details
+      // await salon.save();
+
+      // ======================================================
 
 
       //       if (isQueueing === "true" && isAppointment === "false") {
@@ -1268,7 +1275,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
           quantity: 1,
         };
       }),
-      success_url: "http://localhost:5173/admin-subscription",
+      // success_url: "http://localhost:5173/admin-subscription",
+      success_url: "https://iqb-final.netlify.app/admin-subscription",
       cancel_url: "https://iqb-final.netlify.app/admin-salon",
       metadata: {
         salonId: String(productInfo.salonId),
