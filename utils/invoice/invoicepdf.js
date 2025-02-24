@@ -89,11 +89,11 @@ doc.font('Helvetica');
 
   products.forEach((product, index) => {
     // Calculate tax and total (price + tax) for the product
-    const tax = product.price * 0.18;
-    const totalWithTax = product.price + tax;
+    const tax = product.productPrice * 0.18;
+    const totalWithTax = product.productPrice + tax;
 
     // Write product details in the table
-    doc.text(product.name, 50, currentY, { width: colWidths.description, ellipsis: true })
+    doc.text(product.productName, 50, currentY, { width: colWidths.description, ellipsis: true })
       .text(`${salon.currency}${product.price.toFixed(2)}`, 150, currentY, { align: 'left' })
       .text('-', 250, currentY, { align: 'left' })
       .text(`${salon.currency}${tax.toFixed(2)}`, 350, currentY, { align: 'left' })
