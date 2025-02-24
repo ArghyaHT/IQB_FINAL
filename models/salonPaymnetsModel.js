@@ -129,14 +129,6 @@ const productPaymentSchema = new mongoose.Schema({
     type: String,
     // default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
   },
-  isQueuing: {
-    type: Boolean,
-    default: false,
-  },
-  isAppointments: {
-    type: Boolean,
-    default: false,
-  },
   products: [
     {
       name: String,

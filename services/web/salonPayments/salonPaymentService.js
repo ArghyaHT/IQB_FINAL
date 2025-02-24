@@ -16,8 +16,6 @@ const newPayment = new SalonPayments({
     paymentType: paymentData.paymentType,
     purchaseDate: paymentData.purchaseDate,
     paymentExpiryDate: newExpiryDate,
-    isQueuing: paymentData.isQueuing,
-    isAppointments: paymentData.isAppointments,
     products: paymentData.products, // This will be an array of products
   });
   
