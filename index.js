@@ -229,7 +229,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
 
       const purchaseDate = Math.floor(Date.now() / 1000); // Convert to Unix timestamp
 
-      const paymentDaysToAdd = parseInt(session.metadata.paymentExpiryDate, 10); // Number of days to add
+      const paymentDaysToAdd = parseInt(paymentData.planValidity, 10); // Number of days to add
 
       // Iterate through products and update subscriptions separately
       for (const product of products) {
