@@ -216,8 +216,6 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
         products: products,
       };
 
-      console.log(paymentData)
-
       // Fetch the salon
       const salon = await getSalonBySalonId(session.metadata.salonId);
       if (!salon) {
@@ -237,16 +235,20 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       for (const product of products) {
         if (product.productName === "Queue") {
           salon.isQueuing = true;
-      
+
           const queueSubscription = salon.subscriptions.find(sub => sub.name === "Queue");
           const existingQueueExpiryDate = queueSubscription && queueSubscription.trial !== "Free"
             ? (queueSubscription.expirydate ? parseInt(queueSubscription.expirydate, 10) : purchaseDate)
             : purchaseDate;
-      
+
           const newQueueExpiryDate = moment.unix(existingQueueExpiryDate).add(paymentDaysToAdd, 'days').unix();
 
-          console.log(moment.unix(newQueueExpiryDate).format('YYYY-MM-DD'))
-      
+          console.log("Queueing days to add", paymentDaysToAdd)
+
+          console.log("existingQueueExpiryDate", existingQueueExpiryDate)
+
+          console.log("newQueueExpiryDate", newQueueExpiryDate)
+
           if (queueSubscription) {
             queueSubscription.trial = session.metadata.paymentType;
             queueSubscription.planValidity = paymentDaysToAdd;
@@ -263,12 +265,15 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
               bought: "Renewal"
             });
           }
-      
+
+          // Save updated salon details
+          await salon.save();
+
           // Save Queue payment
           await salonPayments(paymentData, newQueueExpiryDate);
 
-                   const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
-              const emailBody = `
+          const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
+          const emailBody = `
           <!DOCTYPE html>
           <html lang="en">
           <head>
@@ -358,25 +363,26 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
           </html>
           `;
 
-              try {
-                sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
-                console.log("Payment Email Sent")
-                return
-              } catch (error) {
-                console.error('Error sending email:', error);
-                return
-              }
-      
-        } else if (product.productName === "Appointment") {
+          try {
+            sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
+            console.log("Payment Email Sent")
+            return
+          } catch (error) {
+            console.error('Error sending email:', error);
+            return
+          }
+
+        }
+        else if (product.productName === "Appointment") {
           salon.isAppointments = true;
-      
+
           const appointmentSubscription = salon.subscriptions.find(sub => sub.name === "Appointment");
           const existingAppointmentExpiryDate = appointmentSubscription && appointmentSubscription.trial !== "Free"
             ? (appointmentSubscription.expirydate ? parseInt(appointmentSubscription.expirydate, 10) : purchaseDate)
             : purchaseDate;
-      
+
           const newAppointmentExpiryDate = moment.unix(existingAppointmentExpiryDate).add(paymentDaysToAdd, 'days').unix();
-      
+
           if (appointmentSubscription) {
             appointmentSubscription.trial = session.metadata.paymentType;
             appointmentSubscription.planValidity = paymentDaysToAdd;
@@ -393,12 +399,15 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
               bought: "Renewal"
             });
           }
-      
+
+          // Save updated salon details
+          await salon.save();
+
           // Save Appointment payment
           await salonPayments(paymentData, newAppointmentExpiryDate);
 
-                   const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
-              const emailBody = `
+          const emailSubject = ` Payment Confirmation - ${salon.salonName}`;
+          const emailBody = `
           <!DOCTYPE html>
           <html lang="en">
           <head>
@@ -488,19 +497,17 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
           </html>
           `;
 
-              try {
-                sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
-                console.log("Payment Email Sent")
-                return
-              } catch (error) {
-                console.error('Error sending email:', error);
-                return
-              }
+          try {
+            sendPaymentSuccesEmail(session.customer_details.email, emailSubject, emailBody, invoice, paymentData, products);
+            console.log("Payment Email Sent")
+            return
+          } catch (error) {
+            console.error('Error sending email:', error);
+            return
+          }
+
         }
       }
-      
-      // Save updated salon details
-      await salon.save();
 
     }
   }

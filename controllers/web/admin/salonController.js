@@ -1454,6 +1454,7 @@ export const salonTrailPaidPeriod = async (req, res, next) => {
 
         // Calculate new expiry date
         const newQueueExpiryDate = moment.unix(existingQueueExpiryDate).add(paymentDaysToAdd, 'days').unix();
+        
 
 
         if (queueSubscription) {
