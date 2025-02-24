@@ -1243,7 +1243,7 @@ app.use("/api/barberReservations", barberReservations)
 
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
-    const { productInfo } = req.body;
+    const productInfo = req.body;
 
     if (!productInfo || !Array.isArray(productInfo.products)) {
       return res.status(400).json({ success: false, message: "Invalid product information" });
