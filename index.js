@@ -209,7 +209,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
         planValidity: Number(session.metadata.planValidityDate),
         customerEmail: session.customer_details.email,
         customerName: session.customer_details.name,
-        // amount: session.amount_total / 100, // Convert from cents
+        amount: session.amount_total / 100, // Convert from cents
         currency: session.currency,
         paymentIntentId: session.payment_intent,
         status: session.payment_status,
@@ -244,6 +244,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
             : purchaseDate;
       
           const newQueueExpiryDate = moment.unix(existingQueueExpiryDate).add(paymentDaysToAdd, 'days').unix();
+
+          console.log(moment.unix(newQueueExpiryDate).format('YYYY-MM-DD'))
       
           if (queueSubscription) {
             queueSubscription.trial = session.metadata.paymentType;
