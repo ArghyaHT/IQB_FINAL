@@ -248,7 +248,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
           const newQueueExpiryDate = moment.unix(existingQueueExpiryDate).add(paymentDaysToAdd, 'days').unix();
       
           if (queueSubscription) {
-            queueSubscription.trial = paymentType;
+            queueSubscription.trial = session.metadata.paymentType;
             queueSubscription.planValidity = paymentDaysToAdd;
             queueSubscription.expirydate = newQueueExpiryDate;
             queueSubscription.paymentIntentId = paymentIntentId;
@@ -378,7 +378,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
           const newAppointmentExpiryDate = moment.unix(existingAppointmentExpiryDate).add(paymentDaysToAdd, 'days').unix();
       
           if (appointmentSubscription) {
-            appointmentSubscription.trial = paymentType;
+            appointmentSubscription.trial = session.metadata.paymentType;
             appointmentSubscription.planValidity = paymentDaysToAdd;
             appointmentSubscription.expirydate = newAppointmentExpiryDate;
             appointmentSubscription.paymentIntentId = paymentIntentId;
