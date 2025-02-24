@@ -1209,12 +1209,12 @@ app.post("/api/create-checkout-session", async (req, res) => {
         mode: "payment",
         line_items: productInfo.products.map((product) => ({
           price_data: {
-            currency: product.currency,
+            currency: product.isoCurrencyCode,
             //  currency: "inr",
             product_data: {
               productName: product.productName,
             },
-            unit_amount: product.price * 100, // Price in cents
+            unit_amount: product.productPrice * 100, // Price in cents
           },
           quantity: 1,
         })),
