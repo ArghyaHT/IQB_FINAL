@@ -1193,70 +1193,66 @@ export const getAllAdminSalonsSubcriptions = async (req, res, next) => {
     try {
         const { adminEmail } = req.body;
 
-        let email = adminEmail;
-
-        if (!email) {
+        if (!adminEmail) {
             return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res);
         }
 
-        email = email.toLowerCase();
-
+        const email = adminEmail.toLowerCase();
         const admin = await findAdminByEmailandRole(email);
 
         if (!admin) {
             return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res);
         }
 
-        // Fetch all salons associated with the admin from registeredSalons array
+        // Fetch all salons associated with the admin
         const salons = await allSalonsByAdmin(admin.registeredSalons);
 
-        const filteredSalons = salons.map(({
-            _id, salonId, salonName, adminEmail, salonLogo, currency, isoCurrencyCode,
-            isQueuing, isAppointments, appointmentExpiryDate, queueingExpiryDate,
-            timeZone,
-            appointmentTrailExpiryDate, isAppointmentTrailEnabled,
-            isQueueingTrailEnabled, queueTrailExpiryDate, queueingPaymentType, appointmentPaymentType
-        }) => ({
-            _id,
-            salonId,
-            salonName,
-            adminEmail,
-            salonLogo,
-            currency,
-            isoCurrencyCode,
-        
-            queueSubscriptions: {
-                isQueuing,
-                isQueueingTrailEnabled,
-                queueingPaymentType,
-                queueingExpiryDate: queueingExpiryDate  
-                    ? moment.unix(queueingExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
-                    : queueTrailExpiryDate 
-                        ? moment.unix(queueTrailExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
-                        : "",
-                 bought: queueingPaymentType === "Paid" ? "renewal" : ""
+        // Map salon data with subscriptions
+        const filteredSalons = salons.map((salon) => {
+            const { _id, salonId, salonName, adminEmail, salonLogo, currency, isoCurrencyCode, timeZone } = salon;
 
-            },
-        
-            appointmentSubscriptions: {
-                isAppointments,
-                isAppointmentTrailEnabled,
-                appointmentPaymentType,
-                appointmentExpiryDate: appointmentExpiryDate 
-                    ? moment.unix(appointmentExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
-                    : appointmentTrailExpiryDate 
-                        ? moment.unix(appointmentTrailExpiryDate).utcOffset(timeZone).format("D MMM, YYYY h:mm A") 
-                        : "",
-                bought: appointmentPaymentType === "Paid" ? "renewal" : ""
-            },
-        
-            
-        }));
-        
+            // Extract subscriptions
+            const queueSubscription = salon.subscriptions.find(sub => sub.name === "Queue");
+            const appointmentSubscription = salon.subscriptions.find(sub => sub.name === "Appointment");
+
+            return {
+                _id,
+                salonId,
+                salonName,
+                adminEmail,
+                salonLogo,
+                currency,
+                isoCurrencyCode,
+
+                subscriptions: [
+                    queueSubscription && {
+                        name: "Queue",
+                        trial: queueSubscription.trial,
+                        planValidity: queueSubscription.planValidity || 0,
+                        expirydate: queueSubscription.expirydate
+                            ? moment.unix(queueSubscription.expirydate).utcOffset(timeZone).format("D MMM, YYYY h:mm A")
+                            : "",
+                        paymentIntentId: queueSubscription.paymentIntentId || "",
+                        bought: queueSubscription.bought || ""
+                    },
+                    appointmentSubscription && {
+                        name: "Appointment",
+                        trial: appointmentSubscription.trial,
+                        planValidity: appointmentSubscription.planValidity || 0,
+                        expirydate: appointmentSubscription.expirydate
+                            ? moment.unix(appointmentSubscription.expirydate).utcOffset(timeZone).format("D MMM, YYYY h:mm A")
+                            : "",
+                        paymentIntentId: appointmentSubscription.paymentIntentId || "",
+                        bought: appointmentSubscription.bought || ""
+                    }
+                ].filter(Boolean) // Remove undefined values
+            };
+        });
+
         return SuccessHandler(SALONS_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: filteredSalons });
-        
 
     } catch (error) {
         next(error);
     }
 };
+

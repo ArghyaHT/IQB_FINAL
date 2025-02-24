@@ -202,52 +202,52 @@ const salonsSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    queueingExpiryDate: {
-        type: String,
-        default:""
-    },
+    // queueingExpiryDate: {
+    //     type: String,
+    //     default:""
+    // },
     isAppointments: {
         type: Boolean,
         default: false
-    },    
-    appointmentExpiryDate: {
-        type: String,
-        default: ""
     },
+    // appointmentExpiryDate: {
+    //     type: String,
+    //     default: ""
+    // },
 
-    isQueueingTrailEnabled:{
-        type: String,
-        default: "initial"
-    },
-    isAppointmentTrailEnabled:{
-        type: String,
-        default: "intial"
-    },
+    // isQueueingTrailEnabled:{
+    //     type: String,
+    //     default: "initial"
+    // },
+    // isAppointmentTrailEnabled:{
+    //     type: String,
+    //     default: "intial"
+    // },
     // isTrailEnabled: {
     //     type: Boolean,
     //     default: false
     // },
-   
-    queueingPaymentType:{
-        type: String
-    },
-    appointmentPaymentType:{
-        type: String
-    },
-   
+
+    // queueingPaymentType:{
+    //     type: String
+    // },
+    // appointmentPaymentType:{
+    //     type: String
+    // },
+
     // paymentType:{
     //     type: String
     // },
 
-    queueTrailExpiryDate: {
-        type: String,
-        default: ""
-    },
+    // queueTrailExpiryDate: {
+    //     type: String,
+    //     default: ""
+    // },
 
-    appointmentTrailExpiryDate: {
-        type: String,
-        default: ""
-    },
+    // appointmentTrailExpiryDate: {
+    //     type: String,
+    //     default: ""
+    // },
     // trailExpiryDate: {
     //     type: String,
     //     default: ""
@@ -262,6 +262,57 @@ const salonsSchema = new mongoose.Schema({
             }
         }
     ],
+
+    // subscriptions: [
+    //     Queue: {
+    //         trial: enum["initial", "free", "paid"],
+    //         planValidity: any value,
+    //         expirydate: "",
+    //         bought: ""
+    //     },
+    //     Appointment:{
+    //         trial: enum["initial", "free", "paid"],
+    //         planValidity: any value,
+    //         expirydate: "",
+    //         bought: ""
+    //     },
+    // ]
+
+    subscriptions: {
+        type: [{
+            name: {  // Changed from `type` to `name`
+                type: String,
+                enum: ["Queue", "Appointment"], // Allowed values
+                required: true
+            },
+            trial: {
+                type: String,
+                enum: ["initial", "Free", "Paid"],
+                default: "initial"
+            },
+            planValidity: {
+                type: Number,
+                default: 0
+            },
+            expirydate: {
+                type: String,
+                default: ""
+            },
+            paymentIntentId: {
+                type: String,
+                default: ""
+            },
+            bought: {
+                type: String,
+                default: ""
+            }
+        }],
+        default: [
+            { name: "Queue", trial: "initial", planValidity: 0, expirydate: "", paymentIntentId: "",bought: "" },
+            { name: "Appointment", trial: "initial", planValidity: 0, expirydate: "", paymentIntentId: "", bought: "" }
+        ]
+    }
+
 
 }, { timestamps: true });
 

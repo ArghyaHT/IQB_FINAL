@@ -1326,71 +1326,97 @@ export const getSalonPaymentsBySalonId = async (req, res, next) => {
 
 export const salonTrailPeriod = async (req, res, next) => {
   try {
-    const { salonId, products, trailStartDate, isTrailEnabled } = req.body;
+    const { salonId, products, paymentType, trailStartDate, isTrailEnabled } = req.body;
 
     const salon = await getSalonBySalonId(salonId);
+    if (!salon) {
+      return ErrorHandler("Salon not found", ERROR_STATUS_CODE, res);
+    }
 
-    /// 1. Query salon subscription model
-    // find the salon and then check if Queue.istrialEnabled like this checking
-
-
-    //Timeformat "Fri Feb 07 2025 12:25:28 GMT+0530 (India Standard Time)"
-
-    const trailEndDate = moment(trailStartDate).add(14, 'days').unix().toString();
-    // const trailEndDate = moment(trailStartDate).add(1, 'minutes').unix().toString();
+    // Calculate the trial end date (14 days from start date)
+    const trailEndDate = moment(trailStartDate).add(14, "days").unix();
 
     // Check which product is included in the request
     const hasAppointment = products.some(product => product.productName === "Appointment");
     const hasQueueing = products.some(product => product.productName === "Queue");
 
     if (isTrailEnabled) {
-      if (hasQueueing) {
-        if (salon.queueTrailExpiryDate) {
-          return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
-        }
-    
-        if (salon.queueingPaymentType == "Paid") {
-          return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
-        }
-        salon.isQueueingTrailEnabled = true;
-        salon.isQueuing = true;
-        salon.queueTrailExpiryDate = trailEndDate;
-        salon.queueingPaymentType = "Free";
+      // Ensure subscriptions array exists
+      if (!Array.isArray(salon.subscriptions)) {
+        salon.subscriptions = [];
       }
 
+      // Handle Queue Subscription
+      if (hasQueueing) {
+        const queueSubscription = salon.subscriptions.find(sub => sub.name === "Queue");
+
+        if (queueSubscription) {
+          if (queueSubscription.trial === "Free") {
+            return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res);
+          }
+          if (queueSubscription.trial === "Paid") {
+            return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res);
+          }
+
+          queueSubscription.trial = paymentType;
+          queueSubscription.planValidity = 14;
+          queueSubscription.expirydate = trailEndDate;
+          salon.isQueuing = true
+        } else {
+          // If Queue subscription does not exist, add a new one
+          salon.subscriptions.push({
+            name: "Queue",
+            trial: paymentType,
+            planValidity: 14,
+            expirydate: trailEndDate,
+            bought: ""
+          }),
+            salon.isQueuing = true
+        }
+      }
+
+      // Handle Appointment Subscription
       if (hasAppointment) {
+        const appointmentSubscription = salon.subscriptions.find(sub => sub.name === "Appointment");
 
+        if (appointmentSubscription) {
+          if (appointmentSubscription.trial === "Free") {
+            return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res);
+          }
+          if (appointmentSubscription.trial === "Paid") {
+            return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res);
+          }
 
-    if (salon.appointmentTrailExpiryDate) {
-      return ErrorHandler(SALON_TRAIL_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-    if (salon.appointmentPaymentType == "Paid") {
-      return ErrorHandler(SALON_TRAIL_ENABLED_ERROR, ERROR_STATUS_CODE, res)
-    }
-
-        salon.isAppointmentTrailEnabled = true;
-        salon.isAppointments = true;
-        salon.appointmentTrailExpiryDate = trailEndDate;
-        salon.appointmentPaymentType = "Free";
+          appointmentSubscription.trial = paymentType;
+          appointmentSubscription.planValidity = 14;
+          appointmentSubscription.expirydate = trailEndDate;
+          salon.isAppointments = true
+        } else {
+          // If Appointment subscription does not exist, add a new one
+          salon.subscriptions.push({
+            name: "Appointment",
+            trial: paymentType,
+            planValidity: 14,
+            expirydate: trailEndDate,
+            bought: ""
+          }),
+            salon.isAppointments = true
+        }
       }
 
       await salon.save();
     }
 
-    return SuccessHandler(SALON_TRAIL_ENABLED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: salon })
-
-  }
-  catch (error) {
+    return SuccessHandler(SALON_TRAIL_ENABLED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: salon });
+  } catch (error) {
     next(error);
   }
-}
-
+};
 
 
 export const salonTrailPaidPeriod = async (req, res, next) => {
   try {
-    const { salonId, isTrailEnabled, adminEmail, trailStartDate, paymentType, planValidityDate, products } = req.body;
+    const { salonId, isTrailEnabled, paymentIntentId, adminEmail, paymentType, planValidityDate, products } = req.body;
 
     // Fetch salon details
     const salon = await getSalonBySalonId(salonId);
@@ -1403,51 +1429,93 @@ export const salonTrailPaidPeriod = async (req, res, next) => {
       return ErrorHandler(PRODUCTS_REQUIRED_ERROR, ERROR_STATUS_CODE, res);
     }
 
-    const purchaseDate = new Date();
-    console.log(purchaseDate);
+    const purchaseDate = Math.floor(Date.now() / 1000); // Convert to Unix timestamp
 
-    const existingExpiryDate = parseInt(salon.queueingExpiryDate, 10) ||  parseInt(purchaseDate, 10); // Convert stored Unix timestamp to an integer
     const paymentDaysToAdd = parseInt(planValidityDate, 10); // Number of days to add
 
-  
-    // Calculate the new expiry date
-    const newExpiryDate = moment.unix(existingExpiryDate) // Convert existing Unix timestamp to a moment object
-      .add(paymentDaysToAdd, 'days') // Add the payment expiry days
-      .unix(); 
+    // Ensure subscriptions array exists
+    if (!Array.isArray(salon.subscriptions)) {
+      salon.subscriptions = [];
+    }
 
-      console.log(newExpiryDate)
-
-    // Determine which fields to update based on the product type
-
+    // Iterate through products and update subscriptions separately
     products.forEach(product => {
       if (product.productName === "Queue") {
+        // Update isQueuing field
         salon.isQueuing = true;
-        salon.queueingExpiryDate = newExpiryDate;
-        salon.queueingPaymentType = paymentType;
-        salon.isQueueingTrailEnabled = isTrailEnabled;
-        salon.queueTrailExpiryDate = "";
+
+        // Get existing expiry date or use purchaseDate
+        const queueSubscription = salon.subscriptions.find(sub => sub.name === "Queue");
+        // Determine the base expiry date
+        const existingQueueExpiryDate = queueSubscription && queueSubscription.trial !== "Free"
+          ? (queueSubscription.expirydate ? parseInt(queueSubscription.expirydate, 10) : purchaseDate) // Use purchaseDate if expirydate is empty
+          : purchaseDate;
+
+
+        // Calculate new expiry date
+        const newQueueExpiryDate = moment.unix(existingQueueExpiryDate).add(paymentDaysToAdd, 'days').unix();
+
+
+        if (queueSubscription) {
+          queueSubscription.trial = paymentType;
+          queueSubscription.planValidity = paymentDaysToAdd;
+          queueSubscription.expirydate = newQueueExpiryDate;
+          queueSubscription.paymentIntentId = paymentIntentId,
+          queueSubscription.bought = "Renewal";
+        } else {
+          salon.subscriptions.push({
+            name: "Queue",
+            trial: paymentType,
+            planValidity: paymentDaysToAdd,
+            paymentIntentId: paymentIntentId,
+            expirydate: newQueueExpiryDate,
+            bought: "Renewal"
+          });
+        }
       } else if (product.productName === "Appointment") {
+        // Update isAppointments field
         salon.isAppointments = true;
-        salon.appointmentExpiryDate = newExpiryDate;
-        salon.appointmentPaymentType = paymentType;
-        salon.isAppointmentTrailEnabled = isTrailEnabled;
-        salon.appointmentTrailExpiryDate = "";
+
+        // Get existing expiry date or use purchaseDate
+        const appointmentSubscription = salon.subscriptions.find(sub => sub.name === "Appointment");
+        // Determine the base expiry date
+        const existingAppointmentExpiryDate = appointmentSubscription && appointmentSubscription.trial !== "Free"
+          ? (appointmentSubscription.expirydate ? parseInt(appointmentSubscription.expirydate, 10) : purchaseDate) // Use purchaseDate if expirydate is empty
+          : purchaseDate;
+        // Calculate new expiry date
+        const newAppointmentExpiryDate = moment.unix(existingAppointmentExpiryDate).add(paymentDaysToAdd, 'days').unix();
+
+        if (appointmentSubscription) {
+          appointmentSubscription.trial = paymentType;
+          appointmentSubscription.planValidity = paymentDaysToAdd;
+          appointmentSubscription.expirydate = newAppointmentExpiryDate;
+          appointmentSubscription.paymentIntentId = paymentIntentId
+          appointmentSubscription.bought = "Renewal";
+        } else {
+          salon.subscriptions.push({
+            type: "Appointment",
+            trial: paymentType,
+            planValidity: paymentDaysToAdd,
+            paymentIntentId: paymentIntentId,
+            expirydate: newAppointmentExpiryDate,
+            bought: "Renewal"
+          });
+        }
       }
     });
 
+    // Save updated salon details
+    await salon.save();
 
-
-    // // Update salon details
-    await salon.save()
-
+    // Prepare and save payment details
     const newPayment = new SalonPayments({
       salonId: salonId,
       adminEmail: adminEmail,
-      amount: products.productPrice,
-      currency: products.isoCurrencyCode,
-      paymentType: products.paymentType,
-      purchaseDate: products.trailStartDate,
-      paymentExpiryDate: newExpiryDate,
+      amount: products.reduce((sum, product) => sum + (product.productPrice || 0), 0), // Sum total price
+      currency: products.length > 0 ? products[0].isoCurrencyCode : "USD", // Use the currency from the first product
+      paymentType: paymentType,
+      purchaseDate: purchaseDate,
+      paymentExpiryDate: moment.unix(purchaseDate).add(paymentDaysToAdd, 'days').unix(), // Expiry based on purchase date
       products: products.map(product => ({
         name: product.productName,
         quantity: 1, // Assuming quantity is always 1 (since not provided in payload)
@@ -1456,20 +1524,15 @@ export const salonTrailPaidPeriod = async (req, res, next) => {
       }))
     });
 
-    // Save the new payment document directly
     try {
       const savedPayment = await newPayment.save();
-      console.log("Saved Payment:", savedPayment);
     } catch (error) {
       console.error("Error saving payment:", error);
     }
 
+    return SuccessHandler(SALON_TRAIL_ENABLED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: salon });
 
-
-    return SuccessHandler(SALON_TRAIL_ENABLED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: salon })
-
-  }
-  catch (error) {
+  } catch (error) {
     next(error);
   }
-}
+};
