@@ -37,8 +37,11 @@ export const SALON_LOGO_DELETE_ERROR = "Failed to delete salon logo"
 
 export const SALON_QUEUELIST_ERROR = "Salon cant be offline as customers in queue"
 
-export const SALON_TRAIL_ENABLED_ERROR ="A paid subscription is already active, so the trial cannot be enabled."
-export const SALON_TRAIL_ERROR = "The free trial has already been used and cannot be activated again."
+export const SALON_TRAIL_QUEUE_ENABLED_ERROR ="A paid subscription for queue is already active, so the trial cannot be enabled."
+export const SALON_TRAIL_APPOINTMENT_ENABLED_ERROR ="A paid subscription for appointment is already active, so the trial cannot be enabled."
+
+export const SALON_TRAIL_QUEUE_ERROR = "The free trial for queueing has already been used and cannot be activated again."
+export const SALON_TRAIL_APPOINTMENT_ERROR = "The free trial for appointment has already been used and cannot be activated again."
 
 
 
