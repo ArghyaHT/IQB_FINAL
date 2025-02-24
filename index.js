@@ -188,7 +188,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
       const products = lineItems.data.map((item) => ({
-        name: item.productName,
+        productName: item.productName,
         quantity: item.quantity,
         price: item.amount_total / 100, // Amount in dollars (converted from cents)
         currency: session.currency,

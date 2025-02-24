@@ -131,7 +131,7 @@ const productPaymentSchema = new mongoose.Schema({
   },
   products: [
     {
-      name: String,
+      productName: String,
       quantity: Number,
       price: Number,
       currency: String,
