@@ -1199,9 +1199,9 @@ app.post("/api/create-checkout-session", async (req, res) => {
   try {
     const { productInfo } = req.body;
 
-    console.log(productInfo)
+    // console.log(productInfo)
 
-    const expiryDate = moment().add(productInfo.paymentExpiryDate, 'days').toDate();
+    // const expiryDate = moment().add(productInfo.planValidityDate, 'days').toDate(); 
 
     if (productInfo) {
       const session = await stripe.checkout.sessions.create({
@@ -1212,19 +1212,18 @@ app.post("/api/create-checkout-session", async (req, res) => {
             currency: product.currency,
             //  currency: "inr",
             product_data: {
-              productName: product.name,
+              productName: product.productName,
             },
             unit_amount: product.price * 100, // Price in cents
           },
-          quantity: product.quantity,
+          quantity: 1,
         })),
-        success_url: "https://iqb-final.netlify.app/admin-subscription",
-        // success_url: "http://localhost:5173/admin-subscription",
+        // success_url: "https://iqb-final.netlify.app/admin-subscription",
+        success_url: "http://localhost:5173/admin-subscription",
         cancel_url: "https://iqb-final.netlify.app/admin-salon",
         metadata: {
           salonId: productInfo.salonId,
           adminEmail: productInfo.adminEmail,
-          purchaseDate: new Date(),
           paymentType: productInfo.paymentType,
           planValidityDate: productInfo.planValidityDate,
         },
