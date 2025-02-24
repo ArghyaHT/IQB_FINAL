@@ -190,6 +190,8 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
 
       const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
+      console.log(lineItems)
+
       const products = lineItems.data.map((item) => ({
         productName: item.name,
         quantity: item.quantity,
@@ -825,6 +827,8 @@ app.post("/api/create-checkout-session", async (req, res) => {
         planValidityDate: String(productInfo.planValidityDate),
       },
     });
+
+    console.log("session data",session)
 
     res.status(200).json({
       success: true,
