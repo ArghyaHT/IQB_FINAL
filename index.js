@@ -1195,53 +1195,99 @@ app.use("/api/barberReservations", barberReservations)
 //   }
 // });
 
+// app.post("/api/create-checkout-session", async (req, res) => {
+//   try {
+//     const { productInfo } = req.body;
+
+//     // console.log(productInfo)
+
+//     if (productInfo) {
+//       const session = await stripe.checkout.sessions.create({
+//         payment_method_types: ["card"],
+//         mode: "payment",
+//         line_items: productInfo.products.map((product) => ({
+//           price_data: {
+//             currency: product.isoCurrencyCode,
+//             product_data: {
+//               productName: product.productName,
+//             },
+//             unit_amount: product.productPrice * 100, // Price in cents
+//           },
+//           quantity: 1,
+//         })),
+//         // success_url: "https://iqb-final.netlify.app/admin-subscription",
+//         success_url: "http://localhost:5173/admin-subscription",
+//         cancel_url: "https://iqb-final.netlify.app/admin-salon",
+//         metadata: {
+//           salonId: productInfo.salonId,
+//           adminEmail: productInfo.adminEmail,
+//           paymentType: productInfo.paymentType,
+//           planValidityDate: productInfo.planValidityDate,
+//         },
+//         // customer_email: productInfo.adminEmail ** this code will prefill the email in stripe payment in frontend default and cannot be modify
+//       });
+
+//       res.status(200).json({
+//         success: true,
+//         session,
+//       });
+//     }
+
+
+//   } catch (error) {
+//     console.error("Payment Check-Out Failed ", error);
+//     res.status(500).send("Internal Server Error");
+//   }
+// });
+
+
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
     const { productInfo } = req.body;
 
-    // console.log(productInfo)
-
-    // const expiryDate = moment().add(productInfo.planValidityDate, 'days').toDate(); 
-
-    if (productInfo) {
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        mode: "payment",
-        line_items: productInfo.products.map((product) => ({
-          price_data: {
-            currency: product.isoCurrencyCode,
-            //  currency: "inr",
-            product_data: {
-              productName: product.productName,
-            },
-            unit_amount: product.productPrice * 100, // Price in cents
-          },
-          quantity: 1,
-        })),
-        // success_url: "https://iqb-final.netlify.app/admin-subscription",
-        success_url: "http://localhost:5173/admin-subscription",
-        cancel_url: "https://iqb-final.netlify.app/admin-salon",
-        metadata: {
-          salonId: productInfo.salonId,
-          adminEmail: productInfo.adminEmail,
-          paymentType: productInfo.paymentType,
-          planValidityDate: productInfo.planValidityDate,
-        },
-        // customer_email: productInfo.adminEmail ** this code will prefill the email in stripe payment in frontend default and cannot be modify
-      });
-
-      res.status(200).json({
-        success: true,
-        session,
-      });
+    if (!productInfo || !Array.isArray(productInfo.products)) {
+      return res.status(400).json({ success: false, message: "Invalid product information" });
     }
 
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      line_items: productInfo.products.map((product) => {
+        if (!product.isoCurrencyCode || typeof product.isoCurrencyCode !== "string") {
+          throw new Error("Invalid currency code");
+        }
 
+        return {
+          price_data: {
+            currency: product.isoCurrencyCode,
+            product_data: {
+              name: product.productName,
+            },
+            unit_amount: Math.round(Number(product.productPrice) * 100), // Ensure valid number
+          },
+          quantity: 1,
+        };
+      }),
+      success_url: "http://localhost:5173/admin-subscription",
+      cancel_url: "https://iqb-final.netlify.app/admin-salon",
+      metadata: {
+        salonId: String(productInfo.salonId),
+        adminEmail: String(productInfo.adminEmail),
+        paymentType: String(productInfo.paymentType),
+        planValidityDate: String(productInfo.planValidityDate),
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      session,
+    });
   } catch (error) {
-    console.error("Payment Check-Out Failed ", error);
-    res.status(500).send("Internal Server Error");
+    console.error("Payment Check-Out Failed:", error.message);
+    res.status(500).json({ success: false, message: error.message });
   }
 });
+
 
 app.post("/api/onboard-vendor-account", async (req, res, next) => {
   try {
