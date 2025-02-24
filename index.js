@@ -193,7 +193,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
       console.log(lineItems)
 
       const products = lineItems.data.map((item) => ({
-        productName: item.name,
+        productName: item.description,
         quantity: item.quantity,
         productPrice: item.amount_total / 100, // Amount in dollars (converted from cents)
         currency: session.currency,
@@ -828,7 +828,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
       },
     });
 
-    console.log("session data",session)
+    console.log("session data",session.metadata)
 
     res.status(200).json({
       success: true,
