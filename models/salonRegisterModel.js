@@ -287,8 +287,8 @@ const salonsSchema = new mongoose.Schema({
             },
             trial: {
                 type: String,
-                enum: ["initial", "Free", "Paid"],
-                default: "initial"
+                enum: ["Initial", "Free", "Paid"],
+                default: "Initial"
             },
             planValidity: {
                 type: Number,
@@ -308,8 +308,8 @@ const salonsSchema = new mongoose.Schema({
             }
         }],
         default: [
-            { name: "Queue", trial: "initial", planValidity: 0, expirydate: "", paymentIntentId: "",bought: "" },
-            { name: "Appointment", trial: "initial", planValidity: 0, expirydate: "", paymentIntentId: "", bought: "" }
+            { name: "Queue", trial: "Initial", planValidity: 0, expirydate: "", paymentIntentId: "",bought: "" },
+            { name: "Appointment", trial: "Initial", planValidity: 0, expirydate: "", paymentIntentId: "", bought: "" }
         ]
     }
 
