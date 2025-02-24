@@ -42,7 +42,7 @@ export const generateInvoicePDF = async (invoice, paymentData, products) => {
   doc.fontSize(10)
     .text(`Invoice #: ${invoice}`, detailsX, detailsY + 15)
     .text(`Invoice Issued: ${moment().format('DD MMM, YYYY')}`, detailsX, detailsY + 30)
-    .text(`Invoice Amount: ${salon.currency}${(paymentData.amount).toFixed(2)}`, detailsX, detailsY + 45)
+    .text(`Invoice Amount: ${salon.currency}${(paymentData.products.productPrice).toFixed(2)}`, detailsX, detailsY + 45)
   // Print "Status: " without changing color
   doc.text('Status: ', detailsX, detailsY + 60);
 

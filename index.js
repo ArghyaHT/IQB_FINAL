@@ -249,14 +249,14 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
             queueSubscription.trial = session.metadata.paymentType;
             queueSubscription.planValidity = paymentDaysToAdd;
             queueSubscription.expirydate = newQueueExpiryDate;
-            queueSubscription.paymentIntentId = paymentIntentId;
+            queueSubscription.paymentIntentId = session.metadata.paymentIntentId;
             queueSubscription.bought = "Renewal";
           } else {
             salon.subscriptions.push({
               name: "Queue",
-              trial: paymentType,
+              trial: session.metadata.paymentType,
               planValidity: paymentDaysToAdd,
-              paymentIntentId: paymentIntentId,
+              paymentIntentId: session.metadata.paymentIntentId,
               expirydate: newQueueExpiryDate,
               bought: "Renewal"
             });
@@ -384,9 +384,9 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
           } else {
             salon.subscriptions.push({
               name: "Appointment",
-              trial: paymentType,
+              trial: session.metadata.paymentType,
               planValidity: paymentDaysToAdd,
-              paymentIntentId: paymentIntentId,
+              paymentIntentId: session.metadata.paymentIntentId,
               expirydate: newAppointmentExpiryDate,
               bought: "Renewal"
             });
