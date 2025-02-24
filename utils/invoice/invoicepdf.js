@@ -108,7 +108,7 @@ doc.font('Helvetica');
 
   // Summary Section
   const summaryStartY = currentY + 30;
-  const total = products.reduce((sum, p) => sum + p.price, 0);
+  const total = products.reduce((sum, p) => sum + p.productPrice, 0);
   const tax = total * 0.18;
   const grandTotal = total + tax;
 
