@@ -94,7 +94,7 @@ doc.font('Helvetica');
 
     // Write product details in the table
     doc.text(product.productName, 50, currentY, { width: colWidths.description, ellipsis: true })
-      .text(`${salon.currency}${product.price.toFixed(2)}`, 150, currentY, { align: 'left' })
+      .text(`${salon.currency}${product.productPrice.toFixed(2)}`, 150, currentY, { align: 'left' })
       .text('-', 250, currentY, { align: 'left' })
       .text(`${salon.currency}${tax.toFixed(2)}`, 350, currentY, { align: 'left' })
       .text(`${salon.currency}${totalWithTax.toFixed(2)}`, 450, currentY, { align: 'left' });
