@@ -346,7 +346,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
                           <li><strong>Purchase Date:</strong> ${moment.unix(purchaseDate).format('YYYY-MM-DD')}</li>
                           <li><strong>Expiry Date:</strong> ${moment.unix(newQueueExpiryDate).format('YYYY-MM-DD')}</li>
                           <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
-                          <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
+                          <li><strong>Product Purchased:</strong> ${product.productName}</li>
                       </ul>
                       <p>If you have any questions or need further assistance, feel free to contact us.</p>
                       <p>Best regards,</p>
@@ -480,7 +480,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (reque
                           <li><strong>Purchase Date:</strong> ${moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD')}</li>
                           <li><strong>Expiry Date:</strong> ${moment.unix(newExpiryDate).format('YYYY-MM-DD')}</li>
                           <li><strong>Total Amount Paid:</strong> ${session.currency.toUpperCase()} ${session.amount_total / 100}</li>
-                          <li><strong>Products Purchased:</strong> ${products.map(product => product.name).join(', ')}</li>
+                          <li><strong>Product Purchased:</strong> ${product.productName}</li>
                       </ul>
                       <p>If you have any questions or need further assistance, feel free to contact us.</p>
                       <p>Best regards,</p>
