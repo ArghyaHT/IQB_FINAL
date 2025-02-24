@@ -808,7 +808,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
           price_data: {
             currency: product.isoCurrencyCode,
             product_data: {
-              name: product.productName,
+              productName: product.productName,
             },
             unit_amount: Math.round(Number(product.productPrice) * 100), // Ensure valid number
           },
