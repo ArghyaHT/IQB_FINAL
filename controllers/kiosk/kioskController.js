@@ -237,15 +237,19 @@ export const getDefaultSalon = async (req, res, next) => {
                 let minQueueCount = Infinity;
                 let leastQueueBarbers = [];
 
-                // Find the minimum queue count first
-                barbers.forEach(barber => {
-                    if (barber.queueCount < minQueueCount) {
-                        minQueueCount = barber.queueCount;
-                    }
-                });
+
+
+                leastQueueBarbers = barbers.sort((a, b) => a.queueCount - b.queueCount);
+
+                // // Find the minimum queue count first
+                // barbers.forEach(barber => {
+                //     if (barber.queueCount < minQueueCount) {
+                //         minQueueCount = barber.queueCount;
+                //     }
+                // });
 
                 // Collect all barbers who have this minimum queue count
-                leastQueueBarbers = barbers.filter(barber => barber.queueCount === minQueueCount);
+                // leastQueueBarbers = barbers.filter(barber => barber.queueCount === minQueueCount);
 
                 // Find queues associated with the salonId
                 const salonQueues = await getSalonQlist(admin.salonId);
@@ -257,18 +261,18 @@ export const getDefaultSalon = async (req, res, next) => {
 
                 return SuccessHandler(DEFAULT_SALON_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, {
                     response: {
-                            ...defaultSalon.toObject(),  // Spread existing defaultSalon properties
-                            barbersOnDuty: barberCount,    // Add barbers on duty count inside defaultSalon
-                            totalQueueCount: totalQueueCount,  // Add total queue count inside defaultSalon
-                            // leastQueueCount: minQueueCountAsInteger   // Add least queue count inside defaultSalon
-                            leastQueueBarbers: leastQueueBarbers.map(barber => ({  // Add least queue barbers
-                                barberId: barber._id,
-                                name: barber.name,
-                                profile: barber.profile,
-                                queueCount: barber.queueCount,
-                                barberEWT: barber.barberEWT
-                            }))
-                        }
+                        ...defaultSalon.toObject(),  // Spread existing defaultSalon properties
+                        barbersOnDuty: barberCount,    // Add barbers on duty count inside defaultSalon
+                        totalQueueCount: totalQueueCount,  // Add total queue count inside defaultSalon
+                        // leastQueueCount: minQueueCountAsInteger   // Add least queue count inside defaultSalon
+                        leastQueueBarbers: leastQueueBarbers.map(barber => ({  // Add least queue barbers
+                            barberId: barber._id,
+                            name: barber.name,
+                            profile: barber.profile,
+                            queueCount: barber.queueCount,
+                            barberEWT: barber.barberEWT
+                        }))
+                    }
                 });
             }
         }
@@ -306,7 +310,8 @@ export const getDefaultSalon = async (req, res, next) => {
 
                 totalQueueCount = salonQueues.length
 
-                return SuccessHandler(DEFAULT_SALON_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, {  response: {
+                return SuccessHandler(DEFAULT_SALON_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, {
+                    response: {
                         ...defaultSalon.toObject(),  // Spread existing defaultSalon properties
                         barbersOnDuty: barberCount,    // Add barbers on duty count inside defaultSalon
                         totalQueueCount: totalQueueCount,  // Add total queue count inside defaultSalon
@@ -318,8 +323,8 @@ export const getDefaultSalon = async (req, res, next) => {
                             queueCount: barber.queueCount,
                             barberEWT: barber.barberEWT
                         }))
-                } 
-            })
+                    }
+                })
             }
         }
     }

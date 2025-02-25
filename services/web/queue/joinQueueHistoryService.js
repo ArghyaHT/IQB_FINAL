@@ -91,7 +91,7 @@ export const getSalonServedQlist = async (salonId, reportType, days, month) => {
         from = today.clone().subtract(days - 1, "days").startOf("day");
         to = today.clone().endOf("day");
         dateFormat = "YYYY-MM-DD"; // Group by day
-    }else if (reportType === "weekly") {
+    } else if (reportType === "weekly") {
         // Get the first and last date of the month
         const startOfMonth = today.clone().startOf("month");
         const endOfMonth = today.clone().endOf("month");
@@ -124,14 +124,14 @@ export const getSalonServedQlist = async (salonId, reportType, days, month) => {
 
         // Now, group daily data into weekly data
         const weeklyData = groupByWeeks(dailyData, startOfMonth, endOfMonth);
-        
+
         // Convert the weekly data into an array
         return weeklyData;
 
-     } else if (reportType === "monthly") {
+    } else if (reportType === "monthly") {
         let from, to, dateFormat;
         const today = moment(); // Current date using moment.js
-    
+
         if (month === 0) {
             // If month is 0, show all months of the current year
             from = today.clone().startOf("year");
@@ -550,7 +550,7 @@ export const getDailyBarberServedReport = async (salonId, barberEmail, days) => 
     return fillMissingDates(result, from, to, 'daily');
 };
 
-export const getWeeklyBarberServedReport = async (salonId,barberEmail, week) => {
+export const getWeeklyBarberServedReport = async (salonId, barberEmail, week) => {
     const today = moment().utc();
     const startOfMonth = today.clone().startOf("month");
     const endOfMonth = today.clone().endOf("month");
@@ -972,7 +972,7 @@ export const getMonthlyBarberCancelledReport = async (salonId, barberId, months)
 
 
 //SALON SERVED REPORT BY DATE RANGE
-export const getDailySalonServedReportByDateRange = async (salonId, from, to ) => {
+export const getDailySalonServedReportByDateRange = async (salonId, from, to) => {
     let startDate = moment.utc(from).startOf("day");
     let endDate = moment.utc(to).endOf("day");
     let dateFormat = "YYYY-MM-DD"; // Group by day
@@ -1029,7 +1029,7 @@ export const getWeeklySalonServedReportByDateRange = async (salonId, from, to) =
     // Manually group data into weeks from the `from` date
     const weeklyData = [];
     let currentStart = startDate.clone();
-    
+
     while (currentStart.isBefore(endDate)) {
         let currentEnd = currentStart.clone().add(6, "days"); // Move forward 6 days
 
@@ -1037,9 +1037,9 @@ export const getWeeklySalonServedReportByDateRange = async (salonId, from, to) =
         if (currentEnd.isAfter(endDate)) {
             currentEnd = endDate.clone(); // Adjust the last week's end date
         }
-    
+
         let totalQueue = 0;
-    
+
         // Sum up queue counts within the week range
         Object.keys(dailyData).forEach(date => {
             let momentDate = moment.utc(date, "YYYY-MM-DD");
@@ -1047,17 +1047,17 @@ export const getWeeklySalonServedReportByDateRange = async (salonId, from, to) =
                 totalQueue += dailyData[date];
             }
         });
-    
+
         weeklyData.push({
             weekStart: currentStart,
             weekEnd: currentEnd,
             totalQueue: totalQueue
         });
-    
+
         // Move to the next week
         currentStart = currentEnd.clone().add(1, "day");
     }
-    
+
 
     return weeklyData;
 };
@@ -1065,7 +1065,7 @@ export const getWeeklySalonServedReportByDateRange = async (salonId, from, to) =
 export const getMonthlySalonServedReportByDateRange = async (salonId, from, to) => {
     const startOfMonth = moment.utc(from, "YYYY-MM-DD").startOf("month"); // Start of the month
     const endOfMonth = moment.utc(to, "YYYY-MM-DD").endOf("month"); // End of the month
-    
+
 
     // Fetch served queue data for the entire date range (month or last n months)
     const queueHistory = await JoinedQueueHistory.find({
@@ -1173,7 +1173,7 @@ export const getWeeklySalonCancelledReportByDateRange = async (salonId, from, to
     // Manually group data into weeks from the `from` date
     const weeklyData = [];
     let currentStart = startDate.clone();
-    
+
     while (currentStart.isBefore(endDate)) {
         let currentEnd = currentStart.clone().add(6, "days"); // Move forward 6 days
 
@@ -1181,9 +1181,9 @@ export const getWeeklySalonCancelledReportByDateRange = async (salonId, from, to
         if (currentEnd.isAfter(endDate)) {
             currentEnd = endDate.clone(); // Adjust the last week's end date
         }
-    
+
         let totalQueue = 0;
-    
+
         // Sum up queue counts within the week range
         Object.keys(dailyData).forEach(date => {
             let momentDate = moment.utc(date, "YYYY-MM-DD");
@@ -1191,17 +1191,17 @@ export const getWeeklySalonCancelledReportByDateRange = async (salonId, from, to
                 totalQueue += dailyData[date];
             }
         });
-    
+
         weeklyData.push({
             weekStart: currentStart,
             weekEnd: currentEnd,
             totalQueue: totalQueue
         });
-    
+
         // Move to the next week
         currentStart = currentEnd.clone().add(1, "day");
     }
-    
+
 
     return weeklyData;
 };
@@ -1353,7 +1353,7 @@ export const getWeeklyBarberServedReportByDateRange = async (salonId, barberEmai
     // Manually group data into weeks from the `from` date
     const weeklyData = [];
     let currentStart = startDate.clone();
-    
+
     while (currentStart.isBefore(endDate)) {
         let currentEnd = currentStart.clone().add(6, "days"); // Move forward 6 days
 
@@ -1361,9 +1361,9 @@ export const getWeeklyBarberServedReportByDateRange = async (salonId, barberEmai
         if (currentEnd.isAfter(endDate)) {
             currentEnd = endDate.clone(); // Adjust the last week's end date
         }
-    
+
         let totalQueue = 0;
-    
+
         // Sum up queue counts within the week range
         Object.keys(dailyData).forEach(date => {
             let momentDate = moment.utc(date, "YYYY-MM-DD");
@@ -1371,17 +1371,17 @@ export const getWeeklyBarberServedReportByDateRange = async (salonId, barberEmai
                 totalQueue += dailyData[date];
             }
         });
-    
+
         weeklyData.push({
             weekStart: currentStart,
             weekEnd: currentEnd,
             totalQueue: totalQueue
         });
-    
+
         // Move to the next week
         currentStart = currentEnd.clone().add(1, "day");
     }
-    
+
 
     return weeklyData;
 };
@@ -1554,7 +1554,7 @@ export const getWeeklyBarberCancelledReportByDateRange = async (salonId, barberI
     // Manually group data into weeks from the `from` date
     const weeklyData = [];
     let currentStart = startDate.clone();
-    
+
     while (currentStart.isBefore(endDate)) {
         let currentEnd = currentStart.clone().add(6, "days"); // Move forward 6 days
 
@@ -1562,9 +1562,9 @@ export const getWeeklyBarberCancelledReportByDateRange = async (salonId, barberI
         if (currentEnd.isAfter(endDate)) {
             currentEnd = endDate.clone(); // Adjust the last week's end date
         }
-    
+
         let totalQueue = 0;
-    
+
         // Sum up queue counts within the week range
         Object.keys(dailyData).forEach(date => {
             let momentDate = moment.utc(date, "YYYY-MM-DD");
@@ -1572,17 +1572,17 @@ export const getWeeklyBarberCancelledReportByDateRange = async (salonId, barberI
                 totalQueue += dailyData[date];
             }
         });
-    
+
         weeklyData.push({
             weekStart: currentStart,
             weekEnd: currentEnd,
             totalQueue: totalQueue
         });
-    
+
         // Move to the next week
         currentStart = currentEnd.clone().add(1, "day");
     }
-    
+
 
     return weeklyData;
 };
@@ -1952,5 +1952,61 @@ const groupByWeeks = (dailyData, startDate, endDate) => {
     return weeklyData;
 };
 
+
+export const totalQueueCountsForLast30Days = async (salonId) => {
+    const today = new Date();
+    const last30Days = new Date();
+    last30Days.setDate(today.getDate() - 30);
+
+    // Count queue entries for the last 30 days
+    const totalCount = await JoinedQueueHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$queueList" },
+        { $match: { "queueList.dateJoinedQ": { $gte: last30Days } } },
+        { $count: "totalCount" }
+    ]);
+
+    return { totalCount: totalCount.length > 0 ? totalCount[0].totalCount : 0 };
+};
+
+
+
+export const totalQueueCountsForLast60Days = async (salonId) => {
+    const today = new Date();
+    const last60Days = new Date();
+    last60Days.setDate(today.getDate() - 60);
+
+    // Count queue entries for the last 30 days
+    const totalCount = await JoinedQueueHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$queueList" },
+        { $match: { "queueList.dateJoinedQ": { $gte: last60Days } } },
+        { $count: "totalCount" }
+    ]);
+
+    return { totalCount: totalCount.length > 0 ? totalCount[0].totalCount : 0 };
+};
+
+
+export const getTotalQueueCount = async (salonId) => {
+    const result = await JoinedQueueHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$queueList" },
+        { $count: "totalCount" }
+    ]);
+
+    return result.length > 0 ? result[0].totalCount : 0;
+};
+
+export const getServedQueueCount = async (salonId) => {
+    const result = await JoinedQueueHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$queueList" },
+        { $match: { "queueList.status": "served" } }, // Filter only served queues
+        { $count: "servedCount" }
+    ]);
+
+    return result.length > 0 ? result[0].servedCount : 0;
+};
 
 

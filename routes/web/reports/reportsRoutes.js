@@ -1,5 +1,5 @@
 import express from "express";
-import { dashboardReports, salonAppointmentReport, salonServedReport } from "../../../controllers/web/reports/reportsController.js";
+import { dashboardReports, newdashboardReports, queueTrend, salonAppointmentReport, salonServedReport } from "../../../controllers/web/reports/reportsController.js";
 
 const router = express.Router()
 
@@ -11,6 +11,12 @@ router.route("/getdashboardReports").post(dashboardReports)
 
 
 router.route("/getSalonAppointmentReports").post(salonAppointmentReport)
+
+
+router.route("/queueTrend").post(queueTrend)
+
+router.route("/getnewdashboardReports").post(newdashboardReports)
+
 
 
 
