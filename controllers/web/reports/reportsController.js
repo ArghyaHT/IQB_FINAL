@@ -1407,11 +1407,6 @@ export const newdashboardReports = async (req, res, next) => {
                     prev30DaysCount,
                     percentageChangelast30Days: `${trend === "Rise" ? "+" : trend === "Fall" ? "-" : ""}${Math.abs(percentageChange).toFixed(2)}%`,
                     queueTrend: trend,
-                    last7daysCount: last7daysCount.map(item => ({
-                        date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
-                        TotalQueue: item.count
-                    })
-                )
                 },
                 appointment: {
                     totalAppointmentCount,
@@ -1420,7 +1415,12 @@ export const newdashboardReports = async (req, res, next) => {
                     lastWeekCount: getlastWeekAppointmentCount,
                     prevWeekCount: previousWeekCount,
                     percentageChangeLastWeek: `${appointmentTrend === "Rise" ? "+" : appointmentTrend === "Fall" ? "-" : ""}${Math.abs(appointmentPercentageChange).toFixed(2)}%`,
-                    appointmentTrend
+                    appointmentTrend,
+                    last7daysCount: last7daysCount.map(item => ({
+                        date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
+                        TotalQueue: item.count
+                    })
+                )
                 }
             }
         });
