@@ -22,6 +22,7 @@ import { findBarberByEmailAndRole } from "../../../services/kiosk/barber/barberS
 import { getPushDevicesbyEmailId } from "../../../services/mobile/pushDeviceTokensService.js";
 import { QUEUE_POSITION_CHANGE } from "../../../constants/mobile/NotificationConstants.js";
 import { sendQueueNotification } from "../../../utils/pushNotifications/pushNotifications.js";
+import { io } from "../../../utils/socket/socket.js";
 
 
 //DESC:GET SALON QUEUELIST ================
@@ -48,6 +49,9 @@ export const getQueueListBySalonId = async (req, res, next) => {
         }
 
         const sortedQlist = getSalon;
+
+        io.emit("queueUpdated", sortedQlist);
+
 
 
         // if (!sortedQlist) {
