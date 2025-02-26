@@ -30,6 +30,7 @@ import SalonQueueListModel from "../../models/salonQueueListModel.js";
 import { getPushDevicesbyEmailId } from "../../services/mobile/pushDeviceTokensService.js";
 import { sendQueueNotification } from "../../utils/pushNotifications/pushNotifications.js";
 import { QUEUE_POSITION_CHANGE } from "../../constants/mobile/NotificationConstants.js";
+import { io } from "../../utils/socket/socket.js";
 
 //DESC:LOGIN AN ADMIN =========================
 export const loginKiosk = async (req, res, next) => {
@@ -931,6 +932,8 @@ export const getQueueListBySalonId = async (req, res, next) => {
         }
 
         const sortedQlist = getSalon;
+
+        io.emit("queueUpdated", sortedQlist);
 
         return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist ? sortedQlist : [] })
 
