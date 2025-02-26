@@ -871,10 +871,9 @@ export const joinQueueKiosk = async (req, res, next) => {
                 // Handle error if email sending fails
             }
 
-            if (mobileNumber) {
-
-            }
         }
+
+        io.emit("queueUpdated", existingQueue);
 
         return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingQueue })
 
