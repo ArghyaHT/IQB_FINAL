@@ -873,7 +873,9 @@ export const joinQueueKiosk = async (req, res, next) => {
 
         }
 
-        io.emit("queueUpdated", existingQueue);
+        console.log(existingQueue)
+
+        io.to(`salon_${salonId}`).emit("queueUpdated", existingQueue);
 
         return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingQueue })
 
@@ -932,7 +934,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
         const sortedQlist = getSalon;
 
-        io.emit("queueUpdated", sortedQlist);
+        io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
 
         return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist ? sortedQlist : [] })
 
