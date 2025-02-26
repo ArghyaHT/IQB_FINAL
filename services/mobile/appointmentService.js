@@ -176,6 +176,7 @@ export const allAppointmentsBySalonId = async (salonId) => {
             $project: {
                 _id: 0,
                 "appointmentList._id": 1,
+                "appointmentList.barberId": 1,
                 "appointmentList.appointmentDate": 1,
                 "appointmentList.appointmentNotes": 1,
                 "appointmentList.startTime": 1,
