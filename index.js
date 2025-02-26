@@ -12,6 +12,7 @@ import jsonFile from "jsonfile"
 import path from "path"
 import { v2 as cloudinary } from "cloudinary";
 import bodyParser from "body-parser";
+import http from "http"
 
 import kioskRoutes from "./routes/kiosk/kioskRouter.js"
 import customerRoutes from "./routes/mobile/customerRoutes.js"
@@ -58,6 +59,7 @@ import { validateEmail } from "./middlewares/validator.js";
 import Admin from "./models/adminRegisterModel.js";
 import SalonSettings from "./models/salonSettingsModel.js";
 import { vendorCustomerPayment } from "./services/web/vendorCustomerDetails/vendorCustomerService.js";
+import { initializeSocket } from "./utils/socket/socket.js";
 
 dotenv.config()
 
@@ -91,6 +93,10 @@ connectDB()
 
 // Writing the cors for for both dev and prod
 const app = express()
+const server = http.createServer(app);
+
+initializeSocket(server);
+
 
 
 const allowedOrigins = [
@@ -1090,6 +1096,6 @@ checkPaymentsExpiry()
 // salonShutdown()
 checkSalonTrailPeriod()
 
-app.listen(PORT, () => {
-  console.log(`Server started on port ${PORT}`);
+server.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
 });

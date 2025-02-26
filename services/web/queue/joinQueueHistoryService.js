@@ -2009,4 +2009,33 @@ export const getServedQueueCount = async (salonId) => {
     return result.length > 0 ? result[0].servedCount : 0;
 };
 
+export const getlast6weeksQueueCount = async (salonId) => {
+    const today = moment().utc().endOf("day"); // End of today
+    const weeksAgo = moment().utc().subtract(6, "weeks").startOf("isoWeek"); // Start of the 6th week ago
+
+    // Fetch served queue data for the last 'n' weeks
+    const lastNWeeksQueueHistory = await JoinedQueueHistory.find({
+        salonId: salonId,
+        "queueList.dateJoinedQ": { $gte: weeksAgo.toDate(), $lte: today.toDate() },
+    });
+
+    // Process and group data by day
+    let lastNWeeksData = {};
+    lastNWeeksQueueHistory.forEach(entry => {
+        entry.queueList.forEach(queue => {
+            if (queue.status === "served") {
+                const dateKey = moment(queue.dateJoinedQ).utc().format("YYYY-MM-DD");
+                lastNWeeksData[dateKey] = (lastNWeeksData[dateKey] || 0) + 1;
+            }
+        });
+    });
+
+    // Group daily data into weekly data
+    let weeklyData = groupByWeeks(lastNWeeksData, weeksAgo, today);
+
+    // Remove single-day entries (weekStart === weekEnd)
+    weeklyData = weeklyData.filter(week => week.weekStart !== week.weekEnd);
+
+    return weeklyData;
+};
 

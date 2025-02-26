@@ -10,6 +10,10 @@ const router = express.Router();
 //getQListBySalonId
 router.route("/getQListBySalonId").get(verifyRefreshTokenAdmin,getQueueListBySalonId)
 
+
+router.route("/getQListBySalonIdTest").get(getQueueListBySalonId)
+
+
 // //Auto Join
 // router.route("/autoJoin").post(verifyRefreshTokenAdmin,autoJoin),
 
