@@ -105,7 +105,7 @@ export const addCustomerToQueue = async (salonId, newQueue, barberId, customerEm
     existingQueue = await existingQueue.save();
 
 
-    io.to(`salon_${salonId}`).emit("queueUpdated", existingQueue.queueList);
+    await io.to(`salon_${salonId}`).emit("queueUpdated", existingQueue.queueList);
 
 
     // 1. finding the token from the database using customer email
