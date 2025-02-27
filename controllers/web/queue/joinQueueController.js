@@ -58,11 +58,6 @@ export const getQueueListBySalonId = async (req, res, next) => {
     catch (error) {
         next(error);
     }
-
-    // const salonId = parseInt(req.query.salonId, 10);
-
-    // const getSalon = await SalonQueueList.findOne({salonId})
-    // res.json(getSalon.queueList)
 }
 
 //DESC:BARBER SERVED API ================
