@@ -42,64 +42,6 @@ export const getSalonQlist = async(salonId) => {
 
 return updatedQueueList;
 
-
- 
-
-
-//   const Qlist = await SalonQueueList.aggregate([
-//       {
-//         $match: { salonId } // Match the document based on salonId
-//       },
-//       {
-//         $unwind: "$queueList" // Deconstruct queueList array
-//       },
-//       {
-//         $sort: {
-//           "queueList.qPosition": 1 // Sort by qPosition in ascending order (1)
-//         }
-//       },
-//       {
-//         $group: {
-//           _id: "$_id", // Group by the document's _id field
-//           queueList: { $push: "$queueList" } // Reconstruct the queueList array
-//         }
-//       },
-//       //Changed for frontend 
-//       {
-//         $project: {
-//           queueList: {
-//             $map: {
-//               input: "$queueList",
-//               as: "list",
-//               in: {
-//                 $mergeObjects: [
-//                   "$$list",
-//                   { "name": "$$list.customerName" } // Rename customerName to name
-//                 ]
-//               }
-//             }
-//           }
-//         }
-//       },
-//       {
-//         $project: {
-//           "queueList.customerName": 0 // Exclude the customerName field
-//         }
-//       }
-//     ]);
-
-//         // Fetch and append barber email for each queue item
-//         for (const queue of Qlist) {
-//           for (const queueItem of queue.queueList) {
-//               const barberId = queueItem.barberId;
-//               const barber = await getBarberByBarberId(barberId);
-//               if (barber) {
-//                   queueItem.barberEmail = barber.email;
-//               }
-//           }
-//       }
-
-//     return Qlist;
 }
 
 

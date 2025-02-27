@@ -118,7 +118,7 @@ export const addCustomerToQueue = async (salonId, newQueue, barberId, customerEm
     }
 
     
-    io.emit("queueUpdated", existingQueue.queueList);
+    io.to(`salon_${salonId}`).emit("queueUpdated", existingQueue.queueList);
 
     return {
         queue: existingQueue,

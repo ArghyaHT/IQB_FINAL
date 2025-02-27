@@ -50,15 +50,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
         const sortedQlist = getSalon;
 
-        io.emit("queueUpdated", sortedQlist);
-
-
-
-        // if (!sortedQlist) {
-        //     return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res)
-
-        // }
-        // else {
+        io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
 
         return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist })
 
