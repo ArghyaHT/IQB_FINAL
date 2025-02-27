@@ -116,11 +116,7 @@ export const addCustomerToQueue = async (salonId, newQueue, barberId, customerEm
     if(pushDevice.deviceToken){
         await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType , NEW_QUEUE_ADD, customerEmail )
     }
-
-
-    await io.to(`salon_${salonId}`).emit("queueUpdated", existingQueue.queueList);
-    console.log(`🚀 Emitting queueUpdated for salon_${salonId}`, existingQueue.queueList);
-
+    
     return {
         queue: existingQueue,
         customerEWT,
