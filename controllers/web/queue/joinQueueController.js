@@ -50,7 +50,6 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
         const sortedQlist = getSalon;
 
-        console.log(sortedQlist)
 
         io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
 

@@ -873,11 +873,14 @@ export const joinQueueKiosk = async (req, res, next) => {
 
         }
 
-        
-        console.log(existingQueue.queue.queueList)
+
+        if (existingQueue.queue.queueList) {
+            existingQueue.queue.queueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+        }
+
 
         await io.to(`salon_${salonId}`).emit("queueUpdated", existingQueue.queue.queueList);
-        return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingQueue })
+        return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingQueue.queue.queueList })
 
     } catch (error) {
         next(error);
