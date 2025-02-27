@@ -873,10 +873,13 @@ export const joinQueueKiosk = async (req, res, next) => {
 
         }
 
-        const plainQueueList = existingQueue.queueList.map(queue => queue.toObject());
 
-        console.log(plainQueueList)
-        await io.to(`salon_${salonId}`).emit("queueUpdated", plainQueueList);
+
+        const plainExistingQueue = existingQueue.toObject();
+
+        console.log(plainExistingQueue)
+
+        await io.to(`salon_${salonId}`).emit("queueUpdated", plainExistingQueue.queueList);
         return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingQueue })
 
     } catch (error) {
