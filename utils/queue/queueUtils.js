@@ -105,11 +105,6 @@ export const addCustomerToQueue = async (salonId, newQueue, barberId, customerEm
     // Save the updated queue
     existingQueue = await existingQueue.save();
 
-
-    console.log(existingQueue.queueList)
-    await io.to(`salon_${salonId}`).emit("queueUpdated", existingQueue.queueList);
-
-
     // 1. finding the token from the database using customer email
     // 2. Token must be present here
     // 3. Prepare the token head and message body 
@@ -119,7 +114,7 @@ export const addCustomerToQueue = async (salonId, newQueue, barberId, customerEm
 
     const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-    if(pushDevice.deviceToken){
+    if(pushDevice && pushDevice.deviceToken){
         await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType , NEW_QUEUE_ADD, customerEmail )
     }
     
