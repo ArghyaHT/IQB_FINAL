@@ -4,6 +4,7 @@ import { addNewQueue, findSalonQueueList } from "../../services/kiosk/queue/queu
 import { getPushDevicesbyEmailId } from "../../services/mobile/pushDeviceTokensService.js";
 import { getSalonBySalonId } from "../../services/mobile/salonServices.js";
 import { sendQueueNotification } from "../pushNotifications/pushNotifications.js";
+import { io } from "../socket/socket.js";
 
 export const addCustomerToQueue = async (salonId, newQueue, barberId, customerEmail, customerName) => {
     let existingQueue = await findSalonQueueList(salonId);
@@ -105,6 +106,7 @@ export const addCustomerToQueue = async (salonId, newQueue, barberId, customerEm
     existingQueue = await existingQueue.save();
 
 
+    console.log(existingQueue.queueList)
     await io.to(`salon_${salonId}`).emit("queueUpdated", existingQueue.queueList);
 
 
@@ -116,8 +118,6 @@ export const addCustomerToQueue = async (salonId, newQueue, barberId, customerEm
     const salon = await getSalonBySalonId(salonId)
 
     const pushDevice = await getPushDevicesbyEmailId(customerEmail)
-
-    console.log(pushDevice)
 
     if(pushDevice.deviceToken){
         await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType , NEW_QUEUE_ADD, customerEmail )

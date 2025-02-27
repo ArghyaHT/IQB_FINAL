@@ -50,6 +50,8 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
         const sortedQlist = getSalon;
 
+        console.log(sortedQlist)
+
         io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
 
         return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist })
