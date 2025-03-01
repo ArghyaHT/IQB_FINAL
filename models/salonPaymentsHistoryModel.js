@@ -33,9 +33,9 @@ const productPaymentHistorySchema = new mongoose.Schema({
   },
   products: [
     {
-      name: String,
+      productName: String,
       quantity: Number,
-      price: Number,
+      productPrice: Number,
       currency: String,
     },
   ],

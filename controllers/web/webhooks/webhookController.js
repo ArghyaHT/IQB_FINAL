@@ -39,6 +39,8 @@ export const handleStripeWebhook = async(request, response) => {
     const vendorAccountId = session.metadata.vendorAccountId
     const paymentStatus = paymentIntent.status
 
+    const purchaseDate = new Date()
+
     if (vendorAccountId && paymentStatus === "succeeded") {
 
       const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
@@ -58,7 +60,7 @@ export const handleStripeWebhook = async(request, response) => {
         salonName: session.metadata.salonName,
         vendorEmail: session.metadata.adminEmail,
         vendorAccountId: session.metadata.vendorAccountId,
-        purchaseDate: session.metadata.purchaseDate,
+        purchaseDate: moment.unix(purchaseDate).format('YYYY-MM-DD'),
         customerEmail: session.metadata.customerEmail,
         customerName: session.metadata.customerName,
         amount: session.amount_total / 100, // Convert from cents
@@ -96,7 +98,7 @@ export const handleStripeWebhook = async(request, response) => {
         adminEmail: session.metadata.adminEmail,
         invoiceNumber: invoice,
         paymentType: session.metadata.paymentType,
-        purchaseDate: moment.unix(session.metadata.purchaseDate).format('YYYY-MM-DD'),
+        purchaseDate: moment.unix(purchaseDate).format('YYYY-MM-DD'),
         planValidity: Number(session.metadata.planValidityDate),
         customerEmail: session.customer_details.email,
         customerName: session.customer_details.name,
