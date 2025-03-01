@@ -30,13 +30,7 @@ export const getSalonQlist = async (salonId, customerEmail) => {
     },
     {
       $addFields: {
-        "queueList.name": {
-          $cond: {
-            if: { $eq: ["$queueList.customerEmail", customerEmail] },
-            then: "$queueList.customerName",
-            else: "Client",
-          },
-        },
+        "queueList.name": "$queueList.customerName", // Always use customerName
         "queueList.customerProfile": {
           $cond: {
             if: { $gt: [{ $size: "$customerData" }, 0] }, // If customerData exists

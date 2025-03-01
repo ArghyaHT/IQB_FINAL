@@ -8,6 +8,7 @@ import { findCustomerByCustomerEmailAndSalonId } from "../../services/mobile/cus
 import { addQueueHistoryWhenCanceled, findSalonQueueListHistory, statusCancelQ } from "../../services/mobile/queueHistoryService.js";
 import { validateEmail } from "../../middlewares/validator.js";
 import { findCustomersToMail } from "../../services/web/queue/joinQueueService.js";
+import { io } from "../../utils/socket/socket.js";
 
 //DESC:SINGLE JOIN QUEUE ================
 export const singleJoinQueue = async (req, res, next) => {
