@@ -744,6 +744,10 @@ export const getQueueListBySalonId = async (req, res, next) => {
             // Access the sorted queueList array from the result
             const sortedQueueList = getSalon[0].queueList;
 
+
+            io.to(`salon_${salonId}`).emit("queueUpdated", sortedQueueList);
+
+
             res.status(200).json({
                 success: true,
                 message: "Queue list of the salon retrieved successfully.",

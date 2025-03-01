@@ -674,7 +674,7 @@ app.use("/api/barberBreakTimes", barberBreakTimes)
 app.use("/api/barberReservations", barberReservations)
 
 
-app.subscribe("/api", checkoutSession)
+app.use("/api", checkoutSession)
 
 
 // app.post("/api/create-checkout-session", async (req, res) => {
