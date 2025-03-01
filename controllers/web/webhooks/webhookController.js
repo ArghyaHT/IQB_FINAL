@@ -60,7 +60,7 @@ export const handleStripeWebhook = async(request, response) => {
         salonName: session.metadata.salonName,
         vendorEmail: session.metadata.adminEmail,
         vendorAccountId: session.metadata.vendorAccountId,
-        purchaseDate: moment.unix(purchaseDate).format('YYYY-MM-DD'),
+        purchaseDate: purchaseDate,
         customerEmail: session.metadata.customerEmail,
         customerName: session.metadata.customerName,
         amount: session.amount_total / 100, // Convert from cents
@@ -98,7 +98,7 @@ export const handleStripeWebhook = async(request, response) => {
         adminEmail: session.metadata.adminEmail,
         invoiceNumber: invoice,
         paymentType: session.metadata.paymentType,
-        purchaseDate: moment.unix(purchaseDate).format('YYYY-MM-DD'),
+        purchaseDate: purchaseDate,
         planValidity: Number(session.metadata.planValidityDate),
         customerEmail: session.customer_details.email,
         customerName: session.customer_details.name,
