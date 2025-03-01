@@ -2,8 +2,11 @@ import SalonQueueList from "../../models/salonQueueListModel.js";
 
 //Get salon queue list
 export const getSalonQlist = async (salonId, customerEmail) => {
-  const defaultProfileImage =
-    "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg";
+  const defaultProfileImage = [
+    {
+      url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg",
+    },
+  ];
 
   const Qlist = await SalonQueueList.aggregate([
     {
@@ -35,15 +38,12 @@ export const getSalonQlist = async (salonId, customerEmail) => {
           },
         },
         "queueList.customerProfile": {
-          $ifNull: [
-            {
-              $arrayElemAt: ["$customerData.profile", 0] // Extract the first profile
-            },
-            {   // Default profile object
-              "url": "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg"
-            }
-          ]
-        }
+          $cond: {
+            if: { $gt: [{ $size: "$customerData" }, 0] }, // If customerData exists
+            then: { $arrayElemAt: ["$customerData.profile", 0] }, // Extract profile
+            else: defaultProfileImage, // Use default profile array
+          },
+        },
       },
     },
     {
