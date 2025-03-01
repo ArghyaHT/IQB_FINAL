@@ -39,7 +39,7 @@ export const handleStripeWebhook = async(request, response) => {
     const vendorAccountId = session.metadata.vendorAccountId
     const paymentStatus = paymentIntent.status
 
-    const purchaseDate = new Date()
+    const purchaseDate = Math.floor(Date.now() / 1000); // Convert to Unix timestamp
 
     if (vendorAccountId && paymentStatus === "succeeded") {
 
@@ -119,8 +119,6 @@ export const handleStripeWebhook = async(request, response) => {
       if (!Array.isArray(salon.subscriptions)) {
         salon.subscriptions = [];
       }
-
-      const purchaseDate = Math.floor(Date.now() / 1000); // Convert to Unix timestamp
 
       const paymentDaysToAdd = parseInt(paymentData.planValidity, 10); // Number of days to add
 
