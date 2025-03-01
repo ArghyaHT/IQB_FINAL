@@ -41,6 +41,9 @@ export const handleStripeWebhook = async(request, response) => {
 
     const purchaseDate = Math.floor(Date.now() / 1000); // Convert to Unix timestamp
 
+    const date = new Date(purchaseDate * 1000); // Multiply by 1000 to convert to milliseconds
+console.log(date.toUTCString());
+
     if (vendorAccountId && paymentStatus === "succeeded") {
 
       const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
