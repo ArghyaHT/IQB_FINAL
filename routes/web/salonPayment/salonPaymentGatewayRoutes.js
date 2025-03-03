@@ -1,6 +1,6 @@
 import express from 'express';
 import { getSalonPayments } from '../../../controllers/web/salonPaymentGateway/salonPaymentGatewayController.js';
-import { paymenthistories } from '../../../controllers/web/salonPaymentGateway/salonpaymentHistoryController.js';
+import { paymentHistories } from '../../../controllers/web/salonPaymentGateway/salonpaymentHistoryController.js';
 
 const router = express.Router();
 
@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.route("/getSalonPaymentsBySalonId").post(getSalonPayments)
 
-router.route("/getSalonPaymentHistoryBySalonId").post(paymenthistories)
+router.route("/getSalonPaymentHistoryBySalonId").post(paymentHistories)
 
 
 

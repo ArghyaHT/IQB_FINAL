@@ -31,39 +31,49 @@ export const getSalonPaymentsBySalonId = async(salonId) => {
 }
 
 
-export const checkSalonPaymentExpiryDate = async() => {
+export const checkSalonPaymentExpiryDate = async () => {
+  try {
+      // Get today's date in Unix timestamp format
+      const today = Math.floor(Date.now() / 1000);
 
-   // Get today's date in Unix timestamp format
-   const today = Math.floor(Date.now() / 1000);
+      // Fetch all salon payments
+      const salonPayments = await SalonPayments.find();
 
-// Fetch all salon payments
-    const salonPayments = await SalonPayments.find();
+      for (const payment of salonPayments) {
+          const paymentExpiryDate = Number(payment.paymentExpiryDate); // Convert string to number
 
-    for (const payment of salonPayments) {
-      const paymentExpiryDate = parseInt(payment.paymentExpiryDate, 10);
 
-      if (paymentExpiryDate <= today) {
-        // Move the payment to SalonPaymentHistoryModel
-        await SalonPaymentsHistory.create({
-          salonId: payment.salonId,
-          adminEmail: payment.adminEmail,
-          customerName: payment.customerName,
-          customerEmail: payment.customerEmail,
-          amount: payment.amount,
-          currency: payment.currency,
-          paymentIntentId: payment.paymentIntentId,
-          status: payment.status,
-          paymentType: payment.paymentType,
-          purchaseDate: payment.purchaseDate,
-          paymentExpiryDate: payment.paymentExpiryDate,
-          isQueuing: payment.isQueuing,
-          isAppointments: payment.isAppointments,
-          products: payment.products,
-        });
+          if (paymentExpiryDate <= today) {
 
-        // Delete the payment from SalonPayments
-        await SalonPayments.deleteOne({ _id: payment._id });
+              try {
+                  // Move to history
+                  await SalonPaymentsHistory.create({
+                      salonId: payment.salonId,
+                      invoiceNumber: payment.invoiceNumber,
+                      adminEmail: payment.adminEmail,
+                      customerName: payment.customerName,
+                      customerEmail: payment.customerEmail,
+                      amount: payment.amount,
+                      currency: payment.currency,
+                      paymentIntentId: payment.paymentIntentId,
+                      status: payment.status,
+                      paymentType: payment.paymentType,
+                      purchaseDate: Number(payment.purchaseDate), // Convert purchaseDate to number
+                      paymentExpiryDate: paymentExpiryDate,
+                      products: payment.products,
+                  });
+
+                  console.log(`Moved to History: ${payment._id}`);
+
+                  // Delete from active payments
+                  await SalonPayments.deleteOne({ _id: payment._id });
+                  console.log(`Deleted from SalonPayments: ${payment._id}`);
+              } catch (error) {
+                  console.error(`Error processing payment ID ${payment._id}:`, error);
+              }
+          }
       }
-    }
-
-}
+  } catch (error) {
+      console.error("Error checking salon payment expiry:", error);
+  }
+};

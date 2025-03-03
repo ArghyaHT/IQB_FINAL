@@ -14,6 +14,8 @@ import { SuccessHandler } from "../../../middlewares/SuccessHandler.js"
 import { SALON_NOT_FOUND_ERROR } from "../../../constants/web/SalonConstants.js";
 import { getSalonBySalonId } from "../../../services/mobile/salonServices.js";
 import { getBarberBreakTimes } from "../../../services/web/barberBreakTimes/barberBreakTimesService.js";
+import { io } from "../../../utils/socket/socket.js";
+
 
 
 //DESC:CREATE APPOINTMENT ====================
@@ -379,10 +381,15 @@ export const getAllAppointmentsBySalonId = async (req, res, next) => {
             });
         }
 
+        const fetchedAppointments = appointments.map(appointment => appointment.appointmentList)
+
+        io.to(`salon_${salonId}`).emit("appointmentUpdated", fetchedAppointments);
+
+
         res.status(200).json({
             success: true,
             message: 'Appointments retrieved successfully',
-            response: appointments.map(appointment => appointment.appointmentList),
+            response: fetchedAppointments,
         });
     } catch (error) {
         next(error);
