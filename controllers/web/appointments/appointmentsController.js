@@ -458,13 +458,6 @@ export const getAllAppointmentsByBarberIdAndDate = async (req, res, next) => {
                 response: [],
             });
         }
-        // Emit to SPECIFIC barber
-       await io.to(`salon_${salonId}_barber_${barberId}`).emit("appointmentUpdated", {
-            salonId,
-            barberId,
-            appointmentDate,
-            appointments,
-        });
 
         res.status(200).json({
             success: true,
