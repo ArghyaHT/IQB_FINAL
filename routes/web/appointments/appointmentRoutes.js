@@ -19,7 +19,7 @@ router.route("/getEngageBarberTimeSlots").post(verifyRefreshTokenAdmin ,getEngag
 
 router.route("/getAllAppointmentsBySalonId").post(verifyRefreshTokenAdmin ,getAllAppointmentsBySalonId)
 
-router.route("/getAllAppointmentsBySalonIdTest").post(getAllAppointmentsBySalonId)
+// router.route("/getAllAppointmentsBySalonIdTest").post(getAllAppointmentsBySalonId)
 
 
 router.route("/getAllAppointmentsBySalonIdAndDate").post(verifyRefreshTokenAdmin,getAllAppointmentsBySalonIdAndDate)
@@ -27,6 +27,9 @@ router.route("/getAllAppointmentsBySalonIdAndDate").post(verifyRefreshTokenAdmin
 router.route("/getAllAppointmentsByBarberId").post(verifyRefreshTokenBarber ,getAllAppointmentsByBarberId)
 
 router.route("/getAllAppointmentsByBarberIdAndDate").post(verifyRefreshTokenBarber ,getAllAppointmentsByBarberIdAndDate)
+
+router.route("/getAllAppointmentsByBarberIdAndDateTest").post(getAllAppointmentsByBarberIdAndDate)
+
 
 router.route("/barberServedAppointment").post(barberServedAppointment)
 

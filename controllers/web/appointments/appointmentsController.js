@@ -459,6 +459,13 @@ export const getAllAppointmentsByBarberIdAndDate = async (req, res, next) => {
             });
         }
 
+        io.to(`salon_${salonId}`).emit("appointmentUpdated", {
+            salonId,
+            barberId,
+            appointmentDate,
+            appointments,
+        });
+
         res.status(200).json({
             success: true,
             message: 'Appointments retrieved successfully',
