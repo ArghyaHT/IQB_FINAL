@@ -42,9 +42,12 @@ export const checkSalonPaymentExpiryDate = async () => {
       for (const payment of salonPayments) {
           const paymentExpiryDate = Number(payment.paymentExpiryDate); // Convert string to number
 
-
           if (paymentExpiryDate <= today) {
 
+            console.log(`Processing Payment ID: ${payment._id}`);
+            console.log(`Payment Expiry Date: ${paymentExpiryDate}`);
+            console.log(`Today's Date: ${today}`);
+            
               try {
                   // Move to history
                   await SalonPaymentsHistory.create({

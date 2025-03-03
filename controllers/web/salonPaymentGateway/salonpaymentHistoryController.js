@@ -1,3 +1,6 @@
+import { SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
+import { SALON_PAYMENT_HISTORY_SUCCESS } from "../../../constants/web/SalonPaymentsConstants.js";
+import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { getSalonPaymentHistoryBySalonId } from "../../../services/web/salonPayments/salonPaymentsHistoryService.js";
 
 export const paymentHistories = async (req, res, next) => {
@@ -6,11 +9,8 @@ export const paymentHistories = async (req, res, next) => {
 
         const salonPaymentHistory = await getSalonPaymentHistoryBySalonId(salonId);
 
-        if (!salonPaymentHistory) {
-            return res.status(400).json({success: false, response: "No payment history found for this salon" });
-        }
+        return SuccessHandler(SALON_PAYMENT_HISTORY_SUCCESS, SUCCESS_STATUS_CODE, res, { response: salonPaymentHistory })
 
-        res.status(200).json({ success: true, response: salonPaymentHistory });
     } catch (error) {
         next(error);
     }
