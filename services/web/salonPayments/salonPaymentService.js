@@ -31,22 +31,27 @@ export const getSalonPaymentsBySalonId = async(salonId) => {
 }
 
 
+// Function to check and process expired salon payments
 export const checkSalonPaymentExpiryDate = async () => {
     try {
-        const today = Math.floor(Date.now() / 1000);
+        const today = Math.floor(Date.now() / 1000); // Current timestamp (Unix time)
 
         while (true) {
-            // Find and delete the first expired payment in one step (Atomic)
-            const payment = await SalonPayments.findOneAndDelete({ 
-                paymentExpiryDate: { $lte: today } 
-            });
+            // Find an expired payment and mark it as processing atomically
+            const payment = await SalonPayments.findOneAndUpdate(
+                { 
+                    paymentExpiryDate: { $lte: today.toString() },  // Convert `today` to string if needed
+                    isProcessing: { $ne: true }  // Only process if not already marked
+                },
+                { $set: { isProcessing: true } },  // Mark as processing
+                { new: true } 
+            );
 
-            // If no expired payment is found, stop the loop
-            if (!payment) break;
+            if (!payment) break; // No expired payments left
 
             console.log(`Processing Payment ID: ${payment._id}`);
 
-            // Check if the payment already exists in history
+            // Check if the payment is already moved to history
             const existingHistory = await SalonPaymentsHistory.findOne({
                 salonId: payment.salonId,
                 invoiceNumber: payment.invoiceNumber
@@ -70,11 +75,15 @@ export const checkSalonPaymentExpiryDate = async () => {
                 status: payment.status,
                 paymentType: payment.paymentType,
                 purchaseDate: Number(payment.purchaseDate),
-                paymentExpiryDate: payment.paymentExpiryDate,
+                paymentExpiryDate: Number(payment.paymentExpiryDate), // Convert to number
                 products: payment.products,
             });
 
             console.log(`Moved to History: ${payment._id}`);
+
+            // Delete from active payments
+            await SalonPayments.deleteOne({ _id: payment._id });
+            console.log(`Deleted from SalonPayments: ${payment._id}`);
         }
     } catch (error) {
         console.error("Error checking salon payment expiry:", error);
