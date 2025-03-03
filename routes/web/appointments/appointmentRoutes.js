@@ -19,7 +19,7 @@ router.route("/getEngageBarberTimeSlots").post(verifyRefreshTokenAdmin ,getEngag
 
 router.route("/getAllAppointmentsBySalonId").post(verifyRefreshTokenAdmin ,getAllAppointmentsBySalonId)
 
-// router.route("/getAllAppointmentsBySalonIdTest").post(getAllAppointmentsBySalonId)
+router.route("/getAllAppointmentsBySalonIdTest").post(getAllAppointmentsBySalonId)
 
 
 router.route("/getAllAppointmentsBySalonIdAndDate").post(verifyRefreshTokenAdmin,getAllAppointmentsBySalonIdAndDate)
