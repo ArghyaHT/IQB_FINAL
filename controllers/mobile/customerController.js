@@ -108,9 +108,9 @@ export const signUp = async (req, res, next) => {
             return res.status(400).json({ success: false, message: "Please enter a name that is between 1 and 20 characters in length." });
         }
         // Validate mobile number format if parsed successfully
-        if (mobileNumber == null || mobileNumber == undefined || mobileNumber.length !== 10) {
-            return res.status(201).json({ success: false, message: "Mobile number should be 10 digit" });
-        }
+        // if (mobileNumber == null || mobileNumber == undefined || mobileNumber.length !== 10) {
+        //     return res.status(201).json({ success: false, message: "Mobile number should be 10 digit" });
+        // }
 
         const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
 
