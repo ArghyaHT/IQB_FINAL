@@ -141,43 +141,6 @@ export const allAppointmentsBySalonId = async (salonId) => {
 // GET ALL APPOINTMENTS BY SALON ID AND DATE
 export const allAppointmentsBySalonIdAndDate = async (salonId, appointmentDate) => {
 
-    // const appointments = await Appointment.findOne({ salonId }).lean();
-
-    // if (appointments) {
-    //     // Modify the appointment list structure if needed
-    //     const modifyAppointmentList = appointments.appointmentList.map((appointment) => ({
-    //         // barberName: appointment.barberName,
-    //         appointments: [
-    //             {
-    //                 barberId: appointment.barberId,
-    //                 // serviceId: appointment.serviceId,
-    //                 appointmentNotes: appointment.appointmentNotes,
-    //                 appointmentDate: appointment.appointmentDate,
-    //                 startTime: appointment.startTime,
-    //                 endTime: appointment.endTime,
-    //                 timeSlots: `${appointment.startTime}-${appointment.endTime}`,
-    //                 customerEmail: appointment.customerEmail,
-    //                 customerName: appointment.customerName,
-    //                 customerType: appointment.customerType,
-    //                 methodUsed: appointment.methodUsed,
-    //                 _id: appointment._id,
-    //                 background: appointment.background || "#FFFFFF" // Default background color
-    //             }
-    //         ]
-    //     }));
-
-    //     if (modifyAppointmentList) {
-    //         const filteredAppointmentList = modifyAppointmentList.filter(item => item.appointments.a === appointmentDate);
-
-    //         return filteredAppointmentList
-    //       }
-
-    //     console.log(modifyAppointmentList)
-
-    //     // return filteredAppointmentList;
-    // }
-
-
     const appointments = await Appointment.aggregate([
         // Match appointments based on salonId and appointmentDate
         {
@@ -669,3 +632,164 @@ export const cancelAppointmentByBarber = async (salonId, filteredAppointments) =
 
     return updatedAppointmentList
 };
+
+
+
+// GET ALL APPOINTMENTS BY BARBER IDS
+export const allAppointmentsByMultipleBarberIds = async (salonId, barberIds) => {
+    const appointments = await Appointment.aggregate([
+        { $match: { salonId: salonId } },
+        { $unwind: "$appointmentList" },
+        {
+            $match: {
+                "appointmentList.barberId": { $in: barberIds } // Match multiple barberIds
+            }
+        },
+        {
+            $lookup: {
+                from: "barbers",
+                localField: "appointmentList.barberId",
+                foreignField: "barberId",
+                as: "barberInfo"
+            }
+        },
+        {
+            $addFields: {
+                "appointmentList.barberName": {
+                    $arrayElemAt: ["$barberInfo.name", 0]
+                },
+                "appointmentList.appointmentDate": {
+                    $dateToString: {
+                        format: "%Y-%m-%d",
+                        date: "$appointmentList.appointmentDate"
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                "appointmentList._id": 1,
+                "appointmentList.appointmentDate": 1,
+                "appointmentList.appointmentName": 1,
+                "appointmentList.startTime": 1,
+                "appointmentList.endTime": 1,
+                "appointmentList.timeSlots": 1,
+                "appointmentList.barberName": 1,
+                "appointmentList.barberId": 1
+            }
+        },
+        { $sort: { "appointmentList.appointmentDate": 1 } }
+    ]);
+    return appointments;
+}
+
+
+// GET ALL APPOINTMENTS BY MULTIPLE BARBER IDS AND DATE
+export const allAppointmentsByMultipleBarberIdsAndDate = async (salonId, barberIds, appointmentDate) => {
+    const appointments = await Appointment.aggregate([
+        {
+            $match: {
+                salonId: salonId,
+                "appointmentList.barberId": { $in: barberIds } // Match multiple barberIds
+            }
+        },
+        {
+            $unwind: "$appointmentList"
+        },
+        {
+            $match: {
+                "appointmentList.barberId": { $in: barberIds },
+                "appointmentList.appointmentDate": { 
+                    $gte: new Date(`${appointmentDate}T00:00:00.000Z`),
+                    $lt: new Date(`${appointmentDate}T23:59:59.999Z`)
+                }
+            }
+        },
+        {
+            // Lookup customer information from the "customers" collection
+            $lookup: {
+                from: "customers",
+                localField: "appointmentList.customerEmail",
+                foreignField: "email",
+                as: "customerInfo"
+            }
+        },
+        {
+            $addFields: {
+                "appointmentList.customerProfile": {
+                    $ifNull: [
+                        { $arrayElemAt: ["$customerInfo.profile", 0] },
+                        [
+                            {
+                                "url": "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg"
+                            }
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            $group: {
+                _id: "$appointmentList.appointmentDate", // Group by appointment date
+                appointmentDate: {
+                    $first: {
+                        $dateToString: {
+                            format: "%Y-%m-%d",
+                            date: "$appointmentList.appointmentDate"
+                        }
+                    }
+                },
+                appointments: { $push: "$appointmentList" }
+            }
+        },
+        {
+            $addFields: {
+                appointments: {
+                    $map: {
+                        input: "$appointments",
+                        as: "appointment",
+                        in: {
+                            $mergeObjects: [
+                                "$$appointment",
+                                {
+                                    appointmentDate: {
+                                        $dateToString: {
+                                            format: "%Y-%m-%d",
+                                            date: "$$appointment.appointmentDate"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                appointmentDate: 1,
+                appointments: {
+                    barberId: 1,
+                    appointmentNotes: 1,
+                    appointmentDate: 1,
+                    services: 1,
+                    startTime: 1,
+                    endTime: 1,
+                    timeSlots: 1,
+                    customerEmail: 1,
+                    customerName: 1,
+                    customerProfile: 1,
+                    customerType: 1,
+                    methodUsed: 1,
+                    _id: 1,
+                    background: 1
+                }
+            }
+        }
+    ]);
+
+    return appointments;
+}
+

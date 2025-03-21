@@ -36,17 +36,12 @@ export const saveCustomer = async(newCustomer) => {
 }
 
 //GET ALL CUSTOMERS BY SALONID
-export const fetchedCustomers = async (query, sortOptions, skip, limit) => {
-    const customers = await Customer.find(query).sort(sortOptions).skip(skip).limit(Number(limit));
+export const fetchedCustomers = async (salonId) => {
+    const customers = await Customer.find({salonId});
  
     return customers || [];
  }
  
- //TOTAL CUSTOMER COUNT 
- export const totalCustomerCount = async (query) => {
-    const totalCount = await Customer.countDocuments(query);
-    return totalCount;
- }
 
  //UPDATE CUSTOMER
  export const updateCustomerDetails = async(customerData) => {

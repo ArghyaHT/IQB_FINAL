@@ -1,5 +1,5 @@
 import { findAdminByEmailandRole } from "../../../services/web/admin/adminService.js";
-import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppointmentsBySalonId, allAppointmentsBySalonIdAndDate, cancelAppointmentByBarber, createNewAppointment, deleteAppointmentById, findAppointmentById, getAllAppointmentsByBarberIdAndSalonId, getAppointmentbySalonId, getAppointmentsByDateAndBarberId, servedOrcancelAppointment, updateAppointmentById } from "../../../services/web/appointments/appointmentsService.js";
+import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppointmentsByMultipleBarberIds, allAppointmentsByMultipleBarberIdsAndDate, allAppointmentsBySalonId, allAppointmentsBySalonIdAndDate, cancelAppointmentByBarber, createNewAppointment, deleteAppointmentById, findAppointmentById, getAllAppointmentsByBarberIdAndSalonId, getAppointmentbySalonId, getAppointmentsByDateAndBarberId, servedOrcancelAppointment, updateAppointmentById } from "../../../services/web/appointments/appointmentsService.js";
 import { getBarberbyId } from "../../../services/web/barber/barberService.js";
 import { getSalonSettings } from "../../../services/web/salonSettings/salonSettingsService.js";
 import { sendAppointmentsEmailAdmin, sendAppointmentsEmailBarber, sendAppointmentsEmailCustomer, sendQueuePositionEmail } from "../../../utils/emailSender/emailSender.js";
@@ -696,6 +696,58 @@ export const barberCancelAppointment = async (req, res, next) => {
         );
     } catch (error) {
         // Handle unexpected errors
+        next(error);
+    }
+};
+
+
+export const getAllAppointmentsByMultipleBarberIds = async (req, res, next) => {
+    try {
+        const { salonId, barberIds } = req.body;
+
+        const appointments = await allAppointmentsByMultipleBarberIds(salonId, barberIds)
+
+        if (!appointments || appointments.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'No appointments found for the provided salon and barber ID',
+                appointments: [],
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Appointments retrieved successfully',
+            response: appointments.map(appointment => appointment.appointmentList),
+        });
+    }
+    catch (error) {
+        //console.log(error);
+        next(error);
+    }
+};
+
+export const getAllAppointmentsByMultipleBarberIdsAndDate = async (req, res, next) => {
+    try {
+        const { salonId, barberIds, appointmentDate } = req.body;
+
+        const appointments = await allAppointmentsByMultipleBarberIdsAndDate(salonId, barberIds, appointmentDate)
+
+        if (!appointments || appointments.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: 'No appointments found for the provided salon Id, barber Id, and date',
+                response: [],
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Appointments retrieved successfully',
+            response: appointments,
+        });
+    } catch (error) {
+        //console.log(error);
         next(error);
     }
 };

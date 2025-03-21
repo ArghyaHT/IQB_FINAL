@@ -1,4 +1,4 @@
-import { deleteCustomer, deleteCustomerProPic, fetchedCustomers, findCustomerByEmail, findCustomerProfileById, saveCustomer, totalCustomerCount, updateCustomerDetails, updateCustomerProPic, uploadCustomerProPic } from "../../../services/web/customer/customerService.js";
+import { deleteCustomer, deleteCustomerProPic, fetchedCustomers, findCustomerByEmail, findCustomerProfileById, saveCustomer, updateCustomerDetails, updateCustomerProPic, uploadCustomerProPic } from "../../../services/web/customer/customerService.js";
 import bcrypt from "bcrypt"
 import { bulkEmail, sendCustomerMail, sendForgetPasswordMail, sendVerificationCode } from "../../../utils/emailSender/emailSender.js";
 import { checkSalonExists, findSalonBySalonId, getCustomerConnectedSalons, getCustomerFavouriteSalon } from "../../../services/web/admin/salonService.js";
@@ -1116,20 +1116,15 @@ export const getAllCustomers = async (req, res, next) => {
                 sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
             }
 
-            const skip = Number(page - 1) * Number(limit)
 
-            const getAllCustomers = await fetchedCustomers(query, sortOptions, skip, limit);
+            const getAllCustomers = await fetchedCustomers(salonId);
 
-            const totalCustomers = await totalCustomerCount(query)
 
             if (getAllCustomers) {
                 return res.status(200).json({
                     success: true,
                     message: "All Customers fetched successfully",
                     getAllCustomers: getAllCustomers,
-                    totalPages: Math.ceil(totalCustomers / Number(limit)),
-                    currentPage: Number(page),
-                    totalCustomers,
                 })
             }
 
