@@ -44,6 +44,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
         //To find the queueList according to salonId and sort it according to qposition
         const getSalon = await getSalonQlist(salonId)
 
+
         if (getSalon) {
             getSalon.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
         }

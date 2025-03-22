@@ -1,5 +1,6 @@
 import SalonQueueList from "../../../models/salonQueueListModel.js"
 import { getBarberByBarberId } from "../barber/barberService.js";
+import { findCustomerByEmail } from "../customer/customerService.js";
 
 // Find existing SalonQueueList
 export const findSalonQueueList = async (salonId) => {
@@ -108,6 +109,13 @@ export const addGroupJoin = async (salonId) => {
 // }
 
 export const getSalonQlist = async (salonId) => {
+
+  const defaultProfileImage = [
+    {
+      url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg",
+    },
+  ];
+
   const sortedQlist = await SalonQueueList.findOne({ salonId }).lean();
 
   if (!sortedQlist || !sortedQlist.queueList || sortedQlist.queueList.length === 0) {
@@ -117,9 +125,12 @@ export const getSalonQlist = async (salonId) => {
   const modifyQueuelist = await Promise.all(
     sortedQlist.queueList.map(async (queue) => {
         const barber = await getBarberByBarberId(queue.barberId);
+        const customer = await findCustomerByEmail(queue.customerEmail)
         return {
             ...queue, // Spread the existing queue properties
             barberEmail: barber ? barber.email : null, // Add barberEmail
+            barberProfile: barber? barber.profile: defaultProfileImage,
+            customerProfile: customer?customer.profile: defaultProfileImage,
             name: queue.customerName
         };
       })

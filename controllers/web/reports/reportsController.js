@@ -1428,7 +1428,7 @@ export const newdashboardReports = async (req, res, next) => {
                     appointmentTrend,
                     last7daysCount: last7daysCount.map(item => ({
                         date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
-                        TotalQueue: item.count
+                        TotalAppoinment: item.count
                     })
                 )
                 }
