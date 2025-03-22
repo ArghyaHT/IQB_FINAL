@@ -1083,7 +1083,7 @@ export const getAllCustomersForBarberBySalonId = async (req, res, next) => {
 export const getAllCustomers = async (req, res, next) => {
     try {
 
-        const { salonId, name, email, page = 1, limit = 10, sortField, sortOrder } = req.query
+        const { salonId } = req.query
 
         if (Number(salonId) === 0) {
             return ErrorHandler(SALON_NOT_CREATED_ERROR, ERROR_STATUS_CODE, res)
@@ -1095,28 +1095,6 @@ export const getAllCustomers = async (req, res, next) => {
             if (salonExists === null) {
                 return ErrorHandler(SALON_EXISTS_ERROR, ERROR_STATUS_CODE, res)
             }
-            let query = {}
-
-            const searchRegExpName = new RegExp('.*' + name + ".*", 'i')
-            const searchRegExpEmail = new RegExp('.*' + email + ".*", 'i')
-
-            if (salonId) {
-                query.salonId = salonId
-            }
-
-            if (name || email) {
-                query.$or = [
-                    { name: { $regex: searchRegExpName } },
-                    { email: { $regex: searchRegExpEmail } }
-                ];
-            }
-
-            const sortOptions = {};
-            if (sortField && sortOrder) {
-                sortOptions[sortField] = sortOrder === 'asc' ? 1 : -1;
-            }
-
-
             const getAllCustomers = await fetchedCustomers(salonId);
 
 

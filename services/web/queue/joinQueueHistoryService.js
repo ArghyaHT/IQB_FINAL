@@ -1,5 +1,7 @@
 import moment from "moment";
 import JoinedQueueHistory from "../../../models/joinQueueHistoryModel.js"
+import { getBarberByBarberId } from "../barber/barberService.js";
+import { findCustomerByEmail } from "../customer/customerService.js";
 
 // FIND SALON IN HISTORY
 export const findSalonQueueListHistory = async (salonId) => {
@@ -1770,13 +1772,33 @@ export const getBarberServedQlist = async (salonId, barberId, fromDate, toDate) 
 };
 
 export const getSalonQueueHistory = async (salonId) => {
-    const salonQueueListHistory = await JoinedQueueHistory.findOne({ salonId })
+    const defaultProfileImage = [
+        {
+          url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg",
+        },
+      ];
 
-    if (!salonQueueListHistory || !salonQueueListHistory.queueList || salonQueueListHistory.queueList.length === 0) {
-        return [];
-    }
+      const salonQueueListHistory = await JoinedQueueHistory.findOne({ salonId });
 
-    return salonQueueListHistory.queueList
+      if (!salonQueueListHistory || !salonQueueListHistory.queueList || salonQueueListHistory.queueList.length === 0) {
+          return [];
+      }
+  
+      const modifyQueueHistorylist = await Promise.all(
+          salonQueueListHistory.queueList.map(async (queue) => {
+              const barber = await getBarberByBarberId(queue.barberId);
+              const customer = await findCustomerByEmail(queue.customerEmail);
+  
+              return {
+                  ...queue.toObject(), // Spread the existing queue properties
+                  barberProfile: barber?.profile || defaultProfileImage,
+                  customerProfile: customer?.profile || defaultProfileImage,
+              };
+          })
+      );
+    
+      // Return the modified list instead of the original one
+      return modifyQueueHistorylist;
 }
 
 export const getQueueHistoryByBarber = async (salonId, barberId) => {
