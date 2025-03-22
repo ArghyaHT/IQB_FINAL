@@ -429,3 +429,19 @@ export const changeAllBarberOnlineStatus = async() => {
       await barber.save();
    }
 }
+
+
+export const getAllBarbersForAdmin = async (adminSalons) => {
+   // Assuming you have a function getBarbersBySalonId(salonId)
+   const allBarbers = await Promise.all(
+       adminSalons.map(async (salonId) => {
+           const barbers = await getbarbersBySalonId(salonId); // Fetch barbers for this salonId
+           return barbers; // Return the list of barbers for this salon
+       })
+   );
+
+   // Flattening the array to get a single list of all barbers
+   const flattenedBarbers = allBarbers.flat();
+
+   return flattenedBarbers;
+};

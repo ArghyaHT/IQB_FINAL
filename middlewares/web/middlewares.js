@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken"
 import { findAdminByEmailandRole } from "../../services/web/admin/adminService.js";
-import { findBarberByEmailAndRole } from "../../services/web/barber/barberService.js";
+import { findBarberByEmailAndRole, getAllBarbersForAdmin } from "../../services/web/barber/barberService.js";
 import { findSalonBySalonIdAndAdmin, getSalonBySalonId } from "../../services/web/admin/salonService.js";
+import { getAllCustomersForAdmin } from "../../services/web/customer/customerService.js";
 
 //COMMON MIDDLEWARES FOR ALL ==========================
 export const handleProtectedRoute = async (req, res, next) => {
@@ -36,10 +37,29 @@ export const AdminLoggedIn = async (req, res, next) => {
 
     const salon = await findSalonBySalonIdAndAdmin(loggedinAdmin.salonId, email)
 
+    const adminSalons = loggedinAdmin.registeredSalons;
+
+    const salonCount = adminSalons.length;
+
+
+    const allBarbers = await getAllBarbersForAdmin(adminSalons);
+
+    const barbersCount = allBarbers.length;
+
+    const allCustomers = await getAllCustomersForAdmin(adminSalons);
+
+
+    const customersCount = allCustomers.length;
+
     // const salon = await getSalonSettings(loggedinAdmin.salonId)
 
     // Convert Mongoose document to plain object
     const adminData = loggedinAdmin.toObject();
+
+    // Add counts to the adminData object
+    adminData.salonCount = salonCount;
+    adminData.barbersCount = barbersCount;
+    adminData.customersCount = customersCount;
 
     if (loggedinAdmin.salonId === 0) {
 

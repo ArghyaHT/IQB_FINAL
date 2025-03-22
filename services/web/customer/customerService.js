@@ -104,3 +104,26 @@ export const uploadCustomerProPic = async(email, profileimg) => {
  );
  return customer;
  }
+
+
+ //GET BARBERS BY SALON ID
+export const getCustomersBySalonId = async (salonId) => {
+    const customer = await Customer.find({ salonId });
+    return customer;
+ }
+
+
+ export const getAllCustomersForAdmin = async (adminSalons) => {
+    // Assuming you have a function getBarbersBySalonId(salonId)
+    const allCustomers = await Promise.all(
+        adminSalons.map(async (salonId) => {
+            const customers = await getCustomersBySalonId(salonId); // Fetch barbers for this salonId
+            return customers; // Return the list of barbers for this salon
+        })
+    );
+ 
+    // Flattening the array to get a single list of all barbers
+    const flattenedCustomers = allCustomers.flat();
+ 
+    return flattenedCustomers;
+ };
