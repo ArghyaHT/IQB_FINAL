@@ -123,11 +123,15 @@ export const BarberLoggedIn = async (req, res, next) => {
 
     const salon = await getSalonBySalonId(loggedinBarber.salonId)
 
+    const barberObject = {
+      ...loggedinBarber.toObject(), // Spread the barber data properly
+      currency: salon.currency      // Add the currency field from salon data
+    };
+
     res.status(201).json({
       success: true,
       message: "Yes i am barber Logged in",
-      user: [loggedinBarber],
-      // currency: salon.currency
+      user: [barberObject],
     })
 
 

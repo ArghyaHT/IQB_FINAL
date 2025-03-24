@@ -148,70 +148,49 @@ export const findCustomersToMail = async (salonId, barberId) => {
 
 
 //GET Q LIST BY BARBER ID
+// GET Q LIST BY BARBER ID
 export const qListByBarberId = async (salonId, barberId) => {
 
-  const qlist = await SalonQueueList.findOne({ salonId }).lean()
+  const defaultProfileImage = [
+    {
+      url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg",
+    },
+  ];
 
-  const modifyQueuelist = qlist.queueList.map((queue) => ({
-    ...queue, 
-    name: queue.customerName 
-  }));
+  // Fetch the salon's queue list
+  const qlist = await SalonQueueList.findOne({ salonId }).lean();
 
-  if (modifyQueuelist) {
-    const filteredQueueList = modifyQueuelist.filter(item => item.barberId === barberId);
-
-    return filteredQueueList
+  if (!qlist || !qlist.queueList) {
+    return []; // Return an empty array if no queue list is found
   }
 
-  // const qList = await SalonQueueList.aggregate([
-  //   {
-  //     $match: {
-  //       salonId: salonId
-  //     }
-  //   },
-  //   {
-  //     $unwind: "$queueList"
-  //   },
-  //   {
-  //     $match: {
-  //       "queueList.barberId": barberId
-  //     }
-  //   },
-  //   {
-  //     $group: {
-  //       _id: "$queueList.barberId",
-  //       queueList: { $push: "$queueList" }
-  //     }
-  //   },
-  //   {
-  //     $project: {
-  //       _id: 0,
-  //       queueList: 1
-  //     }
-  //   },
-  //   //Changed for frontend 
-  //   {
-  //     $project: {
-  //       queueList: {
-  //         $map: {
-  //           input: "$queueList",
-  //           as: "list",
-  //           in: {
-  //             $mergeObjects: [
-  //               "$$list",
-  //               { "name": "$$list.customerName" } // Rename customerName to name
-  //             ]
-  //           }
-  //         }
-  //       }
-  //     }
-  //   },
-  //   {
-  //     $project: {
-  //       "queueList.customerName": 0 // Exclude the customerName field
-  //     }
-  //   }
-  // ]);
+  // Process the queue list and add profiles before filtering
+  const modifyQueuelist = await Promise.all(
+    qlist.queueList.map(async (queue) => {
+      // Find the matching barber profile if available
 
-  // return qList.map(item => item.queueList);
-}
+      const barber = await getBarberByBarberId(barberId)
+
+      const barberProfile = barber?.profile?.length > 0 ? barber.profile : defaultProfileImage;
+
+
+      // Fetch the customer profile asynchronously
+      const customer = await findCustomerByEmail(queue.customerEmail);
+
+      // Check if the customer exists and has a profile
+      const customerProfile = customer?.profile?.length > 0 ? customer.profile : defaultProfileImage;
+
+      return {
+        ...queue,
+        name: queue.customerName,
+        barberProfile,
+        customerProfile
+      };
+    })
+  );
+
+  // Now filter the modified queue list by barberId
+  const filteredQueueList = modifyQueuelist.filter(item => item.barberId === barberId);
+
+  return filteredQueueList;
+};
