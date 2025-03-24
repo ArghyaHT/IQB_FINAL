@@ -1802,16 +1802,29 @@ export const getSalonQueueHistory = async (salonId) => {
 }
 
 export const getQueueHistoryByBarber = async (salonId, barberId) => {
-    const barberQueuelisthistory = await JoinedQueueHistory.findOne({ salonId });
+    const defaultProfileImage = [{ url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg" }];
+    
+    const barberQueueHistory = await JoinedQueueHistory.findOne({ salonId }).lean();
 
+    if (!barberQueueHistory) return [];
 
-    if (barberQueuelisthistory) {
-        const filteredQueueList = barberQueuelisthistory.queueList.filter(item => item.barberId === barberId);
+    const filteredQueueList = await Promise.all(
+        barberQueueHistory.queueList
+            .filter(item => item.barberId === barberId)
+            .map(async queue => {
+                const barber = await getBarberByBarberId(queue.barberId);
+                const customer = await findCustomerByEmail(queue.customerEmail);
 
-        return filteredQueueList
-    }
+                return {
+                    ...queue,
+                    barberProfile: barber?.profile?.length > 0 ? barber.profile : defaultProfileImage,
+                    customerProfile: customer?.profile || defaultProfileImage
+                };
+            })
+    );
 
-}
+    return filteredQueueList;
+};
 
 export const getTotalSalonQlist = async (salonId, reportType) => {
     const today = new Date();
