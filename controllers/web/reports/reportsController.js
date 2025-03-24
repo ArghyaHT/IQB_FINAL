@@ -15,10 +15,10 @@ export const salonServedReport = async (req, res, next) => {
             });
         }
 
-        if (!["daily", "weekly", "monthly"].includes(reportType)) {
+        if (!["daily", "weekly", "monthly", "range"].includes(reportType)) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid reportType. Allowed values: 'daily', 'weekly', 'monthly'."
+                message: "Invalid reportType. Allowed values: 'daily', 'weekly', 'monthly', 'range'."
             });
         }
 
@@ -27,7 +27,7 @@ export const salonServedReport = async (req, res, next) => {
             if (barberEmail) {
                 if (reportValue === "queueserved") {
 
-                    if (reportType === "daily") {
+                    if (reportType === "range") {
 
                         // Convert 'from' and 'to' to Date objects
                         const fromDate = new Date(from);
@@ -38,13 +38,208 @@ export const salonServedReport = async (req, res, next) => {
                         const dayDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert milliseconds to days
 
                         // Validate date range (should not exceed 20 days)
-                        if (dayDiff > 20) {
-                            return res.status(400).json({
-                                success: false,
-                                message: "Date range should not exceed 20 days."
+                        if (dayDiff < 20) {
+                            const getSalonServedReport = await getDailyBarberServedReportByDateRange(salonId, barberEmail, from, to);
+
+                            return res.status(200).json({
+                                success: true,
+                                message: 'Report retrieved successfully.',
+                                response: getSalonServedReport.map(item => ({
+                                    date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
+                                    TotalQueue: item.totalQueue
+                                }))
                             });
                         }
-                        const getSalonServedReport = await getDailyBarberServedReportByDateRange(salonId, barberEmail, from, to);
+                        else {
+                            const today = new Date();
+                            today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
+
+                            const startDate = moment.utc(from, "YYYY-MM-DD").startOf("day");
+                            const endDate = moment.utc(to, "YYYY-MM-DD").endOf("day");
+
+                            // Calculate the number of weeks in the range
+                            const totalWeeks = Math.ceil(endDate.diff(startDate, 'days') / 7);
+
+                            if (totalWeeks < 20) {
+                                const getSalonServedReport = await getWeeklyBarberServedReportByDateRange(salonId, barberEmail, from, to);
+
+                                return res.status(200).json({
+                                    success: true,
+                                    message: "Report retrieved successfully.",
+                                    response: getSalonServedReport.map(item => {
+                                        // Format the week range (e.g., "Jan 1 - Jan 7")
+                                        const weekStart = moment(item.weekStart).format("MMM D");
+                                        const weekEnd = moment(item.weekEnd).format("MMM D");
+
+                                        return {
+                                            week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                                            TotalQueue: item.totalQueue
+                                        };
+                                    })
+                                });
+                            }
+                            else {
+                                const startDate = moment.utc(from, "YYYY-MM-DD").startOf("month");
+                                const endDate = moment.utc(to, "YYYY-MM-DD").endOf("month");
+
+                                // Calculate the total number of months in the range
+                                const totalMonths = endDate.diff(startDate, "months") + 1; // +1 to include the last month
+
+                                // If the range exceeds 24 months, return an error response
+                                if (totalMonths > 24) {
+                                    return res.status(400).json({
+                                        success: false,
+                                        message: "Date range exceeds the allowed limit of 24 months. Please select a shorter range."
+                                    });
+                                }
+                                const getSalonServedReport = await getMonthlyBarberServedReportByDateRange(salonId, barberEmail, from, to);
+
+                                // Log the entire report data to inspect its structure and values                
+                                return res.status(200).json({
+                                    success: true,
+                                    message: 'Report retrieved successfully.',
+                                    response: getSalonServedReport.map(item => {
+                                        return {
+                                            month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                                            TotalQueue: item.count // Use item.count instead of item.totalQueue
+                                        };
+                                    })
+                                });
+                            }
+                        }
+                    }
+                    // if (reportType === "monthly") {
+
+                    //     const startDate = moment.utc(from, "YYYY-MM-DD").startOf("month");
+                    //     const endDate = moment.utc(to, "YYYY-MM-DD").endOf("month");
+
+                    //     // Calculate the total number of months in the range
+                    //     const totalMonths = endDate.diff(startDate, "months") + 1; // +1 to include the last month
+
+                    //     // If the range exceeds 24 months, return an error response
+                    //     if (totalMonths > 24) {
+                    //         return res.status(400).json({
+                    //             success: false,
+                    //             message: "Date range exceeds the allowed limit of 24 months. Please select a shorter range."
+                    //         });
+                    //     }
+                    //     const getSalonServedReport = await getMonthlyBarberServedReportByDateRange(salonId, barberEmail, from, to);
+
+                    //     // Log the entire report data to inspect its structure and values                
+                    //     return res.status(200).json({
+                    //         success: true,
+                    //         message: 'Report retrieved successfully.',
+                    //         response: getSalonServedReport.map(item => {
+                    //             return {
+                    //                 month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                    //                 TotalQueue: item.count // Use item.count instead of item.totalQueue
+                    //             };
+                    //         })
+                    //     });
+                    // }
+                }
+            }
+
+            if (barberId) {
+                if (reportType === "range") {
+
+                    // Convert 'from' and 'to' to Date objects
+                    const fromDate = new Date(from);
+                    const toDate = new Date(to);
+
+                    // Calculate the difference in days
+                    const timeDiff = toDate - fromDate;
+                    const dayDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert milliseconds to days
+
+                    if (dayDiff < 20) {
+                        const getSalonCancelledReport = await getDailyBarberCancelledReportByDateRange(salonId, barberId, from, to);
+
+                        return res.status(200).json({
+                            success: true,
+                            message: 'Report retrieved successfully.',
+                            response: getSalonCancelledReport.map(item => ({
+                                date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
+                                TotalQueue: item.totalQueue
+                            }))
+                        });
+                    }
+                    else {
+                        const today = new Date();
+                        today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
+
+                        const startDate = moment.utc(from, "YYYY-MM-DD").startOf("day");
+                        const endDate = moment.utc(to, "YYYY-MM-DD").endOf("day");
+
+                        // Calculate the number of weeks in the range
+                        const totalWeeks = Math.ceil(endDate.diff(startDate, 'days') / 7);
+
+                        if (totalWeeks < 20) {
+                            const getSalonCancelledReport = await getWeeklyBarberCancelledReportByDateRange(salonId, barberId, from, to);
+
+                            return res.status(200).json({
+                                success: true,
+                                message: "Report retrieved successfully.",
+                                response: getSalonCancelledReport.map(item => {
+                                    // Format the week range (e.g., "Jan 1 - Jan 7")
+                                    const weekStart = moment(item.weekStart).format("MMM D");
+                                    const weekEnd = moment(item.weekEnd).format("MMM D");
+
+                                    return {
+                                        week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                                        TotalQueue: item.totalQueue
+                                    };
+                                })
+                            });
+                        }
+
+                        else {
+
+                            const startDate = moment.utc(from, "YYYY-MM-DD").startOf("month");
+                            const endDate = moment.utc(to, "YYYY-MM-DD").endOf("month");
+        
+                            // Calculate the total number of months in the range
+                            const totalMonths = endDate.diff(startDate, "months") + 1; // +1 to include the last month
+        
+                            // If the range exceeds 24 months, return an error response
+                            if (totalMonths > 24) {
+                                return res.status(400).json({
+                                    success: false,
+                                    message: "Date range exceeds the allowed limit of 24 months. Please select a shorter range."
+                                });
+                            }
+                            const getSalonCancelledReport = await getMonthlyBarberCancelledReportByDateRange(salonId, barberId, from, to);
+        
+                            // Log the entire report data to inspect its structure and values                
+                            return res.status(200).json({
+                                success: true,
+                                message: 'Report retrieved successfully.',
+                                response: getSalonCancelledReport.map(item => {
+                                    return {
+                                        month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                                        TotalQueue: item.count // Use item.count instead of item.totalQueue
+                                    };
+                                })
+                            });
+                        }
+                    }
+
+
+                }
+            }
+
+            if (reportValue === "queueserved") {
+
+                if (reportType === "range") {
+                    // Convert 'from' and 'to' to Date objects
+                    const fromDate = new Date(from);
+                    const toDate = new Date(to);
+
+                    // Calculate the difference in days
+                    const timeDiff = toDate - fromDate;
+                    const dayDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert milliseconds to days
+
+                    if (dayDiff < 20) {
+                        const getSalonServedReport = await getDailySalonServedReportByDateRange(salonId, from, to);
 
                         return res.status(200).json({
                             success: true,
@@ -55,36 +250,7 @@ export const salonServedReport = async (req, res, next) => {
                             }))
                         });
                     }
-                    if (reportType === "monthly") {
-
-                        const startDate = moment.utc(from, "YYYY-MM-DD").startOf("month");
-                        const endDate = moment.utc(to, "YYYY-MM-DD").endOf("month");
-
-                        // Calculate the total number of months in the range
-                        const totalMonths = endDate.diff(startDate, "months") + 1; // +1 to include the last month
-
-                        // If the range exceeds 24 months, return an error response
-                        if (totalMonths > 24) {
-                            return res.status(400).json({
-                                success: false,
-                                message: "Date range exceeds the allowed limit of 24 months. Please select a shorter range."
-                            });
-                        }
-                        const getSalonServedReport = await getMonthlyBarberServedReportByDateRange(salonId, barberEmail, from, to);
-
-                        // Log the entire report data to inspect its structure and values                
-                        return res.status(200).json({
-                            success: true,
-                            message: 'Report retrieved successfully.',
-                            response: getSalonServedReport.map(item => {
-                                return {
-                                    month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
-                                    TotalQueue: item.count // Use item.count instead of item.totalQueue
-                                };
-                            })
-                        });
-                    }
-                    if (reportType === "weekly") {
+                    else {
                         const today = new Date();
                         today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
 
@@ -94,306 +260,139 @@ export const salonServedReport = async (req, res, next) => {
                         // Calculate the number of weeks in the range
                         const totalWeeks = Math.ceil(endDate.diff(startDate, 'days') / 7);
 
-                        // If the range exceeds 20 weeks, return an error response
-                        if (totalWeeks > 20) {
-                            return res.status(400).json({
-                                success: false,
-                                message: "Date range exceeds the allowed limit of 20 weeks. Please select a shorter range."
+                        if (totalWeeks < 20) {
+                            const getSalonServedReport = await getWeeklySalonServedReportByDateRange(salonId, from, to);
+
+                            return res.status(200).json({
+                                success: true,
+                                message: "Report retrieved successfully.",
+                                response: getSalonServedReport.map(item => {
+                                    // Format the week range (e.g., "Jan 1 - Jan 7")
+                                    const weekStart = moment(item.weekStart).format("MMM D");
+                                    const weekEnd = moment(item.weekEnd).format("MMM D");
+
+                                    return {
+                                        week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                                        TotalQueue: item.totalQueue
+                                    };
+                                })
                             });
                         }
+                        else {
+                            const startDate = moment.utc(from, "YYYY-MM-DD").startOf("month");
+                            const endDate = moment.utc(to, "YYYY-MM-DD").endOf("month");
 
-                        const getSalonServedReport = await getWeeklyBarberServedReportByDateRange(salonId, barberEmail, from, to);
+                            // Calculate the total number of months in the range
+                            const totalMonths = endDate.diff(startDate, "months") + 1; // +1 to include the last month
 
-                        return res.status(200).json({
-                            success: true,
-                            message: "Report retrieved successfully.",
-                            response: getSalonServedReport.map(item => {
-                                // Format the week range (e.g., "Jan 1 - Jan 7")
-                                const weekStart = moment(item.weekStart).format("MMM D");
-                                const weekEnd = moment(item.weekEnd).format("MMM D");
+                            // If the range exceeds 24 months, return an error response
+                            if (totalMonths > 24) {
+                                return res.status(400).json({
+                                    success: false,
+                                    message: "Date range exceeds the allowed limit of 24 months. Please select a shorter range."
+                                });
+                            }
+                            const getSalonServedReport = await getMonthlySalonServedReportByDateRange(salonId, from, to);
 
-                                return {
-                                    week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
-                                    TotalQueue: item.totalQueue
-                                };
-                            })
-                        });
+                            // Log the entire report data to inspect its structure and values                
+                            return res.status(200).json({
+                                success: true,
+                                message: 'Report retrieved successfully.',
+                                response: getSalonServedReport.map(item => {
+                                    return {
+                                        month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                                        TotalQueue: item.count // Use item.count instead of item.totalQueue
+                                    };
+                                })
+                            });
+                        }
                     }
-                }
-            }
-
-            if (barberId) {
-                if (reportType === "daily") {
-
-                    // Convert 'from' and 'to' to Date objects
-                    const fromDate = new Date(from);
-                    const toDate = new Date(to);
-
-                    // Calculate the difference in days
-                    const timeDiff = toDate - fromDate;
-                    const dayDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert milliseconds to days
-
-                    // Validate date range (should not exceed 20 days)
-                    if (dayDiff > 20) {
-                        return res.status(400).json({
-                            success: false,
-                            message: "Date range should not exceed 20 days."
-                        });
-                    }
-
-                    const getSalonCancelledReport = await getDailyBarberCancelledReportByDateRange(salonId, barberId, from, to);
-
-                    return res.status(200).json({
-                        success: true,
-                        message: 'Report retrieved successfully.',
-                        response: getSalonCancelledReport.map(item => ({
-                            date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
-                            TotalQueue: item.totalQueue
-                        }))
-                    });
-
-                }
-                if (reportType === "monthly") {
-
-                    const startDate = moment.utc(from, "YYYY-MM-DD").startOf("month");
-                    const endDate = moment.utc(to, "YYYY-MM-DD").endOf("month");
-
-                    // Calculate the total number of months in the range
-                    const totalMonths = endDate.diff(startDate, "months") + 1; // +1 to include the last month
-
-                    // If the range exceeds 24 months, return an error response
-                    if (totalMonths > 24) {
-                        return res.status(400).json({
-                            success: false,
-                            message: "Date range exceeds the allowed limit of 24 months. Please select a shorter range."
-                        });
-                    }
-                    const getSalonCancelledReport = await getMonthlyBarberCancelledReportByDateRange(salonId, barberId, from, to);
-
-                    // Log the entire report data to inspect its structure and values                
-                    return res.status(200).json({
-                        success: true,
-                        message: 'Report retrieved successfully.',
-                        response: getSalonCancelledReport.map(item => {
-                            return {
-                                month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
-                                TotalQueue: item.count // Use item.count instead of item.totalQueue
-                            };
-                        })
-                    });
-                }
-                if (reportType === "weekly") {
-                    const today = new Date();
-                    today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
-
-                    const startDate = moment.utc(from, "YYYY-MM-DD").startOf("day");
-                    const endDate = moment.utc(to, "YYYY-MM-DD").endOf("day");
-
-                    // Calculate the number of weeks in the range
-                    const totalWeeks = Math.ceil(endDate.diff(startDate, 'days') / 7);
-
-                    // If the range exceeds 20 weeks, return an error response
-                    if (totalWeeks > 20) {
-                        return res.status(400).json({
-                            success: false,
-                            message: "Date range exceeds the allowed limit of 20 weeks. Please select a shorter range."
-                        });
-                    }
-
-                    const getSalonCancelledReport = await getWeeklyBarberCancelledReportByDateRange(salonId, barberId, from, to);
-
-                    return res.status(200).json({
-                        success: true,
-                        message: "Report retrieved successfully.",
-                        response: getSalonCancelledReport.map(item => {
-                            // Format the week range (e.g., "Jan 1 - Jan 7")
-                            const weekStart = moment(item.weekStart).format("MMM D");
-                            const weekEnd = moment(item.weekEnd).format("MMM D");
-
-                            return {
-                                week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
-                                TotalQueue: item.totalQueue
-                            };
-                        })
-                    });
-                }
-            }
-
-            if (reportValue === "queueserved") {
-                if (reportType === "daily") {
-
-                    // Convert 'from' and 'to' to Date objects
-                    const fromDate = new Date(from);
-                    const toDate = new Date(to);
-
-                    // Calculate the difference in days
-                    const timeDiff = toDate - fromDate;
-                    const dayDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert milliseconds to days
-
-                    // Validate date range (should not exceed 20 days)
-                    if (dayDiff > 20) {
-                        return res.status(400).json({
-                            success: false,
-                            message: "Date range should not exceed 20 days."
-                        });
-                    }
-                    const getSalonServedReport = await getDailySalonServedReportByDateRange(salonId, from, to);
-
-                    return res.status(200).json({
-                        success: true,
-                        message: 'Report retrieved successfully.',
-                        response: getSalonServedReport.map(item => ({
-                            date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
-                            TotalQueue: item.totalQueue
-                        }))
-                    });
-
-                }
-                if (reportType === "monthly") {
-
-                    const startDate = moment.utc(from, "YYYY-MM-DD").startOf("month");
-                    const endDate = moment.utc(to, "YYYY-MM-DD").endOf("month");
-
-                    // Calculate the total number of months in the range
-                    const totalMonths = endDate.diff(startDate, "months") + 1; // +1 to include the last month
-
-                    // If the range exceeds 24 months, return an error response
-                    if (totalMonths > 24) {
-                        return res.status(400).json({
-                            success: false,
-                            message: "Date range exceeds the allowed limit of 24 months. Please select a shorter range."
-                        });
-                    }
-                    const getSalonServedReport = await getMonthlySalonServedReportByDateRange(salonId, from, to);
-
-                    // Log the entire report data to inspect its structure and values                
-                    return res.status(200).json({
-                        success: true,
-                        message: 'Report retrieved successfully.',
-                        response: getSalonServedReport.map(item => {
-                            return {
-                                month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
-                                TotalQueue: item.count // Use item.count instead of item.totalQueue
-                            };
-                        })
-                    });
-                }
-                if (reportType === "weekly") {
-                    const today = new Date();
-                    today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
-
-                    const startDate = moment.utc(from, "YYYY-MM-DD").startOf("day");
-                    const endDate = moment.utc(to, "YYYY-MM-DD").endOf("day");
-
-                    // Calculate the number of weeks in the range
-                    const totalWeeks = Math.ceil(endDate.diff(startDate, 'days') / 7);
-
-                    // If the range exceeds 20 weeks, return an error response
-                    if (totalWeeks > 20) {
-                        return res.status(400).json({
-                            success: false,
-                            message: "Date range exceeds the allowed limit of 20 weeks. Please select a shorter range."
-                        });
-                    }
-
-                    const getSalonServedReport = await getWeeklySalonServedReportByDateRange(salonId, from, to);
-
-                    return res.status(200).json({
-                        success: true,
-                        message: "Report retrieved successfully.",
-                        response: getSalonServedReport.map(item => {
-                            // Format the week range (e.g., "Jan 1 - Jan 7")
-                            const weekStart = moment(item.weekStart).format("MMM D");
-                            const weekEnd = moment(item.weekEnd).format("MMM D");
-
-                            return {
-                                week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
-                                TotalQueue: item.totalQueue
-                            };
-                        })
-                    });
                 }
 
             }
             else {
-                if (reportType === "daily") {
-                    const getSalonCancelledReport = await getDailySalonCancelledReportByDateRange(salonId, from, to);
+                if (reportType === "range") {
 
-                    return res.status(200).json({
-                        success: true,
-                        message: 'Report retrieved successfully.',
-                        response: getSalonCancelledReport.map(item => ({
-                            date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
-                            TotalQueue: item.totalQueue
-                        }))
-                    });
+                    // Convert 'from' and 'to' to Date objects
+                    const fromDate = new Date(from);
+                    const toDate = new Date(to);
 
-                }
-                if (reportType === "monthly") {
+                    // Calculate the difference in days
+                    const timeDiff = toDate - fromDate;
+                    const dayDiff = timeDiff / (1000 * 60 * 60 * 24); // Convert milliseconds to days
 
-                    const startDate = moment.utc(from, "YYYY-MM-DD").startOf("month");
-                    const endDate = moment.utc(to, "YYYY-MM-DD").endOf("month");
+                    if (dayDiff < 20) {
+                        const getSalonCancelledReport = await getDailySalonCancelledReportByDateRange(salonId, from, to);
 
-                    // Calculate the total number of months in the range
-                    const totalMonths = endDate.diff(startDate, "months") + 1; // +1 to include the last month
-
-                    // If the range exceeds 24 months, return an error response
-                    if (totalMonths > 24) {
-                        return res.status(400).json({
-                            success: false,
-                            message: "Date range exceeds the allowed limit of 24 months. Please select a shorter range."
-                        });
-                    }
-                    const getSalonCancelledReport = await getMonthlySalonCancelledReportByDateRange(salonId, from, to);
-
-                    // Log the entire report data to inspect its structure and values                
-                    return res.status(200).json({
-                        success: true,
-                        message: 'Report retrieved successfully.',
-                        response: getSalonCancelledReport.map(item => {
-                            return {
-                                month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
-                                TotalQueue: item.count // Use item.count instead of item.totalQueue
-                            };
-                        })
-                    });
-                }
-                if (reportType === "weekly") {
-                    const today = new Date();
-                    today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
-
-                    const startDate = moment.utc(from, "YYYY-MM-DD").startOf("day");
-                    const endDate = moment.utc(to, "YYYY-MM-DD").endOf("day");
-
-                    // Calculate the number of weeks in the range
-                    const totalWeeks = Math.ceil(endDate.diff(startDate, 'days') / 7);
-
-                    // If the range exceeds 20 weeks, return an error response
-                    if (totalWeeks > 20) {
-                        return res.status(400).json({
-                            success: false,
-                            message: "Date range exceeds the allowed limit of 20 weeks. Please select a shorter range."
-                        });
-                    }
-
-                    const getSalonCancelledReport = await getWeeklySalonCancelledReportByDateRange(salonId, from, to);
-
-                    return res.status(200).json({
-                        success: true,
-                        message: "Report retrieved successfully.",
-                        response: getSalonCancelledReport.map(item => {
-                            // Format the week range (e.g., "Jan 1 - Jan 7")
-                            const weekStart = moment(item.weekStart).format("MMM D");
-                            const weekEnd = moment(item.weekEnd).format("MMM D");
-
-                            return {
-                                week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                        return res.status(200).json({
+                            success: true,
+                            message: 'Report retrieved successfully.',
+                            response: getSalonCancelledReport.map(item => ({
+                                date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
                                 TotalQueue: item.totalQueue
-                            };
-                        })
-                    });
-                }
+                            }))
+                        });
+                    }
 
+                    else {
+                        const today = new Date();
+                        today.setUTCHours(0, 0, 0, 0); // Ensure today's time is 00:00
+
+                        const startDate = moment.utc(from, "YYYY-MM-DD").startOf("day");
+                        const endDate = moment.utc(to, "YYYY-MM-DD").endOf("day");
+
+                        // Calculate the number of weeks in the range
+                        const totalWeeks = Math.ceil(endDate.diff(startDate, 'days') / 7);
+
+                        if (totalWeeks < 20) {
+                            const getSalonCancelledReport = await getWeeklySalonCancelledReportByDateRange(salonId, from, to);
+
+                            return res.status(200).json({
+                                success: true,
+                                message: "Report retrieved successfully.",
+                                response: getSalonCancelledReport.map(item => {
+                                    // Format the week range (e.g., "Jan 1 - Jan 7")
+                                    const weekStart = moment(item.weekStart).format("MMM D");
+                                    const weekEnd = moment(item.weekEnd).format("MMM D");
+
+                                    return {
+                                        week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                                        TotalQueue: item.totalQueue
+                                    };
+                                })
+                            });
+                        }
+                        else {
+
+                            const startDate = moment.utc(from, "YYYY-MM-DD").startOf("month");
+                            const endDate = moment.utc(to, "YYYY-MM-DD").endOf("month");
+
+                            // Calculate the total number of months in the range
+                            const totalMonths = endDate.diff(startDate, "months") + 1; // +1 to include the last month
+
+                            // If the range exceeds 24 months, return an error response
+                            if (totalMonths > 24) {
+                                return res.status(400).json({
+                                    success: false,
+                                    message: "Date range exceeds the allowed limit of 24 months. Please select a shorter range."
+                                });
+                            }
+                            const getSalonCancelledReport = await getMonthlySalonCancelledReportByDateRange(salonId, from, to);
+
+                            // Log the entire report data to inspect its structure and values                
+                            return res.status(200).json({
+                                success: true,
+                                message: 'Report retrieved successfully.',
+                                response: getSalonCancelledReport.map(item => {
+                                    return {
+                                        month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                                        TotalQueue: item.count // Use item.count instead of item.totalQueue
+                                    };
+                                })
+                            });
+                        }
+                    }
+                }
             }
         }
 
@@ -1430,7 +1429,7 @@ export const newdashboardReports = async (req, res, next) => {
                         date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
                         TotalAppoinment: item.count
                     })
-                )
+                    )
                 }
             }
         });
