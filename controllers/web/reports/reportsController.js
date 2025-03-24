@@ -45,7 +45,7 @@ export const salonServedReport = async (req, res, next) => {
                                 success: true,
                                 message: 'Report retrieved successfully.',
                                 response: getSalonServedReport.map(item => ({
-                                    date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
+                                    range: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
                                     TotalQueue: item.totalQueue
                                 }))
                             });
@@ -72,7 +72,7 @@ export const salonServedReport = async (req, res, next) => {
                                         const weekEnd = moment(item.weekEnd).format("MMM D");
 
                                         return {
-                                            week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                                            range: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
                                             TotalQueue: item.totalQueue
                                         };
                                     })
@@ -100,7 +100,7 @@ export const salonServedReport = async (req, res, next) => {
                                     message: 'Report retrieved successfully.',
                                     response: getSalonServedReport.map(item => {
                                         return {
-                                            month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                                            range: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
                                             TotalQueue: item.count // Use item.count instead of item.totalQueue
                                         };
                                     })
@@ -108,35 +108,6 @@ export const salonServedReport = async (req, res, next) => {
                             }
                         }
                     }
-                    // if (reportType === "monthly") {
-
-                    //     const startDate = moment.utc(from, "YYYY-MM-DD").startOf("month");
-                    //     const endDate = moment.utc(to, "YYYY-MM-DD").endOf("month");
-
-                    //     // Calculate the total number of months in the range
-                    //     const totalMonths = endDate.diff(startDate, "months") + 1; // +1 to include the last month
-
-                    //     // If the range exceeds 24 months, return an error response
-                    //     if (totalMonths > 24) {
-                    //         return res.status(400).json({
-                    //             success: false,
-                    //             message: "Date range exceeds the allowed limit of 24 months. Please select a shorter range."
-                    //         });
-                    //     }
-                    //     const getSalonServedReport = await getMonthlyBarberServedReportByDateRange(salonId, barberEmail, from, to);
-
-                    //     // Log the entire report data to inspect its structure and values                
-                    //     return res.status(200).json({
-                    //         success: true,
-                    //         message: 'Report retrieved successfully.',
-                    //         response: getSalonServedReport.map(item => {
-                    //             return {
-                    //                 month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
-                    //                 TotalQueue: item.count // Use item.count instead of item.totalQueue
-                    //             };
-                    //         })
-                    //     });
-                    // }
                 }
             }
 
@@ -158,7 +129,7 @@ export const salonServedReport = async (req, res, next) => {
                             success: true,
                             message: 'Report retrieved successfully.',
                             response: getSalonCancelledReport.map(item => ({
-                                date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
+                                range: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
                                 TotalQueue: item.totalQueue
                             }))
                         });
@@ -185,7 +156,7 @@ export const salonServedReport = async (req, res, next) => {
                                     const weekEnd = moment(item.weekEnd).format("MMM D");
 
                                     return {
-                                        week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                                        range: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
                                         TotalQueue: item.totalQueue
                                     };
                                 })
@@ -215,7 +186,7 @@ export const salonServedReport = async (req, res, next) => {
                                 message: 'Report retrieved successfully.',
                                 response: getSalonCancelledReport.map(item => {
                                     return {
-                                        month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                                        range: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
                                         TotalQueue: item.count // Use item.count instead of item.totalQueue
                                     };
                                 })
@@ -245,7 +216,7 @@ export const salonServedReport = async (req, res, next) => {
                             success: true,
                             message: 'Report retrieved successfully.',
                             response: getSalonServedReport.map(item => ({
-                                date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
+                                range: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
                                 TotalQueue: item.totalQueue
                             }))
                         });
@@ -272,7 +243,7 @@ export const salonServedReport = async (req, res, next) => {
                                     const weekEnd = moment(item.weekEnd).format("MMM D");
 
                                     return {
-                                        week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                                        range: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
                                         TotalQueue: item.totalQueue
                                     };
                                 })
@@ -300,7 +271,7 @@ export const salonServedReport = async (req, res, next) => {
                                 message: 'Report retrieved successfully.',
                                 response: getSalonServedReport.map(item => {
                                     return {
-                                        month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                                        range: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
                                         TotalQueue: item.count // Use item.count instead of item.totalQueue
                                     };
                                 })
@@ -328,7 +299,7 @@ export const salonServedReport = async (req, res, next) => {
                             success: true,
                             message: 'Report retrieved successfully.',
                             response: getSalonCancelledReport.map(item => ({
-                                date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
+                                range: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
                                 TotalQueue: item.totalQueue
                             }))
                         });
@@ -356,7 +327,7 @@ export const salonServedReport = async (req, res, next) => {
                                     const weekEnd = moment(item.weekEnd).format("MMM D");
 
                                     return {
-                                        week: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
+                                        range: `${weekStart} - ${weekEnd}`,  // Example: "Jan 1 - Jan 7"
                                         TotalQueue: item.totalQueue
                                     };
                                 })
@@ -385,7 +356,7 @@ export const salonServedReport = async (req, res, next) => {
                                 message: 'Report retrieved successfully.',
                                 response: getSalonCancelledReport.map(item => {
                                     return {
-                                        month: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
+                                        range: new Date(item.month).toLocaleDateString("en-US", { month: "short", year: "numeric" }), // Format to "Jan 2025"
                                         TotalQueue: item.count // Use item.count instead of item.totalQueue
                                     };
                                 })
@@ -1369,7 +1340,6 @@ export const newdashboardReports = async (req, res, next) => {
 
         const last6weeksQueueCount = await getlast6weeksQueueCount(salonId)
 
-        console.log(last6weeksQueueCount)
 
         // **Appointment Dashboard Logic**
         const totalAppointmentCount = await getTotalAppointmentCount(salonId);
@@ -1399,12 +1369,12 @@ export const newdashboardReports = async (req, res, next) => {
             success: true,
             response: {
                 queue: {
-                    totalQueueCount,
-                    servedPercentage: `${servedPercentage}%`,
-                    cancelledPercentage: `${cancelledPercentage}%`,
+                    totalQueueHistoryCount: totalQueueCount,
+                    servedHistoryPercentage: Number(servedPercentage),
+                    cancelledHistoryPercentage: Number(cancelledPercentage),
                     last30DaysCount,
                     prev30DaysCount,
-                    percentageChangelast30Days: `${trend === "Rise" ? "+" : trend === "Fall" ? "-" : ""}${Math.abs(percentageChange).toFixed(2)}%`,
+                    percentageChangelast30Days: Number(Math.abs(percentageChange).toFixed(2)),
                     queueTrend: trend,
                     last6weeksQueueCount: last6weeksQueueCount.map(item => {
                         // Format the week range (e.g., "Jan 1 - Jan 7")
@@ -1418,12 +1388,12 @@ export const newdashboardReports = async (req, res, next) => {
                     })
                 },
                 appointment: {
-                    totalAppointmentCount,
-                    servedAppointmentCount,
-                    cancelledAppointmentCount,
+                    totalAppointmentHistoryCount: totalAppointmentCount,
+                    servedAppointmenthistoryCount: servedAppointmentCount,
+                    cancelledAppointmentHistoryCount: cancelledAppointmentCount,
                     lastWeekCount: getlastWeekAppointmentCount,
                     prevWeekCount: previousWeekCount,
-                    percentageChangeLastWeek: `${appointmentTrend === "Rise" ? "+" : appointmentTrend === "Fall" ? "-" : ""}${Math.abs(appointmentPercentageChange).toFixed(2)}%`,
+                    percentageChangeLastWeek: Number(Math.abs(appointmentPercentageChange).toFixed(2)),
                     appointmentTrend,
                     last7daysCount: last7daysCount.map(item => ({
                         date: new Date(item.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" }), // Format to "Feb-08"
