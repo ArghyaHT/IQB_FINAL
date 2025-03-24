@@ -2031,33 +2031,55 @@ export const getServedQueueCount = async (salonId) => {
     return result.length > 0 ? result[0].servedCount : 0;
 };
 
-export const getlast6weeksQueueCount = async (salonId) => {
-    const today = moment().utc().endOf("day"); // End of today
-    const weeksAgo = moment().utc().subtract(6, "weeks").startOf("isoWeek"); // Start of the 6th week ago
 
-    // Fetch served queue data for the last 'n' weeks
-    const lastNWeeksQueueHistory = await JoinedQueueHistory.find({
+export const totalQueueCountsForLast7Days = async (salonId) => {
+    const today = new Date();
+    const last7Days = new Date();
+    last7Days.setDate(today.getDate() - 7);
+
+    // Count queue entries for the last 7 days
+    const totalCount = await JoinedQueueHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$queueList" },
+        { $match: { "queueList.dateJoinedQ": { $gte: last7Days } } },
+        { $count: "totalCount" }
+    ]);
+
+    return { totalCount: totalCount.length > 0 ? totalCount[0].totalCount : 0 };
+};
+
+
+export const getLast7DaysQueueCount = async (salonId) => {
+    const yesterday = moment().utc().startOf("day"); // Start of yesterday (00:00:00 UTC)
+    const sevenDaysAgo = moment().utc().subtract(6, "days").startOf("day"); // Start of 7 days ago (00:00:00 UTC)
+
+    // Fetch all queue data from 7 days ago to the end of yesterday
+    const last7DaysQueueHistory = await JoinedQueueHistory.find({
         salonId: salonId,
-        "queueList.dateJoinedQ": { $gte: weeksAgo.toDate(), $lte: today.toDate() },
+        "queueList.dateJoinedQ": { $gte: sevenDaysAgo.toDate(), $lt: yesterday.toDate() },
     });
 
     // Process and group data by day
-    let lastNWeeksData = {};
-    lastNWeeksQueueHistory.forEach(entry => {
+    let last7DaysData = {};
+
+    last7DaysQueueHistory.forEach(entry => {
         entry.queueList.forEach(queue => {
-            if (queue.status === "served") {
-                const dateKey = moment(queue.dateJoinedQ).utc().format("YYYY-MM-DD");
-                lastNWeeksData[dateKey] = (lastNWeeksData[dateKey] || 0) + 1;
-            }
+            const dateKey = moment(queue.dateJoinedQ).utc().format("YYYY-MM-DD");
+            last7DaysData[dateKey] = (last7DaysData[dateKey] || 0) + 1;
         });
     });
 
-    // Group daily data into weekly data
-    let weeklyData = groupByWeeks(lastNWeeksData, weeksAgo, today);
+    // Ensure all days in the range are represented, even if count is 0
+    let result = [];
+    for (let i = 6; i >= 0; i--) {  // Loop backwards from 6 to 0
+        const currentDay = moment().utc().subtract(i + 1, "days").format("YYYY-MM-DD"); // Subtracting i + 1 to exclude today
+        result.push({
+            date: currentDay,
+            count: last7DaysData[currentDay] || 0
+        });
+    }
 
-    // Remove single-day entries (weekStart === weekEnd)
-    weeklyData = weeklyData.filter(week => week.weekStart !== week.weekEnd);
-
-    return weeklyData;
+    return result;
 };
+
 

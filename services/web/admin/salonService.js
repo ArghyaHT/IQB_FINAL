@@ -469,3 +469,9 @@ export const changeSalonTrailPeriodStatus = async() => {
   return
 
 }
+
+
+export const getAllSalons = async () => {
+  const salons = await Salon.find({}, { salonId: 1, timeZone: 1 }); // Only returns salonId and timezone
+  return salons;
+}

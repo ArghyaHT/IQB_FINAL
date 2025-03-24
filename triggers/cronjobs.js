@@ -63,7 +63,7 @@ export const checkQueuingAndAppointmentExpire = (next) => {
 }
 
 export const checkPaymentsExpiry = (next) => {
-    const timezones = ['America/New_York', 'Europe/London', 'Asia/Kolkata'];
+    const timezones = ['Europe/London', 'America/New_York', 'Asia/Kolkata'];
 
     // For each timezone, schedule a cron job that runs at midnight
     timezones.forEach((timezone) => {
