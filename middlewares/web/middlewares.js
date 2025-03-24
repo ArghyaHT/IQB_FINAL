@@ -3,6 +3,7 @@ import { findAdminByEmailandRole } from "../../services/web/admin/adminService.j
 import { findBarberByEmailAndRole, getAllBarbersForAdmin } from "../../services/web/barber/barberService.js";
 import { findSalonBySalonIdAndAdmin, getSalonBySalonId } from "../../services/web/admin/salonService.js";
 import { getAllCustomersForAdmin } from "../../services/web/customer/customerService.js";
+import { formatCount } from "../../utils/calculateCount.js";
 
 //COMMON MIDDLEWARES FOR ALL ==========================
 export const handleProtectedRoute = async (req, res, next) => {
@@ -50,6 +51,8 @@ export const AdminLoggedIn = async (req, res, next) => {
 
 
     const customersCount = allCustomers.length;
+    const formattedCustomersCount = await formatCount(customersCount);
+
 
     // const salon = await getSalonSettings(loggedinAdmin.salonId)
 
@@ -59,7 +62,7 @@ export const AdminLoggedIn = async (req, res, next) => {
     // Add counts to the adminData object
     adminData.salonCount = salonCount;
     adminData.barbersCount = barbersCount;
-    adminData.customersCount = customersCount;
+    adminData.customersCount = formattedCustomersCount;
 
     if (loggedinAdmin.salonId === 0) {
 
