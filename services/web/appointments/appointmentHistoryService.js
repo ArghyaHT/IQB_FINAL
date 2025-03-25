@@ -1723,15 +1723,18 @@ export const getAppointmentCountForLast2Week = async (salonId) => {
 
 
 export const getLastWeekAppointmentCountsEachDay = async (salonId) => {
-    const yesterday = moment().utc().startOf("day"); // Start of yesterday (00:00:00 UTC)
-    const sevenDaysAgo = moment().utc().subtract(6, "days").startOf("day"); // Start of 7 days ago (00:00:00 UTC)
+    const today = moment().utc().startOf("day"); 
+    const sevenDaysAgo = moment().utc().subtract(7, "days").startOf("day"); 
 
     const result = await AppointmentHistory.aggregate([
         { $match: { salonId } },
         { $unwind: "$appointmentList" },
         {
             $match: {
-                "appointmentList.appointmentDate": { $gte: sevenDaysAgo, $lt: yesterday } // Correct date comparison
+                "appointmentList.appointmentDate": { 
+                    $gte: sevenDaysAgo.toDate(), 
+                    $lt: today.toDate() // Exclude today
+                }
             }
         },
         {
@@ -1745,7 +1748,7 @@ export const getLastWeekAppointmentCountsEachDay = async (salonId) => {
         { $sort: { "_id": 1 } }
     ]);
 
-    // Ensure all 7 days are included, even if no appointments exist
+    // Ensure all 7 days are included
     const last7DaysCounts = [];
     for (let i = 6; i >= 0; i--) {  
         const currentDay = moment().utc().subtract(i + 1, "days").format("YYYY-MM-DD"); // Excludes today
@@ -1757,6 +1760,7 @@ export const getLastWeekAppointmentCountsEachDay = async (salonId) => {
 
     return last7DaysCounts;
 };
+
 
 
 
