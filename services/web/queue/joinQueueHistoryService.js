@@ -1774,36 +1774,36 @@ export const getBarberServedQlist = async (salonId, barberId, fromDate, toDate) 
 export const getSalonQueueHistory = async (salonId) => {
     const defaultProfileImage = [
         {
-          url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg",
+            url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg",
         },
-      ];
+    ];
 
-      const salonQueueListHistory = await JoinedQueueHistory.findOne({ salonId });
+    const salonQueueListHistory = await JoinedQueueHistory.findOne({ salonId });
 
-      if (!salonQueueListHistory || !salonQueueListHistory.queueList || salonQueueListHistory.queueList.length === 0) {
-          return [];
-      }
-  
-      const modifyQueueHistorylist = await Promise.all(
-          salonQueueListHistory.queueList.map(async (queue) => {
-              const barber = await getBarberByBarberId(queue.barberId);
-              const customer = await findCustomerByEmail(queue.customerEmail);
-  
-              return {
-                  ...queue.toObject(), // Spread the existing queue properties
-                  barberProfile: barber?.profile || defaultProfileImage,
-                  customerProfile: customer?.profile || defaultProfileImage,
-              };
-          })
-      );
-    
-      // Return the modified list instead of the original one
-      return modifyQueueHistorylist;
+    if (!salonQueueListHistory || !salonQueueListHistory.queueList || salonQueueListHistory.queueList.length === 0) {
+        return [];
+    }
+
+    const modifyQueueHistorylist = await Promise.all(
+        salonQueueListHistory.queueList.map(async (queue) => {
+            const barber = await getBarberByBarberId(queue.barberId);
+            const customer = await findCustomerByEmail(queue.customerEmail);
+
+            return {
+                ...queue.toObject(), // Spread the existing queue properties
+                barberProfile: barber?.profile || defaultProfileImage,
+                customerProfile: customer?.profile || defaultProfileImage,
+            };
+        })
+    );
+
+    // Return the modified list instead of the original one
+    return modifyQueueHistorylist;
 }
 
 export const getQueueHistoryByBarber = async (salonId, barberId) => {
     const defaultProfileImage = [{ url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg" }];
-    
+
     const barberQueueHistory = await JoinedQueueHistory.findOne({ salonId }).lean();
 
     if (!barberQueueHistory) return [];
@@ -2094,5 +2094,145 @@ export const getLast7DaysQueueCount = async (salonId) => {
 
     return result;
 };
+
+
+export const totalBarberQueueCountsForLast30Days = async (salonId, barberId) => {
+    const today = new Date();
+    const last30Days = new Date();
+    last30Days.setDate(today.getDate() - 30);
+
+    // Count queue entries for the last 30 days
+    const totalCount = await JoinedQueueHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$queueList" },
+        {
+            $match: {
+                $and: [
+                    { "queueList.dateJoinedQ": { $gte: last30Days } },
+                    { "queueList.barberId": barberId }
+                ]
+            }
+        },
+        { $count: "totalCount" }
+    ]);
+
+    return { totalCount: totalCount.length > 0 ? totalCount[0].totalCount : 0 };
+};
+
+export const totalBarberQueueCountsForLast60Days = async (salonId, barberId) => {
+    const today = new Date();
+    const last60Days = new Date();
+    last60Days.setDate(today.getDate() - 60);
+
+    // Count queue entries for the last 30 days
+    const totalCount = await JoinedQueueHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$queueList" },
+        {
+            $match: {
+                $and: [
+                    { "queueList.dateJoinedQ": { $gte: last60Days } },
+                    { "queueList.barberId": barberId }
+                ]
+            }
+        },
+        { $count: "totalCount" }
+    ]);
+
+    return { totalCount: totalCount.length > 0 ? totalCount[0].totalCount : 0 };
+};
+
+
+export const getTotalBarberQueueCount = async (salonId, barberId) => {
+    const result = await JoinedQueueHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$queueList" },
+        { 
+            $match: 
+                { "queueList.barberId": barberId }
+          },
+        { $count: "totalCount" }
+    ]);
+
+    return result.length > 0 ? result[0].totalCount : 0;
+};
+
+
+export const getBarberServedQueueCount = async (salonId, barberId) => {
+    const result = await JoinedQueueHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$queueList" },
+        {
+            $match: {
+                $and: [
+                    { "queueList.status": "served" },
+                    { "queueList.barberId": barberId }
+                ]
+            }
+        },
+        { $count: "servedCount" }
+    ]);
+
+    return result.length > 0 ? result[0].servedCount : 0;
+};
+
+
+export const totalbarberQueueCountsForLast7Days = async (salonId, barberId) => {
+    const today = new Date();
+    const last7Days = new Date();
+    last7Days.setDate(today.getDate() - 7);
+
+    // Count queue entries for the last 7 days
+    const totalCount = await JoinedQueueHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$queueList" },
+        {
+            $match: {
+                $and: [
+                    { "queueList.dateJoinedQ": { $gte: last7Days } },
+                    { "queueList.barberId": barberId }
+                ]
+            }
+        },        { $count: "totalCount" }
+    ]);
+
+    return { totalCount: totalCount.length > 0 ? totalCount[0].totalCount : 0 };
+};
+
+export const getBarberLast7DaysQueueCount = async (salonId, barberId) => {
+    const yesterday = moment().utc().startOf("day"); // Start of yesterday (00:00:00 UTC)
+    const sevenDaysAgo = moment().utc().subtract(6, "days").startOf("day"); // Start of 7 days ago (00:00:00 UTC)
+
+    // Fetch all queue data from 7 days ago to the end of yesterday
+    const last7DaysQueueHistory = await JoinedQueueHistory.find({
+        salonId: salonId,
+        "queueList.barberId": barberId,
+        "queueList.dateJoinedQ": { $gte: sevenDaysAgo.toDate(), $lt: yesterday.toDate() },
+    });
+
+    // Process and group data by day
+    let last7DaysData = {};
+
+    last7DaysQueueHistory.forEach(entry => {
+        entry.queueList.forEach(queue => {
+            const dateKey = moment(queue.dateJoinedQ).utc().format("YYYY-MM-DD");
+            last7DaysData[dateKey] = (last7DaysData[dateKey] || 0) + 1;
+        });
+    });
+
+    // Ensure all days in the range are represented, even if count is 0
+    let result = [];
+    for (let i = 6; i >= 0; i--) {  // Loop backwards from 6 to 0
+        const currentDay = moment().utc().subtract(i + 1, "days").format("YYYY-MM-DD"); // Subtracting i + 1 to exclude today
+        result.push({
+            date: currentDay,
+            count: last7DaysData[currentDay] || 0
+        });
+    }
+
+    return result;
+};
+
+
 
 

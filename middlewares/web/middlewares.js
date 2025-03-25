@@ -125,7 +125,8 @@ export const BarberLoggedIn = async (req, res, next) => {
 
     const barberObject = {
       ...loggedinBarber.toObject(), // Spread the barber data properly
-      currency: salon.currency      // Add the currency field from salon data
+      currency: salon.currency,      // Add the currency field from salon data
+      salonName: salon.salonName
     };
 
     res.status(201).json({

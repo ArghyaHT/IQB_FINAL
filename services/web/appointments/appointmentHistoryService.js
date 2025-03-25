@@ -1769,3 +1769,138 @@ export const getLastWeekAppointmentCountsEachDay = async (salonId) => {
     return last7DaysCounts;
 };
 
+
+export const getBarberTotalAppointmentCount = async (salonId, barberId) => {
+    const result = await AppointmentHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$appointmentList" },
+        { $match: { "appointmentList.barberId": barberId } }, // Match barberId inside appointmentList
+        { $count: "totalCount" }
+    ]);
+
+    return result.length > 0 ? result[0].totalCount : 0;
+}
+
+
+export const getBarberServedAppointmentCount = async (salonId, barberId) => {
+    const result = await AppointmentHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$appointmentList" },
+        { $match: { "appointmentList.barberId": barberId, "appointmentList.status": "served" } }, // Match barberId & served status
+        { $count: "servedCount" }
+    ]);
+
+    return result.length > 0 ? result[0].servedCount : 0;
+};
+
+
+export const getBarberAppointmentCountForLastWeek = async (salonId, barberId) => {
+    const today = new Date();
+today.setHours(0, 0, 0, 0); // Midnight of today
+
+const sevenDaysAgo = new Date();
+sevenDaysAgo.setDate(today.getDate() - 7); // Start from 7 days before today
+sevenDaysAgo.setHours(0, 0, 0, 0); // Midnight of that day
+
+const yesterday = new Date(today);
+yesterday.setDate(yesterday.getDate() - 1); // Move to yesterday
+yesterday.setHours(23, 59, 59, 999); // End of yesterday
+
+const result = await AppointmentHistory.aggregate([
+    { $match: { salonId } },
+    { $unwind: "$appointmentList" },
+    {
+        $match: {
+            "appointmentList.barberId": barberId,
+            "appointmentList.appointmentDate": {
+                $gte: sevenDaysAgo, // Start from 7 days ago (midnight)
+                $lt: today // Exclude today (midnight start of today)
+            }
+        }
+    },
+    { $count: "totalCount" }
+]);
+
+
+    return result.length > 0 ? result[0].totalCount : 0;
+};
+
+
+export const getBarberAppointmentCountForLast2Week = async (salonId, barberId) => {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 14);
+
+    const result = await AppointmentHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$appointmentList" },
+        {
+            $match: {
+                "appointmentList.barberId": barberId,
+                "appointmentList.appointmentDate": { $gte: sevenDaysAgo } // Assuming 'servedAt' stores the date
+            }
+        },
+        { $count: "totalCount" }
+    ]);
+
+    return result.length > 0 ? result[0].totalCount : 0;
+};
+
+
+export const getLastWeekBarberAppointmentCountsEachDay = async (salonId, barberId) => {
+    const today = new Date();
+    
+    // Correctly set startDate to exactly 6 days ago at midnight
+    const startDate = new Date(today);
+    startDate.setDate(today.getDate() - 6);
+    startDate.setHours(0, 0, 0, 0); 
+
+    // Correctly set endDate to today at 23:59:59
+    const endDate = new Date(today);
+    endDate.setHours(23, 59, 59, 999);
+
+    const result = await AppointmentHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$appointmentList" },
+        {
+            $match: {
+                "appointmentList.barberId": barberId, // Match barberId
+            }
+        },
+        {
+            $addFields: {
+                formattedDate: {
+                    $dateToString: { format: "%Y-%m-%d", date: "$appointmentList.appointmentDate" }
+                }
+            }
+        },
+        {
+            $match: {
+                formattedDate: { 
+                    $gte: startDate.toISOString().split("T")[0], 
+                    $lte: endDate.toISOString().split("T")[0] 
+                }
+            }
+        },
+        {
+            $group: {
+                _id: "$formattedDate",
+                count: { $sum: 1 }
+            }
+        },
+        { $sort: { "_id": 1 } }
+    ]);
+
+    // Ensure all 7 days are included with 0 count if no appointments exist
+    const last7DaysCounts = [];
+    for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        date.setHours(0, 0, 0, 0); // Ensure no time component issues
+        const formattedDate = date.toISOString().split("T")[0];
+
+        const dayData = result.find(r => r._id === formattedDate);
+        last7DaysCounts.push({ date: formattedDate, count: dayData ? dayData.count : 0 });
+    }
+
+    return last7DaysCounts;
+};
