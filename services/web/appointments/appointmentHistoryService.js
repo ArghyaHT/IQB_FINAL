@@ -1776,17 +1776,20 @@ export const getBarberTotalAppointmentCount = async (salonId, barberId) => {
 }
 
 
-export const getBarberServedAppointmentCount = async (salonId, barberId) => {
+export const getBarberServedAppointmentCountLast7Days = async (salonId, barberId) => {
+    const today = new Date();
+    
+const last7Days = new Date(today);
+last7Days.setDate(today.getDate() - 7); // Set to 7 days ago
     const result = await AppointmentHistory.aggregate([
         { $match: { salonId } },
         { $unwind: "$appointmentList" },
-        { $match: { "appointmentList.barberId": barberId, "appointmentList.status": "served" } }, // Match barberId & served status
+        { $match: {  "appointmentList.appointmentDate": { $gte: last7Days }, "appointmentList.barberId": barberId, "appointmentList.status": "served" } }, // Match barberId & served status
         { $count: "servedCount" }
     ]);
 
     return result.length > 0 ? result[0].servedCount : 0;
 };
-
 
 export const getBarberAppointmentCountForLastWeek = async (salonId, barberId) => {
     const today = new Date();

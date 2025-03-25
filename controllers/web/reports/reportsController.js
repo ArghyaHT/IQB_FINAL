@@ -1,6 +1,6 @@
 import moment from "moment";
-import { getDailyBarberCancelledReport, getDailyBarberCancelledReportByDateRange, getDailyBarberServedReport, getDailyBarberServedReportByDateRange, getDailySalonCancelledReport, getDailySalonCancelledReportByDateRange, getDailySalonServedReport, getDailySalonServedReportByDateRange, getMonthlyBarberCancelledReport, getMonthlyBarberCancelledReportByDateRange, getMonthlyBarberServedReport, getMonthlyBarberServedReportByDateRange, getMonthlySalonCancelledReport, getMonthlySalonCancelledReportByDateRange, getMonthlySalonServedReport, getMonthlySalonServedReportByDateRange, getTotalSalonQlist, getWeeklyBarberCancelledReport, getWeeklyBarberCancelledReportByDateRange, getWeeklyBarberServedReport, getWeeklyBarberServedReportByDateRange, getWeeklySalonCancelledReport, getWeeklySalonCancelledReportByDateRange, getWeeklySalonServedReport, getWeeklySalonServedReportByDateRange, totalQueueCountsForLast30Days, totalQueueCountsForLast60Days, getTotalQueueCount, totalQueueCountsForLast7Days, getLast7DaysQueueCount, totalBarberQueueCountsForLast30Days, totalBarberQueueCountsForLast60Days, getTotalBarberQueueCount, getBarberServedQueueCount, totalbarberQueueCountsForLast7Days, getBarberLast7DaysQueueCount, totalQueueServedCountsForLast30Days } from "../../../services/web/queue/joinQueueHistoryService.js";
-import { getAppointmentCountForLast2Week, getAppointmentCountForLastWeek, getBarberAppointmentCountForLast2Week, getBarberAppointmentCountForLastWeek, getBarberServedAppointmentCount, getBarberTotalAppointmentCount, getDailyBarberAppointmentCancelledReport, getDailyBarberAppointmentCancelledReportByDateRange, getDailyBarberAppointmentServedReport, getDailyBarberServedAppointmentReportByDateRange, getDailySalonAppointmentCancelledReport, getDailySalonAppointmentCancelledReportByDateRange, getDailySalonAppointmentServedReport, getDailySalonAppointmentServedReportByDateRange, getLastWeekAppointmentCountsEachDay, getLastWeekBarberAppointmentCountsEachDay, getMonthlyBarberAppointmentCancelledReport, getMonthlyBarberAppointmentCancelledReportByDateRange, getMonthlyBarberAppointmentServedReport, getMonthlyBarberAppointmentServedReportByDateRange, getMonthlySalonAppointmentCancelledReport, getMonthlySalonAppointmentCancelledReportByDateRange, getMonthlySalonAppointmentServedReport, getMonthlySalonAppointmentServedReportByDateRange, getServedAppointmentCountlast7Days, getTotalAppointmentCount, getWeeklyBarberAppointmentCancelledReport, getWeeklyBarberAppointmentCancelledReportByDateRange, getWeeklyBarberAppointmentServedReport, getWeeklyBarberServedAppointmentReportByDateRange, getWeeklySalonAppointmentCancelledReport, getWeeklySalonAppointmentCancelledReportByDateRange, getWeeklySalonAppointmentServedReport, getWeeklySalonAppointmentServedReportByDateRange } from "../../../services/web/appointments/appointmentHistoryService.js";
+import { getDailyBarberCancelledReport, getDailyBarberCancelledReportByDateRange, getDailyBarberServedReport, getDailyBarberServedReportByDateRange, getDailySalonCancelledReport, getDailySalonCancelledReportByDateRange, getDailySalonServedReport, getDailySalonServedReportByDateRange, getMonthlyBarberCancelledReport, getMonthlyBarberCancelledReportByDateRange, getMonthlyBarberServedReport, getMonthlyBarberServedReportByDateRange, getMonthlySalonCancelledReport, getMonthlySalonCancelledReportByDateRange, getMonthlySalonServedReport, getMonthlySalonServedReportByDateRange, getTotalSalonQlist, getWeeklyBarberCancelledReport, getWeeklyBarberCancelledReportByDateRange, getWeeklyBarberServedReport, getWeeklyBarberServedReportByDateRange, getWeeklySalonCancelledReport, getWeeklySalonCancelledReportByDateRange, getWeeklySalonServedReport, getWeeklySalonServedReportByDateRange, totalQueueCountsForLast30Days, totalQueueCountsForLast60Days, getTotalQueueCount, totalQueueCountsForLast7Days, getLast7DaysQueueCount, totalBarberQueueCountsForLast30Days, totalBarberQueueCountsForLast60Days, getTotalBarberQueueCount, getBarberServedQueueCount, totalbarberQueueCountsForLast7Days, getBarberLast7DaysQueueCount, totalQueueServedCountsForLast30Days, getBarberServedQueueCountLast30Days } from "../../../services/web/queue/joinQueueHistoryService.js";
+import { getAppointmentCountForLast2Week, getAppointmentCountForLastWeek, getBarberAppointmentCountForLast2Week, getBarberAppointmentCountForLastWeek, getBarberServedAppointmentCountLast7Days, getBarberTotalAppointmentCount, getDailyBarberAppointmentCancelledReport, getDailyBarberAppointmentCancelledReportByDateRange, getDailyBarberAppointmentServedReport, getDailyBarberServedAppointmentReportByDateRange, getDailySalonAppointmentCancelledReport, getDailySalonAppointmentCancelledReportByDateRange, getDailySalonAppointmentServedReport, getDailySalonAppointmentServedReportByDateRange, getLastWeekAppointmentCountsEachDay, getLastWeekBarberAppointmentCountsEachDay, getMonthlyBarberAppointmentCancelledReport, getMonthlyBarberAppointmentCancelledReportByDateRange, getMonthlyBarberAppointmentServedReport, getMonthlyBarberAppointmentServedReportByDateRange, getMonthlySalonAppointmentCancelledReport, getMonthlySalonAppointmentCancelledReportByDateRange, getMonthlySalonAppointmentServedReport, getMonthlySalonAppointmentServedReportByDateRange, getServedAppointmentCountlast7Days, getTotalAppointmentCount, getWeeklyBarberAppointmentCancelledReport, getWeeklyBarberAppointmentCancelledReportByDateRange, getWeeklyBarberAppointmentServedReport, getWeeklyBarberServedAppointmentReportByDateRange, getWeeklySalonAppointmentCancelledReport, getWeeklySalonAppointmentCancelledReportByDateRange, getWeeklySalonAppointmentServedReport, getWeeklySalonAppointmentServedReportByDateRange } from "../../../services/web/appointments/appointmentHistoryService.js";
 import { formatDateWithSuffix } from "../../../utils/dateString.js";
 
 
@@ -168,10 +168,10 @@ export const salonServedReport = async (req, res, next) => {
 
                             const startDate = moment.utc(from, "YYYY-MM-DD").startOf("month");
                             const endDate = moment.utc(to, "YYYY-MM-DD").endOf("month");
-        
+
                             // Calculate the total number of months in the range
                             const totalMonths = endDate.diff(startDate, "months") + 1; // +1 to include the last month
-        
+
                             // If the range exceeds 24 months, return an error response
                             if (totalMonths > 24) {
                                 return res.status(400).json({
@@ -180,7 +180,7 @@ export const salonServedReport = async (req, res, next) => {
                                 });
                             }
                             const getSalonCancelledReport = await getMonthlyBarberCancelledReportByDateRange(salonId, barberId, from, to);
-        
+
                             // Log the entire report data to inspect its structure and values                
                             return res.status(200).json({
                                 success: true,
@@ -1377,7 +1377,7 @@ export const newdashboardReports = async (req, res, next) => {
 
         const firstDate = formatDateWithSuffix(last7daysCount[0].date);
         const lastDate = formatDateWithSuffix(last7daysCount[last7daysCount.length - 1].date);
-        
+
         return res.status(200).json({
             success: true,
             response: {
@@ -1395,7 +1395,7 @@ export const newdashboardReports = async (req, res, next) => {
                         TotalQueue: item.count
                     })
                     )
-                    
+
                 },
                 appointment: {
                     totalAppointmentHistoryCount: getlastWeekAppointmentCount,
@@ -1432,23 +1432,26 @@ export const newBarberdashboardReports = async (req, res, next) => {
         const totalqueue30Days = await totalBarberQueueCountsForLast30Days(salonId, barberId);
         const totalqueue60Days = await totalBarberQueueCountsForLast60Days(salonId, barberId);
 
-        const totalQueueCount = await getTotalBarberQueueCount(salonId, barberId);
-        const servedQueueCount = await getBarberServedQueueCount(salonId, barberId);
-        const cancelledQueueCount = totalQueueCount - servedQueueCount;
+         // Extract counts
+         const last30DaysCount = totalqueue30Days.totalCount;
+         const prev30DaysCount = totalqueue60Days.totalCount - last30DaysCount; 
+
+        const servedQueueCountlast30Days = await getBarberServedQueueCountLast30Days(salonId, barberId);
+
+        const cancelledQueueCountLast30Days = last30DaysCount - servedQueueCountlast30Days;
 
 
-        const totalQueueCountlast7days = await totalbarberQueueCountsForLast7Days(salonId)
+        const totalQueueCountlast7days = await totalbarberQueueCountsForLast7Days(salonId, barberId)
 
-        const eachDayQueueCountlast7days = await getBarberLast7DaysQueueCount(salonId)
+
+        const eachDayQueueCountlast7days = await getBarberLast7DaysQueueCount(salonId, barberId)
 
 
         // Calculate percentages
-        const servedPercentage = totalQueueCount > 0 ? ((servedQueueCount / totalQueueCount) * 100).toFixed(2) : "0.00";
-        const cancelledPercentage = totalQueueCount > 0 ? ((cancelledQueueCount / totalQueueCount) * 100).toFixed(2) : "0.00";
+        const servedPercentage = last30DaysCount > 0 ? ((servedQueueCountlast30Days / last30DaysCount) * 100).toFixed(2) : "0.00";
+        const cancelledPercentage = last30DaysCount > 0 ? ((cancelledQueueCountLast30Days / last30DaysCount) * 100).toFixed(2) : "0.00";
 
-        // Extract counts
-        const last30DaysCount = totalqueue30Days.totalCount;
-        const prev30DaysCount = totalqueue60Days.totalCount - last30DaysCount; // Previous 30 days count
+
 
         let percentageChange = 0;
         let trend = "No Change";
@@ -1462,17 +1465,21 @@ export const newBarberdashboardReports = async (req, res, next) => {
         }
 
         // **Appointment Dashboard Logic**
-        const totalAppointmentCount = await getBarberTotalAppointmentCount(salonId,barberId);
-        const servedAppointmentCount = await getBarberServedAppointmentCount(salonId, barberId);
-        const cancelledAppointmentCount = totalAppointmentCount - servedAppointmentCount;
-
-        const servedAppointmentPercentage = totalAppointmentCount > 0 ? ((servedAppointmentCount / totalAppointmentCount) * 100).toFixed(2) : "0.00";
-        const cancelledAppointmentPercentage = totalAppointmentCount > 0 ? ((cancelledAppointmentCount / totalAppointmentCount) * 100).toFixed(2) : "0.00";
-
+        const totalAppointmentCount = await getBarberTotalAppointmentCount(salonId, barberId);
+        const servedAppointmentCount7Days = await getBarberServedAppointmentCountLast7Days(salonId, barberId);
 
 
         const getlastWeekAppointmentCount = await getBarberAppointmentCountForLastWeek(salonId, barberId);
         const getlast2WeeksAppointmentCount = await getBarberAppointmentCountForLast2Week(salonId, barberId);
+
+
+        const cancelledAppointmentCount7Days = getlastWeekAppointmentCount - servedAppointmentCount7Days;
+
+        const servedAppointmentPercentage = getlastWeekAppointmentCount > 0 ? ((servedAppointmentCount7Days / getlastWeekAppointmentCount) * 100).toFixed(2) : "0.00";
+        const cancelledAppointmentPercentage = getlastWeekAppointmentCount > 0 ? ((cancelledAppointmentCount7Days / getlastWeekAppointmentCount) * 100).toFixed(2) : "0.00";
+
+
+
 
         // Calculate Appointment Percentage Change
         const previousWeekCount = getlast2WeeksAppointmentCount - getlastWeekAppointmentCount;
@@ -1497,7 +1504,7 @@ export const newBarberdashboardReports = async (req, res, next) => {
             success: true,
             response: {
                 queue: {
-                    totalQueueHistoryCount: totalQueueCount,
+                    totalQueueHistoryCount: last30DaysCount,
                     servedHistoryPercentage: Number(servedPercentage),
                     cancelledHistoryPercentage: Number(cancelledPercentage),
                     last30DaysCount,
@@ -1510,13 +1517,13 @@ export const newBarberdashboardReports = async (req, res, next) => {
                         TotalQueue: item.count
                     })
                     )
-                    
+
                 },
                 appointment: {
-                    totalAppointmentHistoryCount: totalAppointmentCount,
-                    servedAppointmenthistoryCount: servedAppointmentCount,
+                    totalAppointmentHistoryCount: getlastWeekAppointmentCount,
+                    servedAppointmenthistoryCount: servedAppointmentCount7Days,
                     servedAppointmentHistoryPercentage: Number(servedAppointmentPercentage),
-                    cancelledAppointmentHistoryCount: cancelledAppointmentCount,
+                    cancelledAppointmentHistoryCount: cancelledAppointmentCount7Days,
                     cancelledAppointmentHistoryPercentage: Number(cancelledAppointmentPercentage),
                     lastWeekCount: getlastWeekAppointmentCount,
                     prevWeekCount: previousWeekCount,

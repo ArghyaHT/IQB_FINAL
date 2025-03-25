@@ -2194,6 +2194,30 @@ export const getBarberServedQueueCount = async (salonId, barberId) => {
 };
 
 
+export const getBarberServedQueueCountLast30Days = async (salonId, barberId) => {
+    const today = new Date();
+    const last30Days = new Date();
+    last30Days.setDate(today.getDate() - 30);
+    
+    const result = await JoinedQueueHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$queueList" },
+        {
+            $match: {
+                $and: [
+                    { "queueList.dateJoinedQ": { $gte: last30Days }},
+                    { "queueList.status": "served" },
+                    { "queueList.barberId": barberId }
+                ]
+            }
+        },
+        { $count: "servedCount" }
+    ]);
+
+    return result.length > 0 ? result[0].servedCount : 0;
+};
+
+
 export const totalbarberQueueCountsForLast7Days = async (salonId, barberId) => {
     const today = new Date();
     const last7Days = new Date();
@@ -2203,14 +2227,13 @@ export const totalbarberQueueCountsForLast7Days = async (salonId, barberId) => {
     const totalCount = await JoinedQueueHistory.aggregate([
         { $match: { salonId } },
         { $unwind: "$queueList" },
-        {
-            $match: {
-                $and: [
-                    { "queueList.dateJoinedQ": { $gte: last7Days } },
-                    { "queueList.barberId": barberId }
-                ]
-            }
-        },        { $count: "totalCount" }
+        { 
+            $match: { 
+                "queueList.dateJoinedQ": { $gte: last7Days }, 
+                "queueList.barberId": barberId 
+            } 
+        },         
+        { $count: "totalCount" }
     ]);
 
     return { totalCount: totalCount.length > 0 ? totalCount[0].totalCount : 0 };
