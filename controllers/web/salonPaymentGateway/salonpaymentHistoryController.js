@@ -10,12 +10,20 @@ export const paymentHistories = async (req, res, next) => {
 
         const salonPaymentHistory = await getSalonPaymentHistoryBySalonId(salonId);
 
-        // Format the dates in the response
-        const formattedHistory = salonPaymentHistory.map(payment => ({
-            ...payment.toObject(), // Spread original fields
-            purchaseDate: moment.unix(Number(payment.purchaseDate)).format("D MMM YYYY"), 
-            paymentExpiryDate: moment.unix(Number(payment.paymentExpiryDate)).format("D MMM YYYY")
-        }));
+        // Format the dates and calculate time period in days
+        const formattedHistory = salonPaymentHistory.map(payment => {
+            const purchaseDateUnix = Number(payment.purchaseDate);
+            const expiryDateUnix = Number(payment.paymentExpiryDate);
+
+            const timePeriodDays = moment.unix(expiryDateUnix).diff(moment.unix(purchaseDateUnix), "days") + 1;
+
+            return {
+                ...payment.toObject(), // Spread original fields
+                purchaseDate: moment.unix(Number(payment.purchaseDate)).format("D MMM YYYY"), 
+                paymentExpiryDate: moment.unix(Number(payment.paymentExpiryDate)).format("D MMM YYYY"),
+                timePeriod: timePeriodDays
+            };
+        });
 
         return SuccessHandler(SALON_PAYMENT_HISTORY_SUCCESS, SUCCESS_STATUS_CODE, res, { response: formattedHistory });
 

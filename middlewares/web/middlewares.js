@@ -121,6 +121,10 @@ export const BarberLoggedIn = async (req, res, next) => {
 
     const loggedinBarber = await findBarberByEmailAndRole(email)
 
+    const defaultLogo = [{
+      "url": "https://res.cloudinary.com/dpynxkjfq/image/upload/v1742907445/iqbLogo_brktfk.jpg"
+    }]
+
     let salon = null;
     if (loggedinBarber.salonId !== 0) {
       salon = await getSalonBySalonId(loggedinBarber.salonId);
@@ -129,7 +133,7 @@ export const BarberLoggedIn = async (req, res, next) => {
       ...loggedinBarber.toObject(), // Spread the barber data properly
       currency: salon?.currency || "£",    
       salonName: salon?.salonName || "",
-      salonlogo: salon?.salonLogo || ""
+      salonlogo: salon?.salonLogo || defaultLogo
     };
 
     res.status(201).json({
