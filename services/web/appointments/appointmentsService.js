@@ -793,3 +793,81 @@ export const allAppointmentsByMultipleBarberIdsAndDate = async (salonId, barberI
     return appointments;
 }
 
+
+
+export const todayAppointmentsByBarberId = async (salonId, barberId) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of the day
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1); // Next day at 00:00:00
+
+    const appointments = await Appointment.aggregate([
+        {
+            $match: {
+                salonId: salonId,
+                "appointmentList.barberId": barberId
+            }
+        },
+        { $unwind: "$appointmentList" },
+        {
+            $match: {
+                "appointmentList.barberId": barberId,
+                "appointmentList.appointmentDate": { $gte: today, $lt: tomorrow } // Filter for today
+            }
+        },
+        {
+            $lookup: {
+                from: "customers",
+                localField: "appointmentList.customerEmail",
+                foreignField: "email",
+                as: "customerInfo"
+            }
+        },
+        {
+            $addFields: {
+                "appointmentList.customerProfile": {
+                    $ifNull: [
+                        { $arrayElemAt: ["$customerInfo.profile", 0] },
+                        [
+                        {
+                            url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg"
+                        }
+                    ]
+                    ]
+                }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                barberId: "$appointmentList.barberId",
+                appointmentNotes: "$appointmentList.appointmentNotes",
+                appointmentDate: {
+                    $dateToString: {
+                        format: "%Y-%m-%d",
+                        date: "$appointmentList.appointmentDate"
+                    }
+                },
+                startTime: "$appointmentList.startTime",
+                endTime: "$appointmentList.endTime",
+                timeSlots: "$appointmentList.timeSlots",
+                customerEmail: "$appointmentList.customerEmail",
+                customerName: "$appointmentList.customerName",
+                customerType: "$appointmentList.customerType",
+                methodUsed: "$appointmentList.methodUsed",
+                _id: "$appointmentList._id",
+                background: "$appointmentList.background",
+                services: "$appointmentList.services",
+                customerProfile: "$appointmentList.customerProfile"
+            }
+        }
+    ]);
+
+    return {
+        totalCount: appointments.length,
+        appointments
+    };
+};
+
+
+

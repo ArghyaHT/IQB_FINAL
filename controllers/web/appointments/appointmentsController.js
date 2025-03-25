@@ -1,5 +1,5 @@
 import { findAdminByEmailandRole } from "../../../services/web/admin/adminService.js";
-import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppointmentsByMultipleBarberIds, allAppointmentsByMultipleBarberIdsAndDate, allAppointmentsBySalonId, allAppointmentsBySalonIdAndDate, cancelAppointmentByBarber, createNewAppointment, deleteAppointmentById, findAppointmentById, getAllAppointmentsByBarberIdAndSalonId, getAppointmentbySalonId, getAppointmentsByDateAndBarberId, servedOrcancelAppointment, updateAppointmentById } from "../../../services/web/appointments/appointmentsService.js";
+import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppointmentsByMultipleBarberIds, allAppointmentsByMultipleBarberIdsAndDate, allAppointmentsBySalonId, allAppointmentsBySalonIdAndDate, cancelAppointmentByBarber, createNewAppointment, deleteAppointmentById, findAppointmentById, getAllAppointmentsByBarberIdAndSalonId, getAppointmentbySalonId, getAppointmentsByDateAndBarberId, servedOrcancelAppointment, todayAppointmentsByBarberId, updateAppointmentById } from "../../../services/web/appointments/appointmentsService.js";
 import { getBarberbyId } from "../../../services/web/barber/barberService.js";
 import { getSalonSettings } from "../../../services/web/salonSettings/salonSettingsService.js";
 import { sendAppointmentsEmailAdmin, sendAppointmentsEmailBarber, sendAppointmentsEmailCustomer, sendQueuePositionEmail } from "../../../utils/emailSender/emailSender.js";
@@ -751,3 +751,34 @@ export const getAllAppointmentsByMultipleBarberIdsAndDate = async (req, res, nex
         next(error);
     }
 };
+
+
+//DESC:GET ALL APPOINTMENTS BY BARBER ID AND DATE ====================
+export const getAllAppointmentsByBarberIdForToday = async (req, res, next) => {
+    try {
+        const { salonId, barberId } = req.body;
+
+        const appointments = await todayAppointmentsByBarberId(salonId, barberId)
+
+        if (!appointments || appointments.length === 0) {
+            return res.status(200).json({
+                success: true,
+                message: 'No appointments found for the provided salon Id, barber Id, and date',
+                response: [],
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Appointments retrieved successfully',
+            response: appointments,
+        });
+    } catch (error) {
+        //console.log(error);
+        next(error);
+    }
+};
+
+
+
+
