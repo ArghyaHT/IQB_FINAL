@@ -63,23 +63,16 @@ export const checkQueuingAndAppointmentExpire = (next) => {
 }
 
 export const checkPaymentsExpiry = (next) => {
-    const timezones = ['Europe/London', 'America/New_York', 'Asia/Kolkata'];
-
-    // For each timezone, schedule a cron job that runs at midnight
-    timezones.forEach((timezone) => {
-        cron.schedule('* * * * *', async () => {
-            try {
-                await checkSalonPaymentExpiryDate();
-            } catch (error) {
-                next(error);
-            }
-        }, {
-            scheduled: true,
-            timezone: timezone  // Set the timezone for the cron job
-        });
+    cron.schedule('* * * * *', async () => {
+        try {
+            await checkSalonPaymentExpiryDate();
+        } catch (error) {
+            next(error);
+        }
+    }, {
+        scheduled: true
     });
-
-}
+};
 
 
 export const salonShutdown = (next) => {
