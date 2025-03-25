@@ -1727,7 +1727,7 @@ export const getLastWeekAppointmentCountsEachDay = async (salonId) => {
     today.setHours(0, 0, 0, 0); // Ensure today is at midnight
 
     const last7Days = new Date(today);
-    last7Days.setDate(today.getDate() - 7); // Start from 7 days ago
+    last7Days.setDate(today.getDate() - 6); // Start from 7 days ago
 
     const result = await AppointmentHistory.aggregate([
         { $match: { salonId } },

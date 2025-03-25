@@ -824,6 +824,14 @@ export const todayAppointmentsByBarberId = async (salonId, barberId) => {
             }
         },
         {
+            $lookup: {
+                from: "barbers", // Join with barbers collection
+                localField: "appointmentList.barberId",
+                foreignField: "barberId", // Assuming barberId is stored as ObjectId in barbers collection
+                as: "barberInfo"
+            }
+        },
+        {
             $addFields: {
                 "appointmentList.customerProfile": {
                     $ifNull: [
@@ -834,17 +842,20 @@ export const todayAppointmentsByBarberId = async (salonId, barberId) => {
                         }
                     ]
                     ]
-                }
+                },
+                "appointmentList.barberName": { $arrayElemAt: ["$barberInfo.name", 0] } // Extract barber name
+
             }
         },
         {
             $project: {
                 _id: 0,
                 barberId: "$appointmentList.barberId",
+                barberName: "$appointmentList.barberName", // Include barber name in output
                 appointmentNotes: "$appointmentList.appointmentNotes",
                 appointmentDate: {
                     $dateToString: {
-                        format: "%Y-%m-%d",
+                        format: "%d %b %Y", // Format as "dd MMM yyyy"
                         date: "$appointmentList.appointmentDate"
                     }
                 },
