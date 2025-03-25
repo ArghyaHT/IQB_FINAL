@@ -2004,6 +2004,23 @@ export const totalQueueCountsForLast30Days = async (salonId) => {
     return { totalCount: totalCount.length > 0 ? totalCount[0].totalCount : 0 };
 };
 
+export const totalQueueServedCountsForLast30Days = async (salonId) => {
+    const today = new Date();
+    const last30Days = new Date();
+    last30Days.setDate(today.getDate() - 30);
+
+    // Count queue entries for the last 30 days
+    const totalCount = await JoinedQueueHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$queueList" },
+        { $match: { "queueList.dateJoinedQ": { $gte: last30Days },
+    "queueList.status": "served"  } },
+        { $count: "totalCount" }
+    ]);
+
+    return { totalCount: totalCount.length > 0 ? totalCount[0].totalCount : 0 };
+};
+
 
 
 export const totalQueueCountsForLast60Days = async (salonId) => {
