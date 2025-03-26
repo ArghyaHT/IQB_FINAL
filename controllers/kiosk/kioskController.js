@@ -1743,11 +1743,15 @@ export const getAttendenceByBarberIdKiosk = async (req, res, next) => {
         }
         // Sort attendance records in descending order by date
         attendance.attendance.sort((a, b) => new Date(b.date) - new Date(a.date));
-        // res.status(200).json({
-        //     success: true,
-        //     message: 'Attendence list retrieved successfully',
-        //     response: attendance
-        // });
+
+        attendance.attendance = attendance.attendance.map(record => ({
+            ...record.toObject(),
+            date: new Date(record.date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            })
+        }));
 
         return SuccessHandler(BARBER_ATTENDENCE_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: attendance })
 
