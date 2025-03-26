@@ -1844,60 +1844,41 @@ export const getBarberAppointmentCountForLast2Week = async (salonId, barberId) =
 
 
 export const getLastWeekBarberAppointmentCountsEachDay = async (salonId, barberId) => {
-    const today = new Date();
-    
-    // Correctly set startDate to exactly 6 days ago at midnight
-    const startDate = new Date(today);
-    startDate.setDate(today.getDate() - 6);
-    startDate.setHours(0, 0, 0, 0); 
-
-    // Correctly set endDate to today at 23:59:59
-    const endDate = new Date(today);
-    endDate.setHours(23, 59, 59, 999);
+    const today = moment().utc().startOf("day"); 
+    const sevenDaysAgo = moment().utc().subtract(7, "days").startOf("day"); 
 
     const result = await AppointmentHistory.aggregate([
         { $match: { salonId } },
         { $unwind: "$appointmentList" },
         {
             $match: {
-                "appointmentList.barberId": barberId, // Match barberId
-            }
-        },
-        {
-            $addFields: {
-                formattedDate: {
-                    $dateToString: { format: "%Y-%m-%d", date: "$appointmentList.appointmentDate" }
-                }
-            }
-        },
-        {
-            $match: {
-                formattedDate: { 
-                    $gte: startDate.toISOString().split("T")[0], 
-                    $lte: endDate.toISOString().split("T")[0] 
-                }
+                "appointmentList.appointmentDate": { 
+                    $gte: sevenDaysAgo.toDate(), 
+                    $lt: today.toDate() // Exclude today
+                },
+                "appointmentList.barberId": barberId
             }
         },
         {
             $group: {
-                _id: "$formattedDate",
+                _id: {
+                    $dateToString: { format: "%Y-%m-%d", date: "$appointmentList.appointmentDate" }
+                },
                 count: { $sum: 1 }
             }
         },
         { $sort: { "_id": 1 } }
     ]);
 
-    // Ensure all 7 days are included with 0 count if no appointments exist
-    const last7DaysCounts = [];
-    for (let i = 6; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(today.getDate() - i);
-        date.setHours(0, 0, 0, 0); // Ensure no time component issues
-        const formattedDate = date.toISOString().split("T")[0];
+ // Ensure all 7 days are included
+ const last7DaysCounts = [];
+ for (let i = 6; i >= 0; i--) {  
+     const currentDay = moment().utc().subtract(i + 1, "days").format("YYYY-MM-DD"); // Excludes today
+     last7DaysCounts.push({
+         date: currentDay,
+         count: result.find(r => r._id === currentDay)?.count || 0 // Assign count if exists
+     });
+ }
 
-        const dayData = result.find(r => r._id === formattedDate);
-        last7DaysCounts.push({ date: formattedDate, count: dayData ? dayData.count : 0 });
-    }
-
-    return last7DaysCounts;
+ return last7DaysCounts;
 };

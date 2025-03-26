@@ -1399,6 +1399,7 @@ export const newdashboardReports = async (req, res, next) => {
                 },
                 appointment: {
                     totalAppointmentHistoryCount: getlastWeekAppointmentCount,
+                    totalAppointmentHistoryPercentage: Number(servedAppointmentPercentage) + Number(cancelledAppointmentPercentage),
                     servedAppointmenthistoryCount: servedAppointmentCount,
                     servedAppointmentHistoryPercentage: Number(servedAppointmentPercentage),
                     cancelledAppointmentHistoryCount: cancelledAppointmentCount,
@@ -1521,6 +1522,7 @@ export const newBarberdashboardReports = async (req, res, next) => {
                 },
                 appointment: {
                     totalAppointmentHistoryCount: getlastWeekAppointmentCount,
+                    totalAppointmentHistoryPercentage: Number(servedAppointmentPercentage) + Number(cancelledAppointmentPercentage),
                     servedAppointmenthistoryCount: servedAppointmentCount7Days,
                     servedAppointmentHistoryPercentage: Number(servedAppointmentPercentage),
                     cancelledAppointmentHistoryCount: cancelledAppointmentCount7Days,

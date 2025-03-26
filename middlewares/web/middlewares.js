@@ -64,6 +64,10 @@ export const AdminLoggedIn = async (req, res, next) => {
     adminData.barbersCount = barbersCount;
     adminData.customersCount = formattedCustomersCount;
 
+    const defaultLogo = [{
+      "url": "https://res.cloudinary.com/dpynxkjfq/image/upload/v1742907445/iqbLogo_brktfk.jpg"
+    }]
+
     if (loggedinAdmin.salonId === 0) {
 
       adminData.isQueueing = false; // Default to false if undefined
