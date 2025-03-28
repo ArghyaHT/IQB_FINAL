@@ -39,7 +39,9 @@ export const LOGOUT_SUCCESS = "Barber logged in successfully"
 export const ADMIN_CONNECT_SUCCESS = "Admin connected successfully"
 export const DEFAULT_SALON_RETRIEVED_SUCESS = "Default Salon retrieved successfully"
 
-export const BARBER_CLOCKIN_CLOCKOUT_SUCCESS = "Barber online/offline status changed successfully"
+export const BARBER_ONLINE_SUCCESS = "Barber online status changed successfully"
+export const BARBER_OFFLINE_SUCCESS = "Barber offline status changed successfully"
+
 
 export const JOIN_QUEUE_SUCCESS = "Joined Queue successfully"
 
