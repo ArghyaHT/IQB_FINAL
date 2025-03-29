@@ -139,11 +139,14 @@ export const matchSalonOffDays = async(salonId, day) =>{
 }
 
 
-export const getSalonOffDaysBySalonId = async(salonId) => {
-  const salon = await SalonSettings.findOne({salonId})
+export const getSalonOffDaysBySalonId = async (salonId) => {
+  const salon = await SalonSettings.findOne({ salonId });
 
-  const salonOffDays = salon.salonOffDays;
+  if (!salon) {
+      console.warn(`Salon with salonId: ${salonId} not found`); // Log the issue
+      return []; // Return an empty array if no salon is found
+  }
 
-  return salonOffDays;
-}
+  return salon.salonOffDays || []; // Ensure it always returns an array
+};
 
