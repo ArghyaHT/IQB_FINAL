@@ -1117,13 +1117,10 @@ export const adminchangepassword = async (req, res, next) => {
             return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        if (!oldPassword && !password) {
-            return ErrorHandler(FILL_ALL_FIELDS_ERROR, ERROR_STATUS_CODE, res)
-        }
+        // if (!oldPassword && !password) {
+        //     return ErrorHandler(FILL_ALL_FIELDS_ERROR, ERROR_STATUS_CODE, res)
+        // }
 
-        if (!oldPassword) {
-            return ErrorHandler(OLD_PASSWORD_ERROR, ERROR_STATUS_CODE, res)
-        }
 
         if (!password) {
             return ErrorHandler(NEW_PASSWORD_ERROR, ERROR_STATUS_CODE, res)
@@ -1138,6 +1135,15 @@ export const adminchangepassword = async (req, res, next) => {
         }
 
         if (getAdmin.AuthType === "local") {
+
+             if (!oldPassword && !password) {
+            return ErrorHandler(FILL_ALL_FIELDS_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+
+            if (!oldPassword) {
+                return ErrorHandler(OLD_PASSWORD_ERROR, ERROR_STATUS_CODE, res)
+            }
 
             if (oldPassword === password) {
                 return ErrorHandler(OLD_AND_NEW_PASSWORD_DONOT_MATCH, ERROR_STATUS_CODE, res)
