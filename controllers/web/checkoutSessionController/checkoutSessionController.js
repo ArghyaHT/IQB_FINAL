@@ -34,8 +34,8 @@ export const createCheckOutSession = async (req, res, next) => {
         };
       }),
       // success_url: "http://localhost:5173/admin-subscription",
-      success_url: "https://iqb-final.netlify.app/admin-subscription",
-      cancel_url: "https://iqb-final.netlify.app/admin-salon",
+      success_url: "https://iqb-web-design.netlify.app/admin-subscription",
+      cancel_url: "https://iqb-web-design.netlify.app/admin-salon",
       metadata: {
         salonId: String(productInfo.salonId),
         adminEmail: String(productInfo.adminEmail),
@@ -86,8 +86,8 @@ export const onboardVendorAccount = async (req, res, next) => {
         // Create an account link for onboarding
         const accountLink = await stripe.accountLinks.create({
           account: vendorAccountId,
-          refresh_url: 'https://iqb-final.netlify.app/admin-dashboard/editprofile',
-          return_url: 'https://iqb-final.netlify.app/admin-dashboard/editprofile',
+          refresh_url: 'https://iqb-web-design.netlify.app/admin-dashboard/editprofile',
+          return_url: 'https://iqb-web-design.netlify.app/admin-dashboard/editprofile',
           type: 'account_onboarding',
         });
 
@@ -122,8 +122,8 @@ export const onboardVendorAccount = async (req, res, next) => {
     // Generate an account link for onboarding
     const accountLink = await stripe.accountLinks.create({
       account: stripeAccount.id,
-      refresh_url: 'https://iqb-final.netlify.app/admin-dashboard/editprofile',
-      return_url: 'https://iqb-final.netlify.app/admin-dashboard/editprofile',
+      refresh_url: 'https://iqb-web-design.netlify.app/admin-dashboard/editprofile',
+      return_url: 'https://iqb-web-design.netlify.app/admin-dashboard/editprofile',
       type: 'account_onboarding',
     });
 
@@ -244,8 +244,8 @@ export const vendorCreateCheckOutSession = async (req, res, next) => {
         },
         quantity: item.unit,
       })),
-      success_url: "https://iqb-final.netlify.app/mobilesuccess",
-      cancel_url: "https://iqb-final.netlify.app",
+      success_url: "https://iqb-web-design.netlify.app/mobilesuccess",
+      cancel_url: "https://iqb-web-design.netlify.app/",
       payment_intent_data: {
         application_fee_amount: platformFee,
         transfer_data: { destination: productInfo.vendorAccountId },
