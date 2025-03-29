@@ -110,7 +110,7 @@ export const getSalonOffDays = async(req, res, next) => {
        
        const salonOffDays = await getSalonOffDaysBySalonId(salonId)
 
-       return SuccessHandler(SALON_OFF_DAYS_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, {response: salonOffDays})
+       return SuccessHandler(SALON_OFF_DAYS_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, {response: salonOffDays? salonOffDays: []})
 
     }
     catch (error) {
