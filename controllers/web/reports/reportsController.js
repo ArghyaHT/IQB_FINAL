@@ -1349,6 +1349,7 @@ export const newdashboardReports = async (req, res, next) => {
         const totalAppointmentCount = await getAppointmentCountForLastWeek(salonId);
 
         const servedAppointmentCount = await getServedAppointmentCountlast7Days(salonId);
+
         const cancelledAppointmentCount = totalAppointmentCount - servedAppointmentCount;
 
 
@@ -1466,7 +1467,6 @@ export const newBarberdashboardReports = async (req, res, next) => {
         }
 
         // **Appointment Dashboard Logic**
-        const totalAppointmentCount = await getBarberTotalAppointmentCount(salonId, barberId);
         const servedAppointmentCount7Days = await getBarberServedAppointmentCountLast7Days(salonId, barberId);
 
 
