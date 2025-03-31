@@ -49,7 +49,7 @@ export const getBarberAppointmentDays = async (req, res, next) => {
 
         // return SuccessHandler(BARBER_APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: formatedBarberAppointmentDays })
 
-        return SuccessHandler(BARBER_APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: getbarberAppointmentDays? getbarberAppointmentDays: [] })
+        return SuccessHandler(BARBER_APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: getbarberAppointmentDays })
 
 
     }
