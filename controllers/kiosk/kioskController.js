@@ -1020,6 +1020,11 @@ export const getAvailableBarbersForQKiosk = async (req, res, next) => {
                 barberEWT: minEwtBarber.barberEWT,
                 isClockedIn: minEwtBarber.isClockedIn,
                 isOnline: minEwtBarber.isClockedIn,
+                profile: [
+                    {
+                        "url": "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg",
+                    }
+                ],
                 isDeleted: minEwtBarber.isDeleted,
                 isApproved: minEwtBarber.isApproved,
                 isActive: minEwtBarber.isActive,
