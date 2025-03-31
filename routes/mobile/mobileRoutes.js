@@ -11,6 +11,7 @@ import { pushDeviceTokens, pushFcmDeviceTokens } from "../../controllers/mobile/
 import { checkPushNotifications } from "../../utils/pushNotifications/pushNotifications.js";
 import { changeNotificationSeenStatus, getAllNotificationsByCustomerEmail } from "../../controllers/mobile/notificationController.js";
 import { getBarberMissingAppointmentDates, getFullyBookedDatesBySalonIdBarberId } from "../../controllers/web/barberAppointmentDays/barberAppointmentController.js";
+import { getSalonBusinessDays } from "../../controllers/mobile/salonSettingsController.js";
 // import { getAllAdvertisements } from "../../controllers/dashboard/dashboardController.js";
 
 const router = express.Router();
@@ -79,11 +80,10 @@ router.route("/getQlistByBarberId").post(getQlistbyBarberId)
 //Get Q list by Salon Id
 router.route("/getQlistBySalonId").get(getQueueListBySalonId)
 
-// //DESC:ADVERTISEMENT ROUTES ==============================
+//DESC:ADVERTISEMENT ROUTES ==============================
 
 //Get Advertisements
 router.route("/getAllAdvertisements").post(getAllAdvertisements)
-
 
 
 
@@ -110,5 +110,9 @@ router.route("/getBarberDisabledAppointmentDates").post(getBarberMissingAppointm
 
 router.route("/getFullyBookedDatesBySalonIdBarberId").post(getFullyBookedDatesBySalonIdBarberId)
 
+
+//Get Salon Business hours
+
+router.route("/getSalonBusinessHours").post(getSalonBusinessDays)
 
 export default router;
