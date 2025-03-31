@@ -32,7 +32,7 @@ const salonsSchema = new mongoose.Schema({
             },
             url: {
                 type: String,
-                default: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720532593/depositphotos_247872612-stock-illustration-no-image-available-icon-vector_fhytrg.jpg"
+                default: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1742907445/iqbLogo_brktfk.jpg",
             }
         }],
         default: [{}]
@@ -202,10 +202,6 @@ const salonsSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    // queueingExpiryDate: {
-    //     type: String,
-    //     default:""
-    // },
     isAppointments: {
         type: Boolean,
         default: false
@@ -262,21 +258,6 @@ const salonsSchema = new mongoose.Schema({
             }
         }
     ],
-
-    // subscriptions: [
-    //     Queue: {
-    //         trial: enum["initial", "free", "paid"],
-    //         planValidity: any value,
-    //         expirydate: "",
-    //         bought: ""
-    //     },
-    //     Appointment:{
-    //         trial: enum["initial", "free", "paid"],
-    //         planValidity: any value,
-    //         expirydate: "",
-    //         bought: ""
-    //     },
-    // ]
 
     subscriptions: {
         type: [{

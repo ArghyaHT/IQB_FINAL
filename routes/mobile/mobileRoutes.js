@@ -112,7 +112,6 @@ router.route("/getFullyBookedDatesBySalonIdBarberId").post(getFullyBookedDatesBy
 
 
 //Get Salon Business hours
-
 router.route("/getSalonBusinessHours").post(getSalonBusinessDays)
 
 export default router;

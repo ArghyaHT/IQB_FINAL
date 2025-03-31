@@ -35,7 +35,6 @@ export const createGoogleBarber = async(email, barberId) => {
       role: "Barber",
       AuthType: "google",
       barberId: barberId,
-      // barberCode: barberCode
     })
 
     await barber.save();
@@ -237,7 +236,6 @@ export const changeBarberStatus = async (barberId, isActive) => {
    return barber;
 }
 
-//CHANGE BARBER ONLINE STATUS
 //CHANGE BARBER ONLINE STATUS
 export const barberOnlineStatus = async (barberId, salonId, isOnline) => {
    const barber = await Barber.findOneAndUpdate(
