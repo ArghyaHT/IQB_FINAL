@@ -78,8 +78,8 @@ export const AdminLoggedIn = async (req, res, next) => {
     }
     else {
       // Add `isQueueing` and `isAppointments` fields from `salon` to `loggedinAdmin`
-      adminData.isQueueing = salon.isQueuing  // Default to false if undefined
-      adminData.isAppointments = salon.isAppointments // Default to false if undefined
+      adminData.isQueueing = salon.isQueuing?  salon.isQueuing : false// Default to false if undefined
+      adminData.isAppointments = salon.isAppointments?  salon.isAppointments : false// Default to false if undefined
     }
 
     // Respond with admin and payment details
