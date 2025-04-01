@@ -12,6 +12,12 @@ export const findBarberByEmailAndSalonId = async(email, salonId) => {
    return barber;
 }
 
+export const findGoogleBarberByEmailAndSalonId = async(email, salonId) => {
+   const barber = await Barber.findOne({ email, salonId: salonId, AuthType: "google", isApproved: true }).exec();
+
+   return barber;
+}
+
 export const findBaberByBarberId = async(barberId) => {
    const barber = await Barber.findOne({barberId}).exec();
 

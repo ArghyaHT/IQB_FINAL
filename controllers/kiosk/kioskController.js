@@ -2,8 +2,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken"
 
 
-import { connectAdminKiosk, findAdminByEmailandRole, findAdminByEmailandSalonId } from "../../services/kiosk/admin/adminServices.js";
-import { availableBarberAutoJoin, barberClockInStatus, barberOnlineStatus, changeBarberStatusAtSalonOffline, decreaseBarberEWT, decreaseBarberEWTWhenQCancel, fetchedBarbers, findBaberByBarberId, findBarberByBarberEmailAndSalonId, findBarberByEmailAndRole, findBarberByEmailAndSalonId, findBarbersBySalonId, getAllSalonBarbers, getBarberByBarberId, getBarbersForQ, getBarbersWithMulServices, updateBarberEWT } from "../../services/kiosk/barber/barberService.js";
+import { connectAdminKiosk, findAdminByEmailandRole, findAdminByEmailandSalonId, findGoogleAdminByEmailandSalonId } from "../../services/kiosk/admin/adminServices.js";
+import { availableBarberAutoJoin, barberClockInStatus, barberOnlineStatus, changeBarberStatusAtSalonOffline, decreaseBarberEWT, decreaseBarberEWTWhenQCancel, fetchedBarbers, findBaberByBarberId, findBarberByBarberEmailAndSalonId, findBarberByEmailAndRole, findBarberByEmailAndSalonId, findBarbersBySalonId, findGoogleBarberByEmailAndSalonId, getAllSalonBarbers, getBarberByBarberId, getBarbersForQ, getBarbersWithMulServices, updateBarberEWT } from "../../services/kiosk/barber/barberService.js";
 import { allSalonsByAdmin, allSalonServices, checkSalonExists, getDefaultSalonDetailsEmail, getSalonBySalonId, getSalonTimeZone, kioskAvailabilityStatus, mobileBookingAvailabilityStatus, salonOnlineStatus } from "../../services/kiosk/salon/salonServices.js";
 import { findCustomersToMail, findSalonQueueList, getSalonQlist, qListByBarberId } from "../../services/kiosk/queue/queueService.js";
 import { addCustomerToQueue } from "../../utils/queue/queueUtils.js";
@@ -2104,6 +2104,52 @@ export const salonAccountLogin = async (req, res, next) => {
             return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
                 foundUser
             })
+        }
+
+    }
+    catch (error) {
+        next(error);
+    }
+}
+
+export const googleSalonAccountLogin = async(req, res, next) =>{
+    try {
+        let { email, salonId, role } = req.body
+
+
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        if (!validateEmail(email)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        email = email.toLowerCase();
+
+        if (role === "Admin") {
+            const foundUser = await findGoogleAdminByEmailandSalonId(email, salonId)
+
+            if (!foundUser) {
+                return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
+            }
+            
+                // Send accessToken containing username and roles 
+                return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+                    foundUser
+                })
+        }
+        else {
+            const foundUser = await findGoogleBarberByEmailAndSalonId(email, salonId)
+
+            if (!foundUser) {
+                return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
+            }
+
+                // Send accessToken containing username and roles 
+                return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+                    foundUser
+                })
         }
 
     }
