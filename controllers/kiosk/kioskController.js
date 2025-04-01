@@ -20,7 +20,7 @@ import { ERROR_STATUS_CODE, ERROR_STATUS_CODE_403, ERROR_STATUS_CODE_404, SUCCES
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 import { ADMIN_CONNECT_SUCCESS, ADMIN_LOGIN_QUEUE_ERROR, BARBER_ATTENDENCE_ERROR, BARBER_ATTENDENCE_RETRIEVED_SUCCESS, BARBER_CONNECT_SALON_ERROR, BARBER_LOGIN_QUEUE_ERROR, BARBER_NOT_FOUND_ERROR, BARBER_OFFLINE_ERROR, BARBER_OFFLINE_SUCCESS, BARBER_ONLINE_SUCCESS, BARBER_RETRIEVED_SUCCESS, BARBER_SIGNIN_SUCCESS, BARBER_TOKEN_MISSING_ERROR, BARBERS_UNABLE_QUEUE_ERROR, DEFAULT_SALON_RETRIEVED_SUCESS, FORBIDDEN_BARBER_ERROR, JOIN_QUEUE_SUCCESS, KIOSK_AVAILABILITY_ERROR, KIOSK_OFFLINE_SUCCESS, KIOSK_ONLINE_SUCCESS, LOGOUT_SUCCESS, MOBILE_BOOKING_AVAILABILITY_ERROR, MOBILE_BOOKING_OFFLINE_SUCCESS, MOBILE_BOOKING_ONLINE_SUCCESS, NO_BARBERS_AVAILABLE_ERROR, NO_BARBERS_AVAILABLE_QUEUE_ERROR, NO_BARBERS_AVAILABLE_SUCCESS, SALON_JOIN_QUEUE_ERROR, SALON_KIOSK_AVAILABILITY_ERROR, SALON_KIOSK_ERROR, SALON_MOBILE_BOOKING_AVAILABILITY_ERROR, SALON_OFFLINE_ERROR, SALON_VALID_ERROR } from "../../constants/kiosk/KioskConstants.js";
 import { SALON_EXISTS_ERROR, SALON_NOT_FOUND_ERROR, SALON_OFFLINE_SUCCESS, SALON_ONLINE_SUCCESS, SALON_QUEUELIST_ERROR, SALONS_RETRIEVED_SUCESS } from "../../constants/web/SalonConstants.js";
-import { BARBER_CLOCKIN_ERROR, BARBER_CLOCKIN_SUCCESS, BARBER_CLOCKOUT_SUCCESS, BARBER_EXISTS_ERROR, BARBER_NOT_APPROVE_ERROR, BARBER_SERVICES_SUCCESS, CUSTOMERS_IN_QUEUE_ERROR, GET_ALL_BARBER_SUCCESS, SELECT_SERVICE_ERROR } from "../../constants/web/BarberConstants.js";
+import { BARBER_CLOCKIN_ERROR, BARBER_CLOCKIN_SUCCESS, BARBER_CLOCKOUT_SUCCESS, BARBER_EXISTS_ERROR, BARBER_NOT_APPROVE_ERROR, BARBER_NOT_EXIST_ERROR, BARBER_SERVICES_SUCCESS, CUSTOMERS_IN_QUEUE_ERROR, GET_ALL_BARBER_SUCCESS, SELECT_SERVICE_ERROR } from "../../constants/web/BarberConstants.js";
 
 import { ErrorHandler } from "../../middlewares/ErrorHandler.js";
 import { QUEUE_CANCEL_SUCCESS, QUEUE_NOT_FOUND_ERROR, QUEUE_POSITION_ERROR, QUEUE_SERVE_SUCCESS, RETRIVE_QUEUELIST_SUCCESS } from "../../constants/web/QueueConstants.js";
@@ -31,14 +31,13 @@ import { getPushDevicesbyEmailId } from "../../services/mobile/pushDeviceTokensS
 import { sendQueueNotification } from "../../utils/pushNotifications/pushNotifications.js";
 import { QUEUE_POSITION_CHANGE } from "../../constants/mobile/NotificationConstants.js";
 import { io } from "../../utils/socket/socket.js";
+import { googleLoginAdmin } from "../../services/web/admin/adminService.js";
+import { googleLoginBarber } from "../../services/web/barber/barberService.js";
 
 //DESC:LOGIN AN ADMIN =========================
 export const loginKiosk = async (req, res, next) => {
     try {
         let { email, password, role } = req.body
-
-        console.log("email", email)
-        console.log("password", email)
 
         if (!email && !password) {
             return ErrorHandler(EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
@@ -143,6 +142,79 @@ export const loginKiosk = async (req, res, next) => {
         next(error);
     }
 };
+
+export const googleLoginKiosk = async (req, res, next) => {
+    try {
+        let { email, role } = req.body
+
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        if (!validateEmail(email)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        email = email.toLowerCase();
+
+        if (role === "Admin") {
+            const foundUser = await googleLoginAdmin(email)
+
+            if (!foundUser) {
+                return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
+            }
+
+            const getDefaultAdminSalon = await getDefaultSalonDetailsEmail(foundUser.salonId)
+
+            if (getDefaultAdminSalon.isQueuing) {
+                const adminKioskToken = jwt.sign(
+                    {
+                        "email": foundUser.email,
+                        "role": foundUser.role
+                    },
+                    process.env.JWT_ADMIN_ACCESS_SECRET,
+                    { expiresIn: '1d' }
+                )
+                // Send accessToken containing username and roles 
+                return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+                    token: adminKioskToken,
+                    foundUser
+                })
+            }
+        }
+        else {
+            const foundUser = await googleLoginBarber(email)
+
+            if (!foundUser) {
+                return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
+            }
+
+            const getDefaultBarberSalon = await getDefaultSalonDetailsEmail(foundUser.salonId)
+
+            if (getDefaultBarberSalon.isQueuing) {
+
+                const barberKioskToken = jwt.sign(
+                    {
+                        "email": foundUser.email,
+                        "role": foundUser.role
+                    },
+                    process.env.JWT_BARBER_ACCESS_SECRET,
+                    { expiresIn: '1d' }
+                )
+
+                // Send accessToken containing username and roles 
+                return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+                    token: barberKioskToken,
+                    foundUser
+                })
+            }
+        }
+
+    }
+    catch (error) {
+        next(error);
+    }
+}
 
 //DESC:LOGOUT An Admin ========================
 export const logoutKiosk = async (req, res, next) => {
@@ -479,6 +551,54 @@ export const barberLoginKiosk = async (req, res, next) => {
         next(error);
     }
 };
+
+export const googleBarberLoginKiosk = async (req, res, next) => {
+    try {
+
+        let { email } = req.body
+
+        if (!email) {
+            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        if (!validateEmail(email)) {
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        email = email.toLowerCase();
+
+        const foundUser = await googleLoginBarber(email)
+
+        if (!foundUser) {
+            return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+
+        if (foundUser.isApproved === false) {
+            return ErrorHandler(BARBER_NOT_APPROVE_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+
+        const barberKioskToken = jwt.sign(
+            {
+                "email": foundUser.email,
+                "role": foundUser.role
+            },
+            process.env.JWT_BARBER_ACCESS_SECRET,
+            { expiresIn: '1d' }
+        )
+
+        // Send accessToken containing username and roles 
+        return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+            token: barberKioskToken,
+            foundUser
+        })
+
+    }
+    catch (error) {
+        next(error);
+    }
+}
 
 //DESC:CHANGE BARBER ONLINE STATUS ===========================
 export const changeBarberOnlineStatus = async (req, res, next) => {

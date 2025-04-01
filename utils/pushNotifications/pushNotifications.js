@@ -23,8 +23,6 @@ export const sendQueueNotification = async(Token, SalonName, Current, FirstLastN
 
     const existingUser = await findNotificationUserByEmail(customerEmail)
 
-    console.log(existingUser)
-
 
     if (existingUser) {
         // Email already exists, update the existing document
