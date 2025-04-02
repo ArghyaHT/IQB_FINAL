@@ -19,7 +19,6 @@ export const savedNewBarberAttendence = async (salonId, barberId, adjustedDayOfW
                 day: adjustedDayOfWeek,
                 date: adjustedDate,
                 signInTime: adjustedTime,
-                signOutTime: ""
             }]
         });
         await newAttendanceRecord.save();
@@ -38,7 +37,6 @@ export const saveOldBarberAttendence = async (salonId, barberId, adjustedDayOfWe
         day: adjustedDayOfWeek,
         date: adjustedDate,
         signInTime: adjustedTime,
-        signOutTime: ""
     });
     await existingAttendance.save();
     return existingAttendance;

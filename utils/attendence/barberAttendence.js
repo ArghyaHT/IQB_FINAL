@@ -38,6 +38,7 @@ export const barberLogInTime = async (salonId, barberId, updatedAt) => {
         if (todayAttendance) {
             // Update the sign-out time
             todayAttendance.signInTime = adjustedTime;
+            todayAttendance.signOutTime = ""
             await attendanceRecord.save(); // Save the updated record
             return { success: true, message: "SignIn time updated" };
     }else{
