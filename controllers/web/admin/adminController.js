@@ -760,11 +760,10 @@ export const getDefaultSalonByAdmin = async (req, res, next) => {
         if (admin.salonId === 0) {
 
             const defaultLogo = [{
-                "url": "https://res-console.cloudinary.com/dpynxkjfq/thumbnails/v1/image/upload/v1743597098/aXFiX2JvcmRlcmxlc3NfaXZpOTY1/drilldown"
+                "url": "https://res.cloudinary.com/dpynxkjfq/image/upload/v1743597098/iqb_borderless_ivi965.jpg"
               }]
-              
             res.status(SUCCESS_STATUS_CODE).json({
-                success: false,
+                success: true,
                 message: "There are no salons present for this admin",
                 response: {
                     salonLogo: defaultLogo
