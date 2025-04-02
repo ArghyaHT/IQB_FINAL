@@ -147,16 +147,6 @@ export const googleLoginKiosk = async (req, res, next) => {
     try {
         let { email, role } = req.body
 
-        if (!email) {
-            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
-        }
-
-        if (!validateEmail(email)) {
-            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
-        }
-
-        email = email.toLowerCase();
-
         if (role === "Admin") {
             const foundUser = await googleLoginAdmin(email)
 
@@ -556,16 +546,6 @@ export const googleBarberLoginKiosk = async (req, res, next) => {
     try {
 
         let { email } = req.body
-
-        if (!email) {
-            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
-        }
-
-        if (!validateEmail(email)) {
-            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
-        }
-
-        email = email.toLowerCase();
 
         const foundUser = await googleLoginBarber(email)
 
@@ -2115,17 +2095,6 @@ export const salonAccountLogin = async (req, res, next) => {
 export const googleSalonAccountLogin = async(req, res, next) =>{
     try {
         let { email, salonId, role } = req.body
-
-
-        if (!email) {
-            return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
-        }
-
-        if (!validateEmail(email)) {
-            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
-        }
-
-        email = email.toLowerCase();
 
         if (role === "Admin") {
             const foundUser = await findGoogleAdminByEmailandSalonId(email, salonId)
