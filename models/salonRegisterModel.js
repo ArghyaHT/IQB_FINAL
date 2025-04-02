@@ -32,7 +32,7 @@ const salonsSchema = new mongoose.Schema({
             },
             url: {
                 type: String,
-                default: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1742907445/iqbLogo_brktfk.jpg",
+                default: "https://res-console.cloudinary.com/dpynxkjfq/thumbnails/v1/image/upload/v1743597098/aXFiX2JvcmRlcmxlc3NfaXZpOTY1/drilldown",
             }
         }],
         default: [{}]
