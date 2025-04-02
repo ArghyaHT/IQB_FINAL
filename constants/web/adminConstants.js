@@ -64,3 +64,7 @@ export const NO_ADMIN_SALONS = "There are no salons present for this admin"
 
 
 export const CHANGE_PASSWORD_SUCCESS = "Admin password updated successfully"
+
+export const NO_QUEUE_ERROR = "Queuing is disabled for this salon"
+
+export const CREATE_SALON_ERROR = "Please create a salon first"

@@ -15,7 +15,7 @@ import { barberLogInTime, barberLogOutTime } from "../../utils/attendence/barber
 import { validateEmail } from "../../middlewares/validator.js";
 
 import moment from "moment";
-import { ADMIN_NOT_EXIST_ERROR, EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, INVALID_EMAIL_ERROR, NAME_LENGTH_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, SIGNIN_SUCCESS } from "../../constants/web/adminConstants.js";
+import { ADMIN_NOT_EXIST_ERROR, CREATE_SALON_ERROR, EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, INVALID_EMAIL_ERROR, NAME_LENGTH_ERROR, NO_QUEUE_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, SIGNIN_SUCCESS } from "../../constants/web/adminConstants.js";
 import { ERROR_STATUS_CODE, ERROR_STATUS_CODE_403, ERROR_STATUS_CODE_404, SUCCESS_STATUS_CODE } from "../../constants/kiosk/StatusCodeConstants.js";
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 import { ADMIN_CONNECT_SUCCESS, ADMIN_LOGIN_QUEUE_ERROR, BARBER_ATTENDENCE_ERROR, BARBER_ATTENDENCE_RETRIEVED_SUCCESS, BARBER_CONNECT_SALON_ERROR, BARBER_LOGIN_QUEUE_ERROR, BARBER_NOT_FOUND_ERROR, BARBER_OFFLINE_ERROR, BARBER_OFFLINE_SUCCESS, BARBER_ONLINE_SUCCESS, BARBER_RETRIEVED_SUCCESS, BARBER_SIGNIN_SUCCESS, BARBER_TOKEN_MISSING_ERROR, BARBERS_UNABLE_QUEUE_ERROR, DEFAULT_SALON_RETRIEVED_SUCESS, FORBIDDEN_BARBER_ERROR, JOIN_QUEUE_SUCCESS, KIOSK_AVAILABILITY_ERROR, KIOSK_OFFLINE_SUCCESS, KIOSK_ONLINE_SUCCESS, LOGOUT_SUCCESS, MOBILE_BOOKING_AVAILABILITY_ERROR, MOBILE_BOOKING_OFFLINE_SUCCESS, MOBILE_BOOKING_ONLINE_SUCCESS, NO_BARBERS_AVAILABLE_ERROR, NO_BARBERS_AVAILABLE_QUEUE_ERROR, NO_BARBERS_AVAILABLE_SUCCESS, SALON_JOIN_QUEUE_ERROR, SALON_KIOSK_AVAILABILITY_ERROR, SALON_KIOSK_ERROR, SALON_MOBILE_BOOKING_AVAILABILITY_ERROR, SALON_OFFLINE_ERROR, SALON_VALID_ERROR } from "../../constants/kiosk/KioskConstants.js";
@@ -76,7 +76,15 @@ export const loginKiosk = async (req, res, next) => {
                 return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
             }
 
+            if(foundUser.salonId === 0){
+                return ErrorHandler(CREATE_SALON_ERROR, ERROR_STATUS_CODE, res);
+            }
+
             const getDefaultAdminSalon = await getDefaultSalonDetailsEmail(foundUser.salonId)
+
+            if (!getDefaultAdminSalon.isQueuing) {
+                return ErrorHandler(NO_QUEUE_ERROR, ERROR_STATUS_CODE, res);
+            }
 
             if (getDefaultAdminSalon.isQueuing) {
                 const adminKioskToken = jwt.sign(
@@ -112,7 +120,16 @@ export const loginKiosk = async (req, res, next) => {
 
             }
 
+            if(foundUser.salonId === 0){
+                return ErrorHandler(CREATE_SALON_ERROR, ERROR_STATUS_CODE, res);
+            }
+
             const getDefaultBarberSalon = await getDefaultSalonDetailsEmail(foundUser.salonId)
+
+
+            if (!getDefaultBarberSalon.isQueuing) {
+                return ErrorHandler(NO_QUEUE_ERROR, ERROR_STATUS_CODE, res);
+            }
 
             if (getDefaultBarberSalon.isQueuing) {
 
@@ -154,7 +171,15 @@ export const googleLoginKiosk = async (req, res, next) => {
                 return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
             }
 
+            if(foundUser.salonId === 0){
+                return ErrorHandler(CREATE_SALON_ERROR, ERROR_STATUS_CODE, res);
+            }
+
             const getDefaultAdminSalon = await getDefaultSalonDetailsEmail(foundUser.salonId)
+
+            if (!getDefaultAdminSalon.isQueuing) {
+                return ErrorHandler(NO_QUEUE_ERROR, ERROR_STATUS_CODE, res);
+            }
 
             if (getDefaultAdminSalon.isQueuing) {
                 const adminKioskToken = jwt.sign(
@@ -179,7 +204,17 @@ export const googleLoginKiosk = async (req, res, next) => {
                 return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
             }
 
+
+            if(foundUser.salonId === 0){
+                return ErrorHandler(CREATE_SALON_ERROR, ERROR_STATUS_CODE, res);
+            }
+
+            
             const getDefaultBarberSalon = await getDefaultSalonDetailsEmail(foundUser.salonId)
+
+            if (!getDefaultBarberSalon.isQueuing) {
+                return ErrorHandler(NO_QUEUE_ERROR, ERROR_STATUS_CODE, res);
+            }
 
             if (getDefaultBarberSalon.isQueuing) {
 
