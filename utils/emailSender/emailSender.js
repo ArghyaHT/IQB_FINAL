@@ -347,3 +347,30 @@ export const sendPaymentSuccesEmail = async(email, emailSubject, emailBody, invo
     }
   });
 };
+
+// DESC: SEND CONTACT FORM EMAIL ============================
+export const sendContactFormEmail = (name, email, mobileCountryCode, mobileNumber, message) => {
+  const emailSubject = "New Contact Form Submission";
+  const emailBody = `
+    <h2>New Contact Form Submission</h2>
+    <p><strong>Name:</strong> ${name}</p>
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Phone:</strong> +${mobileCountryCode} ${mobileNumber}</p>
+    <p><strong>Message:</strong> ${message}</p>
+  `;
+
+  const mailOptions = {
+    from: process.env.SENDER_EMAIL_ADDRESS, // Replace with your sender email
+    to: process.env.SENDER_EMAIL_ADDRESS, // Replace with your actual recipient email
+    subject: emailSubject,
+    html: emailBody
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Error sending email:", error);
+    } else {
+      console.log("Email sent:", info.response);
+    }
+  });
+};
