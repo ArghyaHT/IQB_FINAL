@@ -22,7 +22,7 @@ import { sendMobileVerificationCode } from "../../../utils/mobileMessageSender/m
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import { EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, EMAIL_VERIFIED_SUCCESS, EMAIL_VERIFY_CODE_ERROR, FILL_ALL_FIELDS_ERROR, FORGET_PASSWORD_SUCCESS, FORGOT_PASSWORD_EMAIL_ERROR, IMAGE_EMPTY_ERROR, IMAGE_FILE_EXTENSION_ERROR, IMAGE_FILE_SIZE_ERROR, IMAGE_UPLOAD_SUCCESS, INCORRECT_OLD_PASSWORD_ERROR, INVALID_EMAIL_ERROR, MOBILE_NUMBER_ERROR, MOBILE_VERIFIED_SUCCESS, MOBILE_VERIFY_CODE_ERROR, NAME_LENGTH_ERROR, NEW_PASSWORD_ERROR, OLD_AND_NEW_PASSWORD_DONOT_MATCH, OLD_PASSWORD_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, RESET_PASSWORD_SUCCESS, SEND_VERIFICATION_EMAIL_SUCCESS, SEND_VERIFICATION_MOBILE_SUCCESS, VERIFICATION_EMAIL_ERROR } from "../../../constants/web/adminConstants.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
-import { BARBER_CLOCKIN_ERROR, BARBER_CLOCKIN_SUCCESS, BARBER_CLOCKOUT_SUCCESS, BARBER_CONNECT_SALON_SUCCESS, BARBER_DETAILS_SUCCESS, BARBER_EXISTS_ERROR, BARBER_NOT_APPROVE_ERROR, BARBER_NOT_EXIST_ERROR, BARBER_SERVICES_SUCCESS, CHANGE_BARBER_ONLINE_SUCCESS, CHANGE_PASSWORD_SUCCESS, CREATE_BARBER_SUCCESS, CUSTOMERS_IN_QUEUE_ERROR, EMPTY_SERVICE_ERROR, GET_ALL_BARBER_SUCCESS, LOGOUT_SUCCESS, NO_BARBER_SERVICEID_ERROR, NO_BARBERS_ERROR, SELECT_SERVICE_ERROR, SIGNIN_SUCCESS, SIGNUP_SUCCESS, UPDATE_BARBER_SUCCESS } from "../../../constants/web/BarberConstants.js";
+import { BARBER_CLOCKIN_ERROR, BARBER_CLOCKIN_SUCCESS, BARBER_CLOCKOUT_SUCCESS, BARBER_CONNECT_SALON_SUCCESS, BARBER_DETAILS_SUCCESS, BARBER_EXISTS_ERROR, BARBER_MOBILE_NOT_EXIST_ERROR, BARBER_NOT_APPROVE_ERROR, BARBER_NOT_EXIST_ERROR, BARBER_SERVICES_SUCCESS, CHANGE_BARBER_ONLINE_SUCCESS, CHANGE_PASSWORD_SUCCESS, CREATE_BARBER_SUCCESS, CUSTOMERS_IN_QUEUE_ERROR, EMPTY_SERVICE_ERROR, GET_ALL_BARBER_SUCCESS, LOGOUT_SUCCESS, NO_BARBER_SERVICEID_ERROR, NO_BARBERS_ERROR, SELECT_SERVICE_ERROR, SIGNIN_SUCCESS, SIGNUP_SUCCESS, UPDATE_BARBER_SUCCESS } from "../../../constants/web/BarberConstants.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ALLOWED_IMAGE_EXTENSIONS, BARBER_IMAGE_EMPTY_ERROR, IMAGE_FAILED_DELETE, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 import { SALON_EXISTS_ERROR, SALON_NOT_CREATED_ERROR, SALON_NOT_FOUND_ERROR, SALON_SERVICES_RETRIEVED_SUCESS } from "../../../constants/web/SalonConstants.js";
@@ -1431,6 +1431,11 @@ export const sendVerificationCodeForBarberEmail = async (req, res, next) => {
             return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
+        if (!user.mobileNumber) {
+            return ErrorHandler(BARBER_MOBILE_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+
         const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
 
         user.verificationCode = verificationCode;
@@ -1595,7 +1600,7 @@ export const barberchangepassword = async (req, res, next) => {
         //     return ErrorHandler(FILL_ALL_FIELDS_ERROR, ERROR_STATUS_CODE, res)
         // }
 
-       
+
         if (!password) {
             return ErrorHandler(NEW_PASSWORD_ERROR, ERROR_STATUS_CODE, res)
         }
@@ -1610,9 +1615,9 @@ export const barberchangepassword = async (req, res, next) => {
 
         if (getBarber.AuthType === "local") {
 
-             if (!oldPassword && !password) {
-            return ErrorHandler(FILL_ALL_FIELDS_ERROR, ERROR_STATUS_CODE, res)
-        }
+            if (!oldPassword && !password) {
+                return ErrorHandler(FILL_ALL_FIELDS_ERROR, ERROR_STATUS_CODE, res)
+            }
 
 
             if (!oldPassword) {
@@ -1669,26 +1674,27 @@ export const barberchangepassword = async (req, res, next) => {
 //DESC:GET ALL SALON SERVICES ======================
 export const getAllSalonServicesForBarber = async (req, res, next) => {
     try {
-  
-      const { salonId } = req.query;
-  
-      if (Number(salonId) === 0) {
-        return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res)
-    }
-  
-      const salon = await getSalonBySalonId(salonId)
 
-          // Assuming the salon object includes a `currency` field
-    const { services, currency } = salon;
-  
-      return SuccessHandler(SALON_SERVICES_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: {
-        services,
-        currency, 
-    }
-    })
+        const { salonId } = req.query;
+
+        if (Number(salonId) === 0) {
+            return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        const salon = await getSalonBySalonId(salonId)
+
+        // Assuming the salon object includes a `currency` field
+        const { services, currency } = salon;
+
+        return SuccessHandler(SALON_SERVICES_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, {
+            response: {
+                services,
+                currency,
+            }
+        })
     }
     catch (error) {
-      next(error);
+        next(error);
     }
-  }
+}
 

@@ -1,5 +1,6 @@
 //ERROR
 export const BARBER_NOT_EXIST_ERROR = "Barber does not exist"
+export const BARBER_MOBILE_NOT_EXIST_ERROR = "Please add phone number for verification"
 export const BARBER_EXISTS_ERROR = "Barber already exists"
 export const SELECT_SERVICE_ERROR = "Please select a service"
 export const NO_BARBERS_ERROR = "No barbers available"
