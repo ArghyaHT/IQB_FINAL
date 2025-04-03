@@ -4,14 +4,37 @@ import fs from "fs"
 
 // Configure the email transporter
 const transporter = nodemailer.createTransport({
-  host: 'iqueuebarbers.com',
+  // host: 'iqueuebarbers.com',
+  // port: 465,
+  // secure: true,
+  // auth: {
+  //   user: process.env.SENDER_EMAIL_ADDRESS,
+  //   pass: 'DDOoTM5uB3rH',
+  // },
+
+    host: 'smtp.gmail.com',
   port: 465,
   secure: true,
   auth: {
-    user: process.env.SENDER_EMAIL_ADDRESS,
-    pass: 'DDOoTM5uB3rH',
+    user: 'arghyahimanstech@gmail.com',
+    pass: 'srseljzsckyykpsg',
   },
   });
+
+  // host: 'smtp.gmail.com',
+  // port: 465,
+  // secure: true,
+  // auth: {
+  //   user: 'arghyahimanstech@gmail.com',
+  //   pass: 'srseljzsckyykpsg',
+  // },
+// host: 'smtp.hostinger.com',
+// port: 465,
+// secure: true,
+// auth: {
+//   user: process.env.SENDER_EMAIL_ADDRESS,
+//   pass: 'Bikki@852147',
+// },
 
 transporter.verify((err, success) => {
   if (err) console.error(err);

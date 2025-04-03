@@ -40,6 +40,7 @@ import barberBreakTimes from "./routes/web/barberBreakTimes/barberBreakTimeRoute
 import barberReservations from "./routes/web/barberReservations/barberReservationsRoutes.js"
 import checkoutSession from "./routes/web/checkOutSessionRoutes/checkoutSessionRoutes.js"
 import webhooks from "./routes/web/webhookRoutes/webhookRoutes.js"
+import  clientLeads from "./routes/web/clientLeads/clientLeadsRoute.js"
 
 // import { setupCronJobs } from "./triggers/cronJobs.js";
 // import { storeCountries } from "./utils/countries.js";
@@ -673,6 +674,7 @@ app.use("/api/barberAppointmentDays", barberAppointmentDays)
 app.use('/api/salonPayments', salonPaymentRoutes);
 app.use("/api/barberBreakTimes", barberBreakTimes)
 app.use("/api/barberReservations", barberReservations)
+app.use("/api/clientLeads", clientLeads)
 
 
 app.use("/api", checkoutSession)
