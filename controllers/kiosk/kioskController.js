@@ -605,7 +605,7 @@ export const googleBarberLoginKiosk = async (req, res, next) => {
 
         // Send accessToken containing username and roles 
         return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
-            token: barberKioskToken,
+            barberToken: barberKioskToken,
             foundUser
         })
 
