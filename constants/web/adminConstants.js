@@ -6,6 +6,7 @@ export const PASSWORD_NOT_PRESENT_ERROR = "Please enter your password"
 export const PASSWORD_LENGTH_ERROR = "Password must be at least 8 characters"
 export const NAME_LENGTH_ERROR = "Name must be between 1 to 20 characters"
 export const ADMIN_NOT_EXIST_ERROR = "Admin does not exist"
+export const ADMIN_MOBILE_NOT_EXIST_ERROR = "Please add phone number for verification"
 export const ADMIN_EXISTS_ERROR = "Admin already exists"
 
 export const EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR = "Email or password donot match"
