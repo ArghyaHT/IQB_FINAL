@@ -47,6 +47,9 @@ export const loggedIn = async (req, res, next) => {
 
             const bookingAvailabilityStatus = await getbokingAvailabilystatus(loggedInBarber.salonId);
 
+            const kioskAvailabilityStatus = await getKioskAvailabilystatus(loggedInBarber.salonId)
+
+
             res.status(201).json({
                 message: "Yes i am barber Logged in",
                 email,
@@ -56,6 +59,7 @@ export const loggedIn = async (req, res, next) => {
                     ...loggedInBarber.toObject(), // Convert Mongoose document to plain object
                     isSalonOnline: salonOnlineStatus,
                     mobileBookingAvailability: bookingAvailabilityStatus,
+                    kioskAvailability: kioskAvailabilityStatus,
                     salonName: salonName,
                     salonLogo: salonImage,
                     salonAdvertisements: salonAdds
