@@ -2205,21 +2205,11 @@ export const barberServedQueueTvApp = async (req, res, next) => {
         let { salonId, barberId, servedByEmail, adminEmail, services, _id } = req.body;
 
         if (!adminEmail) {
-            // return res.status(400).json({
-            //     success: false,
-            //     message: "Please enter your email."
-            // });
             return ErrorHandler(EMAIL_NOT_PRESENT_ERROR, ERROR_STATUS_CODE, res)
-
         }
 
         if (!validateEmail(adminEmail)) {
-            // return res.status(400).json({
-            //     success: false,
-            //     message: "Invalid Email "
-            // });
             return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
-
         }
 
         adminEmail = adminEmail.toLowerCase();
@@ -2229,10 +2219,6 @@ export const barberServedQueueTvApp = async (req, res, next) => {
             const foundUser = await findAdminByEmailandSalonId(adminEmail, salonId);
 
             if (!foundUser) {
-                // return res.status(400).json({
-                //     success: false,
-                //     message: 'Admin not found'
-                // })
                 return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
 
             }
@@ -2836,3 +2822,44 @@ export const cancelQueueTvApp = async (req, res, next) => {
     }
 };
 
+
+export const googleLoginTV = async (req, res, next) => {
+    try {
+        let { email } = req.body
+
+            const foundUser = await googleLoginAdmin(email)
+
+            if (!foundUser) {
+                return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
+            }
+
+            if(foundUser.salonId === 0){
+                return ErrorHandler(CREATE_SALON_ERROR, ERROR_STATUS_CODE, res);
+            }
+
+            const getDefaultAdminSalon = await getDefaultSalonDetailsEmail(foundUser.salonId)
+
+            if (!getDefaultAdminSalon.isQueuing) {
+                return ErrorHandler(NO_QUEUE_ERROR, ERROR_STATUS_CODE, res);
+            }
+
+            if (getDefaultAdminSalon.isQueuing) {
+                const adminKioskToken = jwt.sign(
+                    {
+                        "email": foundUser.email,
+                        "role": foundUser.role
+                    },
+                    process.env.JWT_ADMIN_ACCESS_SECRET,
+                    { expiresIn: '1d' }
+                )
+                // Send accessToken containing username and roles 
+                return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+                    token: adminKioskToken,
+                    response: foundUser
+                })
+            }
+        }
+        catch (error) {
+            next(error);
+        }
+    }
