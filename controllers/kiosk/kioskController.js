@@ -24,7 +24,7 @@ import { BARBER_CLOCKIN_ERROR, BARBER_CLOCKIN_SUCCESS, BARBER_CLOCKOUT_SUCCESS, 
 
 import { ErrorHandler } from "../../middlewares/ErrorHandler.js";
 import { QUEUE_CANCEL_SUCCESS, QUEUE_NOT_FOUND_ERROR, QUEUE_POSITION_ERROR, QUEUE_SERVE_SUCCESS, RETRIVE_QUEUELIST_SUCCESS } from "../../constants/web/QueueConstants.js";
-import { ADVERT_IMAGES_SUCCESS } from "../../constants/web/DashboardConstants.js";
+import { ADVERT_IMAGES_SUCCESS, ADVERT_NOT_FOUND, ADVERT_NOT_PRESENT_ERROR } from "../../constants/web/DashboardConstants.js";
 
 import SalonQueueListModel from "../../models/salonQueueListModel.js";
 import { getPushDevicesbyEmailId } from "../../services/mobile/pushDeviceTokensService.js";
@@ -1858,13 +1858,14 @@ export const getAllAdvertisementsKiosk = async (req, res, next) => {
         // Find SalonSettings by salonId and retrieve only the advertisements field
         const salonSettings = await getAdvertisements(salonId)
 
-        // Sort advertisements array in descending order
-        const sortedAdvertisements = salonSettings.advertisements;
-
         if (!salonSettings) {
-            return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE_404, res)
+            return ErrorHandler(ADVERT_NOT_FOUND, ERROR_STATUS_CODE_404, res)
         }
 
+        // Sort advertisements array in descending order
+        const sortedAdvertisements = salonSettings.advertisements|| [];
+
+    
         return SuccessHandler(ADVERT_IMAGES_SUCCESS, SUCCESS_STATUS_CODE, res, { advertisements: sortedAdvertisements })
 
     } catch (error) {
