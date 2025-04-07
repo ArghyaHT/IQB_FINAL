@@ -908,7 +908,7 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
     const updatedSalon = await salonOnlineStatus(salonId, isOnline)
 
-    io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
+    await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
       salonId: salonId,
       isOnline: isOnline // or false when offline
   });
