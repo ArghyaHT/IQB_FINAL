@@ -26,6 +26,7 @@ import { CITY_NOT_FOUND_ERROR, COUNTRY_NOT_FOUND_ERROR } from "../../../constant
 import moment from "moment";
 import Salon from "../../../models/salonRegisterModel.js";
 import SalonPayments from "../../../models/salonPaymnetsModel.js";
+import { io } from "../../../utils/socket/socket.js";
 
 
 //DESC:CREATE SALON BY ADMIN============================
@@ -899,18 +900,6 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
   try {
     const { salonId, isOnline } = req.body;
 
-    // const salonQueueList = await SalonQueueListModel.findOne({ salonId });
-
-    // if (!salonQueueList) {
-    //   return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res);
-    // }
-
-    // if (salonQueueList.queueList.length > 0 && isOnline === false) {
-
-    //   return ErrorHandler(SALON_QUEUELIST_ERROR, ERROR_STATUS_CODE, res)
-
-    // }
-
     const salonQueueList = await SalonQueueListModel.findOne({ salonId });
 
     if (salonQueueList?.queueList?.length > 0 && isOnline === false) {
@@ -918,6 +907,11 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
     }
 
     const updatedSalon = await salonOnlineStatus(salonId, isOnline)
+
+    io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
+      salonId: salonId,
+      isOnline: isOnline // or false when offline
+  });
 
     if (!updatedSalon) {
       return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
