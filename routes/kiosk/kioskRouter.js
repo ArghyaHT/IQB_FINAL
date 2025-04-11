@@ -1,5 +1,5 @@
 import express from "express";
-import { adminConnectKiosk, barberLoginKiosk, barberServedQueueKiosk, cancelQueueKiosk, changeBarberClockInStatus, changeBarberOnlineStatus, changeMobileBookingAvailabilityOfSalon, changeSalonKioskStatus, changeSalonOnlineStatus, getAllAdvertisementsKiosk, getAllBarberbySalonId, getAllBarberbySalonIdKiosk, getAllSalonServices, getAllSalonsByAdmin, getAttendenceByBarberIdKiosk, getAvailableBarbersForQKiosk, getBarberByServicesKiosk, getBarberServicesByBarberIdKiosk, getDefaultSalon, getQueueListBySalonId, googleBarberLoginKiosk, googleLoginKiosk, googleLoginTV, googleSalonAccountLogin, joinQueueKiosk, loginKiosk, logoutKiosk, salonAccountLogin } from "../../controllers/kiosk/kioskController.js";
+import { adminConnectKiosk, barberLoginKiosk, barberServedQueueKiosk, cancelQueueKiosk, changeBarberClockInStatus, changeBarberOnlineStatus, changeMobileBookingAvailabilityOfSalon, changeSalonKioskStatus, changeSalonOnlineStatus, getAllAdvertisementsKiosk, getAllBarberbySalonId, getAllBarberbySalonIdKiosk, getAllSalonServices, getAllSalonsByAdmin, getAttendenceByBarberIdKiosk, getAvailableBarbersForQKiosk, getBarberByServicesKiosk, getBarberServicesByBarberIdKiosk, getDefaultSalon, getQueueListBySalonId, googleBarberLoginKiosk, googleLoginKiosk, googleSalonAccountLogin, joinQueueKiosk, loginKiosk, logoutKiosk, salonAccountLogin } from "../../controllers/kiosk/kioskController.js";
 import { VerifyAdminJwtToken } from "../../middlewares/kiosk/VerifyAdminJwtToken.js";
 // import { verifyAuthToken } from "../../middlewares/VerifyAuthToken.js";
 // import { verifyBarberRefreshToken } from "../../middlewares/VerifyBarberRefreshToken.js";
@@ -12,9 +12,6 @@ router.route("/loginKiosk").post(loginKiosk)
 router.route('/logoutKiosk').post(logoutKiosk)
 
 router.route('/googleLoginKiosk').post(googleLoginKiosk)
-
-router.route("/googleLoginTV").post(googleLoginTV)
-
 
 router.route("/barberLoginKiosk").post(barberLoginKiosk)
 

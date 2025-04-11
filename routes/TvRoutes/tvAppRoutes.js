@@ -1,9 +1,12 @@
 import express from "express";
-import { adminConnectKiosk, barberLoginKiosk, barberServedQueueTvApp, cancelQueueTvApp, changeBarberClockInStatus, changeBarberOnlineStatus, changeMobileBookingAvailabilityOfSalon, changeSalonOnlineStatus, getAllAdvertisementsKiosk, getAllBarberbySalonId, getAllBarberbySalonIdKiosk, getAllSalonsByAdmin, getAllSalonServices, getAttendenceByBarberIdKiosk, getAvailableBarbersForQKiosk, getBarberByServicesKiosk, getBarberServicesByBarberIdKiosk, getQueueListBySalonId, joinQueueKiosk, loginKiosk, salonAccountLogin } from "../../controllers/kiosk/kioskController.js";
+import { adminConnectKiosk, barberLoginKiosk, barberServedQueueTvApp, cancelQueueTvApp, changeBarberClockInStatus, changeBarberOnlineStatus, changeMobileBookingAvailabilityOfSalon, changeSalonOnlineStatus, getAllAdvertisementsKiosk, getAllBarberbySalonId, getAllBarberbySalonIdKiosk, getAllSalonsByAdmin, getAllSalonServices, getAttendenceByBarberIdKiosk, getAvailableBarbersForQKiosk, getBarberByServicesKiosk, getBarberServicesByBarberIdKiosk, getQueueListBySalonId, googleLoginTV, joinQueueKiosk, loginKiosk, salonAccountLogin } from "../../controllers/kiosk/kioskController.js";
 
 const router = express.Router();
 
 router.route("/login").post(loginKiosk)
+
+router.route("/googleLoginTV").post(googleLoginTV)
+
 
 //getQListBySalonId
 router.route("/getQListBySalonId").get(getQueueListBySalonId)
