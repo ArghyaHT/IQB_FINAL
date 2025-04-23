@@ -500,7 +500,7 @@ export const getAllBarberbySalonIdKiosk = async (req, res, next) => {
             return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        return SuccessHandler(GET_ALL_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { response: getAllBarbers })
+        return SuccessHandler(GET_ALL_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { response: getAllBarbers.filter(barber => barber.AuthType === "local") })
 
     } catch (error) {
         //console.log(error);
