@@ -496,6 +496,7 @@ export const getAllBarberbySalonIdKiosk = async (req, res, next) => {
 
         const getAllBarbers = await fetchedBarbers(query);
 
+
         if (getAllBarbers.length === 0) {
             return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE, res)
         }

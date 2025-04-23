@@ -93,7 +93,7 @@ export const updateBarberEWT = async (salonId, barberId, totalServiceEWT) => {
 
  //GET ALL BARBERS BY SALONID
 export const fetchedBarbers = async (query) => {
-   const barbers = await Barber.find(query).sort({ email: 1 }).select("email isClockedIn"); 
+   const barbers = await Barber.find(query).sort({ email: 1 }).select("email isClockedIn AuthType"); 
 
    return barbers
 }
