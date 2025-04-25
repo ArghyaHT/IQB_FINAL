@@ -1,5 +1,5 @@
 import express from "express";
-import { adminConnectKiosk, barberLoginKiosk, barberServedQueueTvApp, cancelQueueTvApp, changeBarberClockInStatus, changeBarberOnlineStatus, changeMobileBookingAvailabilityOfSalon, changeSalonOnlineStatus, getAllAdvertisementsKiosk, getAllBarberbySalonId, getAllBarberbySalonIdKiosk, getAllSalonsByAdmin, getAllSalonServices, getAttendenceByBarberIdKiosk, getAvailableBarbersForQKiosk, getBarberByServicesKiosk, getBarberServicesByBarberIdKiosk, getDefaultSalon, getQueueListBySalonId, googleLoginTV, joinQueueKiosk, loginKiosk, salonAccountLogin } from "../../controllers/kiosk/kioskController.js";
+import { adminConnectKiosk, barberLoginKiosk, barberServedQueueTvApp, cancelQueueTvApp, changeBarberClockInStatus, changeBarberOnlineStatus, changeMobileBookingAvailabilityOfSalon, changeSalonKioskStatus, changeSalonOnlineStatus, getAllAdvertisementsKiosk, getAllBarberbySalonId, getAllBarberbySalonIdKiosk, getAllSalonsByAdmin, getAllSalonServices, getAttendenceByBarberIdKiosk, getAvailableBarbersForQKiosk, getBarberByServicesKiosk, getBarberServicesByBarberIdKiosk, getDefaultSalon, getQueueListBySalonId, googleLoginTV, joinQueueKiosk, loginKiosk, salonAccountLogin } from "../../controllers/kiosk/kioskController.js";
 import { getDefaultSalonDetailsEmail } from "../../services/kiosk/salon/salonServices.js";
 import { getSalonInfoBySalonId } from "../../controllers/web/admin/salonController.js";
 import { getDefaultSalonDetailsByAdmin } from "../../services/web/admin/salonService.js";
@@ -61,6 +61,8 @@ router.route("/getBarberByServices").post(getBarberByServicesKiosk)
 
 
 router.route("/getDefaultSalonDetailBySalonIdTv").post(getDefaultSalon)
+
+router.route("/kioskQueuingAvailability").post(changeSalonKioskStatus)
 
 
 
