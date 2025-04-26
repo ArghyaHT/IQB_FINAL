@@ -2865,3 +2865,47 @@ export const googleLoginTV = async (req, res, next) => {
             next(error);
         }
     }
+
+
+
+
+    export const changeBarberOnlineStatusTV = async (req, res, next) => {
+        try {
+            const { barberId, salonId, isOnline } = req.body;
+    
+            // Fetch the salon by salonId
+            const salon = await getSalonBySalonId(salonId);
+    
+            // Check if the salon is offline
+            if (salon.isOnline === false) {
+                return ErrorHandler(SALON_OFFLINE_ERROR, ERROR_STATUS_CODE, res);
+            }
+    
+            // Get the barber details using barberId
+            const getbarber = await getBarberByBarberId(barberId);
+    
+            // Check if the barber is clocked in
+            if (getbarber.isClockedIn === false) {
+                return ErrorHandler(BARBER_CLOCKIN_ERROR, ERROR_STATUS_CODE_404, res);
+            }
+    
+            // Update the barber's online status
+            const updatedBarber = await barberOnlineStatus(barberId, salonId, isOnline);
+    
+            // If no update is returned, handle the error
+            if (!updatedBarber) {
+                return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE_404, res);
+            }
+    
+            // Return success based on the isOnline value
+            if (isOnline === true) {
+                return SuccessHandler(BARBER_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber });
+            } else {
+                return SuccessHandler(BARBER_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber });
+            }
+    
+        } catch (error) {
+            next(error);
+        }
+    };
+    
