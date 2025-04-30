@@ -1043,6 +1043,9 @@ export const getAllSalonServices = async (req, res, next) => {
 
         }
 
+        salonServices.sort((a, b) => a.serviceName.localeCompare(b.serviceName, undefined, { sensitivity: 'base' }));
+
+
         return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { response: salonServices })
 
     }
@@ -1198,6 +1201,9 @@ export const getBarberByServicesKiosk = async (req, res, next) => {
             return ErrorHandler(NO_BARBERS_AVAILABLE_ERROR, ERROR_STATUS_CODE_404, res)
 
         }
+
+        barbers.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'en', { sensitivity: 'base' }));
+
 
         return SuccessHandler(BARBER_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barbers })
 
