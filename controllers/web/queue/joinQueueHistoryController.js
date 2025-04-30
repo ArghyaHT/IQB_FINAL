@@ -4,7 +4,7 @@ import { BARBER_QUEUE_HISTORY_SUCCESS, QUEUEHISTORY_MAX_DAYS, QUEUELIST_RANGE_ER
 import { SALONID_EMPTY_ERROR } from "../../../constants/web/SalonConstants.js";
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
-import { getQueueHistoryByBarber, getQueueHistoryByBarberIdToAndFrom, getSalonQueueHistory } from "../../../services/web/queue/joinQueueHistoryService.js";
+import { getQueueHistoryByBarber, getQueueHistoryByBarberIdToAndFrom, getQueueHistoryByCustomerEmail, getSalonQueueHistory } from "../../../services/web/queue/joinQueueHistoryService.js";
 
 export const getBarberQueueHitory = async (req, res, next) => {
     try {
@@ -56,9 +56,43 @@ export const getSalonQueueHistoryBySalonId = async (req, res, next) => {
             return ErrorHandler(SALONID_EMPTY_ERROR, ERROR_STATUS_CODE, res)
 
         }
-        // if(customerEmail){
+        
+        if(customerEmail){
+            // Calculate default from/to dates if not provided
+            const now = new Date(); // ✅ define now first
+            const toDate = to ? new Date(to) : new Date(now.setHours(23, 59, 59, 999));
+            const fromDate = from ? new Date(from) : new Date(new Date().setDate(toDate.getDate() - 30));
 
-        // }
+            // Helper function to calculate total days (inclusive)
+            function getTotalDays(startDate, endDate) {
+                const utc1 = Date.UTC(
+                    startDate.getFullYear(),
+                    startDate.getMonth(),
+                    startDate.getDate()
+                );
+                const utc2 = Date.UTC(
+                    endDate.getFullYear(),
+                    endDate.getMonth(),
+                    endDate.getDate()
+                );
+
+                return (utc2 - utc1) / (1000 * 60 * 60 * 24) + 1;
+            }
+
+            const totalDays = getTotalDays(fromDate, toDate);
+
+            if (to && from) {
+                if (totalDays > QUEUEHISTORY_MAX_DAYS) {
+                    return ErrorHandler(QUEUELIST_RANGE_ERROR, ERROR_STATUS_CODE, res);
+                }
+            }
+
+            const salonQueueHistory = await getQueueHistoryByCustomerEmail(salonId, customerEmail, fromDate, toDate)
+
+            salonQueueHistory.sort((a, b) => new Date(b.dateJoinedQ) - new Date(a.dateJoinedQ));
+
+            return SuccessHandler(SALON_QUEUE_HISTORY_SUCCESS, SUCCESS_STATUS_CODE, res, { response: salonQueueHistory })
+        }
 
         if (barberId) {
             // Calculate default from/to dates if not provided
