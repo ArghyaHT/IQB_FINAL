@@ -1170,6 +1170,8 @@ export const getAvailableBarbersForQKiosk = async (req, res, next) => {
                 })),
             }
 
+            availableBarbers.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+
             // Insert anybarber at the beginning of availableBarbers array
             availableBarbers.unshift(anybarber);
             return SuccessHandler(BARBER_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: availableBarbers })
@@ -1235,6 +1237,9 @@ export const getBarberServicesByBarberIdKiosk = async (req, res, next) => {
 
             }
         }
+
+        barberServices.sort((a, b) => a.serviceName.localeCompare(b.serviceName, undefined, { sensitivity: 'base' }));
+
         return SuccessHandler(BARBER_SERVICES_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barberServices })
     }
     catch (error) {

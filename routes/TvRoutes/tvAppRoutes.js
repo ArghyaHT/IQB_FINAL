@@ -59,7 +59,6 @@ router.route("/getAllServices").get(getAllSalonServices)
 
 router.route("/getBarberByServices").post(getBarberByServicesKiosk)
 
-
 router.route("/getDefaultSalonDetailBySalonIdTv").post(getDefaultSalon)
 
 router.route("/kioskQueuingAvailability").post(changeSalonKioskStatus)
