@@ -10,6 +10,7 @@ export const NO_SALON_CONNECTED_ERROR= "You are not connected to any salon"
 
 export const QUEUELIST_BARBER_ERROR= "Queue list not found for the specified barber"
 
+export const QUEUELIST_RANGE_ERROR= "Date range should not exceed 30 days"
 
 
 
@@ -26,6 +27,10 @@ export const QUEUELIST_RETRIEVED_FOR_BARBER_SUCCESS ="Queue list retrieved for t
 
 export const BARBER_QUEUE_HISTORY_SUCCESS ="Barber queue history retrieved successfully"
 export const SALON_QUEUE_HISTORY_SUCCESS ="Salon queue history retrieved successfully"
+
+
+
+export const QUEUEHISTORY_MAX_DAYS = 30
 
 
 

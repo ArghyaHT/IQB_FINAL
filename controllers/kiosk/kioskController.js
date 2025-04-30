@@ -1896,6 +1896,7 @@ export const getAttendenceByBarberIdKiosk = async (req, res, next) => {
         }
 
         const attendance = await getBarberAttendence(salonId, barberId);
+        
 
         if (!attendance) {
             return ErrorHandler(BARBER_ATTENDENCE_ERROR, ERROR_STATUS_CODE, res)

@@ -1771,7 +1771,7 @@ export const getBarberServedQlist = async (salonId, barberId, fromDate, toDate) 
     return result;
 };
 
-export const getSalonQueueHistory = async (salonId) => {
+export const getSalonQueueHistory = async (salonId, from, to) => {
     const defaultProfileImage = [
         {
             url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg",
@@ -1784,8 +1784,19 @@ export const getSalonQueueHistory = async (salonId) => {
         return [];
     }
 
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    toDate.setHours(23, 59, 59, 999); // Include the full "to" day
+
+    // Filter queueList between from and to dates
+    const filteredQueueList = salonQueueListHistory.queueList.filter((queue) => {
+        const queueDate = new Date(queue.dateJoinedQ); // Assuming createdAt is the queue creation timestamp
+        return queueDate >= fromDate && queueDate <= toDate;
+    });
+
+
     const modifyQueueHistorylist = await Promise.all(
-        salonQueueListHistory.queueList.map(async (queue) => {
+        filteredQueueList.map(async (queue) => {
             const barber = await getBarberByBarberId(queue.barberId);
             const customer = await findCustomerByEmail(queue.customerEmail);
 
@@ -1801,16 +1812,24 @@ export const getSalonQueueHistory = async (salonId) => {
     return modifyQueueHistorylist;
 }
 
-export const getQueueHistoryByBarber = async (salonId, barberId) => {
+export const getQueueHistoryByBarber = async (salonId, barberId, from, to) => {
     const defaultProfileImage = [{ url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg" }];
 
     const barberQueueHistory = await JoinedQueueHistory.findOne({ salonId }).lean();
 
     if (!barberQueueHistory) return [];
 
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    toDate.setHours(23, 59, 59, 999); // Include the full "to" day
+
     const filteredQueueList = await Promise.all(
         barberQueueHistory.queueList
-            .filter(item => item.barberId === barberId)
+            .filter(item =>
+                item.barberId === barberId &&
+                new Date(item.dateJoinedQ) >= fromDate &&
+                new Date(item.dateJoinedQ) <= toDate
+            )
             .map(async queue => {
                 const barber = await getBarberByBarberId(queue.barberId);
                 const customer = await findCustomerByEmail(queue.customerEmail);
