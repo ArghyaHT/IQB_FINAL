@@ -20,23 +20,23 @@ export const getBarberQueueHitory = async(req, res, next) => {
 
         }
 
-             // Calculate default from/to dates if not provided
-     const now = new Date(); // ✅ define now first
-     const toDate = to ? new Date(to) : new Date(now.setHours(0, 0, 0, 0) - 1);;
-     const fromDate = from ? new Date(from) : new Date(new Date().setDate(toDate.getDate() - 30));
+    //          // Calculate default from/to dates if not provided
+    //  const now = new Date(); // ✅ define now first
+    //  const toDate = to ? new Date(to) : new Date(now.setHours(0, 0, 0, 0) - 1);;
+    //  const fromDate = from ? new Date(from) : new Date(new Date().setDate(toDate.getDate() - 30));
 
 
-    // Validate date range
-    const diffInMs = toDate - fromDate;
-    const diffInDays = diffInMs / (1000 * 60 * 60 * 24); // convert ms to days
+    // // Validate date range
+    // const diffInMs = toDate - fromDate;
+    // const diffInDays = diffInMs / (1000 * 60 * 60 * 24); // convert ms to days
 
-    if(to && from){
-        if (diffInDays > QUEUEHISTORY_MAX_DAYS) {
-            return ErrorHandler(QUEUELIST_RANGE_ERROR, ERROR_STATUS_CODE, res);
-        }
-    }
+    // if(to && from){
+    //     if (diffInDays > QUEUEHISTORY_MAX_DAYS) {
+    //         return ErrorHandler(QUEUELIST_RANGE_ERROR, ERROR_STATUS_CODE, res);
+    //     }
+    // }
 
-        const queuehistory = await getQueueHistoryByBarber(salonId, barberId, fromDate, toDate );
+        const queuehistory = await getQueueHistoryByBarber(salonId, barberId);
 
         queuehistory.sort((a, b) => new Date(b.dateJoinedQ) - new Date(a.dateJoinedQ));
 
@@ -50,25 +50,41 @@ export const getBarberQueueHitory = async(req, res, next) => {
 
 export const getSalonQueueHistoryBySalonId = async(req, res, next) => {
     try{
-        const { salonId, from, to } = req.body;
+        const { salonId, from, to, customerEmail, barberId } = req.body;
 
         if(!salonId) {
             return ErrorHandler(SALONID_EMPTY_ERROR, ERROR_STATUS_CODE, res)
     
     }
+    // if(customerEmail){
+
+    // }
 
      // Calculate default from/to dates if not provided
      const now = new Date(); // ✅ define now first
-     const toDate = to ? new Date(to) : new Date(now.setHours(0, 0, 0, 0) - 1);;
+     const toDate = to ? new Date(to) : new Date(now.setHours(23, 59, 59, 999));
      const fromDate = from ? new Date(from) : new Date(new Date().setDate(toDate.getDate() - 30));
 
+     // Helper function to calculate total days (inclusive)
+function getTotalDays(startDate, endDate) {
+    const utc1 = Date.UTC(
+        startDate.getFullYear(),
+        startDate.getMonth(),
+        startDate.getDate()
+    );
+    const utc2 = Date.UTC(
+        endDate.getFullYear(),
+        endDate.getMonth(),
+        endDate.getDate()
+    );
 
-    // Validate date range
-    const diffInMs = toDate - fromDate;
-    const diffInDays = diffInMs / (1000 * 60 * 60 * 24); // convert ms to days
+    return (utc2 - utc1) / (1000 * 60 * 60 * 24) + 1;
+}
+
+const totalDays = getTotalDays(fromDate, toDate);
 
     if(to && from){
-        if (diffInDays > QUEUEHISTORY_MAX_DAYS) {
+        if (totalDays > QUEUEHISTORY_MAX_DAYS) {
             return ErrorHandler(QUEUELIST_RANGE_ERROR, ERROR_STATUS_CODE, res);
         }
     }

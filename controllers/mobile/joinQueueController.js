@@ -918,3 +918,14 @@ export const getQlistbyBarberId = async (req, res, next) => {
 };
 
 
+// export const getQueueHistoryByCustomerEmail = async(req, res, next) =>{
+//     try{
+
+
+
+//     }catch (error) {
+//         next(error);
+//     }
+// }
+
+

@@ -10,7 +10,7 @@ export const getSalonQlist = async (salonId, customerEmail) => {
 
   const Qlist = await SalonQueueList.aggregate([
     {
-      $match: { salonId }, // Match salonId
+      $match: { salonId, }, // Match salonId
     },
     {
       $unwind: "$queueList", // Unwind queueList array

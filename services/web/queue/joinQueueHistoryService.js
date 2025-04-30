@@ -1812,23 +1812,23 @@ export const getSalonQueueHistory = async (salonId, from, to) => {
     return modifyQueueHistorylist;
 }
 
-export const getQueueHistoryByBarber = async (salonId, barberId, from, to) => {
+export const getQueueHistoryByBarber = async (salonId, barberId) => {
     const defaultProfileImage = [{ url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg" }];
 
     const barberQueueHistory = await JoinedQueueHistory.findOne({ salonId }).lean();
 
     if (!barberQueueHistory) return [];
 
-    const fromDate = new Date(from);
-    const toDate = new Date(to);
-    toDate.setHours(23, 59, 59, 999); // Include the full "to" day
+    // const fromDate = new Date(from);
+    // const toDate = new Date(to);
+    // toDate.setHours(23, 59, 59, 999); // Include the full "to" day
 
     const filteredQueueList = await Promise.all(
         barberQueueHistory.queueList
             .filter(item =>
-                item.barberId === barberId &&
-                new Date(item.dateJoinedQ) >= fromDate &&
-                new Date(item.dateJoinedQ) <= toDate
+                item.barberId === barberId 
+                // new Date(item.dateJoinedQ) >= fromDate &&
+                // new Date(item.dateJoinedQ) <= toDate
             )
             .map(async queue => {
                 const barber = await getBarberByBarberId(queue.barberId);
