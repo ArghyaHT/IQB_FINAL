@@ -1,5 +1,7 @@
 import moment from "moment";
 import AppointmentHistory from "../../../models/appointmentHistoryModel.js";
+import { getBarberByBarberId } from "../barber/barberService.js";
+import { findCustomerByEmail } from "../customer/customerService.js";
 
 export const addCancelAppointmentHistory = async (salonId, appointment) => {
     // Extract the first item from the appointmentList and add status
@@ -1900,3 +1902,116 @@ export const getLastWeekBarberAppointmentCountsEachDay = async (salonId, barberI
 
     return last7DaysCounts;
 };
+
+
+
+export const getAppointmentHistoryByCustomerEmail = async (salonId, customerEmail, from, to) => {
+    const defaultProfileImage = [{ url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg" }];
+
+    const customerHistory = await AppointmentHistory.findOne({ salonId }).lean();
+
+    if (!customerHistory) return [];
+
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    toDate.setHours(23, 59, 59, 999); // Include the full "to" day
+
+    const filteredQueueList = await Promise.all(
+        customerHistory.appointmentList
+            .filter(item =>
+                item.customerEmail === customerEmail &&
+                new Date(item.appointmentDate) >= fromDate &&
+                new Date(item.appointmentDate) <= toDate
+            )
+            .map(async appointment => {
+                const barber = await getBarberByBarberId(appointment.barberId);
+                const customer = await findCustomerByEmail(appointment.customerEmail);
+
+                return {
+                    ...appointment,
+                    barberProfile: barber?.profile?.length > 0 ? barber.profile : defaultProfileImage,
+                    customerProfile: customer?.profile || defaultProfileImage
+                };
+            })
+    );
+
+    return filteredQueueList;
+};
+
+
+
+export const getAppointmentHistoryByBarberIdToAndFrom = async (salonId, barberId, from, to) => {
+    const defaultProfileImage = [{ url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg" }];
+
+    const barberAppointmentHistory = await AppointmentHistory.findOne({ salonId }).lean();
+
+    if (!barberAppointmentHistory) return [];
+
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    toDate.setHours(23, 59, 59, 999); // Include the full "to" day
+
+    const filteredQueueList = await Promise.all(
+        barberAppointmentHistory.appointmentList
+            .filter(item =>
+                item.barberId === barberId &&
+                new Date(item.appointmentDate) >= fromDate &&
+                new Date(item.appointmentDate) <= toDate
+            )
+            .map(async appointment => {
+                const barber = await getBarberByBarberId(appointment.barberId);
+                const customer = await findCustomerByEmail(appointment.customerEmail);
+
+                return {
+                    ...appointment,
+                    barberProfile: barber?.profile?.length > 0 ? barber.profile : defaultProfileImage,
+                    customerProfile: customer?.profile || defaultProfileImage
+                };
+            })
+    );
+
+    return filteredQueueList;
+};
+
+
+
+export const getSalonAppointmentHistory = async (salonId, from, to) => {
+    const defaultProfileImage = [
+        {
+            url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg",
+        },
+    ];
+
+    const salonAppointmentListHistory = await AppointmentHistory.findOne({ salonId });
+
+    if (!salonAppointmentListHistory || !salonAppointmentListHistory.appointmentList || salonAppointmentListHistory.appointmentList.length === 0) {
+        return [];
+    }
+
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    toDate.setHours(23, 59, 59, 999); // Include the full "to" day
+
+    // Filter queueList between from and to dates
+    const filteredAppointmentList = salonAppointmentListHistory.appointmentList.filter((appointment) => {
+        const appointmentDate = new Date(appointment.appointmentDate); // Assuming createdAt is the queue creation timestamp
+        return appointmentDate >= fromDate && appointmentDate <= toDate;
+    });
+
+
+    const modifyAppointmentHistorylist = await Promise.all(
+        filteredAppointmentList.map(async (appointment) => {
+            const barber = await getBarberByBarberId(appointment.barberId);
+            const customer = await findCustomerByEmail(appointment.customerEmail);
+
+            return {
+                ...appointment.toObject(), // Spread the existing queue properties
+                barberProfile: barber?.profile || defaultProfileImage,
+                customerProfile: customer?.profile || defaultProfileImage,
+            };
+        })
+    );
+
+    // Return the modified list instead of the original one
+    return modifyAppointmentHistorylist;
+}

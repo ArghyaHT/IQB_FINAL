@@ -478,6 +478,7 @@ export const uploadSalonGalleryImages = async (req, res, next) => {
       return ErrorHandler(SALON_GALLERY_EMPTY_ERROR, ERROR_STATUS_CODE, res)
     }
 
+
     const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', "svg"];
     const maxFileSize = 2 * 1024 * 1024;
 
@@ -543,12 +544,6 @@ export const uploadSalonGalleryImages = async (req, res, next) => {
       // return res.status(404).json({ success: false, message: "Images cant be uploaded" });
       return ErrorHandler(SALON_GALLERY_UPLOADED_ERROR, ERROR_STATUS_CODE, res)
     }
-
-    // res.status(200).json({
-    //   success: true,
-    //   message: "Salon images uploaded successfully",
-    //   response: newImages,
-    // });
 
     return SuccessHandler(SALON_IMAGES_UPLOAD_SUCESS, SUCCESS_STATUS_CODE, res, { response: newImages })
   } catch (error) {
