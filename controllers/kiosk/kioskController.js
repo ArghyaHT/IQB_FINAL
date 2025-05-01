@@ -76,7 +76,7 @@ export const loginKiosk = async (req, res, next) => {
                 return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
             }
 
-            if(foundUser.salonId === 0){
+            if (foundUser.salonId === 0) {
                 return ErrorHandler(CREATE_SALON_ERROR, ERROR_STATUS_CODE, res);
             }
 
@@ -120,7 +120,7 @@ export const loginKiosk = async (req, res, next) => {
 
             }
 
-            if(foundUser.salonId === 0){
+            if (foundUser.salonId === 0) {
                 return ErrorHandler(CREATE_SALON_ERROR, ERROR_STATUS_CODE, res);
             }
 
@@ -171,7 +171,7 @@ export const googleLoginKiosk = async (req, res, next) => {
                 return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
             }
 
-            if(foundUser.salonId === 0){
+            if (foundUser.salonId === 0) {
                 return ErrorHandler(CREATE_SALON_ERROR, ERROR_STATUS_CODE, res);
             }
 
@@ -205,11 +205,11 @@ export const googleLoginKiosk = async (req, res, next) => {
             }
 
 
-            if(foundUser.salonId === 0){
+            if (foundUser.salonId === 0) {
                 return ErrorHandler(CREATE_SALON_ERROR, ERROR_STATUS_CODE, res);
             }
 
-            
+
             const getDefaultBarberSalon = await getDefaultSalonDetailsEmail(foundUser.salonId)
 
             if (!getDefaultBarberSalon.isQueuing) {
@@ -1875,9 +1875,9 @@ export const getAllAdvertisementsKiosk = async (req, res, next) => {
         }
 
         // Sort advertisements array in descending order
-        const sortedAdvertisements = salonSettings.advertisements|| [];
+        const sortedAdvertisements = salonSettings.advertisements || [];
 
-    
+
         return SuccessHandler(ADVERT_IMAGES_SUCCESS, SUCCESS_STATUS_CODE, res, { advertisements: sortedAdvertisements })
 
     } catch (error) {
@@ -1887,41 +1887,116 @@ export const getAllAdvertisementsKiosk = async (req, res, next) => {
 
 
 //DESC:BARBER ATTENDENCE API ================
+// export const getAttendenceByBarberIdKiosk = async (req, res, next) => {
+//     try {
+//         const { salonId, barberId } = req.body;
+
+//         if (salonId === 0) {
+//             return ErrorHandler(BARBER_CONNECT_SALON_ERROR, ERROR_STATUS_CODE_404, res)
+//         }
+
+//         const attendance = await getBarberAttendence(salonId, barberId);
+
+
+//         if (!attendance) {
+//             return ErrorHandler(BARBER_ATTENDENCE_ERROR, ERROR_STATUS_CODE, res)
+//         }
+//         // Sort attendance records in descending order by date
+//         attendance.attendance.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+//         attendance.attendance = attendance.attendance.map(record => ({
+//             ...record.toObject(),
+//             date: new Date(record.date).toLocaleDateString('en-US', {
+//                 year: 'numeric',
+//                 month: 'long',
+//                 day: 'numeric'
+//             })
+//         }));
+
+//         return SuccessHandler(BARBER_ATTENDENCE_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: attendance })
+
+//     } catch (error) {
+//         next(error);
+//     }
+// }
+
+
 export const getAttendenceByBarberIdKiosk = async (req, res, next) => {
     try {
         const { salonId, barberId } = req.body;
 
         if (salonId === 0) {
-            return ErrorHandler(BARBER_CONNECT_SALON_ERROR, ERROR_STATUS_CODE_404, res)
+            return ErrorHandler(BARBER_CONNECT_SALON_ERROR, ERROR_STATUS_CODE_404, res);
         }
 
-        const attendance = await getBarberAttendence(salonId, barberId);
-        
+        const attendanceDoc = await getBarberAttendence(salonId, barberId);
 
-        if (!attendance) {
-            return ErrorHandler(BARBER_ATTENDENCE_ERROR, ERROR_STATUS_CODE, res)
+        if (!attendanceDoc) {
+            return ErrorHandler(BARBER_ATTENDENCE_ERROR, ERROR_STATUS_CODE, res);
         }
-        // Sort attendance records in descending order by date
-        attendance.attendance.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        attendance.attendance = attendance.attendance.map(record => ({
-            ...record.toObject(),
-            date: new Date(record.date).toLocaleDateString('en-US', {
+        const existingRecords = attendanceDoc.attendance;
+
+        // Create a map for quick lookup by date (YYYY-MM-DD)
+        const attendanceMap = new Map();
+        existingRecords.forEach(record => {
+            const dateKey = new Date(record.date).toISOString().split('T')[0]; // 'YYYY-MM-DD'
+            attendanceMap.set(dateKey, record);
+        });
+
+        const today = new Date();
+        today.setDate(today.getDate() - 1); // Start from yesterday
+
+        const result = [];
+
+
+        for (let i = 0; i < 30; i++) {
+            const date = new Date(today); // Copy of yesterday
+            date.setDate(today.getDate() - i); // Subtract i days
+
+            const dateKey = date.toISOString().split('T')[0];
+            const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+            const formattedDate = date.toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
-            })
-        }));
+            });
 
-        return SuccessHandler(BARBER_ATTENDENCE_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: attendance })
+            if (attendanceMap.has(dateKey)) {
+                const record = attendanceMap.get(dateKey);
+                result.push({
+                    ...record.toObject(),
+                    date: formattedDate,
+                    day: dayName
+                });
+            } else {
+                result.push({
+                    day: dayName,
+                    date: formattedDate,
+                    signInTime: "",
+                    signOutTime: "",
+                    _id: ""
+                });
+            }
+        }
+
+
+        // Replace with the complete 30-day list
+        attendanceDoc.attendance = result;
+
+        return SuccessHandler(BARBER_ATTENDENCE_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, {
+            response: attendanceDoc
+        });
 
     } catch (error) {
         next(error);
     }
-}
+};
+
 
 
 //DESC:CHANGE BARBER CLOCKIN STATUS ===========================
+
 export const changeBarberClockInStatus = async (req, res, next) => {
     try {
         const { barberId, salonId, isClockedIn, barberToken } = req.body;
@@ -2141,7 +2216,7 @@ export const salonAccountLogin = async (req, res, next) => {
     }
 }
 
-export const googleSalonAccountLogin = async(req, res, next) =>{
+export const googleSalonAccountLogin = async (req, res, next) => {
     try {
         let { email, salonId, role } = req.body
 
@@ -2151,11 +2226,11 @@ export const googleSalonAccountLogin = async(req, res, next) =>{
             if (!foundUser) {
                 return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
             }
-            
-                // Send accessToken containing username and roles 
-                return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
-                    foundUser
-                })
+
+            // Send accessToken containing username and roles 
+            return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+                foundUser
+            })
         }
         else {
             const foundUser = await findGoogleBarberByEmailAndSalonId(email, salonId)
@@ -2164,10 +2239,10 @@ export const googleSalonAccountLogin = async(req, res, next) =>{
                 return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
             }
 
-                // Send accessToken containing username and roles 
-                return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
-                    foundUser
-                })
+            // Send accessToken containing username and roles 
+            return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+                foundUser
+            })
         }
 
     }
@@ -2841,83 +2916,82 @@ export const googleLoginTV = async (req, res, next) => {
     try {
         let { email } = req.body
 
-            const foundUser = await googleLoginAdmin(email)
+        const foundUser = await googleLoginAdmin(email)
 
-            if (!foundUser) {
-                return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
-            }
-
-            if(foundUser.salonId === 0){
-                return ErrorHandler(CREATE_SALON_ERROR, ERROR_STATUS_CODE, res);
-            }
-
-            const getDefaultAdminSalon = await getDefaultSalonDetailsEmail(foundUser.salonId)
-
-            if (!getDefaultAdminSalon.isQueuing) {
-                return ErrorHandler(NO_QUEUE_ERROR, ERROR_STATUS_CODE, res);
-            }
-
-            if (getDefaultAdminSalon.isQueuing) {
-                const adminKioskToken = jwt.sign(
-                    {
-                        "email": foundUser.email,
-                        "role": foundUser.role
-                    },
-                    process.env.JWT_ADMIN_ACCESS_SECRET,
-                    { expiresIn: '1d' }
-                )
-                // Send accessToken containing username and roles 
-                return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
-                    token: adminKioskToken,
-                    response: foundUser
-                })
-            }
+        if (!foundUser) {
+            return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
-        catch (error) {
-            next(error);
+
+        if (foundUser.salonId === 0) {
+            return ErrorHandler(CREATE_SALON_ERROR, ERROR_STATUS_CODE, res);
+        }
+
+        const getDefaultAdminSalon = await getDefaultSalonDetailsEmail(foundUser.salonId)
+
+        if (!getDefaultAdminSalon.isQueuing) {
+            return ErrorHandler(NO_QUEUE_ERROR, ERROR_STATUS_CODE, res);
+        }
+
+        if (getDefaultAdminSalon.isQueuing) {
+            const adminKioskToken = jwt.sign(
+                {
+                    "email": foundUser.email,
+                    "role": foundUser.role
+                },
+                process.env.JWT_ADMIN_ACCESS_SECRET,
+                { expiresIn: '1d' }
+            )
+            // Send accessToken containing username and roles 
+            return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+                token: adminKioskToken,
+                response: foundUser
+            })
         }
     }
+    catch (error) {
+        next(error);
+    }
+}
 
 
 
 
-    export const changeBarberOnlineStatusTV = async (req, res, next) => {
-        try {
-            const { barberId, salonId, isOnline } = req.body;
-    
-            // Fetch the salon by salonId
-            const salon = await getSalonBySalonId(salonId);
-    
-            // Check if the salon is offline
-            if (salon.isOnline === false) {
-                return ErrorHandler(SALON_OFFLINE_ERROR, ERROR_STATUS_CODE, res);
-            }
-    
-            // Get the barber details using barberId
-            const getbarber = await getBarberByBarberId(barberId);
-    
-            // Check if the barber is clocked in
-            if (getbarber.isClockedIn === false) {
-                return ErrorHandler(BARBER_CLOCKIN_ERROR, ERROR_STATUS_CODE_404, res);
-            }
-    
-            // Update the barber's online status
-            const updatedBarber = await barberOnlineStatus(barberId, salonId, isOnline);
-    
-            // If no update is returned, handle the error
-            if (!updatedBarber) {
-                return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE_404, res);
-            }
-    
-            // Return success based on the isOnline value
-            if (isOnline === true) {
-                return SuccessHandler(BARBER_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber });
-            } else {
-                return SuccessHandler(BARBER_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber });
-            }
-    
-        } catch (error) {
-            next(error);
+export const changeBarberOnlineStatusTV = async (req, res, next) => {
+    try {
+        const { barberId, salonId, isOnline } = req.body;
+
+        // Fetch the salon by salonId
+        const salon = await getSalonBySalonId(salonId);
+
+        // Check if the salon is offline
+        if (salon.isOnline === false) {
+            return ErrorHandler(SALON_OFFLINE_ERROR, ERROR_STATUS_CODE, res);
         }
-    };
-    
+
+        // Get the barber details using barberId
+        const getbarber = await getBarberByBarberId(barberId);
+
+        // Check if the barber is clocked in
+        if (getbarber.isClockedIn === false) {
+            return ErrorHandler(BARBER_CLOCKIN_ERROR, ERROR_STATUS_CODE_404, res);
+        }
+
+        // Update the barber's online status
+        const updatedBarber = await barberOnlineStatus(barberId, salonId, isOnline);
+
+        // If no update is returned, handle the error
+        if (!updatedBarber) {
+            return ErrorHandler(BARBER_EXISTS_ERROR, ERROR_STATUS_CODE_404, res);
+        }
+
+        // Return success based on the isOnline value
+        if (isOnline === true) {
+            return SuccessHandler(BARBER_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber });
+        } else {
+            return SuccessHandler(BARBER_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber });
+        }
+
+    } catch (error) {
+        next(error);
+    }
+};
