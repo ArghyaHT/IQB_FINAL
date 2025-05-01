@@ -466,9 +466,10 @@ export const updateAdminInfo = async (req, res, next) => {
             return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
+        const defaultName = email.split("@")[0];  // "john.doe"
 
         // Update user information
-        foundUser.name = name
+        foundUser.name = name? name : defaultName
         foundUser.mobileNumber = formattedNumberAsNumber
         foundUser.gender = gender
         foundUser.mobileCountryCode = countryCode
