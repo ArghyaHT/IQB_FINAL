@@ -10,7 +10,7 @@ import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/C
 import { ErrorHandler } from "../../../middlewares/ErrorHandler.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ADVERT_DELETE_SUCCESS, ADVERT_DRAG_SUCCESS, ADVERT_IMAGES_SUCCESS, ADVERT_NOT_FOUND, ADVERT_NOT_PRESENT_ERROR, ADVERT_UPDATE_SUCCESS, ADVERT_UPLOAD_SUCCESS } from "../../../constants/web/DashboardConstants.js";
-import { ALLOWED_IMAGE_EXTENSIONS, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
+import { ALLOWED_IMAGE_EXTENSIONS, MAX_FILE_SIZE, TOTAL_IMAGE_SIZE_ERROR, TOTAL_IMAGE_UPLOAD_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 import { IMAGE_FILE_EXTENSION_ERROR, IMAGE_FILE_SIZE_ERROR } from "../../../constants/web/adminConstants.js";
 import { SALON_NOT_CREATED_ERROR } from "../../../constants/web/SalonConstants.js";
 
@@ -31,6 +31,12 @@ export const addAdvertisements = async (req, res, next) => {
 
     const allowedExtensions = ALLOWED_IMAGE_EXTENSIONS;
     const maxFileSize = MAX_FILE_SIZE;
+    
+     // Calculate total size
+          const totalSize = advertisements.reduce((acc, file) => acc + file.size, 0);
+          if (totalSize > TOTAL_IMAGE_UPLOAD_SIZE) {
+            return ErrorHandler(TOTAL_IMAGE_SIZE_ERROR, ERROR_STATUS_CODE, res);
+          }
 
     // Validate each image
     for (const advertisement of advertisements) {
