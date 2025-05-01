@@ -1930,6 +1930,7 @@ export const getAppointmentHistoryByCustomerEmail = async (salonId, customerEmai
                 return {
                     ...appointment,
                     barberProfile: barber?.profile?.length > 0 ? barber.profile : defaultProfileImage,
+                    barberName: barber?.name,
                     customerProfile: customer?.profile || defaultProfileImage
                 };
             })
@@ -1965,6 +1966,7 @@ export const getAppointmentHistoryByBarberIdToAndFrom = async (salonId, barberId
                 return {
                     ...appointment,
                     barberProfile: barber?.profile?.length > 0 ? barber.profile : defaultProfileImage,
+                    barberName:barber?.name,
                     customerProfile: customer?.profile || defaultProfileImage
                 };
             })
@@ -2007,6 +2009,7 @@ export const getSalonAppointmentHistory = async (salonId, from, to) => {
             return {
                 ...appointment.toObject(), // Spread the existing queue properties
                 barberProfile: barber?.profile || defaultProfileImage,
+                barberName: barber?.name,
                 customerProfile: customer?.profile || defaultProfileImage,
             };
         })
