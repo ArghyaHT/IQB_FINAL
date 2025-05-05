@@ -296,7 +296,7 @@ export const createAppointment = async (req, res, next) => {
 
         const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-        if (pushDevice.deviceToken) {
+        if (pushDevice && pushDevice.deviceToken) {
           await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail)
         }
 
@@ -459,7 +459,7 @@ export const createAppointment = async (req, res, next) => {
 
         const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-        if (pushDevice.deviceToken) {
+        if (pushDevice && pushDevice.deviceToken) {
           await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail)
         }
 
