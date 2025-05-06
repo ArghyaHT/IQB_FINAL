@@ -82,11 +82,11 @@ export const loginKiosk = async (req, res, next) => {
 
             const getDefaultAdminSalon = await getDefaultSalonDetailsEmail(foundUser.salonId)
 
-            if (!getDefaultAdminSalon.isQueuing) {
-                return ErrorHandler(NO_QUEUE_ERROR, ERROR_STATUS_CODE, res);
-            }
+            // if (!getDefaultAdminSalon.isQueuing) {
+            //     return ErrorHandler(NO_QUEUE_ERROR, ERROR_STATUS_CODE, res);
+            // }
 
-            if (getDefaultAdminSalon.isQueuing) {
+            // if (getDefaultAdminSalon.isQueuing) {
                 const adminKioskToken = jwt.sign(
                     {
                         "email": foundUser.email,
@@ -100,10 +100,10 @@ export const loginKiosk = async (req, res, next) => {
                     token: adminKioskToken,
                     foundUser
                 })
-            }
-            else {
-                return ErrorHandler(ADMIN_LOGIN_QUEUE_ERROR, ERROR_STATUS_CODE, res)
-            }
+            // }
+            // else {
+            //     return ErrorHandler(ADMIN_LOGIN_QUEUE_ERROR, ERROR_STATUS_CODE, res)
+            // }
 
         }
         else {
@@ -127,11 +127,11 @@ export const loginKiosk = async (req, res, next) => {
             const getDefaultBarberSalon = await getDefaultSalonDetailsEmail(foundUser.salonId)
 
 
-            if (!getDefaultBarberSalon.isQueuing) {
-                return ErrorHandler(NO_QUEUE_ERROR, ERROR_STATUS_CODE, res);
-            }
+            // if (!getDefaultBarberSalon.isQueuing) {
+            //     return ErrorHandler(NO_QUEUE_ERROR, ERROR_STATUS_CODE, res);
+            // }
 
-            if (getDefaultBarberSalon.isQueuing) {
+            // if (getDefaultBarberSalon.isQueuing) {
 
                 const barberKioskToken = jwt.sign(
                     {
@@ -148,10 +148,10 @@ export const loginKiosk = async (req, res, next) => {
                     foundUser
                 })
 
-            }
-            else {
-                return ErrorHandler(BARBER_LOGIN_QUEUE_ERROR, ERROR_STATUS_CODE, res)
-            }
+            // }
+            // else {
+            //     return ErrorHandler(BARBER_LOGIN_QUEUE_ERROR, ERROR_STATUS_CODE, res)
+            // }
         }
     }
     catch (error) {
