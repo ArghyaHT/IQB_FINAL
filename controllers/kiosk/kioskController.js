@@ -2272,6 +2272,9 @@ export const getAllBarberbySalonId = async (req, res, next) => {
         // Fetch all barbers for the salonId
         const getAllBarbers = await getAllSalonBarbers(salonId, email);
 
+        io.to(`salon_${salonId}`).emit("barberListUpdated", getAllBarbers); // You can change the event name
+
+
         if (getAllBarbers && getAllBarbers.length > 0) {
             return SuccessHandler(BARBER_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, {
                 getAllBarbers: getAllBarbers,
