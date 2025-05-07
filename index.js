@@ -41,7 +41,6 @@ import barberReservations from "./routes/web/barberReservations/barberReservatio
 import checkoutSession from "./routes/web/checkOutSessionRoutes/checkoutSessionRoutes.js"
 import webhooks from "./routes/web/webhookRoutes/webhookRoutes.js"
 import  clientLeads from "./routes/web/clientLeads/clientLeadsRoute.js"
-
 import appointmentHistory from "./routes/web/appointments/appointmentHistoryRoutes.js"
 
 // import { setupCronJobs } from "./triggers/cronJobs.js";
