@@ -34,7 +34,7 @@ export const addAdvertisements = async (req, res, next) => {
     
      // Calculate total size
           const totalSize = advertisements.reduce((acc, file) => acc + file.size, 0);
-          if (totalSize > 20 * 1024 * 1024) {
+          if (totalSize > 3 * 1024 * 1024) {
             return ErrorHandler(TOTAL_IMAGE_SIZE_ERROR, ERROR_STATUS_CODE, res);
           }
 
