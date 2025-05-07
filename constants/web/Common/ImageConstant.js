@@ -3,6 +3,6 @@ export const ALLOWED_IMAGE_EXTENSIONS = ["jpg", "png", "jpeg", "webp"]
 export const IMAGE_FAILED_DELETE = "Failed to delete temporary file"
 export const BARBER_IMAGE_EMPTY_ERROR = "Barber profile not present"
 
-export const TOTAL_IMAGE_SIZE_ERROR = "Total image size exceeds 15MB limit"
+export const TOTAL_IMAGE_SIZE_ERROR = "Total image size exceeds 10MB limit"
 
-export const TOTAL_IMAGE_UPLOAD_SIZE = 15 * 1024 * 1024
+export const TOTAL_IMAGE_UPLOAD_SIZE = 20 * 1024 * 1024
