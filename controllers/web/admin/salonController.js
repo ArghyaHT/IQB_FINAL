@@ -487,11 +487,11 @@ export const uploadSalonGalleryImages = async (req, res, next) => {
       galleries = [galleries];
     }
 
-      // Calculate total size
-      const totalSize = galleries.reduce((acc, file) => acc + file.size, 0);
-      if (totalSize > TOTAL_IMAGE_UPLOAD_SIZE) {
-        return ErrorHandler(TOTAL_IMAGE_SIZE_ERROR, ERROR_STATUS_CODE, res);
-      }
+      // // Calculate total size
+      // const totalSize = galleries.reduce((acc, file) => acc + file.size, 0);
+      // if (totalSize > TOTAL_IMAGE_UPLOAD_SIZE) {
+      //   return ErrorHandler(TOTAL_IMAGE_SIZE_ERROR, ERROR_STATUS_CODE, res);
+      // }
 
     // Validate each image
     for (const gallery of galleries) {
