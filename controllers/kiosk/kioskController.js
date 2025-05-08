@@ -87,19 +87,19 @@ export const loginKiosk = async (req, res, next) => {
             // }
 
             // if (getDefaultAdminSalon.isQueuing) {
-                const adminKioskToken = jwt.sign(
-                    {
-                        "email": foundUser.email,
-                        "role": foundUser.role
-                    },
-                    process.env.JWT_ADMIN_ACCESS_SECRET,
-                    { expiresIn: '1d' }
-                )
-                // Send accessToken containing username and roles 
-                return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
-                    token: adminKioskToken,
-                    foundUser
-                })
+            const adminKioskToken = jwt.sign(
+                {
+                    "email": foundUser.email,
+                    "role": foundUser.role
+                },
+                process.env.JWT_ADMIN_ACCESS_SECRET,
+                { expiresIn: '1d' }
+            )
+            // Send accessToken containing username and roles 
+            return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+                token: adminKioskToken,
+                foundUser
+            })
             // }
             // else {
             //     return ErrorHandler(ADMIN_LOGIN_QUEUE_ERROR, ERROR_STATUS_CODE, res)
@@ -133,20 +133,20 @@ export const loginKiosk = async (req, res, next) => {
 
             // if (getDefaultBarberSalon.isQueuing) {
 
-                const barberKioskToken = jwt.sign(
-                    {
-                        "email": foundUser.email,
-                        "role": foundUser.role
-                    },
-                    process.env.JWT_BARBER_ACCESS_SECRET,
-                    { expiresIn: '1d' }
-                )
+            const barberKioskToken = jwt.sign(
+                {
+                    "email": foundUser.email,
+                    "role": foundUser.role
+                },
+                process.env.JWT_BARBER_ACCESS_SECRET,
+                { expiresIn: '1d' }
+            )
 
-                // Send accessToken containing username and roles 
-                return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
-                    token: barberKioskToken,
-                    foundUser
-                })
+            // Send accessToken containing username and roles 
+            return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
+                token: barberKioskToken,
+                foundUser
+            })
 
             // }
             // else {
@@ -768,7 +768,7 @@ export const joinQueueKiosk = async (req, res, next) => {
             };
 
             existingQueue = await addCustomerToQueue(salonId, newQueue, availableBarber.barberId);
-   
+
             // const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             // io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
@@ -930,8 +930,9 @@ export const joinQueueKiosk = async (req, res, next) => {
             existingQueue = await addCustomerToQueue(salonId, newQueue, barberId);
 
 
-            const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
-            io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+            // const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+            // io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
             // Extract customer's waiting time and queue position from the result
             const { queue, customerEWT, qPosition } = existingQueue;
 
@@ -1022,13 +1023,23 @@ export const joinQueueKiosk = async (req, res, next) => {
         }
 
 
-        if (existingQueue.queue.queueList) {
+        // Check if the queueList exists or if it's empty
+        if (existingQueue.queue.queueList && existingQueue.queue.queueList.length > 0) {
+            // Sort the queue list in ascending order based on qPosition
             existingQueue.queue.queueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
-            await io.to(`salon_${salonId}`).emit("queueUpdated", existingQueue.queue.queueList);
 
-            const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
-            io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+            // Emit the updated queue list to the salon
+            await io.to(`salon_${salonId}`).emit("queueUpdated", existingQueue.queue.queueList);
+        } else {
+            // If the queueList is empty, emit a message indicating the queue is empty or send an empty array
+            await io.to(`salon_${salonId}`).emit("queueUpdated", []);
         }
+
+        // Fetch the updated barber list for the salon
+        const updatedBarbers = await getAllSalonBarbersForTV(salonId);
+
+        // Emit the updated barber list
+        io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
         return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingQueue.queue.queueList })
 
