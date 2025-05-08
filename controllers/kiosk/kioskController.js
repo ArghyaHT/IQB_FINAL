@@ -1024,15 +1024,12 @@ export const joinQueueKiosk = async (req, res, next) => {
 
 
         // Check if the queueList exists or if it's empty
-        if (existingQueue.queue.queueList && existingQueue.queue.queueList.length > 0) {
+        if (existingQueue.queue.queueList) {
             // Sort the queue list in ascending order based on qPosition
             existingQueue.queue.queueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
 
             // Emit the updated queue list to the salon
             await io.to(`salon_${salonId}`).emit("queueUpdated", existingQueue.queue.queueList);
-        } else {
-            // If the queueList is empty, emit a message indicating the queue is empty or send an empty array
-            await io.to(`salon_${salonId}`).emit("queueUpdated", []);
         }
 
         // Fetch the updated barber list for the salon
