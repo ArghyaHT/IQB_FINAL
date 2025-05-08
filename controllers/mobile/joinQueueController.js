@@ -9,6 +9,7 @@ import { addQueueHistoryWhenCanceled, findSalonQueueListHistory, statusCancelQ }
 import { validateEmail } from "../../middlewares/validator.js";
 import { findCustomersToMail } from "../../services/web/queue/joinQueueService.js";
 import { io } from "../../utils/socket/socket.js";
+import { getAllSalonBarbersForTV } from "../../services/kiosk/barber/barberService.js";
 
 //DESC:SINGLE JOIN QUEUE ================
 export const singleJoinQueue = async (req, res, next) => {
@@ -104,6 +105,9 @@ export const singleJoinQueue = async (req, res, next) => {
 
 
             existingQueue = await addCustomerToQueue(salonId, newQueue, barberId, customerEmail, name);
+
+            const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+            io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
 
             const emailSubject = 'Your Queue Information';
@@ -235,7 +239,11 @@ export const singleJoinQueue = async (req, res, next) => {
                 customerEWT: isVipServiceRequested ? 0 : (updatedBarber.barberEWT - totalServiceEWT),
             };
 
-            existingQueue = await addCustomerToQueue(salonId, newQueue, barberId, customerEmail, name );
+            existingQueue = await addCustomerToQueue(salonId, newQueue, barberId, customerEmail, name);
+
+
+            const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+            io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
             const emailSubject = 'Your Queue Information';
             const emailBody = `
@@ -437,6 +445,9 @@ export const groupJoinQueue = async (req, res, next) => {
             };
 
             existingQueue = await addCustomerToQueue(salonId, newQueue, member.barberId, member.customerEmail, member.name);
+
+            const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+            io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
             const emailSubject = 'Your Queue Information';
             const emailBody = `
