@@ -1,5 +1,5 @@
 import { validateEmail } from "../../middlewares/validator.js";
-import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppointmentsBySalonId, allAppointmentsBySalonIdAndDate, createNewAppointment, deleteAppointmentById, getAppointmentbyId, getAppointmentsByAppointmentId, getAppointmentsByDateAndBarberId, updateAppointment } from "../../services/mobile/appointmentService.js";
+import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppointmentsBySalonId, allAppointmentsBySalonIdAndDate, createNewAppointment, deleteAppointmentById, getAppointmentbyId, getAppointmentsByAppointmentId, getAppointmentsByDateAndBarberId, getCustomerAppointments, updateAppointment } from "../../services/mobile/appointmentService.js";
 import { getBarberbyId } from "../../services/mobile/barberService.js";
 import { getSalonSettings } from "../../services/mobile/salonSettingsService.js";
 import { generateTimeSlots } from "../../utils/timeSlots.js";
@@ -1134,6 +1134,19 @@ export const bookAppointmentBarbers = async (req, res, next) => {
     return SuccessHandler(BOOK_APPOINTMENT_BARBER_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, {
       response: formattedBarbers
     });
+
+  }
+  catch (error) {
+    next(error);
+  }
+}
+
+
+export const getallAppointmentsByCustomerId = async(req, res, next)=> {
+  try{
+    const {salonId, customerEmail} = req.body;
+
+    const getUpcomingAppointments = await getCustomerAppointments(customerEmail)
 
   }
   catch (error) {

@@ -768,6 +768,9 @@ export const joinQueueKiosk = async (req, res, next) => {
             };
 
             existingQueue = await addCustomerToQueue(salonId, newQueue, availableBarber.barberId);
+   
+            const updatedBarbers = await getAllSalonBarbers(salonId, availableBarber.email); // Refresh latest barber list
+            io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
             // Extract customer's waiting time and queue position from the result
             const { queue, customerEWT, qPosition } = existingQueue;
@@ -925,6 +928,11 @@ export const joinQueueKiosk = async (req, res, next) => {
             };
 
             existingQueue = await addCustomerToQueue(salonId, newQueue, barberId);
+
+            const getBarberByBarberId = await findBaberByBarberId(barberId)
+
+            const updatedBarbers = await getAllSalonBarbers(salonId, getBarberByBarberId.email); // Refresh latest barber list
+            io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
             // Extract customer's waiting time and queue position from the result
             const { queue, customerEWT, qPosition } = existingQueue;
@@ -2271,6 +2279,8 @@ export const getAllBarberbySalonId = async (req, res, next) => {
 
         // Fetch all barbers for the salonId
         const getAllBarbers = await getAllSalonBarbers(salonId, email);
+
+        console.log(`Emitting updated barber list to salon_${salonId}:`, getAllBarbers);
 
         io.to(`salon_${salonId}`).emit("barberListUpdated", getAllBarbers); // You can change the event name
 

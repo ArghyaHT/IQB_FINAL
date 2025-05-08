@@ -18,6 +18,7 @@ export const initializeSocket = (server) => {
             socket.join(`salon_${salonId}`);
             console.log(`Client ${socket.id} joined salon: salon_${salonId}`);
         });
+        
 
         socket.on('disconnect', () => {
             console.log(`Client Disconnected: ${socket.id}`);
