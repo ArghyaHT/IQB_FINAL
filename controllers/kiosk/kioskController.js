@@ -769,8 +769,8 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             existingQueue = await addCustomerToQueue(salonId, newQueue, availableBarber.barberId);
    
-            const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
-            io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+            // const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+            // io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
             // Extract customer's waiting time and queue position from the result
             const { queue, customerEWT, qPosition } = existingQueue;
@@ -1028,6 +1028,10 @@ export const joinQueueKiosk = async (req, res, next) => {
 
 
         await io.to(`salon_${salonId}`).emit("queueUpdated", existingQueue.queue.queueList);
+
+        const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+        io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
         return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingQueue.queue.queueList })
 
     } catch (error) {
