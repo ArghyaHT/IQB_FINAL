@@ -1024,13 +1024,11 @@ export const joinQueueKiosk = async (req, res, next) => {
 
         if (existingQueue.queue.queueList) {
             existingQueue.queue.queueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+            await io.to(`salon_${salonId}`).emit("queueUpdated", existingQueue.queue.queueList);
+
+            const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+            io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
         }
-
-
-        await io.to(`salon_${salonId}`).emit("queueUpdated", existingQueue.queue.queueList);
-
-        const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
-        io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
         return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingQueue.queue.queueList })
 
