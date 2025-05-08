@@ -178,6 +178,22 @@ export const getAllSalonBarbers = async (salonId, email ) => {
 }
 
 
+export const getAllSalonBarbersForTV = async (salonId ) => {
+   // const barbers = await Barber.find({ salonId, isDeleted: false, isApproved: true, isClockedIn: true });
+
+   const query = {
+      salonId,
+      isDeleted: false,
+      isApproved: true,
+      isClockedIn: true,
+  };
+
+  const barbers = await Barber.find(query);
+  return barbers;
+
+}
+
+
 //FIND BARBERS BY SALONID
 export const findBarbersBySalonId = async (salonId) => {
    const barbers = await Barber.find({ salonId, isClockedIn: true });

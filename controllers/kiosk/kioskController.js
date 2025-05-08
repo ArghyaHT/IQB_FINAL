@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken"
 
 
 import { connectAdminKiosk, findAdminByEmailandRole, findAdminByEmailandSalonId, findGoogleAdminByEmailandSalonId } from "../../services/kiosk/admin/adminServices.js";
-import { availableBarberAutoJoin, barberClockInStatus, barberOnlineStatus, changeBarberStatusAtSalonOffline, decreaseBarberEWT, decreaseBarberEWTWhenQCancel, fetchedBarbers, findBaberByBarberId, findBarberByBarberEmailAndSalonId, findBarberByEmailAndRole, findBarberByEmailAndSalonId, findBarbersBySalonId, findGoogleBarberByEmailAndSalonId, getAllSalonBarbers, getBarberByBarberId, getBarbersForQ, getBarbersWithMulServices, updateBarberEWT } from "../../services/kiosk/barber/barberService.js";
+import { availableBarberAutoJoin, barberClockInStatus, barberOnlineStatus, changeBarberStatusAtSalonOffline, decreaseBarberEWT, decreaseBarberEWTWhenQCancel, fetchedBarbers, findBaberByBarberId, findBarberByBarberEmailAndSalonId, findBarberByEmailAndRole, findBarberByEmailAndSalonId, findBarbersBySalonId, findGoogleBarberByEmailAndSalonId, getAllSalonBarbers, getAllSalonBarbersForTV, getBarberByBarberId, getBarbersForQ, getBarbersWithMulServices, updateBarberEWT } from "../../services/kiosk/barber/barberService.js";
 import { allSalonsByAdmin, allSalonServices, checkSalonExists, getDefaultSalonDetailsEmail, getSalonBySalonId, getSalonTimeZone, kioskAvailabilityStatus, mobileBookingAvailabilityStatus, salonOnlineStatus } from "../../services/kiosk/salon/salonServices.js";
 import { findCustomersToMail, findSalonQueueList, getSalonQlist, qListByBarberId } from "../../services/kiosk/queue/queueService.js";
 import { addCustomerToQueue } from "../../utils/queue/queueUtils.js";
@@ -769,7 +769,7 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             existingQueue = await addCustomerToQueue(salonId, newQueue, availableBarber.barberId);
    
-            const updatedBarbers = await getAllSalonBarbers(salonId, availableBarber.email); // Refresh latest barber list
+            const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
             // Extract customer's waiting time and queue position from the result
@@ -929,11 +929,9 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             existingQueue = await addCustomerToQueue(salonId, newQueue, barberId);
 
-            const getBarberByBarberId = await findBaberByBarberId(barberId)
 
-            const updatedBarbers = await getAllSalonBarbers(salonId, getBarberByBarberId.email); // Refresh latest barber list
+            const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
-
             // Extract customer's waiting time and queue position from the result
             const { queue, customerEWT, qPosition } = existingQueue;
 
