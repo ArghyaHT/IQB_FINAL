@@ -10,5 +10,6 @@ export const RETRIEVE_TIMESLOT_SUCCESS = "Please select a barber"
 
 export const SALON_APPOINTMENT_HISTORY_SUCCESS ="Salon appointment history retrieved successfully"
 
+export const BARBER_APPOINTMENT_HISTORY_SUCCESS ="Barber appointment history retrieved successfully"
 
 
