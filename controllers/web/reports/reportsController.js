@@ -9,10 +9,17 @@ export const salonServedReport = async (req, res, next) => {
         const { salonId, from, to, days, barberId, barberEmail, month, week, reportType, reportValue } = req.body;
 
 
-        if (!salonId || !reportType) {
+        if (!salonId) {
             return res.status(400).json({
                 success: false,
-                message: 'Missing required fields: salonId, from, to, or reportType',
+                message: 'Missing required fields: salonId',
+            });
+        }
+
+        if (!reportType) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide a valid value for report type.',
             });
         }
 
