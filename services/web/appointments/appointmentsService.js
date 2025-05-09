@@ -445,7 +445,12 @@ export const allAppointmentsByBarberIdAndDate = async (salonId, barberId) => {
                 },
                 _id: 0          
               }
-        }
+        },
+        {
+            $sort: {
+              appointmentDate: 1
+            }
+          }
     ]);
 
     return appointments;
