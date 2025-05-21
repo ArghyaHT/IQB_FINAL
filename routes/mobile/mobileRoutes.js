@@ -1,7 +1,7 @@
 import express from "express";
 import { getAdminDetailsByAdminEmailTest, getAllSalonServices, getAllSalons, getSalonCities, getSalonInfo, getSalonsByLocation, getSalonsByNameAndCity, getallSalonsTest } from "../../controllers/mobile/salonController.js";
 
-import { bookAppointmentBarbers, createAppointment, deleteAppointment, editAppointment, getAllAppointmentsByBarberId, getAllAppointmentsByBarberIdAndDate, getAllAppointmentsBySalonId, getAllAppointmentsBySalonIdAndDate, getEngageBarberTimeSlots } from "../../controllers/mobile/appointmentController.js";
+import { bookAppointmentBarbers, createAppointment, deleteAppointment, editAppointment, getAllAppointmentsByBarberId, getAllAppointmentsByBarberIdAndDate, getallAppointmentsByCustomerEmail, getAllAppointmentsBySalonId, getAllAppointmentsBySalonIdAndDate, getEngageBarberTimeSlots } from "../../controllers/mobile/appointmentController.js";
 // import { verifyRefreshCustomerToken } from "../middlewares/VerifyRefreshCustomerToken.js";
 import { getAllBarberbySalonId } from "../../controllers/mobile/barberController.js";
 import { cancelQueueByCustomer, getAvailableBarbersForQ, getBarberByServices, getBarberServicesByBarberId, getQlistbyBarberId, getQueueListBySalonId, groupJoinQueue, singleJoinQueue } from "../../controllers/mobile/joinQueueController.js";
@@ -113,5 +113,10 @@ router.route("/getFullyBookedDatesBySalonIdBarberId").post(getFullyBookedDatesBy
 
 //Get Salon Business hours
 router.route("/getSalonBusinessHours").post(getSalonBusinessDays)
+
+
+router.route("/getAllCustomerAppointments").post(getallAppointmentsByCustomerEmail)
+
+
 
 export default router;

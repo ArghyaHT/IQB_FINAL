@@ -22,4 +22,3 @@ export const BARBER_DISABLED_APPOINTMENT_DATES_RETRIEVE_SUCCESS = "Appointment d
 export const BOOK_APPOINTMENT_BARBER_RETRIEVE_SUCCESS = "Barbers retrieved successfully."
 
 
-

@@ -21,6 +21,8 @@ import { getPushDevicesbyEmailId } from "../../services/mobile/pushDeviceTokensS
 import { CREATE_APPOINTMENT, EDIT_APPOINTMENT } from "../../constants/mobile/NotificationConstants.js"
 import { getBarberBreakTimes } from "../../services/web/barberBreakTimes/barberBreakTimesService.js";
 import { getBarberReservations } from "../../services/web/barberReservations/barberReservationsService.js";
+import { getAppointmentsByCustomerEmail } from "../../services/mobile/appointmentHistoryService.js"
+import { CUSTOMER_APPOINTMENT_RETRIEVE_SUCCESS } from "../../constants/web/AppointmentsConstants.js";
 
 //Creating Appointment
 export const createAppointment = async (req, res, next) => {
@@ -1142,12 +1144,31 @@ export const bookAppointmentBarbers = async (req, res, next) => {
 }
 
 
-export const getallAppointmentsByCustomerId = async(req, res, next)=> {
-  try{
-    const {salonId, customerEmail} = req.body;
+export const getallAppointmentsByCustomerEmail = async (req, res, next) => {
+  try {
+    const { salonId, customerEmail } = req.body;
 
-    const getUpcomingAppointments = await getCustomerAppointments(customerEmail)
+    const getUpcomingAppointments = await getCustomerAppointments(salonId, customerEmail)
 
+    const sortedAppointments = getUpcomingAppointments
+      .sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate))
+      .map(appointment => ({
+        ...appointment,
+        status: 'upcoming'
+      }));
+
+    const getCustomerHistoryAppointments = await getAppointmentsByCustomerEmail(salonId, customerEmail)
+
+    const sortedHistoryAppointments = getCustomerHistoryAppointments
+      .sort((a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate));
+
+
+    return SuccessHandler(CUSTOMER_APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, {
+      response: {
+        upcomingAppointments: sortedAppointments,
+        historyAppointments: sortedHistoryAppointments
+      }
+    });
   }
   catch (error) {
     next(error);

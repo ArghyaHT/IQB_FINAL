@@ -12,4 +12,7 @@ export const SALON_APPOINTMENT_HISTORY_SUCCESS ="Salon appointment history retri
 
 export const BARBER_APPOINTMENT_HISTORY_SUCCESS ="Barber appointment history retrieved successfully"
 
+export const CUSTOMER_APPOINTMENT_RETRIEVE_SUCCESS = "Customer appointments retrieved successfully."
+
+
 
