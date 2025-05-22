@@ -3,12 +3,13 @@ import { SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeCon
 import { SALON_PAYMENT_HISTORY_SUCCESS } from "../../../constants/web/SalonPaymentsConstants.js";
 import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { getSalonPaymentHistoryBySalonId } from "../../../services/web/salonPayments/salonPaymentsHistoryService.js";
+import { getSalonPaymentsBySalonId } from "../../../services/web/salonPayments/salonPaymentService.js";
 
 export const paymentHistories = async (req, res, next) => {
     try {
         const { salonId } = req.body;
 
-        const salonPaymentHistory = await getSalonPaymentHistoryBySalonId(salonId);
+        const salonPaymentHistory = await getSalonPaymentsBySalonId(salonId);
 
         // Format the dates and calculate time period in days
         const formattedHistory = salonPaymentHistory.map(payment => {
