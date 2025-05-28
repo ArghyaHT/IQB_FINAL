@@ -452,6 +452,11 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
         const updatedSalon = await salonOnlineStatus(salonId, isOnline);
 
+           await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
+              salonId: salonId,
+              isOnline: isOnline // or false when offline
+          });
+
         if (!updatedSalon) {
             return ErrorHandler(SALON_EXISTS_ERROR, ERROR_STATUS_CODE_404, res)
 
