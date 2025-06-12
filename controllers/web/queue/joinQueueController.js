@@ -51,14 +51,14 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
         const sortedQlist = getSalon;
 
-        // io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
+        io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
 
-        io.to(`salon_${salonId}`).emit("queueUpdated", {
-        success: true,
-        status: SUCCESS_STATUS_CODE,
-        message: RETRIVE_QUEUELIST_SUCCESS,
-        response: sortedQlist
-    });
+    //     io.to(`salon_${salonId}`).emit("queueUpdated", {
+    //     success: true,
+    //     status: SUCCESS_STATUS_CODE,
+    //     message: RETRIVE_QUEUELIST_SUCCESS,
+    //     response: sortedQlist
+    // });
 
         return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist })
 
