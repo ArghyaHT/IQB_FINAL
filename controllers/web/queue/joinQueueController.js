@@ -54,9 +54,9 @@ export const getQueueListBySalonId = async (req, res, next) => {
         // io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
 
         io.to(`salon_${salonId}`).emit("queueUpdated", {
-        success: RETRIVE_QUEUELIST_SUCCESS,
+        success: true,
         status: SUCCESS_STATUS_CODE,
-        message: "Queuelist data",
+        message: RETRIVE_QUEUELIST_SUCCESS,
         response: sortedQlist
     });
 
@@ -141,6 +141,8 @@ export const barberServedQueue = async (req, res, next) => {
                         }
                         // Update the status to "served" for the served queue in JoinedQueueHistory
                         await updateServed(salonId, element._id);
+
+
 
                         const salonDetails = await getSalonBySalonId(salonId);
                         // Construct email subject and body for the customer being served
