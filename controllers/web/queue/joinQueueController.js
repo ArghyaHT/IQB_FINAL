@@ -18,7 +18,7 @@ import { ADMIN_NOT_EXIST_ERROR, INVALID_EMAIL_ERROR } from "../../../constants/w
 import { NO_SALON_CONNECTED_ERROR, QUEUE_CANCEL_SUCCESS, QUEUE_NOT_FOUND_BY_ID_ERROR, QUEUE_NOT_FOUND_ERROR, QUEUE_POSITION_ERROR, QUEUE_SERVE_SUCCESS, QUEUELIST_BARBER_ERROR, QUEUELIST_EMPTY_FOR_BARBER_SUCCESS, RETRIVE_EMPTY_QUEUELIST_SUCCESS, RETRIVE_QUEUELIST_SUCCESS } from "../../../constants/web/QueueConstants.js";
 import { BARBER_EXISTS_ERROR } from "../../../constants/web/BarberConstants.js";
 import SalonQueueList from "../../../models/salonQueueListModel.js";
-import { findBarberByEmailAndRole } from "../../../services/kiosk/barber/barberService.js";
+import { findBarberByEmailAndRole, getAllSalonBarbersForTV } from "../../../services/kiosk/barber/barberService.js";
 import { getPushDevicesbyEmailId } from "../../../services/mobile/pushDeviceTokensService.js";
 import { QUEUE_POSITION_CHANGE } from "../../../constants/mobile/NotificationConstants.js";
 import { sendQueueNotification } from "../../../utils/pushNotifications/pushNotifications.js";
