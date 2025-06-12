@@ -2017,7 +2017,6 @@ export const getAttendenceByBarberIdKiosk = async (req, res, next) => {
 
 
 //DESC:CHANGE BARBER CLOCKIN STATUS ===========================
-
 export const changeBarberClockInStatus = async (req, res, next) => {
     try {
         const { barberId, salonId, isClockedIn, barberToken } = req.body;
@@ -2110,6 +2109,12 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
             return ErrorHandler(MOBILE_BOOKING_AVAILABILITY_ERROR, ERROR_STATUS_CODE_404, res)
         }
 
+          // ✅ Emit the updated mobile booking availability over socket
+        await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
+            salonId: salonId,
+            mobileBookingAvailability: mobileBookingAvailability
+        });
+
         if (mobileBookingAvailability === true) {
             return SuccessHandler(MOBILE_BOOKING_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
 
@@ -2145,6 +2150,12 @@ export const changeSalonKioskStatus = async (req, res, next) => {
         if (!updatedSalon) {
             return ErrorHandler(KIOSK_AVAILABILITY_ERROR, ERROR_STATUS_CODE, res)
         }
+
+          // ✅ Emit kiosk availability update over socket
+        await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
+            salonId: salonId,
+            kioskAvailability: kioskAvailability
+        });
 
         if (kioskAvailability === true) {
             return SuccessHandler(KIOSK_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
