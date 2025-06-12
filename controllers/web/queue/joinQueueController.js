@@ -53,12 +53,12 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
         io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
 
-    //     io.to(`salon_${salonId}`).emit("queueUpdated", {
-    //     success: true,
-    //     status: SUCCESS_STATUS_CODE,
-    //     message: RETRIVE_QUEUELIST_SUCCESS,
-    //     response: sortedQlist
-    // });
+        //     io.to(`salon_${salonId}`).emit("queueUpdated", {
+        //     success: true,
+        //     status: SUCCESS_STATUS_CODE,
+        //     message: RETRIVE_QUEUELIST_SUCCESS,
+        //     response: sortedQlist
+        // });
 
         return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist })
 
@@ -259,9 +259,10 @@ export const barberServedQueue = async (req, res, next) => {
 
                     const updatedBarber = await decreaseBarberEWT(salonId, barberId, currentServiceEWT)
 
-
-
                     const customers = await findCustomersToMail(salonId, barberId)
+
+                    const updatedBarbers = await getAllSalonBarbersForTV(salonId); // ✅ fetch updated barbers
+                    io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
                     if (customers && customers.length > 0) {
                         for (const customer of customers) {
@@ -532,6 +533,8 @@ export const barberServedQueue = async (req, res, next) => {
                     const updatedBarber = await decreaseBarberEWT(salonId, barberId, currentServiceEWT)
 
 
+                    const updatedBarbers = await getAllSalonBarbersForTV(salonId); // ✅ fetch updated barbers
+                    io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
                     const customers = await findCustomersToMail(salonId, barberId)
 
