@@ -889,7 +889,7 @@ export const getQlistbyBarberId = async (req, res, next) => {
 
         const approvedBarber = await getBarberByBarberId(barberId);
 
-        io.to(`salon_${salonId}`).emit("barberQueueUpdated", {
+       await io.to(`barber_${barberId}`).emit("barberQueueUpdated", {
             barberId,
             queueList: sortedQlist,
             barberName: approvedBarber.name, // Optional
