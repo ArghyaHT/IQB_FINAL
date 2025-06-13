@@ -264,6 +264,21 @@ export const barberServedQueue = async (req, res, next) => {
                     const updatedBarbers = await getAllSalonBarbersForTV(salonId); // ✅ fetch updated barbers
                     io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
+                    //Live data for barber updated queue
+
+                    const qListByBarber = await qListByBarberId(salonId, barberId)
+
+                    const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
+
+                    const approvedBarber = await getBarberByBarberId(barberId);
+
+                    await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
+                        salonId,
+                        barberId,
+                        queueList: sortedQlist,
+                        barberName: approvedBarber.name,
+                    });
+
                     if (customers && customers.length > 0) {
                         for (const customer of customers) {
                             if (customer.queueList && Array.isArray(customer.queueList)) {
@@ -536,6 +551,20 @@ export const barberServedQueue = async (req, res, next) => {
                     const updatedBarbers = await getAllSalonBarbersForTV(salonId); // ✅ fetch updated barbers
                     io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
+                    //Live data render for barber served queue
+                    const qListByBarber = await qListByBarberId(salonId, barberId)
+
+                    const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
+
+                    const approvedBarber = await getBarberByBarberId(barberId);
+
+                    await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
+                        salonId,
+                        barberId,
+                        queueList: sortedQlist,
+                        barberName: approvedBarber.name,
+                    });
+
                     const customers = await findCustomersToMail(salonId, barberId)
 
                     if (customers && customers.length > 0) {
@@ -731,6 +760,24 @@ export const cancelQueue = async (req, res, next) => {
         }
 
         await statusCancelQ(salonId, _id);
+
+
+        const updatedBarbers = await getAllSalonBarbersForTV(salonId); // ✅ fetch updated barbers
+        io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
+        //Live data render for barber served queue
+        const qListByBarber = await qListByBarberId(salonId, barberId)
+
+        const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
+
+        const approvedBarber = await getBarberByBarberId(barberId);
+
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
+            salonId,
+            barberId,
+            queueList: sortedQlist,
+            barberName: approvedBarber.name,
+        });
 
         const salonDetails = await getSalonBySalonId(salonId);
         const servedEmailSubject = `${salonDetails.salonName}-Sorry Your Queue Has Been Canceled 🚫`;

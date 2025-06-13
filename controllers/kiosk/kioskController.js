@@ -1052,8 +1052,6 @@ export const joinQueueKiosk = async (req, res, next) => {
 
         const approvedBarber = await getBarberByBarberId(barberId);
 
-        console.log(sortedQlist)
-
         await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
             salonId,
             barberId,
