@@ -20,11 +20,12 @@ export const initializeSocket = (server) => {
             console.log(`Client ${socket.id} joined salon: salon_${salonId}`);
         });
 
-          socket.on("joinBarber", (barberId) => {
-            socket.join(`barber_${barberId}`);
-            console.log(`Client ${socket.id} joined barber: barber_${barberId}`);
+        socket.on("joinBarber", ({ salonId, barberId }) => {
+            const roomName = `barber_${salonId}_${barberId}`;
+            socket.join(roomName);
+            console.log(`Client ${socket.id} joined barber room: ${roomName}`);
         });
-        
+
 
         socket.on('disconnect', () => {
             console.log(`Client Disconnected: ${socket.id}`);

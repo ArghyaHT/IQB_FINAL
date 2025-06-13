@@ -1054,10 +1054,11 @@ export const joinQueueKiosk = async (req, res, next) => {
 
         console.log(sortedQlist)
 
-       await io.to(`salon_${salonId}`).emit("barberQueueUpdated", {
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
+            salonId,
             barberId,
             queueList: sortedQlist,
-            barberName: approvedBarber.name, // Optional
+            barberName: approvedBarber.name,
         });
 
 
