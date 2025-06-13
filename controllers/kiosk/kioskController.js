@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken"
 import { connectAdminKiosk, findAdminByEmailandRole, findAdminByEmailandSalonId, findGoogleAdminByEmailandSalonId } from "../../services/kiosk/admin/adminServices.js";
 import { availableBarberAutoJoin, barberClockInStatus, barberOnlineStatus, changeBarberStatusAtSalonOffline, decreaseBarberEWT, decreaseBarberEWTWhenQCancel, fetchedBarbers, findBaberByBarberId, findBarberByBarberEmailAndSalonId, findBarberByEmailAndRole, findBarberByEmailAndSalonId, findBarbersBySalonId, findGoogleBarberByEmailAndSalonId, getAllSalonBarbers, getAllSalonBarbersForTV, getBarberByBarberId, getBarbersForQ, getBarbersWithMulServices, updateBarberEWT } from "../../services/kiosk/barber/barberService.js";
 import { allSalonsByAdmin, allSalonServices, checkSalonExists, getDefaultSalonDetailsEmail, getSalonBySalonId, getSalonTimeZone, kioskAvailabilityStatus, mobileBookingAvailabilityStatus, salonOnlineStatus } from "../../services/kiosk/salon/salonServices.js";
-import { findCustomersToMail, findSalonQueueList, getSalonQlist, qListByBarberId } from "../../services/kiosk/queue/queueService.js";
+import { findCustomersToMail, findSalonQueueList, getSalonQlist, queueListByBarberId } from "../../services/kiosk/queue/queueService.js";
 import { addCustomerToQueue } from "../../utils/queue/queueUtils.js";
 import { sendQueuePositionEmail } from "../../utils/emailSender/emailSender.js";
 import { addQueueHistory, addQueueHistoryWhenCanceled, findSalonQueueListHistory, statusCancelQ, updateServed } from "../../services/kiosk/queue/queueHistoryService.js";
@@ -33,6 +33,7 @@ import { QUEUE_POSITION_CHANGE } from "../../constants/mobile/NotificationConsta
 import { io } from "../../utils/socket/socket.js";
 import { googleLoginAdmin } from "../../services/web/admin/adminService.js";
 import { googleLoginBarber } from "../../services/web/barber/barberService.js";
+import { qListByBarberId } from "../../services/web/queue/joinQueueService.js";
 
 //DESC:LOGIN AN ADMIN =========================
 export const loginKiosk = async (req, res, next) => {
@@ -933,7 +934,7 @@ export const joinQueueKiosk = async (req, res, next) => {
             };
 
             existingQueue = await addCustomerToQueue(salonId, newQueue, barberId);
-            
+
 
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
@@ -1036,7 +1037,7 @@ export const joinQueueKiosk = async (req, res, next) => {
 
         const enrichedQueueList = await getSalonQlist(salonId);
 
-            // Check if the queueList exists or if it's empty
+        // Check if the queueList exists or if it's empty
         if (enrichedQueueList) {
             // Sort the queue list in ascending order based on qPosition
             enrichedQueueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
@@ -1045,13 +1046,24 @@ export const joinQueueKiosk = async (req, res, next) => {
             await io.to(`salon_${salonId}`).emit("queueUpdated", enrichedQueueList);
         }
 
+        const qListByBarber = await qListByBarberId(salonId, barberId)
+
+        const approvedBarber = await getBarberByBarberId(barberId);
+
+        io.to(`salon_${salonId}`).emit("barberQueueUpdated", {
+            barberId,
+            queueList: qListByBarber,
+            barberName: approvedBarber.name, // Optional
+        });
+
+
 
         // return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingQueue.queue.queueList })
 
 
-return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, {
-  response: enrichedQueueList
-});
+        return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, {
+            response: enrichedQueueList
+        });
 
     } catch (error) {
         next(error);
@@ -2080,7 +2092,7 @@ export const changeBarberClockInStatus = async (req, res, next) => {
                 }
                 else {
 
-                    const getQlistByBarber = await qListByBarberId(salonId, barberId);
+                    const getQlistByBarber = await queueListByBarberId(salonId, barberId);
                     const isOnline = false;
                     if (getQlistByBarber.length === 0) {
                         await barberOnlineStatus(barberId, salonId, isOnline)

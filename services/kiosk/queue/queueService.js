@@ -65,7 +65,7 @@ export const findCustomersToMail = async (salonId, barberId) => {
 
 
 //GET Q LIST BY BARBER ID
-export const qListByBarberId = async (salonId, barberId) => {
+export const queueListByBarberId = async (salonId, barberId) => {
   const qList = await SalonQueueList.aggregate([
     {
       $match: {
