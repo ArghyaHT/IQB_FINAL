@@ -1027,16 +1027,6 @@ export const joinQueueKiosk = async (req, res, next) => {
 
         }
 
-        console.log(existingQueue.queue.queueList)
-
-        // Check if the queueList exists or if it's empty
-        if (existingQueue.queue.queueList) {
-            // Sort the queue list in ascending order based on qPosition
-            existingQueue.queue.queueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
-
-            // Emit the updated queue list to the salon
-            await io.to(`salon_${salonId}`).emit("queueUpdated", existingQueue.queue.queueList);
-        }
 
         // // Fetch the updated barber list for the salon
         // const updatedBarbers = await getAllSalonBarbersForTV(salonId);
@@ -1045,6 +1035,15 @@ export const joinQueueKiosk = async (req, res, next) => {
         // io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
         const enrichedQueueList = await getSalonQlist(salonId);
+
+            // Check if the queueList exists or if it's empty
+        if (enrichedQueueList) {
+            // Sort the queue list in ascending order based on qPosition
+            enrichedQueueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+
+            // Emit the updated queue list to the salon
+            await io.to(`salon_${salonId}`).emit("queueUpdated", enrichedQueueList);
+        }
 
 
         // return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingQueue.queue.queueList })
