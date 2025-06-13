@@ -728,7 +728,7 @@ export const joinQueueKiosk = async (req, res, next) => {
                 return ErrorHandler(BARBERS_UNABLE_QUEUE_ERROR, ERROR_STATUS_CODE_404, res)
             }
 
-            existingQueue = await findSalonQueueList(salonId);
+            existingQueue = await getSalonQlist(salonId);
 
             const time = moment().local().format('HH:mm:ss');
 
@@ -876,7 +876,7 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             }
 
-            existingQueue = await findSalonQueueList(salonId);
+            existingQueue = await getSalonQlist(salonId);
 
             const time = moment().local().format('HH:mm:ss');
 
