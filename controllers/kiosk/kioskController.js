@@ -471,6 +471,18 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
             updatedSalon.kioskAvailability = false
             await updatedSalon.save();
 
+            // ✅ Emit kiosk availability update over socket
+            await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
+                salonId: salonId,
+                kioskAvailability: false
+            });
+
+            // ✅ Emit the updated mobile booking availability over socket
+            await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
+                salonId: salonId,
+                mobileBookingAvailability: false
+            });
+
             await changeBarberStatusAtSalonOffline(salonId);
 
             return SuccessHandler(SALON_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
@@ -2540,19 +2552,19 @@ export const barberServedQueueTvApp = async (req, res, next) => {
 
                     const updatedBarber = await decreaseBarberEWT(salonId, barberId, currentServiceEWT)
 
-                        //Live data render for barber served queue
-                            const qListByBarber = await qListByBarberId(salonId, barberId)
-                    
-                            const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
-                    
-                            const approvedBarber = await getBarberByBarberId(barberId);
-                    
-                            await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
-                                salonId,
-                                barberId,
-                                queueList: sortedQlist,
-                                barberName: approvedBarber.name,
-                            });
+                    //Live data render for barber served queue
+                    const qListByBarber = await qListByBarberId(salonId, barberId)
+
+                    const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
+
+                    const approvedBarber = await getBarberByBarberId(barberId);
+
+                    await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
+                        salonId,
+                        barberId,
+                        queueList: sortedQlist,
+                        barberName: approvedBarber.name,
+                    });
 
 
                     const customers = await findCustomersToMail(salonId, barberId)
@@ -2780,19 +2792,19 @@ export const cancelQueueTvApp = async (req, res, next) => {
         await statusCancelQ(salonId, _id);
 
 
-            //Live data render for barber served queue
-                const qListByBarber = await qListByBarberId(salonId, barberId)
-        
-                const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
-        
-                const approvedBarber = await getBarberByBarberId(barberId);
-        
-                await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
-                    salonId,
-                    barberId,
-                    queueList: sortedQlist,
-                    barberName: approvedBarber.name,
-                });
+        //Live data render for barber served queue
+        const qListByBarber = await qListByBarberId(salonId, barberId)
+
+        const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
+
+        const approvedBarber = await getBarberByBarberId(barberId);
+
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
+            salonId,
+            barberId,
+            queueList: sortedQlist,
+            barberName: approvedBarber.name,
+        });
 
         const salonDetails = await getSalonTimeZone(salonId);
 
