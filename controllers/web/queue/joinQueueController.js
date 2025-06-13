@@ -885,11 +885,13 @@ export const getQlistbyBarberId = async (req, res, next) => {
 
         const qListByBarber = await qListByBarberId(salonId, barberId)
 
+        const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
+
         const approvedBarber = await getBarberByBarberId(barberId);
 
         io.to(`salon_${salonId}`).emit("barberQueueUpdated", {
             barberId,
-            queueList: qListByBarber,
+            queueList: sortedQlist,
             barberName: approvedBarber.name, // Optional
         });
 
@@ -899,7 +901,7 @@ export const getQlistbyBarberId = async (req, res, next) => {
 
         }
 
-        return SuccessHandler(QUEUELIST_EMPTY_FOR_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { queueList: qListByBarber })
+        return SuccessHandler(QUEUELIST_EMPTY_FOR_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { queueList: sortedQlist })
 
     } catch (error) {
         next(error);
