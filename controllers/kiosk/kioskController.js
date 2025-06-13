@@ -452,10 +452,10 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
         const updatedSalon = await salonOnlineStatus(salonId, isOnline);
 
-           await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
-              salonId: salonId,
-              isOnline: isOnline // or false when offline
-          });
+        await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
+            salonId: salonId,
+            isOnline: isOnline // or false when offline
+        });
 
         if (!updatedSalon) {
             return ErrorHandler(SALON_EXISTS_ERROR, ERROR_STATUS_CODE_404, res)
@@ -1104,6 +1104,18 @@ export const getQueueListBySalonId = async (req, res, next) => {
         const sortedQlist = getSalon;
 
         io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
+
+        // Filter the queue for that specific barber
+        const queueListByBarber = existingQueue.queue.queueList.filter(
+            (item) => item.barberId === newQueue.barberId
+        );
+
+        // Emit to frontend components tracking this barber
+        io.to(`salon_${salonId}`).emit("barberQueueUpdated", {
+            barberId: newQueue.barberId,
+            queueList: queueListByBarber,
+            barberName: newQueue.barberName, // Optional
+        });
 
         return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist ? sortedQlist : [] })
 
@@ -2109,7 +2121,7 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
             return ErrorHandler(MOBILE_BOOKING_AVAILABILITY_ERROR, ERROR_STATUS_CODE_404, res)
         }
 
-          // ✅ Emit the updated mobile booking availability over socket
+        // ✅ Emit the updated mobile booking availability over socket
         await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
             salonId: salonId,
             mobileBookingAvailability: mobileBookingAvailability
@@ -2151,7 +2163,7 @@ export const changeSalonKioskStatus = async (req, res, next) => {
             return ErrorHandler(KIOSK_AVAILABILITY_ERROR, ERROR_STATUS_CODE, res)
         }
 
-          // ✅ Emit kiosk availability update over socket
+        // ✅ Emit kiosk availability update over socket
         await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
             salonId: salonId,
             kioskAvailability: kioskAvailability
