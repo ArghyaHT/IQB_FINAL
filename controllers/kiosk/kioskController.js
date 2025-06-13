@@ -933,7 +933,7 @@ export const joinQueueKiosk = async (req, res, next) => {
             };
 
             existingQueue = await addCustomerToQueue(salonId, newQueue, barberId);
-
+            
 
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
@@ -1027,6 +1027,7 @@ export const joinQueueKiosk = async (req, res, next) => {
 
         }
 
+        console.log(existingQueue.queue.queueList)
 
         // Check if the queueList exists or if it's empty
         if (existingQueue.queue.queueList) {
@@ -1043,7 +1044,15 @@ export const joinQueueKiosk = async (req, res, next) => {
         // // Emit the updated barber list
         // io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
-        return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingQueue.queue.queueList })
+        const enrichedQueueList = await getSalonQlist(salonId);
+
+
+        // return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: existingQueue.queue.queueList })
+
+
+return SuccessHandler(JOIN_QUEUE_SUCCESS, SUCCESS_STATUS_CODE, res, {
+  response: enrichedQueueList
+});
 
     } catch (error) {
         next(error);
