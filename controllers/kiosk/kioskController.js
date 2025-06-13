@@ -2540,6 +2540,19 @@ export const barberServedQueueTvApp = async (req, res, next) => {
 
                     const updatedBarber = await decreaseBarberEWT(salonId, barberId, currentServiceEWT)
 
+                        //Live data render for barber served queue
+                            const qListByBarber = await qListByBarberId(salonId, barberId)
+                    
+                            const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
+                    
+                            const approvedBarber = await getBarberByBarberId(barberId);
+                    
+                            await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
+                                salonId,
+                                barberId,
+                                queueList: sortedQlist,
+                                barberName: approvedBarber.name,
+                            });
 
 
                     const customers = await findCustomersToMail(salonId, barberId)
@@ -2765,6 +2778,21 @@ export const cancelQueueTvApp = async (req, res, next) => {
 
         // Update the status to "cancelled" for the canceled queue in JoinedQueueHistory
         await statusCancelQ(salonId, _id);
+
+
+            //Live data render for barber served queue
+                const qListByBarber = await qListByBarberId(salonId, barberId)
+        
+                const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
+        
+                const approvedBarber = await getBarberByBarberId(barberId);
+        
+                await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
+                    salonId,
+                    barberId,
+                    queueList: sortedQlist,
+                    barberName: approvedBarber.name,
+                });
 
         const salonDetails = await getSalonTimeZone(salonId);
 
