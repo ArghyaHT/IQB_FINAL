@@ -889,11 +889,11 @@ export const getQlistbyBarberId = async (req, res, next) => {
 
         // io.to(`salon_${salonId}`).emit("barberQueueUpdated", qListByBarber);
 
-        io.to(`salon_${salonId}`).emit("barberQueueUpdated", {
-            barberId,
-            queueList: qListByBarber,
-            barberName: approvedBarber.name, // Optional
-        });
+        // io.to(`salon_${salonId}`).emit("barberQueueUpdated", {
+        //     barberId,
+        //     queueList: qListByBarber,
+        //     barberName: approvedBarber.name, // Optional
+        // });
 
         if (approvedBarber.isApproved === false) {
 

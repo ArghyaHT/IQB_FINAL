@@ -1105,17 +1105,17 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
         io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
 
-        // Filter the queue for that specific barber
-        const queueListByBarber = existingQueue.queue.queueList.filter(
-            (item) => item.barberId === newQueue.barberId
-        );
+        // // Filter the queue for that specific barber
+        // const queueListByBarber = existingQueue.queue.queueList.filter(
+        //     (item) => item.barberId === newQueue.barberId
+        // );
 
-        // Emit to frontend components tracking this barber
-        io.to(`salon_${salonId}`).emit("barberQueueUpdated", {
-            barberId: newQueue.barberId,
-            queueList: queueListByBarber,
-            barberName: newQueue.barberName, // Optional
-        });
+        // // Emit to frontend components tracking this barber
+        // io.to(`salon_${salonId}`).emit("barberQueueUpdated", {
+        //     barberId: newQueue.barberId,
+        //     queueList: queueListByBarber,
+        //     barberName: newQueue.barberName, // Optional
+        // });
 
         return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist ? sortedQlist : [] })
 
