@@ -7,7 +7,8 @@ export const initializeSocket = (server) => {
         cors: {
             origin: '*', // Allow all origins (Customize this for security)
             methods: ["GET", "POST"],
-        }
+        },
+        path: '/socket.io', // ✅ matches client
     });
 
     io.on('connection', (socket) => {
