@@ -27,6 +27,7 @@ import moment from "moment";
 import Salon from "../../../models/salonRegisterModel.js";
 import SalonPayments from "../../../models/salonPaymnetsModel.js";
 import { io } from "../../../utils/socket/socket.js";
+import { getAllSalonBarbersForTV } from "../../../services/kiosk/barber/barberService.js";
 
 
 //DESC:CREATE SALON BY ADMIN============================
@@ -938,6 +939,9 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
       await updatedSalon.save();
 
       await changeBarberStatusAtSalonOffline(salonId);
+
+      const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+      io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
       const salon = await findSalonBySalonIdAndAdmin(updatedSalon.salonId, updatedSalon.adminEmail)
 
