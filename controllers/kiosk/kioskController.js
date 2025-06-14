@@ -453,16 +453,16 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
         const updatedSalon = await salonOnlineStatus(salonId, isOnline);
 
-        await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
-            salonId: salonId,
-            isOnline: isOnline // or false when offline
-        });
-
         if (!updatedSalon) {
             return ErrorHandler(SALON_EXISTS_ERROR, ERROR_STATUS_CODE_404, res)
 
         }
-        if (isOnline === true) {
+        if (isOnline) {
+            await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
+            response: updatedSalon,
+            SALON_ONLINE_SUCCESS,
+            })
+
             return SuccessHandler(SALON_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
         }
         else {
@@ -484,6 +484,11 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
             });
 
             await changeBarberStatusAtSalonOffline(salonId);
+
+            await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
+            response: updatedSalon,
+            SALON_OFFLINE_SUCCESS,
+            })
 
             return SuccessHandler(SALON_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
         }
@@ -3073,9 +3078,6 @@ export const googleLoginTV = async (req, res, next) => {
         next(error);
     }
 }
-
-
-
 
 export const changeBarberOnlineStatusTV = async (req, res, next) => {
     try {
