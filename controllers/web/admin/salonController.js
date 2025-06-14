@@ -1,4 +1,4 @@
-import { findAdminByEmailandRole } from "../../../services/web/admin/adminService.js";
+import { findAdminByEmailandRole, findAdminByEmailAndSalonId } from "../../../services/web/admin/adminService.js";
 import { addMoreSalonImages, allSalonServices, allSalons, createSalonId, deleteSalonImage, findSalonBySalonIdAndAdmin, findSalonLogoById, findSalonProfileById, findSalonsByLocation, getSalonsByNameAndCity, salonInfoDetails, salonOnlineStatus, saveSalon, toDeleteSalon, updateSalon, updateSalonImage, uploadSalonImages, updatedSalonLogo, getSalonLogoBySalonId, deletedSalonLogo, uploadedSalonLogo, findSalonBySalonNameOrEmail, findSalonBySalonId, getSalonGallery, getSalonBySalonId, changeSalonService, getSalonPayments } from "../../../services/web/admin/salonService.js";
 import { createSalonSettings } from "../../../services/web/salonSettings/salonSettingsService.js";
 import { v4 as uuidv4 } from 'uuid';
@@ -919,8 +919,11 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
     }
     if (isOnline) {
+
+      const salon = await findSalonBySalonIdAndAdmin(updatedSalon.salonId, updatedSalon.adminEmail)
+
       await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
-        response: updatedSalon,
+        response: salon,
         SALON_ONLINE_SUCCESS,
       })
       // return res.status(200).json({ success: true, message: "The salon is currently online.", response: updatedSalon });
@@ -936,8 +939,11 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
       await changeBarberStatusAtSalonOffline(salonId);
 
+      const salon = await findSalonBySalonIdAndAdmin(updatedSalon.salonId, updatedSalon.adminEmail)
+
+
       await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
-        response: updatedSalon,
+        response: salon,
         SALON_OFFLINE_SUCCESS,
       })
 

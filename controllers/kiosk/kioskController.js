@@ -34,6 +34,7 @@ import { io } from "../../utils/socket/socket.js";
 import { googleLoginAdmin } from "../../services/web/admin/adminService.js";
 import { googleLoginBarber } from "../../services/web/barber/barberService.js";
 import { qListByBarberId } from "../../services/web/queue/joinQueueService.js";
+import { findSalonBySalonIdAndAdmin } from "../../services/web/admin/salonService.js";
 
 //DESC:LOGIN AN ADMIN =========================
 export const loginKiosk = async (req, res, next) => {
@@ -458,9 +459,12 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
         }
         if (isOnline) {
+
+            const salon = await findSalonBySalonIdAndAdmin(updatedSalon.salonId, updatedSalon.adminEmail)
+
             await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
-            response: updatedSalon,
-            SALON_ONLINE_SUCCESS,
+                response: salon,
+                SALON_ONLINE_SUCCESS,
             })
 
             return SuccessHandler(SALON_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
@@ -471,23 +475,36 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
             updatedSalon.kioskAvailability = false
             await updatedSalon.save();
 
-            // ✅ Emit kiosk availability update over socket
-            await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
-                salonId: salonId,
-                kioskAvailability: false
-            });
+            // // ✅ Emit kiosk availability update over socket
+            // await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
+            //     salonId: salonId,
+            //     kioskAvailability: false
+            // });
 
-            // ✅ Emit the updated mobile booking availability over socket
-            await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
-                salonId: salonId,
-                mobileBookingAvailability: false
-            });
+            // // ✅ Emit the updated mobile booking availability over socket
+            // await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
+            //     salonId: salonId,
+            //     mobileBookingAvailability: false
+            // });
 
             await changeBarberStatusAtSalonOffline(salonId);
 
+            await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
+                response: updatedSalon,
+                KIOSK_OFFLINE_SUCCESS,
+            });
+
+            await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
+                response: updatedSalon,
+                MOBILE_BOOKING_OFFLINE_SUCCESS,
+            })
+
+
+            const salon = await findSalonBySalonIdAndAdmin(updatedSalon.salonId, updatedSalon.adminEmail)
+
             await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
-            response: updatedSalon,
-            SALON_OFFLINE_SUCCESS,
+                response: salon,
+                SALON_OFFLINE_SUCCESS,
             })
 
             return SuccessHandler(SALON_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
@@ -2165,16 +2182,26 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
         }
 
         // ✅ Emit the updated mobile booking availability over socket
-        await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
-            salonId: salonId,
-            mobileBookingAvailability: mobileBookingAvailability
-        });
+        // await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
+        //     salonId: salonId,
+        //     mobileBookingAvailability: mobileBookingAvailability
+        // });
 
         if (mobileBookingAvailability === true) {
+
+            await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
+                response: updatedSalon,
+                MOBILE_BOOKING_ONLINE_SUCCESS,
+            })
             return SuccessHandler(MOBILE_BOOKING_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
 
         }
         else {
+
+            await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
+                response: updatedSalon,
+                MOBILE_BOOKING_OFFLINE_SUCCESS,
+            })
             return SuccessHandler(MOBILE_BOOKING_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
         }
 
@@ -2207,16 +2234,24 @@ export const changeSalonKioskStatus = async (req, res, next) => {
         }
 
         // ✅ Emit kiosk availability update over socket
-        await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
-            salonId: salonId,
-            kioskAvailability: kioskAvailability
-        });
+        // await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
+        //     salonId: salonId,
+        //     kioskAvailability: kioskAvailability
+        // });
 
         if (kioskAvailability === true) {
+            await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
+                response: updatedSalon,
+                KIOSK_ONLINE_SUCCESS,
+            });
             return SuccessHandler(KIOSK_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
 
         }
         else {
+            await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
+                response: updatedSalon,
+                KIOSK_OFFLINE_SUCCESS,
+            });
             return SuccessHandler(KIOSK_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
         }
 
