@@ -921,7 +921,7 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
     if (isOnline) {
       await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
         response: updatedSalon,
-        SALON_OFFLINE_SUCCESS,
+        SALON_ONLINE_SUCCESS,
       })
       // return res.status(200).json({ success: true, message: "The salon is currently online.", response: updatedSalon });
       return SuccessHandler(SALON_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
