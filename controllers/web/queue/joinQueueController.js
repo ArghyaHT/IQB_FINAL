@@ -272,12 +272,15 @@ export const barberServedQueue = async (req, res, next) => {
 
                     const approvedBarber = await getBarberByBarberId(barberId);
 
-                    await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
-                        salonId,
-                        barberId,
-                        queueList: sortedQlist,
-                        barberName: approvedBarber.name,
-                    });
+                    // await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
+                    //     salonId,
+                    //     barberId,
+                    //     queueList: sortedQlist,
+                    //     barberName: approvedBarber.name,
+                    // });
+
+                    await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+
 
                     if (customers && customers.length > 0) {
                         for (const customer of customers) {
@@ -558,12 +561,15 @@ export const barberServedQueue = async (req, res, next) => {
 
                     const approvedBarber = await getBarberByBarberId(barberId);
 
-                    await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
-                        salonId,
-                        barberId,
-                        queueList: sortedQlist,
-                        barberName: approvedBarber.name,
-                    });
+                    // await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
+                    //     salonId,
+                    //     barberId,
+                    //     queueList: sortedQlist,
+                    //     barberName: approvedBarber.name,
+                    // });
+
+                    await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+
 
                     const customers = await findCustomersToMail(salonId, barberId)
 
@@ -772,12 +778,15 @@ export const cancelQueue = async (req, res, next) => {
 
         const approvedBarber = await getBarberByBarberId(barberId);
 
-        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
-            salonId,
-            barberId,
-            queueList: sortedQlist,
-            barberName: approvedBarber.name,
-        });
+        // await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
+        //     salonId,
+        //     barberId,
+        //     queueList: sortedQlist,
+        //     barberName: approvedBarber.name,
+        // });
+
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+
 
         const salonDetails = await getSalonBySalonId(salonId);
         const servedEmailSubject = `${salonDetails.salonName}-Sorry Your Queue Has Been Canceled 🚫`;
@@ -943,7 +952,7 @@ export const getQlistbyBarberId = async (req, res, next) => {
         //     // barberName: approvedBarber.name,
         // });
 
-         await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
 
         if (approvedBarber.isApproved === false) {
 
