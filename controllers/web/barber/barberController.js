@@ -1319,6 +1319,11 @@ export const changeBarberClockInStatus = async (req, res, next) => {
             }
             await barberLogInTime(updatedBarber.salonId, updatedBarber.barberId, updatedBarber.updatedAt);
 
+
+            await io.to(`barber_${salonId}_${barberId}`).emit("barberClockInStatusUpdate", 
+                isClockedIn
+            );
+
             return SuccessHandler(BARBER_CLOCKIN_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
         }
         else {
@@ -1337,6 +1342,11 @@ export const changeBarberClockInStatus = async (req, res, next) => {
                 }
 
                 await barberLogOutTime(updatedBarber.salonId, updatedBarber.barberId, updatedBarber.updatedAt);
+
+
+                await io.to(`barber_${salonId}_${barberId}`).emit("barberClockInStatusUpdate", 
+                    isClockedIn
+                );
 
                 return SuccessHandler(BARBER_CLOCKOUT_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
             }
@@ -1376,6 +1386,11 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
         if (!updatedBarber) {
             return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
+
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberOnlineStatusUpdate", 
+            isOnline
+        );
+
 
 
         return SuccessHandler(CHANGE_BARBER_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })

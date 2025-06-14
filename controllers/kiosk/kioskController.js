@@ -699,10 +699,16 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
                 }
 
                 if (isOnline === true) {
+                    await io.to(`barber_${salonId}_${barberId}`).emit("barberOnlineStatusUpdate",
+                        isOnline
+                    );
                     // Send accessToken containing username and roles 
                     return SuccessHandler(BARBER_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
                 }
                 else {
+                    await io.to(`barber_${salonId}_${barberId}`).emit("barberOnlineStatusUpdate",
+                        isOnline
+                    );
                     return SuccessHandler(BARBER_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
 
                 }
@@ -2127,6 +2133,10 @@ export const changeBarberClockInStatus = async (req, res, next) => {
                     }
                     await barberLogInTime(updatedBarber.salonId, updatedBarber.barberId, updatedBarber.updatedAt);
 
+                    await io.to(`barber_${salonId}_${barberId}`).emit("barberClockInStatusUpdate",
+                        isClockedIn
+                    );
+
                     return SuccessHandler(BARBER_CLOCKIN_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
 
                 }
@@ -2144,6 +2154,10 @@ export const changeBarberClockInStatus = async (req, res, next) => {
                             return ErrorHandler(BARBER_NOT_FOUND_ERROR, ERROR_STATUS_CODE_404, res)
                         }
                         await barberLogOutTime(updatedBarber.salonId, updatedBarber.barberId, updatedBarber.updatedAt);
+
+                        await io.to(`barber_${salonId}_${barberId}`).emit("barberClockInStatusUpdate",
+                            isClockedIn
+                        );
 
                         return SuccessHandler(BARBER_CLOCKOUT_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
                     }
