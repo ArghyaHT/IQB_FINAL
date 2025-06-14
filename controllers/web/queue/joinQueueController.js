@@ -551,15 +551,15 @@ export const barberServedQueue = async (req, res, next) => {
                     const updatedBarber = await decreaseBarberEWT(salonId, barberId, currentServiceEWT)
 
                     const enrichedQueueList = await getSalonQlist(salonId);
-                    
-                            // Check if the queueList exists or if it's empty
-                            if (enrichedQueueList) {
-                                // Sort the queue list in ascending order based on qPosition
-                                enrichedQueueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
-                    
-                                // Emit the updated queue list to the salon
-                                await io.to(`salon_${salonId}`).emit("queueUpdated", enrichedQueueList);
-                            }
+
+                    // Check if the queueList exists or if it's empty
+                    if (enrichedQueueList) {
+                        // Sort the queue list in ascending order based on qPosition
+                        enrichedQueueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+
+                        // Emit the updated queue list to the salon
+                        await io.to(`salon_${salonId}`).emit("queueUpdated", enrichedQueueList);
+                    }
 
 
                     const updatedBarbers = await getAllSalonBarbersForTV(salonId); // ✅ fetch updated barbers
@@ -777,6 +777,17 @@ export const cancelQueue = async (req, res, next) => {
         }
 
         await statusCancelQ(salonId, _id);
+
+        const enrichedQueueList = await getSalonQlist(salonId);
+
+        // Check if the queueList exists or if it's empty
+        if (enrichedQueueList) {
+            // Sort the queue list in ascending order based on qPosition
+            enrichedQueueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+
+            // Emit the updated queue list to the salon
+            await io.to(`salon_${salonId}`).emit("queueUpdated", enrichedQueueList);
+        }
 
 
         const updatedBarbers = await getAllSalonBarbersForTV(salonId); // ✅ fetch updated barbers
