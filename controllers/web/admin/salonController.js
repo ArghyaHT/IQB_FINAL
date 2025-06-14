@@ -487,11 +487,11 @@ export const uploadSalonGalleryImages = async (req, res, next) => {
       galleries = [galleries];
     }
 
-      // // Calculate total size
-      // const totalSize = galleries.reduce((acc, file) => acc + file.size, 0);
-      // if (totalSize > TOTAL_IMAGE_UPLOAD_SIZE) {
-      //   return ErrorHandler(TOTAL_IMAGE_SIZE_ERROR, ERROR_STATUS_CODE, res);
-      // }
+    // // Calculate total size
+    // const totalSize = galleries.reduce((acc, file) => acc + file.size, 0);
+    // if (totalSize > TOTAL_IMAGE_UPLOAD_SIZE) {
+    //   return ErrorHandler(TOTAL_IMAGE_SIZE_ERROR, ERROR_STATUS_CODE, res);
+    // }
 
     // Validate each image
     for (const gallery of galleries) {
@@ -909,16 +909,20 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
     const updatedSalon = await salonOnlineStatus(salonId, isOnline)
 
-    await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
-      salonId: salonId,
-      isOnline: isOnline // or false when offline
-  });
+    //   await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
+    //     salonId: salonId,
+    //     isOnline: isOnline // or false when offline
+    // });
 
     if (!updatedSalon) {
       return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
 
     }
-    if (isOnline === true) {
+    if (isOnline) {
+      await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
+        response: updatedSalon,
+        SALON_OFFLINE_SUCCESS,
+      })
       // return res.status(200).json({ success: true, message: "The salon is currently online.", response: updatedSalon });
       return SuccessHandler(SALON_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
 
@@ -931,6 +935,12 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
       await updatedSalon.save();
 
       await changeBarberStatusAtSalonOffline(salonId);
+
+      await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
+        response: updatedSalon,
+        SALON_OFFLINE_SUCCESS,
+      })
+
 
       // return res.status(200).json({ success: true, message: "The salon is currently offline.", response: updatedSalon });
 
@@ -1449,7 +1459,7 @@ export const salonTrailPaidPeriod = async (req, res, next) => {
 
         // Calculate new expiry date
         const newQueueExpiryDate = moment.unix(existingQueueExpiryDate).add(paymentDaysToAdd, 'days').unix();
-        
+
 
 
         if (queueSubscription) {
@@ -1457,7 +1467,7 @@ export const salonTrailPaidPeriod = async (req, res, next) => {
           queueSubscription.planValidity = paymentDaysToAdd;
           queueSubscription.expirydate = newQueueExpiryDate;
           queueSubscription.paymentIntentId = paymentIntentId,
-          queueSubscription.bought = "Renewal";
+            queueSubscription.bought = "Renewal";
         } else {
           salon.subscriptions.push({
             name: "Queue",
