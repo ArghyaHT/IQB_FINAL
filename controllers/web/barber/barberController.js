@@ -1326,6 +1326,8 @@ export const changeBarberClockInStatus = async (req, res, next) => {
             );
 
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+            console.log("✅ Emitting updatedBarbers to salon_" + salonId, updatedBarbers); // ✅ DEBUG
+
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
             return SuccessHandler(BARBER_CLOCKIN_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
@@ -1353,6 +1355,8 @@ export const changeBarberClockInStatus = async (req, res, next) => {
                 );
 
                 const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+                console.log("✅ Emitting updatedBarbers to salon_" + salonId, updatedBarbers); // ✅ DEBUG
+
                 io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
                 return SuccessHandler(BARBER_CLOCKOUT_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
