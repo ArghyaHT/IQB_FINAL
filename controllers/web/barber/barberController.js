@@ -27,6 +27,7 @@ import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ALLOWED_IMAGE_EXTENSIONS, BARBER_IMAGE_EMPTY_ERROR, IMAGE_FAILED_DELETE, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 import { SALON_EXISTS_ERROR, SALON_NOT_CREATED_ERROR, SALON_NOT_FOUND_ERROR, SALON_SERVICES_RETRIEVED_SUCESS } from "../../../constants/web/SalonConstants.js";
 import { NO_SALON_CONNECTED_ERROR } from "../../../constants/web/QueueConstants.js";
+import { getAllSalonBarbersForTV } from "../../../services/kiosk/barber/barberService.js";
 
 
 // Desc: Register
@@ -1320,9 +1321,12 @@ export const changeBarberClockInStatus = async (req, res, next) => {
             await barberLogInTime(updatedBarber.salonId, updatedBarber.barberId, updatedBarber.updatedAt);
 
 
-            await io.to(`barber_${salonId}_${barberId}`).emit("barberClockInStatusUpdate", 
+            await io.to(`barber_${salonId}_${barberId}`).emit("barberClockInStatusUpdate",
                 isClockedIn
             );
+
+            const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+            io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
             return SuccessHandler(BARBER_CLOCKIN_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
         }
@@ -1344,9 +1348,12 @@ export const changeBarberClockInStatus = async (req, res, next) => {
                 await barberLogOutTime(updatedBarber.salonId, updatedBarber.barberId, updatedBarber.updatedAt);
 
 
-                await io.to(`barber_${salonId}_${barberId}`).emit("barberClockInStatusUpdate", 
+                await io.to(`barber_${salonId}_${barberId}`).emit("barberClockInStatusUpdate",
                     isClockedIn
                 );
+
+                const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+                io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
                 return SuccessHandler(BARBER_CLOCKOUT_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
             }
@@ -1387,7 +1394,7 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
             return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
-        await io.to(`barber_${salonId}_${barberId}`).emit("barberOnlineStatusUpdate", 
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberOnlineStatusUpdate",
             isOnline
         );
 
