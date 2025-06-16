@@ -927,6 +927,9 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
         response: salon,
         SALON_ONLINE_SUCCESS,
       })
+
+      const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+      io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
       // return res.status(200).json({ success: true, message: "The salon is currently online.", response: updatedSalon });
       return SuccessHandler(SALON_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
 
