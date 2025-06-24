@@ -32,7 +32,7 @@ export const getAllBarberbySalonId = async (req, res, next) => {
         const totalBarbers = await totalBarberCount(query);
 
         if(getAllBarbers.length === 0){
-           return res.status(201).json({
+           return res.status(400).json({
                 success: true,
                 message: "No Barbers found for the particular salon.",
             })

@@ -53,7 +53,7 @@ export const changeNotificationSeenStatus = async (req, res, next) => {
     const updatedNotifications = await changeSeenStatus(email, _id)
 
     if (!updatedNotifications) {
-      return res.status(201).json({ status: false, message: "Notification not found" });
+      return res.status(400).json({ status: false, message: "Notification not found" });
     }
 
     return res.status(200).json({ status: true, message: "Notification marked as seen", response: updatedNotifications });

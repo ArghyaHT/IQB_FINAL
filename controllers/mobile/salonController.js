@@ -1,6 +1,6 @@
 import { getbarbersBySalonId } from "../../services/mobile/barberService.js";
 import { getAverageSalonRating } from "../../services/mobile/salonRatingService.js";
-import { allSalonServices, allSalons, getAllSalonsByCountry, getSalonRating, salonInfoDetails, searchSalonsByLocation, searchSalonsByNameAndCity } from "../../services/mobile/salonServices.js";
+import { allCategorySalonServices, allSalonServices, allSalons, getAllSalonsByCountry, getSalonRating, salonInfoDetails, searchSalonsByLocation, searchSalonsByNameAndCity } from "../../services/mobile/salonServices.js";
 import { getSalonSettings } from "../../services/mobile/salonSettingsService.js";
 import { findAdminByEmailandRoleTest } from "../../services/web/admin/adminService.js";
 
@@ -223,3 +223,31 @@ export const getSalonCities = async (req, res, next) => {
     next(error);
   }
 }
+
+
+//DESC:GET ALL SALON SERVICES ======================
+export const getAllCategorySalonServices = async (req, res, next) => {
+  const { salonId, serviceCategoryName } = req.query;
+  try {
+    const salonServices = await allCategorySalonServices(salonId, serviceCategoryName)
+
+    if (!salonServices) {
+      res.status(201).json({
+        success: true,
+        message: "Salon services not found for the salon.",
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Salon services by category retrieved",
+      response: salonServices
+    })
+
+  }
+  catch (error) {
+    next(error);
+  }
+}
+
+

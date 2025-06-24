@@ -163,7 +163,10 @@ const salonsSchema = new mongoose.Schema({
         vipService: {
             type: Boolean,
             default: false
-        }
+        },
+        serviceCategoryName: {
+            type: String,
+        },
     }],
 
     isLicensed: {
@@ -289,7 +292,7 @@ const salonsSchema = new mongoose.Schema({
             }
         }],
         default: [
-            { name: "Queue", trial: "Initial", planValidity: 0, expirydate: "", paymentIntentId: "",bought: "" },
+            { name: "Queue", trial: "Initial", planValidity: 0, expirydate: "", paymentIntentId: "", bought: "" },
             { name: "Appointment", trial: "Initial", planValidity: 0, expirydate: "", paymentIntentId: "", bought: "" }
         ]
     }

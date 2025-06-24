@@ -28,6 +28,8 @@ import Salon from "../../../models/salonRegisterModel.js";
 import SalonPayments from "../../../models/salonPaymnetsModel.js";
 import { io } from "../../../utils/socket/socket.js";
 import { getAllSalonBarbersForTV } from "../../../services/kiosk/barber/barberService.js";
+import { getCategories } from "../../../services/common/categoryServices.js";
+import { CATEGORY_RETRIEVED_SUCCESS } from "../../../constants/common/commonConstants.js";
 
 
 //DESC:CREATE SALON BY ADMIN============================
@@ -217,6 +219,7 @@ export const createSalonByAdmin = async (req, res, next) => {
         servicePrice: s.servicePrice,
         serviceEWT: s.serviceEWT,
         vipService: s.vipService,
+        serviceCategoryName: s.serviceCategoryName? s.serviceCategoryName: ""
       };
     });
 
@@ -387,7 +390,9 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
             serviceDesc: matchingService.serviceDesc,
             servicePrice: matchingService.servicePrice,
             serviceEWT: matchingService.serviceEWT,
-            vipService: matchingService.vipService
+            vipService: matchingService.vipService,
+            serviceCategoryName: matchingService.serviceCategoryName? matchingService.serviceCategoryName: ""
+
           };
         }
         return existingService; // Keep the existing service unchanged
@@ -1555,3 +1560,19 @@ export const salonTrailPaidPeriod = async (req, res, next) => {
     next(error);
   }
 };
+
+
+export const getAllCategories = async(req, res, next) => {
+  try{
+
+    const categories = await getCategories();
+
+       return SuccessHandler(CATEGORY_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, {
+                response: categories
+            });
+
+  }
+  catch (error) {
+    next(error);
+  }
+}

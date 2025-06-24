@@ -19,11 +19,11 @@ export const singleJoinQueue = async (req, res, next) => {
         const salon = await getSalonBySalonId(salonId);
 
         if (salon.isOnline === false) {
-            return res.status(201).json({ success: false, message: "Please make the salonOnline to join queue" });
+            return res.status(400).json({ success: false, message: "Please make the salonOnline to join queue" });
         }
 
         if (salon.mobileBookingAvailability === false && methodUsed === "App") {
-            return res.status(201).json({ success: false, message: "Cant Join the queue from App at this moment" });
+            return res.status(400).json({ success: false, message: "Cant Join the queue from App at this moment" });
         }
 
         // Parse the mobileNumber if it's provided
@@ -36,7 +36,7 @@ export const singleJoinQueue = async (req, res, next) => {
 
         // Validate mobile number format if parsed successfully
         if (parsedMobileNumber !== null && parsedMobileNumber.toString().length !== 10) {
-            return res.status(201).json({ success: false, message: "Invalid mobile number format" });
+            return res.status(400).json({ success: false, message: "Invalid mobile number format" });
         }
 
 
@@ -54,7 +54,7 @@ export const singleJoinQueue = async (req, res, next) => {
             const availableBarber = await availableBarberAutoJoin(salonId, services.map(service => service.serviceId), totalServiceEWT);
 
             if (!availableBarber) {
-                return res.status(201).json({
+                return res.status(400).json({
                     success: false,
                     message: 'No single barber provides the services.',
                 });
@@ -189,7 +189,7 @@ export const singleJoinQueue = async (req, res, next) => {
             const updatedBarber = await updateBarberEWT(salonId, barberId, totalServiceEWT);
 
             if (!updatedBarber) {
-                return res.status(201).json({
+                return res.status(400).json({
                     success: false,
                     message: "The barber is not online",
                 });
@@ -345,11 +345,11 @@ export const groupJoinQueue = async (req, res, next) => {
         const salon = await getSalonBySalonId(salonId);
 
         if (salon.isOnline === false) {
-            return res.status(201).json({ success: false, message: "The salon is offline." });
+            return res.status(400).json({ success: false, message: "The salon is offline." });
         }
 
         if (!salon.mobileBookingAvailability && groupInfo.some(group => group.methodUsed === "App")) {
-            return res.status(201).json({ success: false, message: "Can't join the queue from app at this moment" });
+            return res.status(400).json({ success: false, message: "Can't join the queue from app at this moment" });
         }
 
         // Initialize existingQueue as null
@@ -382,7 +382,7 @@ export const groupJoinQueue = async (req, res, next) => {
             const parshedMobileNumber = parseInt(groupInfo.mobileNumber)
             // Validate mobile number format (assuming it should be exactly 10 digits)
             if (parshedMobileNumber && !/^\d{10}$/.test(parshedMobileNumber)) {
-                return res.status(201).json({ success: false, message: "Invalid mobile number format. It should be 10 digits." });
+                return res.status(400).json({ success: false, message: "Invalid mobile number format. It should be 10 digits." });
             }
             for (const service of member.services) {
                 totalServiceEWT += service.barberServiceEWT || service.serviceEWT;
@@ -393,7 +393,7 @@ export const groupJoinQueue = async (req, res, next) => {
             // Update the barberEWT and queueCount for the Barber
             const updatedBarber = await updateBarberEWT(salonId, member.barberId, totalServiceEWT)
             if (!updatedBarber) {
-                res.status(201).json({
+                res.status(400).json({
                     success: false,
                     message: "The barber Is not online",
                 });
@@ -548,14 +548,14 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         customerEmail = customerEmail.toLowerCase();
 
         if (!customerEmail) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "Please ensure the email field is filled correctly."
             });
         }
 
         if (!validateEmail(customerEmail)) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "Invalid Email "
             });
@@ -565,14 +565,14 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         const foundUser = await findCustomerByCustomerEmailAndSalonId(customerEmail, salonId);
 
         if (!foundUser) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Customer not found'
             })
         }
 
         if (foundUser.cancellationCount >= 1 && moment(foundUser.updatedAt).isSame(moment(), 'day')) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Cant cancel queue anymore for today'
             })
@@ -581,7 +581,7 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         const updatedQueue = await findSalonQueueList(salonId)
 
         if (!updatedQueue) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Queue not found for the given salon ID',
             });
@@ -590,7 +590,7 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         const canceledQueueIndex = updatedQueue.queueList.findIndex(queue => queue._id.toString() === _id);
 
         if (canceledQueueIndex === -1) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Queue not found with the given _id',
             });
@@ -766,7 +766,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
                 response: sortedQueueList,
             });
         } else {
-            res.status(201).json({
+            res.status(400).json({
                 success: false,
                 message: "Salon not found",
             });
@@ -790,7 +790,7 @@ export const getAvailableBarbersForQ = async (req, res, next) => {
         const availableBarbers = await getBarbersForQ(salonId);
 
         if (availableBarbers.length === 0) {
-            res.status(201).json({
+            res.status(400).json({
                 success: false,
                 message: 'No available Barbers found at this moment.'
             });
@@ -845,13 +845,13 @@ export const getBarberByServices = async (req, res, next) => {
         const { salonId, serviceIds } = req.body; // Assuming serviceIds are passed as query parameters, e.g., /barbers?serviceIds=1,2,3
 
         if (!serviceIds || !Array.isArray(serviceIds) || serviceIds.length === 0) {
-            return res.status(201).json({ success: false, message: 'Please ensure that the request includes valid service IDs.' });
+            return res.status(400).json({ success: false, message: 'Please ensure that the request includes valid service IDs.' });
         }
 
         const barbers = await getBarbersWithMulServices(salonId, serviceIds);
 
         if (!barbers || barbers.length === 0) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: 'No barbers were found for the services specified in the request.'
             });
@@ -885,7 +885,7 @@ export const getBarberServicesByBarberId = async (req, res, next) => {
             barberServices = barbers.barberServices;
 
             if (!barbers) {
-                return res.status(201).json({
+                return res.status(400).json({
                     success: false,
                     message: "No barbers found for the geiven BarberId"
                 });
@@ -912,7 +912,7 @@ export const getQlistbyBarberId = async (req, res, next) => {
         const qList = await qListByBarberId(salonId, barberId)
 
         if (!qList || qList.length === 0) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: 'No queue list was found for the specified barber and salon ID.',
             });

@@ -93,3 +93,24 @@ export const getAllSalonsByCountry = async(country) => {
 
   return salons;
 }
+
+
+//GET ALL SALON SERVICES 
+// GET ALL SALON SERVICES (Optionally filter by serviceCategoryName)
+export const allCategorySalonServices = async (salonId, serviceCategoryName) => {
+  const salon = await Salon.findOne({ salonId });
+
+  if (!salon) {
+    throw new Error("Salon not found");
+  }
+
+  let allServices = salon.services || [];
+
+  if (serviceCategoryName) {
+    allServices = allServices.filter(
+      service => service.serviceCategoryName === serviceCategoryName
+    );
+  }
+
+  return allServices;
+};

@@ -23,6 +23,7 @@ import {ErrorHandler} from "../../middlewares/ErrorHandler.js"
 import { SUCCESS_STATUS_CODE } from "../../constants/web/Common/StatusCodeConstant.js";
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 import { getSalonSettings } from "../../services/mobile/salonSettingsService.js";
+import { ERROR_STATUS_CODE } from "../../constants/kiosk/StatusCodeConstants.js";
 
 
 //DESC:CHECK WEATHER THE EMAIL ALREADY EXISTS IN THE DATABASE =======
@@ -41,7 +42,7 @@ export const checkEmail = async (req, res, next) => {
         email = email.toLowerCase();
 
         if (!email || !validateEmail(email)) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "Invalid Email "
             });
@@ -51,7 +52,7 @@ export const checkEmail = async (req, res, next) => {
         const existingCustomer = await findCustomerByEmail(email)
 
         if (existingCustomer) {
-            res.status(201).json({
+            res.status(400).json({
                 success: false,
                 message: "This emailid already exists",
             });
@@ -91,7 +92,7 @@ export const signUp = async (req, res, next) => {
         email = email.toLowerCase();
 
         if (!email || !validateEmail(email)) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "Invalid Email "
             });
@@ -99,7 +100,7 @@ export const signUp = async (req, res, next) => {
 
         // Validate password length
         if (!password || password.length < 8) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "Password must be at least 8 characters long"
             });
@@ -116,7 +117,7 @@ export const signUp = async (req, res, next) => {
 
         const existingCustomer = await findCustomerByEmail(email)
         if (existingCustomer) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "Customer with the email already exists",
             });
@@ -161,7 +162,7 @@ export const signUp = async (req, res, next) => {
                 message: 'Customer saved successfully and verification code sent successfully',
             });
         } else {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Failed to add customer. Verification code cannot be sent',
             });
@@ -228,7 +229,7 @@ export const matchVerificationCode = async (req, res, next) => {
         }
 
         // If verification code doesn't match or customer not found
-        return res.status(201).json({
+        return res.status(400).json({
             success: false,
             message: "Verification code didn't match. Please enter a valid verification code",
         });
@@ -246,7 +247,7 @@ export const signIn = async (req, res, next) => {
                 email = email.toLowerCase();
 
         if (!email || !validateEmail(email)) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "Invalid Email "
             });
@@ -254,7 +255,7 @@ export const signIn = async (req, res, next) => {
 
         // Validate password length
         if (!password || password.length < 8) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "Password must be at least 8 characters long"
             });
@@ -263,7 +264,7 @@ export const signIn = async (req, res, next) => {
         const foundUser = await findCustomerByEmail(email)
 
         if (!foundUser) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Unauthorized User'
             })
@@ -271,7 +272,7 @@ export const signIn = async (req, res, next) => {
 
         const match = await bcrypt.compare(password, foundUser.password)
 
-        if (!match) return res.status(201).json({
+        if (!match) return res.status(400).json({
             success: false,
             message: 'Unauthorized. User password didnot match.'
         })
@@ -352,7 +353,7 @@ export const googleCustomerSignup = async (req, res, next) => {
         console.log(token)
 
         if (!token) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "UnAuthorized Customer or Token not present"
             })
@@ -376,7 +377,7 @@ export const googleCustomerSignup = async (req, res, next) => {
         const existingUser = await findCustomerByEmail(payload.email);
 
         if (existingUser) {
-            return res.status(201).json({ success: false, message: 'Customer Email already exists' })
+            return res.status(400).json({ success: false, message: 'Customer Email already exists' })
         }
 
           // Create a new user
@@ -408,7 +409,7 @@ export const googleCustomerLogin = async (req, res, next) => {
         const token = req.query.token;
 
         if (!token) {
-            return res.status(201).json({ success: false, message: "UnAuthorized Customer or Token not present" })
+            return res.status(400).json({ success: false, message: "UnAuthorized Customer or Token not present" })
         }
 
         const client = new OAuth2Client(CLIENT_ID);
@@ -429,7 +430,7 @@ export const googleCustomerLogin = async (req, res, next) => {
 
         const foundUser = await googleLoginCustomer(payload.email)
         if (!foundUser) {
-            return res.status(201).json({ success: false, message: 'Unauthorized Customer' })
+            return res.status(400).json({ success: false, message: 'Unauthorized Customer' })
         }
 
         // const accessToken = jwt.sign(
@@ -448,7 +449,7 @@ export const googleCustomerLogin = async (req, res, next) => {
         //     sameSite: 'None', //cross-site cookie 
         //     maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
         // })
-        res.status(201).json({
+        res.status(200).json({
             success: true,
             message: "Customer Logged In Successfully",
             accessToken,
@@ -498,7 +499,7 @@ export const forgetPassword = async (req, res, next) => {
 
         const user = await findCustomerByEmail(email)
         if (!user) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "User with this email does not exist. Please register first",
             });
@@ -535,7 +536,7 @@ export const verifyPasswordResetCode = async (req, res, next) => {
         const user = await findCustomerByEmail(email);
 
         if (!user) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "User not found",
             });
@@ -553,7 +554,7 @@ export const verifyPasswordResetCode = async (req, res, next) => {
             });
         } else {
             // Verification code doesn't match
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "Invalid verification code",
             });
@@ -575,7 +576,7 @@ export const resetPassword = async (req, res, next) => {
         const user = await findCustomerByEmail(email)
 
         if (!user) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "User with this email does not exist",
             });
@@ -613,7 +614,7 @@ export const customerConnectSalon = async (req, res, next) => {
 
         // If customer is not found
         if (!customer) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "Customer not found",
             });
@@ -657,7 +658,7 @@ export const customerDisconnectSalon = async (req, res, next) => {
 
         // If customer is not found
         if (!customer) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "Customer not found",
             });
@@ -694,7 +695,7 @@ export const getAllSalonsByCustomer = async (req, res, next) => {
         const customer = await findCustomerByEmail(customerEmail);
 
         if (!customer) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Customer not found',
             });
@@ -726,7 +727,7 @@ export const changeDefaultSalonIdOfCustomer = async (req, res, next) => {
         const customer = await findCustomerByEmail(customerEmail);
 
         if (!customer) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Customer not found',
             });
@@ -821,7 +822,7 @@ export const updateCustomer = async (req, res, next) => {
         
 
         if (!email || !validateEmail(email)) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "Invalid Email "
             });
@@ -878,7 +879,7 @@ export const deleteSingleCustomer = async (req, res, next) => {
         const customer = await findCustomerByEmail(email)
         // Check if customer exists
         if (!customer) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "Customer not found",
             });
@@ -962,7 +963,7 @@ export const uploadCustomerprofilePic = async (req, res, next) => {
             })
             .catch((err) => {
                 console.error(err);
-                res.status(201).json({
+                res.status(400).json({
                     success: false,
                     message: "Image upload failed",
                 });
@@ -988,14 +989,14 @@ export const updateCustomerProfilePic = async (req, res, next) => {
         const fileExt = profile.name.split(".")[1];
 
         if (fileSize > 1000) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "File size must be lower than 1000kb"
             });
         }
 
         if (!["jpg", "png", "jfif", "svg", "jpeg"].includes(fileExt)) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "File extension must be jpg, png, jfif, svg or jpeg"
             });
@@ -1016,7 +1017,7 @@ export const updateCustomerProfilePic = async (req, res, next) => {
                     console.log("cloud img deleted")
 
                 } else {
-                    res.status(201).json({
+                    res.status(400).json({
                         success: false,
                         message: 'Failed to delete image.'
                     });
@@ -1057,7 +1058,7 @@ export const deleteCustomerProfilePicture = async (req, res, next) => {
             console.log("cloud img deleted")
 
         } else {
-            res.status(201).json({
+            res.status(400).json({
                 success: false,
                 message: 'Failed to delete image.'
             });
@@ -1071,7 +1072,7 @@ export const deleteCustomerProfilePicture = async (req, res, next) => {
                 message: "Image successfully deleted"
             })
         } else {
-            res.status(201).json({
+            res.status(400).json({
                 success: false,
                 message: 'Image not found in the customer profile'
             });
@@ -1092,7 +1093,7 @@ export const sendMailToCustomer = async (req, res, next) => {
 
         const customer = await findCustomerByEmail(email);
         if (!customer) {
-            res.status(201).json({
+            res.status(400).json({
                 success: false,
                 message: 'Customer not found',
             });
@@ -1122,7 +1123,7 @@ export const getCustomerDetails = async (req, res, next) => {
         const customer = await findCustomerByEmail(email);
 
         if (!customer) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "Customer not found",
             });
@@ -1157,7 +1158,7 @@ export const sendBulkEmailToCustomers = async (req, res, next) => {
 
         // Check if subject, message, and recipientEmails are present in the request body
         if (!subject || !message || !recipientEmails || !Array.isArray(recipientEmails) || recipientEmails.length === 0) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Please provide subject, message, and a valid array of recipientEmails in the request body.',
             });
@@ -1184,7 +1185,7 @@ export const getAllAppointmentsByCustomer = async (req, res, next) => {
 
     // Check if customerEmail and salonId are provided
     if (!salonId) {
-        return res.status(201).json({
+        return res.status(400).json({
             success: false,
             message: 'SalonId is required.'
         });
@@ -1192,16 +1193,16 @@ export const getAllAppointmentsByCustomer = async (req, res, next) => {
 
     // Check if customerEmail and salonId are provided
     if (!customerEmail ) {
-        return res.status(201).json({
+        return res.status(400).json({
             success: false,
-            message: 'CustomerEmail is required.'
+            message: 'Customer email is required.'
         });
     }
         // Find appointments based on customerEmail and salonId
         const appointments = await getCustomerAppointments(salonId, customerEmail)
 
         if (!appointments || appointments.length === 0) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: 'No appointments found for this customer.'
             });
@@ -1227,9 +1228,9 @@ export const customerDashboard = async (req, res, next) => {
         const salonInfo = await findSalonBySalonId(salonId);
 
         if (!salonInfo) {
-            res.status(201).json({
+            res.status(400).json({
                 success: false,
-                message: 'No salons found for the particular SalonId.',
+                message: 'No salons found for the particular salonId.',
             });
         }
 
@@ -1293,7 +1294,7 @@ export const customerFavoriteSalon = async (req, res, next) => {
 
         // If customer is not found
         if (!customer) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "Customer not found",
             });
@@ -1315,7 +1316,7 @@ export const customerFavoriteSalon = async (req, res, next) => {
             });
         }
         else {
-            res.status(201).json({
+            res.status(400).json({
                 success: false,
                 message: "Your favourite salon is already added",
             });
@@ -1336,7 +1337,7 @@ export const getAllCustomerFavoriteSalons = async (req, res, next) => {
         const customer = await findCustomerByEmail(customerEmail);
 
         if (!customer) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Customer not found',
             });
@@ -1366,7 +1367,7 @@ export const deleteCustomerFavoriteSalon = async (req, res, next) => {
 
         // If customer is not found
         if (!customer) {
-            return res.status(201).json({
+            return res.status(400).json({
                 success: false,
                 message: "Customer not found",
             });
@@ -1377,7 +1378,7 @@ export const deleteCustomerFavoriteSalon = async (req, res, next) => {
 
         if (!salonExists) {
             // If salonId is not present, respond accordingly
-            res.status(201).json({
+            res.status(400).json({
                 success: false,
                 message: "The salon is not in your favorites.",
             });
@@ -1406,11 +1407,11 @@ export const sendVerificationCodeForCustomerMobile = async (req, res, next) => {
         let { email } = req.body;
 
         if (!email) {
-            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE_201, res)
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
         email = email.toLowerCase();
@@ -1418,7 +1419,7 @@ export const sendVerificationCodeForCustomerMobile = async (req, res, next) => {
         const user = await findCustomerByEmail(email);
 
         if (!user) {
-            return ErrorHandler(CUSTOMER_NOT_EXIST_ERROR, ERROR_STATUS_CODE_201, res)
+            return ErrorHandler(CUSTOMER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
@@ -1449,11 +1450,11 @@ export const changeCustomerMobileVerifiedStatus = async (req, res, next) => {
 
 
         if (!email) {
-            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         if (!validateEmail(email)) {
-            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE_201, res)
+            return ErrorHandler(INVALID_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
         email = email.toLowerCase();
@@ -1468,7 +1469,7 @@ export const changeCustomerMobileVerifiedStatus = async (req, res, next) => {
             return SuccessHandler(MOBILE_VERIFIED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: customer })
         }
         else {
-            return ErrorHandler(MOBILE_VERIFY_CODE_ERROR, ERROR_STATUS_CODE_201, res)
+            return ErrorHandler(MOBILE_VERIFY_CODE_ERROR, ERROR_STATUS_CODE, res)
         }
 
     } catch (error) {
@@ -1483,13 +1484,13 @@ export const sendVerificationCodeForCustomerEmail = async (req, res, next) => {
         let { email } = req.body;
 
         if (!email) {
-            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE_201, res)
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const user = await findCustomerByEmail(email);
 
         if (!user) {
-            return ErrorHandler(CUSTOMER_NOT_EXIST_ERROR, ERROR_STATUS_CODE_201, res)
+            return ErrorHandler(CUSTOMER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
@@ -1500,7 +1501,7 @@ export const sendVerificationCodeForCustomerEmail = async (req, res, next) => {
         try {
             await sendVerificationCode(email, user.name, verificationCode);
         } catch (error) {
-            return ErrorHandler(VERIFICATION_EMAIL_ERROR, ERROR_STATUS_CODE_201, res)
+            return ErrorHandler(VERIFICATION_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
 
         return SuccessHandler(SEND_VERIFICATION_EMAIL_SUCCESS, SUCCESS_STATUS_CODE, res);
@@ -1516,7 +1517,7 @@ export const changeCustomerEmailVerifiedStatus = async (req, res, next) => {
         let { email, verificationCode } = req.body;
 
         if (!email) {
-            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_COD_201, res)
+            return ErrorHandler(EMAIL_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
 
         email = email.toLowerCase();
@@ -1531,7 +1532,7 @@ export const changeCustomerEmailVerifiedStatus = async (req, res, next) => {
             return SuccessHandler(EMAIL_VERIFIED_SUCCESS, SUCCESS_STATUS_CODE, res, { response: customer });
         }
 
-        return ErrorHandler(EMAIL_VERIFY_CODE_ERROR, ERROR_STATUS_CODE_201, res)
+        return ErrorHandler(EMAIL_VERIFY_CODE_ERROR, ERROR_STATUS_CODE, res)
 
     } catch (error) {
         next(error);

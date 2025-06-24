@@ -867,7 +867,7 @@ export const deleteAppointment = async (req, res, next) => {
     const deletedAppointment = await deleteAppointmentById(salonId, appointmentId)
 
     if (!deletedAppointment) {
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: 'Appointment not found',
       });
@@ -889,7 +889,7 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
 
     if (!date || !barberId) {
       // If the date value is null, send a response to choose the date
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: 'Please choose a Date and Barber to fetch time slots'
       });
@@ -1022,7 +1022,7 @@ export const getAllAppointmentsBySalonId = async (req, res, next) => {
     const appointments = await allAppointmentsBySalonId(salonId)
 
     if (!appointments || appointments.length === 0) {
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: 'No appointments found for the provided salon ID',
       });
@@ -1068,7 +1068,7 @@ export const getAllAppointmentsByBarberId = async (req, res, next) => {
     const appointments = await allAppointmentsByBarberId(salonId, barberId)
 
     if (!appointments || appointments.length === 0) {
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: 'No appointments found for the provided salon and barber ID',
       });
@@ -1095,7 +1095,7 @@ export const getAllAppointmentsByBarberIdAndDate = async (req, res, next) => {
     const appointments = await allAppointmentsByBarberIdAndDate(salonId, barberId, appointmentDate)
 
     if (!appointments || appointments.length === 0) {
-      return res.status(201).json({
+      return res.status(400).json({
         success: false,
         message: 'No appointments found for the provided salon ID, barber ID, and date',
       });

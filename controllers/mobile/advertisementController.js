@@ -12,7 +12,7 @@ export const getAllAdvertisements = async (req, res, next) => {
     const sortedAdvertisements = salonSettings.advertisements.reverse();
 
     if (!salonSettings) {
-      return res.status(201).json({ 
+      return res.status(400).json({ 
         success: false, 
         message: "Salon settings not found" 
       });
