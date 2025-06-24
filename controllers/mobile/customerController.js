@@ -52,7 +52,7 @@ export const checkEmail = async (req, res, next) => {
         const existingCustomer = await findCustomerByEmail(email)
 
         if (existingCustomer) {
-            res.status(400).json({
+            res.status(200).json({
                 success: false,
                 message: "This emailid already exists",
             });
