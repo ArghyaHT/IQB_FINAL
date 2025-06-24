@@ -185,6 +185,20 @@ export const verificationCodeApi = async (req, res, next) => {
             });
         }
 
+          if (!mobileCountryCode) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid mobilecountry code"
+            });
+        }
+
+          if (!mobileNumber) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid phone number"
+            });
+        }
+
         const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
 
         const formattedNumber = `+${mobileCountryCode}${String(mobileNumber)}`;
@@ -206,7 +220,7 @@ export const verificationCodeApi = async (req, res, next) => {
         else {
             return res.status(400).json({
                 success: false,
-                message: 'Failed to save customer',
+                message: 'Failed to generate verification code.',
             });
         }
 
