@@ -12,6 +12,7 @@ import { checkPushNotifications } from "../../utils/pushNotifications/pushNotifi
 import { changeNotificationSeenStatus, getAllNotificationsByCustomerEmail } from "../../controllers/mobile/notificationController.js";
 import { getBarberMissingAppointmentDates, getFullyBookedDatesBySalonIdBarberId } from "../../controllers/web/barberAppointmentDays/barberAppointmentController.js";
 import { getSalonBusinessDays } from "../../controllers/mobile/salonSettingsController.js";
+import { getAllCategories } from "../../controllers/web/admin/salonController.js";
 // import { getAllAdvertisements } from "../../controllers/dashboard/dashboardController.js";
 
 const router = express.Router();
@@ -32,6 +33,9 @@ router.route("/getAllBarberBySalonId").post(getAllBarberbySalonId)
 
 //GET SALON INFO BY SALON ID
 router.route("/getSalonInfoBySalonId").get(getSalonInfo)
+
+router.route("/getAllCategories").get(getAllCategories)
+
 
 
 //DESC:APPOINTMENT ROUTES ==============================
