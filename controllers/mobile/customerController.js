@@ -3,7 +3,7 @@ import { createGoogleCustomer, deleteCustomer, deleteCustomerProPic, fetchedCust
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { bulkEmail, sendCustomerMail, sendForgetPasswordMail, sendVerificationCode } from "../../utils/emailSender/emailSender.js";
-import { findSalonBySalonId, getCustomerConnectedSalons, getCustomerFavouriteSalon } from "../../services/mobile/salonServices.js";
+import { findSalonBySalonId, getCustomerConnectedSalons, getCustomerFavouriteSalon, getSalonBySalonId } from "../../services/mobile/salonServices.js";
 
 
 //Upload Profile Picture Config
@@ -374,12 +374,24 @@ export const signIn = async (req, res, next) => {
         //     maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
         // })
 
+        let salonData = null;
+
+        if (foundUser.salonId != 0) {
+            salonData = await getSalonBySalonId(foundUser.salonId);
+        }
+
         // Send accessToken containing username and roles 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
-            message: "Customer Logged In Successfully",
+            message: "Customer logged in Successfully",
             // accessToken,
-            response: foundUser
+            response: {
+                ...foundUser._doc, // or foundUser.toObject() depending on Mongoose
+                ...(salonData && {
+                    salonName: salonData.salonName,         // or any field you want to add
+                    salonlogo: salonData.salonLogo  // change this to actual field name
+                })
+            }
         })
     }
     catch (error) {
