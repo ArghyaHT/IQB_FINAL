@@ -34,7 +34,7 @@ router.route("/getAllBarberBySalonId").post(getAllBarberbySalonId)
 //GET SALON INFO BY SALON ID
 router.route("/getSalonInfoBySalonId").get(getSalonInfo)
 
-router.route("/getAllCategories").get(getAllCategories)
+router.route("/getAllServiceCategories").get(getAllCategories)
 
 
 
