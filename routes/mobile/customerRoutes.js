@@ -1,5 +1,5 @@
 import express from "express";
-import { changeCustomerEmailVerifiedStatus, changeCustomerMobileVerifiedStatus, changeDefaultSalonIdOfCustomer, checkEmail, customerConnectSalon, customerDashboard, customerDisconnectSalon, customerFavoriteSalon, deleteCustomerFavoriteSalon, deleteCustomerProfilePicture, deleteSingleCustomer, forgetPassword, getAllAppointmentsByCustomer, getAllCustomerFavoriteSalons, getAllCustomers, getAllSalonsByCustomer, getCustomerDetails, googleCustomerLogin, googleCustomerSignup, matchVerificationCode, resetPassword, sendBulkEmailToCustomers, sendMailToCustomer, sendVerificationCodeForCustomerEmail, sendVerificationCodeForCustomerMobile, signIn, signUp, updateCustomer, updateCustomerProfilePic, uploadCustomerprofilePic, verifyPasswordResetCode } from "../../controllers/mobile/customerController.js";
+import { changeCustomerEmailVerifiedStatus, changeCustomerMobileVerifiedStatus, changeDefaultSalonIdOfCustomer, checkEmail, customerConnectSalon, customerDashboard, customerDisconnectSalon, customerFavoriteSalon, deleteCustomerFavoriteSalon, deleteCustomerProfilePicture, deleteSingleCustomer, forgetPassword, getAllAppointmentsByCustomer, getAllCustomerFavoriteSalons, getAllCustomers, getAllSalonsByCustomer, getCustomerDetails, googleCustomerLogin, googleCustomerSignup, matchVerificationCode, resetPassword, sendBulkEmailToCustomers, sendMailToCustomer, sendVerificationCodeForCustomerEmail, sendVerificationCodeForCustomerMobile, signIn, signUp, updateCustomer, updateCustomerProfilePic, uploadCustomerprofilePic, verificationCodeApi, verifyPasswordResetCode } from "../../controllers/mobile/customerController.js";
 // import { CustomerLoggedIn } from "../middlewares/loggedInMiddlewares.js";
 // import { verifyRefreshCustomerToken } from "../middlewares/VerifyRefreshCustomerToken.js";
 
@@ -12,6 +12,8 @@ router.route("/checkEmail").post(checkEmail)
 
 //SignUp
 router.route("/signUp").post(signUp)
+
+router.route("/sendCustomerVerificationCode").post(verificationCodeApi)
 
 //Match Verification Code
 router.route("/matchVerificationCode").post(matchVerificationCode)

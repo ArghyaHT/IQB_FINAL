@@ -19,7 +19,7 @@ import { sendMobileVerificationCode } from "../../utils/mobileMessageSender/mobi
 import { CUSTOMER_NOT_EXIST_ERROR, EMAIL_EXISTS_ERROR } from "../../constants/mobile/CustomerConstants.js";
 import { EMAIL_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_VERIFIED_SUCCESS, EMAIL_VERIFY_CODE_ERROR, INVALID_EMAIL_ERROR, MOBILE_VERIFIED_SUCCESS, MOBILE_VERIFY_CODE_ERROR, SEND_VERIFICATION_EMAIL_SUCCESS, SEND_VERIFICATION_MOBILE_SUCCESS, VERIFICATION_EMAIL_ERROR } from "../../constants/web/adminConstants.js";
 import { ERROR_STATUS_CODE_201 } from "../../constants/mobile/StatusCodeConstants.js";
-import {ErrorHandler} from "../../middlewares/ErrorHandler.js"
+import { ErrorHandler } from "../../middlewares/ErrorHandler.js"
 import { SUCCESS_STATUS_CODE } from "../../constants/web/Common/StatusCodeConstant.js";
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 import { getSalonSettings } from "../../services/mobile/salonSettingsService.js";
@@ -113,7 +113,7 @@ export const signUp = async (req, res, next) => {
         //     return res.status(201).json({ success: false, message: "Mobile number should be 10 digit" });
         // }
 
-        const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+        // const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
 
         const existingCustomer = await findCustomerByEmail(email)
         if (existingCustomer) {
@@ -137,34 +137,34 @@ export const signUp = async (req, res, next) => {
             dateOfBirth,
             mobileNumber,
             hashedPassword,
-            verificationCode,
+            // verificationCode,
         })
 
 
         //Saving the Customer
         const savedCustomer = await saveCustomer(newCustomer)
 
-         // Format the mobile number with the country code
+        // Format the mobile number with the country code
 
-         const formattedNumber = `+${mobileCountryCode}${String(mobileNumber)}`;
-         console.log(formattedNumber)
+        // const formattedNumber = `+${mobileCountryCode}${String(mobileNumber)}`;
+        // console.log(formattedNumber)
 
         //Sending the verification Code to Customer Registered Email
-        if (savedCustomer.verificationCode) {
-            try {
-                await sendMobileVerificationCode(formattedNumber, verificationCode);
-            } catch (error) {
-                next(error);
-            }
-            
+        if (savedCustomer) {
+            // try {
+            //     await sendMobileVerificationCode(formattedNumber, verificationCode);
+            // } catch (error) {
+            //     next(error);
+            // }
+
             return res.status(200).json({
                 success: true,
-                message: 'Customer saved successfully and verification code sent successfully',
+                message: 'Customer saved successfully',
             });
         } else {
             return res.status(400).json({
                 success: false,
-                message: 'Failed to add customer. Verification code cannot be sent',
+                message: 'Failed to save customer',
             });
         }
     } catch (error) {
@@ -172,13 +172,57 @@ export const signUp = async (req, res, next) => {
     }
 };
 
+export const verificationCodeApi = async (req, res, next) => {
+    try {
+        let { email, mobileCountryCode, mobileNumber } = req.body;
+
+        email = email.toLowerCase();
+
+        if (!email || !validateEmail(email)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Email"
+            });
+        }
+
+        const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+
+        const formattedNumber = `+${mobileCountryCode}${String(mobileNumber)}`;
+        console.log(formattedNumber)
+
+        if (verificationCode) {
+            try {
+                await sendMobileVerificationCode(formattedNumber, verificationCode);
+            } catch (error) {
+                next(error);
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: 'Verification code genereated successfully',
+                response: verificationCode
+            });
+        }
+        else {
+            return res.status(400).json({
+                success: false,
+                message: 'Failed to save customer',
+            });
+        }
+
+    } catch (error) {
+        next(error);
+    }
+
+}
+
 //DESC:MATCH VERIFICATION CODE FOR NEW CUSTOMER =============
 export const matchVerificationCode = async (req, res, next) => {
     try {
         let { email, verificationCode, webFcmToken, androidFcmToken, iosFcmToken } = req.body;
 
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         // FIND THE CUSTOMER 
         const customer = await findCustomerByEmail(email)
@@ -243,8 +287,8 @@ export const signIn = async (req, res, next) => {
     try {
         let { email, password, webFcmToken, androidFcmToken, iosFcmToken } = req.body
 
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         if (!email || !validateEmail(email)) {
             return res.status(400).json({
@@ -380,8 +424,8 @@ export const googleCustomerSignup = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Customer Email already exists' })
         }
 
-          // Create a new user
-          const newUser = await createGoogleCustomer(payload.email)
+        // Create a new user
+        const newUser = await createGoogleCustomer(payload.email)
 
         //   return SuccessHandler(SIGNUP_SUCCESS, SUCCESS_STATUS_CODE, res, { newUser })
 
@@ -494,8 +538,8 @@ export const forgetPassword = async (req, res, next) => {
     try {
         let { email } = req.body;
 
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         const user = await findCustomerByEmail(email)
         if (!user) {
@@ -530,8 +574,8 @@ export const verifyPasswordResetCode = async (req, res, next) => {
     try {
         let { email, verificationCode, } = req.body;
 
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         const user = await findCustomerByEmail(email);
 
@@ -569,8 +613,8 @@ export const resetPassword = async (req, res, next) => {
     try {
         let { email, newPassword } = req.body;
 
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         // Find the user by email (assuming Customer is your Mongoose model for users)
         const user = await findCustomerByEmail(email)
@@ -606,8 +650,8 @@ export const customerConnectSalon = async (req, res, next) => {
     try {
         let { email, salonId } = req.body;
 
-                // Convert email to lowercase
-                email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         // Find the Customer by emailId
         const customer = await findCustomerByEmail(email)
@@ -686,8 +730,8 @@ export const getAllSalonsByCustomer = async (req, res, next) => {
     try {
         let { customerEmail } = req.body; // Assuming customer's email is provided in the request body
 
-                // Convert email to lowercase
-                customerEmail = customerEmail.toLowerCase();
+        // Convert email to lowercase
+        customerEmail = customerEmail.toLowerCase();
 
         // const email = customerEmail
 
@@ -720,8 +764,8 @@ export const changeDefaultSalonIdOfCustomer = async (req, res, next) => {
     try {
         let { customerEmail, salonId } = req.body; // Assuming admin's email and new salonId are provided in the request body
 
-             // Convert email to lowercase
-                customerEmail = customerEmail.toLowerCase();
+        // Convert email to lowercase
+        customerEmail = customerEmail.toLowerCase();
 
         // Find the admin based on the provided email
         const customer = await findCustomerByEmail(customerEmail);
@@ -755,8 +799,8 @@ export const getAllCustomers = async (req, res, next) => {
         let { salonId, name, email, page = 1, limit = 3, sortField, sortOrder } = req.query
 
 
-              // Convert email to lowercase
-              email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         let query = {}
 
@@ -819,7 +863,7 @@ export const updateCustomer = async (req, res, next) => {
             mobileNumber,
         } = req.body;
 
-        
+
 
         if (!email || !validateEmail(email)) {
             return res.status(400).json({
@@ -827,8 +871,8 @@ export const updateCustomer = async (req, res, next) => {
                 message: "Invalid Email "
             });
         }
-            // Convert email to lowercase
-            email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         // // Validate password length
         // if (!password || password.length < 8) {
@@ -855,7 +899,7 @@ export const updateCustomer = async (req, res, next) => {
 
         const customer = await updateCustomerDetails(customerData)
 
-        if(mobileNumber){
+        if (mobileNumber) {
             customer.mobileVerified = false;
             await customer.save()
         }
@@ -874,8 +918,8 @@ export const updateCustomer = async (req, res, next) => {
 export const deleteSingleCustomer = async (req, res, next) => {
     let { email } = req.body;
     try {
-            // Convert email to lowercase
-            email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
         const customer = await findCustomerByEmail(email)
         // Check if customer exists
         if (!customer) {
@@ -908,7 +952,7 @@ export const uploadCustomerprofilePic = async (req, res, next) => {
 
         console.log(profiles)
 
-            // Convert email to lowercase
+        // Convert email to lowercase
         email = email.toLowerCase();
 
         // Ensure that profiles is an array, even for single uploads
@@ -1088,8 +1132,8 @@ export const sendMailToCustomer = async (req, res, next) => {
     let { email, subject, text } = req.body;
     try {
 
-            // Convert email to lowercase
-            email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
         const customer = await findCustomerByEmail(email);
         if (!customer) {
@@ -1118,8 +1162,8 @@ export const getCustomerDetails = async (req, res, next) => {
     try {
         let { email } = req.body;
 
-            // Convert email to lowercase
-            email = email.toLowerCase();
+        // Convert email to lowercase
+        email = email.toLowerCase();
         const customer = await findCustomerByEmail(email);
 
         if (!customer) {
@@ -1183,21 +1227,21 @@ export const getAllAppointmentsByCustomer = async (req, res, next) => {
     try {
         const { customerEmail, salonId } = req.body;
 
-    // Check if customerEmail and salonId are provided
-    if (!salonId) {
-        return res.status(400).json({
-            success: false,
-            message: 'SalonId is required.'
-        });
-    }
+        // Check if customerEmail and salonId are provided
+        if (!salonId) {
+            return res.status(400).json({
+                success: false,
+                message: 'SalonId is required.'
+            });
+        }
 
-    // Check if customerEmail and salonId are provided
-    if (!customerEmail ) {
-        return res.status(400).json({
-            success: false,
-            message: 'Customer email is required.'
-        });
-    }
+        // Check if customerEmail and salonId are provided
+        if (!customerEmail) {
+            return res.status(400).json({
+                success: false,
+                message: 'Customer email is required.'
+            });
+        }
         // Find appointments based on customerEmail and salonId
         const appointments = await getCustomerAppointments(salonId, customerEmail)
 

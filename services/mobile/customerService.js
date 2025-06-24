@@ -17,7 +17,7 @@ export const saveCustomer = async (newCustomer) => {
       countryCca2,
       mobileCountryCode,
       hashedPassword,
-      verificationCode,
+      // verificationCode,
    } = newCustomer
 
    const customer = new Customer({
@@ -30,8 +30,9 @@ export const saveCustomer = async (newCustomer) => {
       countryCca2,
       mobileCountryCode,
       password: hashedPassword,
-      verificationCode,
+      // verificationCode,
       customer: true,
+      mobileVerified:true
    });
 
 
