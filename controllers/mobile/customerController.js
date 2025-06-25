@@ -186,14 +186,14 @@ export const verificationCodeApi = async (req, res, next) => {
             });
         }
 
-          if (!mobileCountryCode) {
+        if (!mobileCountryCode) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid mobilecountry code"
             });
         }
 
-          if (!mobileNumber) {
+        if (!mobileNumber) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid phone number"
@@ -695,10 +695,36 @@ export const customerConnectSalon = async (req, res, next) => {
         // Save the changes
         await customer.save();
 
-        res.status(200).json({
+        let salonData = null;
+
+        if (salonId != 0) {
+            salonData = await getSalonBySalonId(salonId);
+        }
+
+        // // Send accessToken containing username and roles 
+        // return res.status(200).json({
+        //     success: true,
+        //     message: "Customer logged in Successfully",
+        //     // accessToken,
+        //     response: {
+        //         ...foundUser._doc, // or foundUser.toObject() depending on Mongoose
+        //         ...(salonData && {
+        //             salonName: salonData.salonName,         // or any field you want to add
+        //             salonlogo: salonData.salonLogo  // change this to actual field name
+        //         })
+        //     }
+        // })
+
+        return res.status(200).json({
             success: true,
             message: "Customer is added to the salon successfully.",
-            response: customer,
+            response: {
+                ...customer._doc, // or foundUser.toObject() depending on Mongoose
+                ...(salonData && {
+                    salonName: salonData.salonName,         // or any field you want to add
+                    salonlogo: salonData.salonLogo  // change this to actual field name
+                })
+            }
         });
     } catch (error) {
         //console.log(error);

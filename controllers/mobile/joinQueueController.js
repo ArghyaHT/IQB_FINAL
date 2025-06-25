@@ -760,15 +760,16 @@ export const getQueueListBySalonId = async (req, res, next) => {
             io.to(`salon_${salonId}`).emit("queueUpdated", sortedQueueList);
 
 
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
                 message: "Queue list of the salon retrieved successfully.",
                 response: sortedQueueList,
             });
         } else {
-            res.status(400).json({
-                success: false,
-                message: "Salon not found",
+            return res.status(200).json({
+                success: true,
+                message: "No queuelist found",
+                response: []
             });
         }
 
@@ -790,9 +791,10 @@ export const getAvailableBarbersForQ = async (req, res, next) => {
         const availableBarbers = await getBarbersForQ(salonId);
 
         if (availableBarbers.length === 0) {
-            res.status(400).json({
-                success: false,
-                message: 'No available Barbers found at this moment.'
+            res.status(200).json({
+                success: true,
+                message: 'No available Barbers found at this moment.',
+                response: []
             });
         }
         else {
@@ -851,9 +853,10 @@ export const getBarberByServices = async (req, res, next) => {
         const barbers = await getBarbersWithMulServices(salonId, serviceIds);
 
         if (!barbers || barbers.length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'No barbers were found for the services specified in the request.'
+            return res.status(200).json({
+                success: true,
+                message: 'No barbers were found for the services specified in the request.',
+                response: []
             });
         }
 

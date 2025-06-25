@@ -2,7 +2,7 @@ import Salon from "../../models/salonRegisterModel.js";
 
 //FIND SALON BY SALONID
 export const findSalonBySalonId = async (salonId) => {
-    const salon = await Salon.findOne({ salonId, isOnline: true });
+    const salon = await Salon.findOne({ salonId });
     return salon;
   }
 
