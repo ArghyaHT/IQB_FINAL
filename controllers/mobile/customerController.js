@@ -1362,8 +1362,7 @@ export const customerDashboard = async (req, res, next) => {
                 barbers: barbers,
                 barberOnDuty: barberCount,
                 totalQueueCount: totalQueueCount,
-                // leastQueueCount: minQueueCountAsInteger
-                leastQueueCount: -1
+                leastQueueCount: minQueueCountAsInteger
             },
         });
     } catch (error) {
