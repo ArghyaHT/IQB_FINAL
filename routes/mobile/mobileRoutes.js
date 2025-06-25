@@ -29,7 +29,7 @@ router.route("/getSalonsByLocation").get(getSalonsByLocation)
 router.route("/getSalonServicesByCategory").get(getAllCategorySalonServices)
 
 //DESC:SALON ROUTES ==============================
-router.route("/getAllBarberBySalonId").post(getAllBarberbySalonId)
+router.route("/getAllBarberBySalonId").get(getAllBarberbySalonId)
 
 //GET SALON INFO BY SALON ID
 router.route("/getSalonInfoBySalonId").get(getSalonInfo)
@@ -72,7 +72,7 @@ router.route("/groupJoinQueue").post(groupJoinQueue)
 router.route("/cancelQueueByCustomer").post(cancelQueueByCustomer)
 
 //Get Available Barbers for Queue
-router.route("/getAvailableBarbersForQ").post(getAvailableBarbersForQ)
+router.route("/getAvailableBarbersForQ").get(getAvailableBarbersForQ)
 
 //Get Barber By Multiple ServiceId
 router.route("/getBarberByMultipleServiceId").post(getBarberByServices)
