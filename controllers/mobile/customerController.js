@@ -454,17 +454,7 @@ export const googleCustomerSignup = async (req, res, next) => {
         // Create a new user
         const newUser = await createGoogleCustomer(payload.email)
 
-        //   return SuccessHandler(SIGNUP_SUCCESS, SUCCESS_STATUS_CODE, res, { newUser })
-
-        // // Create a new user
-        // const newUser = new Customer({
-        //     email: payload.email,
-        //     AuthType: "google"
-        // })
-
-        // await newUser.save()
-
-        res.status(200).json({ success: true, message: 'Customer registered successfully', response: newUser })
+        return res.status(200).json({ success: true, message: 'Customer registered successfully', response: newUser })
 
     }
     catch (error) {

@@ -22,7 +22,7 @@ router.route("/getAllSalonsMob").get(getAllSalons)
 
 router.route("/getAllSalonServices").get(getAllSalonServices)
 
-router.route("/searchByNameAndCity").post(getSalonsByNameAndCity)
+router.route("/searchByNameAndCity").get(getSalonsByNameAndCity)
 
 router.route("/getSalonsByLocation").get(getSalonsByLocation)
 
