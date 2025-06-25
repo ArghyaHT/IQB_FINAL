@@ -160,6 +160,7 @@ export const signUp = async (req, res, next) => {
             return res.status(200).json({
                 success: true,
                 message: 'Customer saved successfully',
+                reponse: newCustomer
             });
         } else {
             return res.status(400).json({

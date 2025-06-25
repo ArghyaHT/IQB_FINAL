@@ -1,3 +1,4 @@
+import { getCategories } from "../../services/common/categoryServices.js";
 import { getbarbersBySalonId } from "../../services/mobile/barberService.js";
 import { getAverageSalonRating } from "../../services/mobile/salonRatingService.js";
 import { allCategorySalonServices, allSalonServices, allSalons, getAllSalonsByCountry, getSalonRating, salonInfoDetails, searchSalonsByLocation, searchSalonsByNameAndCity } from "../../services/mobile/salonServices.js";
@@ -125,10 +126,18 @@ export const getSalonsByNameAndCity = async (req, res, next) => {
     }
 
     const getAllSalons = await searchSalonsByNameAndCity(query, sortOptions, limit);
-    res.status(200).json({
+    const getsalonServiceCategories = await getCategories()
+
+    // Attach same category array to every salon
+    const salonsWithCategory = getAllSalons.map((salon) => ({
+      ...salon._doc,
+      serviceCategories: getsalonServiceCategories,
+    }));
+
+    return res.status(200).json({
       success: true,
       message: "Salons retrieved successsfully",
-      response: getAllSalons,
+      response: salonsWithCategory,
     })
   } catch (error) {
     next(error);
