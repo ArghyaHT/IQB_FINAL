@@ -404,7 +404,10 @@ export const signIn = async (req, res, next) => {
                 ...foundUser._doc, // or foundUser.toObject() depending on Mongoose
                 ...(salonData && {
                     salonName: salonData.salonName,         // or any field you want to add
-                    salonlogo: salonData.salonLogo  // change this to actual field name
+                    salonlogo: salonData.salonLogo,  // change this to actual field name
+                    currency: salonData.currency,
+                    isoCurrencyCode: salonData.isoCurrencyCode
+
                 })
             }
         })
@@ -722,7 +725,9 @@ export const customerConnectSalon = async (req, res, next) => {
                 ...customer._doc, // or foundUser.toObject() depending on Mongoose
                 ...(salonData && {
                     salonName: salonData.salonName,         // or any field you want to add
-                    salonlogo: salonData.salonLogo  // change this to actual field name
+                    salonlogo: salonData.salonLogo,  // change this to actual field name
+                    currency: salonData.currency,
+                    isoCurrencyCode: salonData.isoCurrencyCode
                 })
             }
         });
