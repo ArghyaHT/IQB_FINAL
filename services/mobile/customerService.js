@@ -51,7 +51,7 @@ export const createGoogleCustomer = async (newCustomer) => {
       countryFlag,
       countryCca2,
       mobileCountryCode,
-      AuthType
+      
       // verificationCode,
    } = newCustomer
 
@@ -66,7 +66,7 @@ export const createGoogleCustomer = async (newCustomer) => {
       mobileCountryCode,
       customer: true,
       mobileVerified:true,
-      AuthType: AuthType
+      AuthType: "google"
    });
 
    await customer.save();

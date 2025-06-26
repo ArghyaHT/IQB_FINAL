@@ -160,7 +160,7 @@ export const signUp = async (req, res, next) => {
             return res.status(200).json({
                 success: true,
                 message: 'Customer saved successfully',
-                reponse: newCustomer
+                reponse: savedCustomer
             });
         } else {
             return res.status(400).json({
@@ -419,7 +419,7 @@ export const signIn = async (req, res, next) => {
 
 //GOOGLE SIGNIN ===================================
 export const googleCustomerSignup = async (req, res, next) => {
-     try {
+    try {
         let {
             email,
             name,
@@ -429,7 +429,6 @@ export const googleCustomerSignup = async (req, res, next) => {
             mobileNumber,
             countryFlag,
             countryCca2,
-            AuthType,
         } = req.body;
 
         // Convert email to lowercase
@@ -471,7 +470,6 @@ export const googleCustomerSignup = async (req, res, next) => {
             countryCca2,
             dateOfBirth,
             mobileNumber,
-            AuthType
         })
 
 
@@ -494,7 +492,7 @@ export const googleCustomerSignup = async (req, res, next) => {
             return res.status(200).json({
                 success: true,
                 message: 'Customer saved successfully',
-                response: savedCustomer
+                reponse: savedCustomer
             });
         } else {
             return res.status(400).json({
@@ -511,8 +509,8 @@ export const googleCustomerSignup = async (req, res, next) => {
 export const googleCustomerLogin = async (req, res, next) => {
     try {
 
-        const {email, Authtype} = req.body
-  
+        const { email } = req.body
+
         const foundUser = await googleCustomer(email)
         if (!foundUser) {
             return res.status(400).json({ success: false, message: 'Unauthorized google customer' })
@@ -534,11 +532,26 @@ export const googleCustomerLogin = async (req, res, next) => {
         //     sameSite: 'None', //cross-site cookie 
         //     maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
         // })
+
+        let salonData = null;
+
+        if (foundUser.salonId != 0) {
+            salonData = await getSalonBySalonId(foundUser.salonId);
+        }
+
         return res.status(200).json({
             success: true,
             message: "Customer Logged In Successfully",
-            accessToken,
-            response: foundUser
+            response: {
+                ...foundUser._doc, // or foundUser.toObject() depending on Mongoose
+                ...(salonData && {
+                    salonName: salonData.salonName,         // or any field you want to add
+                    salonlogo: salonData.salonLogo,  // change this to actual field name
+                    currency: salonData.currency,
+                    isoCurrencyCode: salonData.isoCurrencyCode
+
+                })
+            }
         })
     } catch (error) {
         next(error);
