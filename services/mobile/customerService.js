@@ -42,18 +42,39 @@ export const saveCustomer = async (newCustomer) => {
    return savedCustomer;
 }
 
-export const createGoogleCustomer = async (email) => {
-   const user = new Customer({
-      email: email,
-      AuthType: "google"
-   })
+export const createGoogleCustomer = async (newCustomer) => {
+    const { email,
+      name,
+      gender,
+      dateOfBirth,
+      mobileNumber,
+      countryFlag,
+      countryCca2,
+      mobileCountryCode,
+      AuthType
+      // verificationCode,
+   } = newCustomer
 
-   await user.save();
+  const customer = new Customer({
+      email,
+      name,
+      gender,
+      dateOfBirth,
+      mobileNumber,
+      countryFlag,
+      countryCca2,
+      mobileCountryCode,
+      customer: true,
+      mobileVerified:true,
+      AuthType: AuthType
+   });
 
-   return user;
+   await customer.save();
+
+   return customer;
 }
 
-export const googleLoginCustomer = async (email) => {
+export const googleCustomer = async (email) => {
    const user = await Customer.findOne({ email: email, AuthType: "google" });
    return user;
 }

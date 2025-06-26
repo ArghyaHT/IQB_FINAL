@@ -1,4 +1,4 @@
-import { createGoogleCustomer, deleteCustomer, deleteCustomerProPic, fetchedCustomers, findCustomerByEmail, findCustomerProfileById, googleLoginCustomer, saveCustomer, totalCustomerCount, updateCustomerDetails, updateCustomerProPic, uploadCustomerProPic } from "../../services/mobile/customerService.js";
+import { createGoogleCustomer, deleteCustomer, deleteCustomerProPic, fetchedCustomers, findCustomerByEmail, findCustomerProfileById, googleCustomer, saveCustomer, totalCustomerCount, updateCustomerDetails, updateCustomerProPic, uploadCustomerProPic } from "../../services/mobile/customerService.js";
 
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
@@ -419,48 +419,90 @@ export const signIn = async (req, res, next) => {
 
 //GOOGLE SIGNIN ===================================
 export const googleCustomerSignup = async (req, res, next) => {
-    try {
-        const CLIENT_ID = process.env.CLIENT_ID;
+     try {
+        let {
+            email,
+            name,
+            gender,
+            dateOfBirth,
+            mobileCountryCode,
+            mobileNumber,
+            countryFlag,
+            countryCca2,
+            AuthType,
+        } = req.body;
 
-        const token = req.query.token;
+        // Convert email to lowercase
+        email = email.toLowerCase();
 
-        console.log(token)
-
-        if (!token) {
+        if (!email || !validateEmail(email)) {
             return res.status(400).json({
                 success: false,
-                message: "UnAuthorized Customer or Token not present"
-            })
+                message: "Invalid Email "
+            });
         }
 
-        const client = new OAuth2Client(CLIENT_ID);
+        if (name.length < 1 || name.length > 20) {
+            return res.status(400).json({ success: false, message: "Please enter a name that is between 1 and 20 characters in length." });
+        }
+        // Validate mobile number format if parsed successfully
+        // if (mobileNumber == null || mobileNumber == undefined || mobileNumber.length !== 10) {
+        //     return res.status(201).json({ success: false, message: "Mobile number should be 10 digit" });
+        // }
 
-        // Call the verifyIdToken to
-        // varify and decode it
-        const ticket = await client.verifyIdToken({
-            idToken: token,
-            audience: CLIENT_ID,
-        });
+        // const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
 
-        // Get the JSON with all the user info
-        const payload = ticket.getPayload();
+        const existingCustomer = await googleCustomer(email)
 
-        console.log("Google payload ", payload)
-
-        // Check if the email is already registered
-        const existingUser = await findCustomerByEmail(payload.email);
-
-        if (existingUser) {
-            return res.status(400).json({ success: false, message: 'Customer Email already exists' })
+        if (existingCustomer) {
+            return res.status(400).json({
+                success: false,
+                message: "Customer with the email already exists",
+            });
         }
 
-        // Create a new user
-        const newUser = await createGoogleCustomer(payload.email)
+        //Creating the Customer Object
+        const newCustomer = ({
+            email,
+            name,
+            gender,
+            mobileCountryCode: mobileCountryCode,
+            countryFlag,
+            countryCca2,
+            dateOfBirth,
+            mobileNumber,
+            AuthType
+        })
 
-        return res.status(200).json({ success: true, message: 'Customer registered successfully', response: newUser })
 
-    }
-    catch (error) {
+        //Saving the Customer
+        const savedCustomer = await createGoogleCustomer(newCustomer)
+
+        // Format the mobile number with the country code
+
+        // const formattedNumber = `+${mobileCountryCode}${String(mobileNumber)}`;
+        // console.log(formattedNumber)
+
+        //Sending the verification Code to Customer Registered Email
+        if (savedCustomer) {
+            // try {
+            //     await sendMobileVerificationCode(formattedNumber, verificationCode);
+            // } catch (error) {
+            //     next(error);
+            // }
+
+            return res.status(200).json({
+                success: true,
+                message: 'Customer saved successfully',
+                response: savedCustomer
+            });
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: 'Failed to save customer',
+            });
+        }
+    } catch (error) {
         next(error);
     }
 }
@@ -468,33 +510,12 @@ export const googleCustomerSignup = async (req, res, next) => {
 
 export const googleCustomerLogin = async (req, res, next) => {
     try {
-        const CLIENT_ID = process.env.CLIENT_ID;
 
-        const token = req.query.token;
-
-        if (!token) {
-            return res.status(400).json({ success: false, message: "UnAuthorized Customer or Token not present" })
-        }
-
-        const client = new OAuth2Client(CLIENT_ID);
-
-        // Call the verifyIdToken to
-        // varify and decode it
-        const ticket = await client.verifyIdToken({
-            idToken: token,
-            audience: CLIENT_ID,
-        });
-
-        // Get the JSON with all the user info
-        const payload = ticket.getPayload();
-
-        console.log("Google Login payload ", payload)
-
-        // const foundUser = await Customer.findOne({ email: payload.email}).exec()
-
-        const foundUser = await googleLoginCustomer(payload.email)
+        const {email, Authtype} = req.body
+  
+        const foundUser = await googleCustomer(email)
         if (!foundUser) {
-            return res.status(400).json({ success: false, message: 'Unauthorized Customer' })
+            return res.status(400).json({ success: false, message: 'Unauthorized google customer' })
         }
 
         // const accessToken = jwt.sign(
@@ -513,7 +534,7 @@ export const googleCustomerLogin = async (req, res, next) => {
         //     sameSite: 'None', //cross-site cookie 
         //     maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
         // })
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "Customer Logged In Successfully",
             accessToken,
