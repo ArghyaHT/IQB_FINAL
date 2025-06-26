@@ -51,7 +51,7 @@ export const getSalonInfo = async (req, res, next) => {
     const salonInfo = await salonInfoDetails(salonId)
 
     if (!salonInfo) {
-      res.status(201).json({
+      res.status(400).json({
         success: false,
         message: 'No salons found for the particular SalonId.',
       });
@@ -60,37 +60,40 @@ export const getSalonInfo = async (req, res, next) => {
     // Find associated barbers using salonId
     const barbers = await getbarbersBySalonId(salonId)
 
-    const salonRating = await getAverageSalonRating(salonId)
+    const salonServiceCategories = await getCategories()
 
-    const salonSettings = await getSalonSettings(salonId);
+    // const salonRating = await getAverageSalonRating(salonId)
 
-    // Define all days of the week
-    const allDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    // const salonSettings = await getSalonSettings(salonId);
 
-    // Get off days from the salon settings
-    const salonOffDays = salonSettings.salonOffDays || [];
+    // // Define all days of the week
+    // const allDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-     // Get business hours from salon settings
-     const startTime = salonSettings.appointmentSettings.appointmentStartTime;
-     const endTime = salonSettings.appointmentSettings.appointmentEndTime;
+    // // Get off days from the salon settings
+    // const salonOffDays = salonSettings?.salonOffDays || [];
 
-    // Construct the response with timings
-    const businessDays = allDays.map(day => {
-        if (salonOffDays.includes(day)) {
-            return { day, "status": "closed" };
-        }
-        return { day, startTime, endTime };
-    });
+    // // Get business hours from salon settings
+    // const startTime = salonSettings?.appointmentSettings.appointmentStartTime || [];
+    // const endTime = salonSettings?.appointmentSettings.appointmentEndTime || [];
+
+    // // Construct the response with timings
+    // const businessDays = allDays.map(day => {
+    //   if (salonOffDays.includes(day)) {
+    //     return { day, "status": "closed" };
+    //   }
+    //   return { day, startTime, endTime };
+    // });
 
 
-    res.status(200).json({
+   return res.status(200).json({
       success: true,
       message: 'Salon and barbers found successfully.',
       response: {
         salonInfo: salonInfo,
         barbers: barbers,
-        salonRating: salonRating,
-        salonBusinessDays: businessDays
+        salonServiceCategories: salonServiceCategories,
+        // salonRating: salonRating,
+        // salonBusinessDays: businessDays
       },
     });
   } catch (error) {
