@@ -569,19 +569,20 @@ export const forgetPassword = async (req, res, next) => {
             });
         }
 
-        const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+        // const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
 
-        user.verificationCode = verificationCode;
-        await user.save();
+        // user.verificationCode = verificationCode;
+        // await user.save();
 
-        try {
-            await sendForgetPasswordMail(email, user.name, verificationCode);
-        } catch (error) {
-            next(error);
-        }
+        // try {
+        //     await sendForgetPasswordMail(email, user.name, verificationCode);
+        // } catch (error) {
+        //     next(error);
+        // }
         return res.status(200).json({
             success: true,
-            message: `Please check your email (${email}) for resetting the password`,
+            message: `Please reset your password in the next page`,
+            response: user
             // verificationCode: verificationCode
         });
     } catch (error) {
@@ -611,7 +612,7 @@ export const verifyPasswordResetCode = async (req, res, next) => {
             // customer.VerificationCode = ''; // Clear the verification code
             await user.save();
 
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
                 message: "Verification Code successfully matched",
                 response: email,
