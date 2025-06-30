@@ -1,5 +1,6 @@
 import { getCategories } from "../../services/common/categoryServices.js";
 import { getbarbersBySalonId } from "../../services/mobile/barberService.js";
+import { findCustomerByCustomerEmailAndSalonId, findCustomerByEmail } from "../../services/mobile/customerService.js";
 import { getAverageSalonRating } from "../../services/mobile/salonRatingService.js";
 import { allCategorySalonServices, allSalonServices, allSalons, getAllSalonsByCountry, getSalonRating, salonInfoDetails, searchSalonsByLocation, searchSalonsByNameAndCity } from "../../services/mobile/salonServices.js";
 import { getSalonSettings } from "../../services/mobile/salonSettingsService.js";
@@ -45,7 +46,7 @@ export const getAllSalonServices = async (req, res, next) => {
 
 //DESC:GET SALON INFO ==================
 export const getSalonInfo = async (req, res, next) => {
-  const { salonId } = req.query;
+  const { salonId, customerEmail } = req.query;
   try {
     // Find salon information by salonId
     const salonInfo = await salonInfoDetails(salonId)
@@ -56,6 +57,29 @@ export const getSalonInfo = async (req, res, next) => {
         message: 'No salons found for the particular SalonId.',
       });
     }
+
+    const getCustomer = await findCustomerByEmail(customerEmail)
+
+    console.log(getCustomer)
+
+    // Determine isFavourite status
+    let isFavourite = false;
+    if (getCustomer?.favoriteSalons && Array.isArray(getCustomer.favoriteSalons)) {
+
+      const custFavSalon = getCustomer.favoriteSalons.includes(Number(salonId));
+
+      if (custFavSalon) {
+        isFavourite = true;
+      }
+    }
+
+    // Add isFavourite to salonInfo object
+    const salonInfoWithFav = {
+      ...salonInfo._doc,
+      isFavourite
+    };
+
+
 
     // Find associated barbers using salonId
     const barbers = await getbarbersBySalonId(salonId)
@@ -85,11 +109,11 @@ export const getSalonInfo = async (req, res, next) => {
     // });
 
 
-   return res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Salon and barbers found successfully.',
       response: {
-        salonInfo: salonInfo,
+        salonInfo: salonInfoWithFav,
         barbers: barbers,
         salonServiceCategories: salonServiceCategories,
         // salonRating: salonRating,
