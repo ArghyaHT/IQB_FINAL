@@ -1146,28 +1146,29 @@ export const bookAppointmentBarbers = async (req, res, next) => {
 
 export const getallAppointmentsByCustomerEmail = async (req, res, next) => {
   try {
-    const { salonId, customerEmail } = req.body;
+    const { salonId, customerEmail, status } = req.body;
 
     const getUpcomingAppointments = await getCustomerAppointments(salonId, customerEmail)
 
-    const sortedAppointments = getUpcomingAppointments
-      .sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate))
-      .map(appointment => ({
-        ...appointment,
-        status: 'upcoming'
-      }));
+    const upcomingAppointments = getUpcomingAppointments.map(appointment => ({
+      ...appointment,
+      status: 'upcoming'
+    }));
 
     const getCustomerHistoryAppointments = await getAppointmentsByCustomerEmail(salonId, customerEmail)
 
-    const sortedHistoryAppointments = getCustomerHistoryAppointments
-      .sort((a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate));
+    // Combine both arrays
+    let allAppointments = [...upcomingAppointments, ...getCustomerHistoryAppointments];
 
+      if (status) {
+      allAppointments = allAppointments.filter(app => app.status === status);
+    }
+
+    // Sort by date ascending or descending (customize as needed)
+    const sortedAppointments = allAppointments.sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate));
 
     return SuccessHandler(CUSTOMER_APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, {
-      response: {
-        upcomingAppointments: sortedAppointments,
-        historyAppointments: sortedHistoryAppointments
-      }
+      response: sortedAppointments
     });
   }
   catch (error) {
