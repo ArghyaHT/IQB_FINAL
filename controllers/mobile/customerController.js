@@ -1475,7 +1475,7 @@ export const getAllCustomerFavoriteSalons = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: 'Salons retrieved successfully',
+            message: 'Customer favourite salons retrieved successfully',
             response: salons,
         });
     } catch (error) {
