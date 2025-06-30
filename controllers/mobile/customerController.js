@@ -2,7 +2,7 @@ import { createGoogleCustomer, deleteCustomer, deleteCustomerProPic, fetchedCust
 
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
-import { bulkEmail, sendCustomerMail, sendForgetPasswordMail, sendVerificationCode } from "../../utils/emailSender/emailSender.js";
+import { bulkEmail, sendCustomerMail, sendForgetPasswordMail, sendSupportMailFromCustomer, sendVerificationCode } from "../../utils/emailSender/emailSender.js";
 import { findSalonBySalonId, getCustomerConnectedSalons, getCustomerFavouriteSalon, getSalonBySalonId } from "../../services/mobile/salonServices.js";
 
 
@@ -1227,6 +1227,35 @@ export const sendMailToCustomer = async (req, res, next) => {
         }
         if (customer) {
             await sendCustomerMail(email, subject, text)
+            res.status(200).json({
+                success: true,
+                message: 'Emails have been sent successfully to customers',
+            });
+        }
+    }
+    catch (error) {
+        //console.log(error);
+        next(error);
+    }
+}
+
+//DESC: SEND MAIL TO CUSTOMER  ================
+export const sendCustomerSupportEmail = async (req, res, next) => {
+    let { email, subject, text } = req.body;
+    try {
+
+        // Convert email to lowercase
+        email = email.toLowerCase();
+
+        const customer = await findCustomerByEmail(email);
+        if (!customer) {
+            res.status(400).json({
+                success: false,
+                message: 'Customer not found',
+            });
+        }
+        if (customer) {
+            await sendSupportMailFromCustomer(email, subject, text)
             res.status(200).json({
                 success: true,
                 message: 'Emails have been sent successfully to customers',

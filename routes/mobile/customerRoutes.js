@@ -1,5 +1,5 @@
 import express from "express";
-import { changeCustomerEmailVerifiedStatus, changeCustomerMobileVerifiedStatus, changeDefaultSalonIdOfCustomer, checkEmail, customerConnectSalon, customerDashboard, customerDisconnectSalon, customerFavoriteSalon, deleteCustomerFavoriteSalon, deleteCustomerProfilePicture, deleteSingleCustomer, forgetPassword, getAllAppointmentsByCustomer, getAllCustomerFavoriteSalons, getAllCustomers, getAllSalonsByCustomer, getCustomerDetails, googleCustomerLogin, googleCustomerSignup, matchVerificationCode, resetPassword, sendBulkEmailToCustomers, sendMailToCustomer, sendVerificationCodeForCustomerEmail, sendVerificationCodeForCustomerMobile, signIn, signUp, updateCustomer, updateCustomerProfilePic, uploadCustomerprofilePic, verificationCodeApi, verifyPasswordResetCode } from "../../controllers/mobile/customerController.js";
+import { changeCustomerEmailVerifiedStatus, changeCustomerMobileVerifiedStatus, changeDefaultSalonIdOfCustomer, checkEmail, customerConnectSalon, customerDashboard, customerDisconnectSalon, customerFavoriteSalon, deleteCustomerFavoriteSalon, deleteCustomerProfilePicture, deleteSingleCustomer, forgetPassword, getAllAppointmentsByCustomer, getAllCustomerFavoriteSalons, getAllCustomers, getAllSalonsByCustomer, getCustomerDetails, googleCustomerLogin, googleCustomerSignup, matchVerificationCode, resetPassword, sendBulkEmailToCustomers, sendCustomerSupportEmail, sendMailToCustomer, sendVerificationCodeForCustomerEmail, sendVerificationCodeForCustomerMobile, signIn, signUp, updateCustomer, updateCustomerProfilePic, uploadCustomerprofilePic, verificationCodeApi, verifyPasswordResetCode } from "../../controllers/mobile/customerController.js";
 // import { CustomerLoggedIn } from "../middlewares/loggedInMiddlewares.js";
 // import { verifyRefreshCustomerToken } from "../middlewares/VerifyRefreshCustomerToken.js";
 
@@ -116,6 +116,7 @@ router.route("/getCustomerFavouriteSalon").post(getAllCustomerFavoriteSalons)
 //Delete Customer Favourite Salon 
 router.route("/deleteCustomerFavouriteSalon").post(deleteCustomerFavoriteSalon)
 
+router.route("/sendSupportMailCustomer").post(sendCustomerSupportEmail)
 
 
 

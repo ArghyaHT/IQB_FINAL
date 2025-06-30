@@ -4,21 +4,21 @@ import fs from "fs"
 
 // Configure the email transporter
 const transporter = nodemailer.createTransport({
-  host: 'iqueuebarbers.com',
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.SENDER_EMAIL_ADDRESS,
-    pass: 'DDOoTM5uB3rH',
-  },
-
-  //   host: 'smtp.gmail.com',
+  // host: 'iqueuebarbers.com',
   // port: 465,
   // secure: true,
   // auth: {
-  //   user: 'arghyahimanstech@gmail.com',
-  //   pass: 'srseljzsckyykpsg',
+  //   user: process.env.SENDER_EMAIL_ADDRESS,
+  //   pass: 'DDOoTM5uB3rH',
   // },
+
+    host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: 'arghyahimanstech@gmail.com',
+    pass: 'srseljzsckyykpsg',
+  },
   });
 
 transporter.verify((err, success) => {
@@ -197,6 +197,30 @@ export const sendCustomerMail = (email,subject, text) => {
     }
   });
 }
+
+export const sendSupportMailFromCustomer = (email, subject, text) => {
+  const mailOptions = {
+    from: `"Customer Inquiry" <${process.env.SENDER_EMAIL_ADDRESS}>`, // your verified sender
+    to: process.env.SUPPORT_EMAIL_ADDRESS, // only host/support gets this
+    subject: `[Customer Support] ${subject}`,
+    replyTo: email, // host sees "Reply" goes to customer
+    html: `
+      <p>You have received a new support message from a customer.</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Subject:</strong> ${subject}</p>
+      <p><strong>Message:</strong></p>
+      <p>${text}</p>
+    `
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error sending support email:', error);
+    } else {
+      console.log('Support email sent:', info.response);
+    }
+  });
+};
 
 //DESC:SEND BULK MAIL TO CUSTOMERS ============================
 export const bulkEmail = (subject, message, recipientEmails) => {
