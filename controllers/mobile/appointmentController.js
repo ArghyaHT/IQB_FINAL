@@ -1160,7 +1160,7 @@ export const getallAppointmentsByCustomerEmail = async (req, res, next) => {
     // Combine both arrays
     let allAppointments = [...upcomingAppointments, ...getCustomerHistoryAppointments];
 
-      if (status) {
+      if (status &&  status.toLowerCase() !== 'all') {
       allAppointments = allAppointments.filter(app => app.status === status);
     }
 
