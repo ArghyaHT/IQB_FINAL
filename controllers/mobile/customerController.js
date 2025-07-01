@@ -1241,11 +1241,14 @@ export const sendMailToCustomer = async (req, res, next) => {
 
 //DESC: SEND MAIL TO CUSTOMER  ================
 export const sendCustomerSupportEmail = async (req, res, next) => {
-    let { email, subject, text } = req.body;
+    let { email, salonId,  subject, text } = req.body;
     try {
 
         // Convert email to lowercase
         email = email.toLowerCase();
+
+        const salon = await getSalonBySalonId(salonId)
+        const adminemail = salon.adminEmail
 
         const customer = await findCustomerByEmail(email);
         if (!customer) {
@@ -1255,10 +1258,10 @@ export const sendCustomerSupportEmail = async (req, res, next) => {
             });
         }
         if (customer) {
-            await sendSupportMailFromCustomer(email, subject, text)
+            await sendSupportMailFromCustomer(email,adminemail, subject, text)
             res.status(200).json({
                 success: true,
-                message: 'Emails have been sent successfully to customers',
+                message: 'Email have been sent successfully to admin',
             });
         }
     }

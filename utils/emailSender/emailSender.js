@@ -4,21 +4,21 @@ import fs from "fs"
 
 // Configure the email transporter
 const transporter = nodemailer.createTransport({
-  // host: 'iqueuebarbers.com',
-  // port: 465,
-  // secure: true,
-  // auth: {
-  //   user: process.env.SENDER_EMAIL_ADDRESS,
-  //   pass: 'DDOoTM5uB3rH',
-  // },
-
-    host: 'smtp.gmail.com',
+  host: 'iqueuebarbers.com',
   port: 465,
   secure: true,
   auth: {
-    user: 'arghyahimanstech@gmail.com',
-    pass: 'srseljzsckyykpsg',
+    user: process.env.SENDER_EMAIL_ADDRESS,
+    pass: 'DDOoTM5uB3rH',
   },
+
+  //   host: 'smtp.gmail.com',
+  // port: 465,
+  // secure: true,
+  // auth: {
+  //   user: 'arghyahimanstech@gmail.com',
+  //   pass: 'srseljzsckyykpsg',
+  // },
   });
 
 transporter.verify((err, success) => {
@@ -198,18 +198,20 @@ export const sendCustomerMail = (email,subject, text) => {
   });
 }
 
-export const sendSupportMailFromCustomer = (email, subject, text) => {
+export const sendSupportMailFromCustomer = (email, adminemail, subject, text) => {
   const mailOptions = {
-    from: `"Customer Inquiry" <${process.env.SENDER_EMAIL_ADDRESS}>`, // your verified sender
-    to: process.env.SUPPORT_EMAIL_ADDRESS, // only host/support gets this
+    from: process.env.SENDER_EMAIL_ADDRESS, // system sender
+    to: adminemail, // send to the admin's email (passed from frontend)
     subject: `[Customer Support] ${subject}`,
-    replyTo: email, // host sees "Reply" goes to customer
+    replyTo: email, // reply goes to the customer
     html: `
+      <p>Hello Admin,</p>
       <p>You have received a new support message from a customer.</p>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Subject:</strong> ${subject}</p>
+      <p><strong>Customer Email:</strong> ${email}</p>
       <p><strong>Message:</strong></p>
-      <p>${text}</p>
+      <div style="white-space: pre-line;">${text}</div>
+      <br/>
+      <p>To respond, simply reply to this email. Your reply will go to the customer directly.</p>
     `
   };
 
@@ -217,7 +219,7 @@ export const sendSupportMailFromCustomer = (email, subject, text) => {
     if (error) {
       console.error('Error sending support email:', error);
     } else {
-      console.log('Support email sent:', info.response);
+      console.log('Support email sent to admin:', info.response);
     }
   });
 };
