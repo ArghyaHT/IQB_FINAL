@@ -12,25 +12,26 @@ export const getAppointmentsByCustomerEmail = async (salonId, customerEmail) => 
     if (!getCustomerBookingBySalonId) {
         return [];
     }
-const filteredAppointments = await Promise.all(
-    getCustomerBookingBySalonId.appointmentList
-        .filter(item => item.customerEmail === customerEmail)
-        .map(async appointment => {
-            const formatTo12Hour = (time) => moment(time, "HH:mm").format("h:mm A");
+    const filteredAppointments = await Promise.all(
+        getCustomerBookingBySalonId.appointmentList
+            .filter(item => item.customerEmail === customerEmail)
+            .map(async appointment => {
+                const formatTo12Hour = (time) => moment(time, "HH:mm").format("h:mm A");
 
-            // Example async logic (e.g., fetching barber)
-            const barber = await Barber.findOne({ barberId: appointment.barberId });
-            const barberProfile = barber?.profile || defaultImage;
+                // Example async logic (e.g., fetching barber)
+                const barber = await Barber.findOne({ barberId: appointment.barberId });
+                const barberProfile = barber?.profile || defaultImage;
 
-            return {
-                ...appointment.toObject(),
-                startTime: formatTo12Hour(appointment.startTime),
-                endTime: formatTo12Hour(appointment.endTime),
-                timeSlots: `${formatTo12Hour(appointment.startTime)} - ${formatTo12Hour(appointment.endTime)}`,
-                barberProfile: barberProfile
-            };
-        })
-);
+                return {
+                    ...appointment.toObject(),
+                    startTime: formatTo12Hour(appointment.startTime),
+                    endTime: formatTo12Hour(appointment.endTime),
+                    timeSlots: `${formatTo12Hour(appointment.startTime)} - ${formatTo12Hour(appointment.endTime)}`,
+                    barberProfile: barberProfile,
+                    barbername: barber.name
+                };
+            })
+    );
 
-return filteredAppointments;
+    return filteredAppointments;
 }

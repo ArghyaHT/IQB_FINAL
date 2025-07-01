@@ -28,7 +28,8 @@ const filteredAppointments = await Promise.all(
                 startTime: formatTo12Hour(appointment.startTime),
                 endTime: formatTo12Hour(appointment.endTime),
                 timeSlots: `${formatTo12Hour(appointment.startTime)} - ${formatTo12Hour(appointment.endTime)}`,
-                barberProfile: barberProfile
+                barberProfile: barberProfile,
+                barbername: barber.name
             };
         })
 );
