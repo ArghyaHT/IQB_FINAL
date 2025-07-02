@@ -1114,7 +1114,11 @@ export const getAllAppointmentsByBarberIdAndDate = async (req, res, next) => {
 
 export const bookAppointmentBarbers = async (req, res, next) => {
   try {
-    const { salonId } = req.body;
+    const { salonId, serviceIds } = req.body;
+
+    if (!Array.isArray(serviceIds) || serviceIds.length === 0) {
+      return ErrorHandler('Service IDs are required and should be an array', ERROR_STATUS_CODE, res);
+    }
 
     const barbers = await getBarbersBySalonIdForAppointments(salonId)
 
@@ -1122,19 +1126,40 @@ export const bookAppointmentBarbers = async (req, res, next) => {
       return ErrorHandler(BOOK_APPOINTMENT_BARBER_RETRIEVE_ERROR, ERROR_STATUS_CODE, res)
     }
 
-    // Format the barber details and fetch additional data using barberId
-    const formattedBarbers = await Promise.all(
-      barbers.map(async barber => {
-        const barberDetails = await getBarberbyId(barber.barberId); // Fetch barber details
-        return {
-          ...barberDetails.toObject(), // Add fetched barber details
-        };
-      })
-    );
 
-    // Return the full response with the modified appointmentDays
+    // Step 2: Fetch detailed barber info first
+    const filteredBarbers = [];
+
+    for (const barber of barbers) {
+      const barberDetails = await getBarberbyId(barber.barberId);
+
+      console.log(barberDetails)
+
+      if (
+        serviceIds.every(requestedId =>
+          barberDetails.barberServices.some(service => service.serviceId === requestedId)
+        )) {
+        filteredBarbers.push(barberDetails.toObject());
+      }
+    }
+
+    if (filteredBarbers.length === 0) {
+      return ErrorHandler('No barbers found for the given services', ERROR_STATUS_CODE, res);
+    }
+
+    // Format the barber details and fetch additional data using barberId
+    // const formattedBarbers = await Promise.all(
+    //   barbers.map(async barber => {
+    //     const barberDetails = await getBarberbyId(barber.barberId); // Fetch barber details
+    //     return {
+    //       ...barberDetails.toObject(), // Add fetched barber details
+    //     };
+    //   })
+    // );
+
+    //Send only barbers whose services match
     return SuccessHandler(BOOK_APPOINTMENT_BARBER_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, {
-      response: formattedBarbers
+      response: filteredBarbers,
     });
 
   }
@@ -1160,7 +1185,7 @@ export const getallAppointmentsByCustomerEmail = async (req, res, next) => {
     // Combine both arrays
     let allAppointments = [...upcomingAppointments, ...getCustomerHistoryAppointments];
 
-      if (status &&  status.toLowerCase() !== 'all') {
+    if (status && status.toLowerCase() !== 'all') {
       allAppointments = allAppointments.filter(app => app.status === status);
     }
 
