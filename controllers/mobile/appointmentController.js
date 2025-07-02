@@ -546,9 +546,9 @@ export const createAppointment = async (req, res, next) => {
       }
     }
     else {
-      res.status(400).json({
-        success: true,
-        message: 'Barber updated his appointment days. please refresh the page',
+      return res.status(400).json({
+        success: false,
+        message: 'Barber not available for this date',
       });
     }
   } catch (error) {
@@ -1132,8 +1132,6 @@ export const bookAppointmentBarbers = async (req, res, next) => {
 
     for (const barber of barbers) {
       const barberDetails = await getBarberbyId(barber.barberId);
-
-      console.log(barberDetails)
 
       if (
         serviceIds.every(requestedId =>
