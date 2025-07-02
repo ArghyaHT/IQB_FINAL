@@ -1188,7 +1188,7 @@ export const getallAppointmentsByCustomerEmail = async (req, res, next) => {
     }
 
     // Sort by date ascending or descending (customize as needed)
-    const sortedAppointments = allAppointments.sort((a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate));
+    const sortedAppointments = allAppointments.sort((a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate));
 
     return SuccessHandler(CUSTOMER_APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, {
       response: sortedAppointments
