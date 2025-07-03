@@ -1187,6 +1187,25 @@ export const getallAppointmentsByCustomerEmail = async (req, res, next) => {
       allAppointments = allAppointments.filter(app => app.status === status);
     }
 
+    const salon = await getSalonBySalonId(salonId);
+    const salonServices = salon?.services || [];
+
+    // 4. Enrich appointments with full service details
+    allAppointments = allAppointments.map(app => {
+      const enrichedServices = (app.services || []).map(serviceInApp => {
+        const matched = salonServices.find(
+          salonService => salonService.serviceId == serviceInApp.serviceId // allow string/number match
+        );
+        return matched || serviceInApp; // fallback to original if no match
+      });
+
+      return {
+        ...app,
+        services: enrichedServices
+      };
+    });
+
+
     // Sort by date ascending or descending (customize as needed)
     const sortedAppointments = allAppointments.sort((a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate));
 
