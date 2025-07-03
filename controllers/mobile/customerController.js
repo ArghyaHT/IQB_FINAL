@@ -395,23 +395,31 @@ export const signIn = async (req, res, next) => {
             salonData = await getSalonBySalonId(foundUser.salonId);
         }
 
+        const customer = { ...foundUser._doc };
+        const salon = { ...salonData._doc };
+
+        delete customer.mobileCountryCode;
+        delete salon.mobileCountryCode;
+
         // Send accessToken containing username and roles 
         return res.status(200).json({
             success: true,
             message: "Customer logged in Successfully",
             // accessToken,
             response: {
-                ...foundUser._doc, // or foundUser.toObject() depending on Mongoose
-                // ...salonData._doc
-                ...(salonData && {
-                    salonName: salonData.salonName,         // or any field you want to add
-                    salonlogo: salonData.salonLogo,  // change this to actual field name
-                    currency: salonData.currency,
-                    isoCurrencyCode: salonData.isoCurrencyCode,
-                    location: salonData.location,
+               ...customer, // or foundUser.toObject() depending on Mongoose
+                customerMobileCountryCode: foundUser.mobileCountryCode,
+                ...salon,
+                salonMobileCountryCode: salonData.mobileCountryCode,   // rename here too
 
-
-                })
+                // ...(salonData && {
+                //     salonName: salonData.salonName,         // or any field you want to add
+                //     salonlogo: salonData.salonLogo,  // change this to actual field name
+                //     currency: salonData.currency,
+                //     isoCurrencyCode: salonData.isoCurrencyCode,
+                //     location: salonData.location,
+                //     tiktokLink: salon
+                // })
             }
         })
     }
@@ -756,19 +764,28 @@ export const customerConnectSalon = async (req, res, next) => {
         //     }
         // })
 
+        //    const customer = { ...foundUser._doc };
+        const salon = { ...salonData._doc };
+
+        delete customer.mobileCountryCode;
+        delete salon.mobileCountryCode;
+
         return res.status(200).json({
             success: true,
             message: "Customer is added to the salon successfully.",
             response: {
                 ...customer._doc, // or foundUser.toObject() depending on Mongoose
-                //  ...salonData._doc
-                ...(salonData && {
-                    salonName: salonData.salonName,         // or any field you want to add
-                    salonlogo: salonData.salonLogo,  // change this to actual field name
-                    currency: salonData.currency,
-                    isoCurrencyCode: salonData.isoCurrencyCode,
-                    location: salonData.location,
-                })
+                customerMobileCountryCode: customer.mobileCountryCode,
+                ...salon,
+                salonMobileCountryCode: salonData.mobileCountryCode,   // rename here too
+
+                // ...(salonData && {
+                //     salonName: salonData.salonName,         // or any field you want to add
+                //     salonlogo: salonData.salonLogo,  // change this to actual field name
+                //     currency: salonData.currency,
+                //     isoCurrencyCode: salonData.isoCurrencyCode,
+                //     location: salonData.location,
+                // })
             }
         });
     } catch (error) {
@@ -1246,7 +1263,7 @@ export const sendMailToCustomer = async (req, res, next) => {
 
 //DESC: SEND MAIL TO CUSTOMER  ================
 export const sendCustomerSupportEmail = async (req, res, next) => {
-    let { email, salonId,  subject, text } = req.body;
+    let { email, salonId, subject, text } = req.body;
     try {
 
         // Convert email to lowercase
@@ -1263,7 +1280,7 @@ export const sendCustomerSupportEmail = async (req, res, next) => {
             });
         }
         if (customer) {
-            await sendSupportMailFromCustomer(email,adminemail, subject, text)
+            await sendSupportMailFromCustomer(email, adminemail, subject, text)
             res.status(200).json({
                 success: true,
                 message: 'Email have been sent successfully to admin',
