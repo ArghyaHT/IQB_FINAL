@@ -402,16 +402,16 @@ export const signIn = async (req, res, next) => {
             // accessToken,
             response: {
                 ...foundUser._doc, // or foundUser.toObject() depending on Mongoose
-                ...salonData._doc
-                // ...(salonData && {
-                //     salonName: salonData.salonName,         // or any field you want to add
-                //     salonlogo: salonData.salonLogo,  // change this to actual field name
-                //     currency: salonData.currency,
-                //     isoCurrencyCode: salonData.isoCurrencyCode,
-                //     location: salonData.location,
+                // ...salonData._doc
+                ...(salonData && {
+                    salonName: salonData.salonName,         // or any field you want to add
+                    salonlogo: salonData.salonLogo,  // change this to actual field name
+                    currency: salonData.currency,
+                    isoCurrencyCode: salonData.isoCurrencyCode,
+                    location: salonData.location,
 
 
-                // })
+                })
             }
         })
     }
@@ -761,13 +761,14 @@ export const customerConnectSalon = async (req, res, next) => {
             message: "Customer is added to the salon successfully.",
             response: {
                 ...customer._doc, // or foundUser.toObject() depending on Mongoose
-                 ...salonData._doc
-                // ...(salonData && {
-                //     salonName: salonData.salonName,         // or any field you want to add
-                //     salonlogo: salonData.salonLogo,  // change this to actual field name
-                //     currency: salonData.currency,
-                //     isoCurrencyCode: salonData.isoCurrencyCode
-                // })
+                //  ...salonData._doc
+                ...(salonData && {
+                    salonName: salonData.salonName,         // or any field you want to add
+                    salonlogo: salonData.salonLogo,  // change this to actual field name
+                    currency: salonData.currency,
+                    isoCurrencyCode: salonData.isoCurrencyCode,
+                    location: salonData.location,
+                })
             }
         });
     } catch (error) {
