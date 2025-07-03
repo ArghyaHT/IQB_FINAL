@@ -849,8 +849,8 @@ export const editAppointment = async (req, res, next) => {
     }
     else {
       res.status(400).json({
-        success: true,
-        message: 'Barber updated his appointment days. please refresh the page',
+        success: false,
+        message: 'Barber not available for this date',
       });
     }
   } catch (error) {
