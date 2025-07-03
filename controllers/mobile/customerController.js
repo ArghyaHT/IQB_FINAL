@@ -396,10 +396,8 @@ export const signIn = async (req, res, next) => {
         }
 
         const customer = { ...foundUser._doc };
-        const salon = { ...salonData._doc };
 
         delete customer.mobileCountryCode;
-        delete salon.mobileCountryCode;
 
         // Send accessToken containing username and roles 
         return res.status(200).json({
@@ -409,9 +407,7 @@ export const signIn = async (req, res, next) => {
             response: {
                ...customer, // or foundUser.toObject() depending on Mongoose
                 customerMobileCountryCode: foundUser.mobileCountryCode,
-                ...salon,
-                salonMobileCountryCode: salonData.mobileCountryCode,   // rename here too
-
+                ...salonData._doc,
                 // ...(salonData && {
                 //     salonName: salonData.salonName,         // or any field you want to add
                 //     salonlogo: salonData.salonLogo,  // change this to actual field name
@@ -765,10 +761,8 @@ export const customerConnectSalon = async (req, res, next) => {
         // })
 
         //    const customer = { ...foundUser._doc };
-        const salon = { ...salonData._doc };
 
         delete customer.mobileCountryCode;
-        delete salon.mobileCountryCode;
 
         return res.status(200).json({
             success: true,
@@ -776,8 +770,7 @@ export const customerConnectSalon = async (req, res, next) => {
             response: {
                 ...customer._doc, // or foundUser.toObject() depending on Mongoose
                 customerMobileCountryCode: customer.mobileCountryCode,
-                ...salon,
-                salonMobileCountryCode: salonData.mobileCountryCode,   // rename here too
+                ...salonData._doc,
 
                 // ...(salonData && {
                 //     salonName: salonData.salonName,         // or any field you want to add
