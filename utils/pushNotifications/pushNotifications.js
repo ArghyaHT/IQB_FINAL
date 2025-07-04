@@ -100,7 +100,7 @@ export const sendAppointmentNotification = async(Token, SalonName, FirstLastName
         };
     } else {
         return {
-            StatusCode: 201,
+            StatusCode: 400,
             Response: response,
             StatusMessage: "Notification failed",
         };
