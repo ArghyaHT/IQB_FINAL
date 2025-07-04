@@ -540,24 +540,23 @@ export const googleCustomerLogin = async (req, res, next) => {
         //     maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
         // })
 
-        let salonData = null;
+          let salonData = null;
 
         if (foundUser.salonId != 0) {
             salonData = await getSalonBySalonId(foundUser.salonId);
         }
 
+        const customer = { ...foundUser._doc };
+
+        delete customer.mobileCountryCode;
+
         return res.status(200).json({
             success: true,
             message: "Customer Logged In Successfully",
             response: {
-                ...foundUser._doc, // or foundUser.toObject() depending on Mongoose
-                ...(salonData && {
-                    salonName: salonData.salonName,         // or any field you want to add
-                    salonlogo: salonData.salonLogo,  // change this to actual field name
-                    currency: salonData.currency,
-                    isoCurrencyCode: salonData.isoCurrencyCode
-
-                })
+                ...customer, // or foundUser.toObject() depending on Mongoose
+                customerMobileCountryCode: foundUser.mobileCountryCode,
+                ...(customer.salonId !== 0 && salonData?._doc ? salonData._doc : {})
             }
         })
     } catch (error) {
