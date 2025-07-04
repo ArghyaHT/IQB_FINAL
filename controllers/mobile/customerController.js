@@ -405,9 +405,9 @@ export const signIn = async (req, res, next) => {
             message: "Customer logged in Successfully",
             // accessToken,
             response: {
-               ...customer, // or foundUser.toObject() depending on Mongoose
+                ...customer, // or foundUser.toObject() depending on Mongoose
                 customerMobileCountryCode: foundUser.mobileCountryCode,
-                ...salonData._doc,
+                ...(customer.salonId !== 0 && salonData?._doc ? salonData._doc : {})
                 // ...(salonData && {
                 //     salonName: salonData.salonName,         // or any field you want to add
                 //     salonlogo: salonData.salonLogo,  // change this to actual field name
