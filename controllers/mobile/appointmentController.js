@@ -31,7 +31,7 @@ let isLocked = false; // lock flag in memory
 export const createAppointment = async (req, res, next) => {
   const { salonId, barberId, serviceId, appointmentDate, appointmentNotes, startTime, customerEmail, customerName, customerType, methodUsed } = req.body;
   if (isLocked) {
-    return res.status(429).json({
+    return res.status(400).json({
       success: false,
       message: "Please wait, another appointment is being processed. Try again shortly.",
     });
@@ -601,9 +601,17 @@ export const createAppointment = async (req, res, next) => {
 
 //DESC:EDIT APPOINTMENT ====================
 export const editAppointment = async (req, res, next) => {
-  try {
-    const { appointmentId, salonId, barberId, serviceId, appointmentDate, appointmentNotes, startTime } = req.body; // Assuming appointmentId is passed as a parameter
+  const { appointmentId, salonId, barberId, serviceId, appointmentDate, appointmentNotes, startTime } = req.body; // Assuming appointmentId is passed as a parameter
 
+  if (isLocked) {
+    return res.status(400).json({
+      success: false,
+      message: "Please wait, another appointment is being processed. Try again shortly.",
+    });
+  }
+  try {
+
+    isLocked = true;
     // Check if required fields are missing
     if (!barberId || !serviceId || !appointmentDate || !startTime) {
       return res.status(400).json({
@@ -928,8 +936,7 @@ export const editAppointment = async (req, res, next) => {
     next(error);
   }
   finally {
-    // Always release the lock after process finishes (success or error)
-    await releaseLock(lockKey);
+    isLocked = false; // always release the lock
   }
 };
 
