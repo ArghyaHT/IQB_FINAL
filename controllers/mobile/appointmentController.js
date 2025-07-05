@@ -459,11 +459,11 @@ export const createAppointment = async (req, res, next) => {
           // Handle error if email sending fails
         }
 
-        const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+        // const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-        if (pushDevice && pushDevice.deviceToken) {
-          await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail)
-        }
+        // if (pushDevice && pushDevice.deviceToken) {
+        //   await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail)
+        // }
 
         const emailSubjectForBarber = 'New Appointment Created';
         const emailBodyForBarber = `
@@ -1002,7 +1002,7 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
         });
       }
     }
-    res.status(200).json({
+   return res.status(200).json({
       success: true,
       message: "Time slots retrieved and matched successfully",
       response: timeSlots
@@ -1012,7 +1012,6 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
     next(error);
   }
 };
-
 
 //DESC:GET ALL APPOINTMENTS BY SALON ID ====================
 export const getAllAppointmentsBySalonId = async (req, res, next) => {

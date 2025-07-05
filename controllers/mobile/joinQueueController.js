@@ -10,6 +10,9 @@ import { validateEmail } from "../../middlewares/validator.js";
 import { findCustomersToMail } from "../../services/web/queue/joinQueueService.js";
 import { io } from "../../utils/socket/socket.js";
 import { getAllSalonBarbersForTV } from "../../services/kiosk/barber/barberService.js";
+import { RETRIVE_QUEUELIST_SUCCESS } from "../../constants/web/QueueConstants.js";
+import { SUCCESS_STATUS_CODE } from "../../constants/web/Common/StatusCodeConstant.js";
+import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 
 //DESC:SINGLE JOIN QUEUE ================
 export const singleJoinQueue = async (req, res, next) => {
@@ -752,26 +755,36 @@ export const getQueueListBySalonId = async (req, res, next) => {
         //To find the queueList according to salonId and sort it according to qposition
         const getSalon = await getSalonQlist(salonId, customerEmail)
 
-        if (getSalon.length > 0) {
-            // Access the sorted queueList array from the result
-            const sortedQueueList = getSalon[0].queueList;
+        // if (getSalon.length > 0) {
+        //     // Access the sorted queueList array from the result
+        //     const sortedQueueList = getSalon[0].queueList;
 
 
-            io.to(`salon_${salonId}`).emit("queueUpdated", sortedQueueList);
+        //     io.to(`salon_${salonId}`).emit("queueUpdated", sortedQueueList);
 
 
-            return res.status(200).json({
-                success: true,
-                message: "Queue list of the salon retrieved successfully.",
-                response: sortedQueueList,
-            });
-        } else {
-            return res.status(200).json({
-                success: true,
-                message: "No queuelist found",
-                response: []
-            });
+        //     return res.status(200).json({
+        //         success: true,
+        //         message: "Queue list of the salon retrieved successfully.",
+        //         response: sortedQueueList,
+        //     });
+        // } else {
+        //     return res.status(200).json({
+        //         success: true,
+        //         message: "No queuelist found",
+        //         response: []
+        //     });
+        // }
+
+        if (getSalon) {
+            getSalon.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
         }
+
+        const sortedQlist = getSalon;
+
+        io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
+
+        return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist })
 
     }
     catch (error) {
@@ -921,7 +934,7 @@ export const getQlistbyBarberId = async (req, res, next) => {
             });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: 'Queue list retrieved successfully for the specified barber',
             response: qList[0].queueList // Extracting the queue list from the result
