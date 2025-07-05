@@ -762,7 +762,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
             io.to(`salon_${salonId}`).emit("queueUpdated", sortedQueueList);
 
-            io.to(`salon_${salonId}`).emit('dummyEvent', { message: `Hello salon ${salonId}! This is a test.` });
+            // io.to(`salon_${salonId}`).emit('dummyEvent', { message: `Hello salon ${salonId}! This is a test.` });
 
             return res.status(200).json({
                 success: true,
