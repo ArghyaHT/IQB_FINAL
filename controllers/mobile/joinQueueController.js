@@ -755,36 +755,36 @@ export const getQueueListBySalonId = async (req, res, next) => {
         //To find the queueList according to salonId and sort it according to qposition
         const getSalon = await getSalonQlist(salonId, customerEmail)
 
-        // if (getSalon.length > 0) {
-        //     // Access the sorted queueList array from the result
-        //     const sortedQueueList = getSalon[0].queueList;
+        if (getSalon.length > 0) {
+            // Access the sorted queueList array from the result
+            const sortedQueueList = getSalon[0].queueList;
 
 
-        //     io.to(`salon_${salonId}`).emit("queueUpdated", sortedQueueList);
+            io.to(`salon_${salonId}`).emit("queueUpdated", sortedQueueList);
 
 
-        //     return res.status(200).json({
-        //         success: true,
-        //         message: "Queue list of the salon retrieved successfully.",
-        //         response: sortedQueueList,
-        //     });
-        // } else {
-        //     return res.status(200).json({
-        //         success: true,
-        //         message: "No queuelist found",
-        //         response: []
-        //     });
-        // }
-
-        if (getSalon) {
-            getSalon.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+            return res.status(200).json({
+                success: true,
+                message: "Queue list of the salon retrieved successfully.",
+                response: sortedQueueList,
+            });
+        } else {
+            return res.status(200).json({
+                success: true,
+                message: "No queuelist found",
+                response: []
+            });
         }
 
-        const sortedQlist = getSalon;
+        // if (getSalon) {
+        //     getSalon.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+        // }
 
-        io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
+        // const sortedQlist = getSalon;
 
-        return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist })
+        // io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
+
+        // return SuccessHandler(RETRIVE_QUEUELIST_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist })
 
     }
     catch (error) {
