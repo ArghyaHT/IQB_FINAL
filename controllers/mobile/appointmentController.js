@@ -200,16 +200,25 @@ export const createAppointment = async (req, res, next) => {
 
       const existingAppointmentList = await getAppointmentbySalonId(salonId);// make this call in appointmentService
 
-      const isOverlap = (start1, end1, start2, end2) => {
-        return moment(start1, 'HH:mm').isBefore(moment(end2, 'HH:mm')) &&
-          moment(start2, 'HH:mm').isBefore(moment(end1, 'HH:mm'));
-      };
-
       if (existingAppointmentList && existingAppointmentList.appointmentList) {
         const isConflict = existingAppointmentList.appointmentList.some(app => {
-          if (app.barberId.toString() !== barberId.toString()) return false;
-          if (app.appointmentDate !== appointmentDate) return false;
-          return isOverlap(startTime, endTime, app.startTime, app.endTime);
+          // Compare barberId (both numbers, so direct compare)
+          if (app.barberId !== barberId) return false;
+
+          // Normalize and compare dates
+          const appDateFormatted = moment(app.appointmentDate).format('YYYY-MM-DD');
+          const newAppDateFormatted = moment(appointmentDate).format('YYYY-MM-DD');
+          if (appDateFormatted !== newAppDateFormatted) return false;
+
+          // Compose full datetime moments
+          const existingStart = moment(`${appDateFormatted} ${app.startTime}`, 'YYYY-MM-DD HH:mm');
+          const existingEnd = moment(`${appDateFormatted} ${app.endTime}`, 'YYYY-MM-DD HH:mm');
+
+          const newStart = moment(`${newAppDateFormatted} ${startTime}`, 'YYYY-MM-DD HH:mm');
+          const newEnd = moment(`${newAppDateFormatted} ${endTime}`, 'YYYY-MM-DD HH:mm');
+
+          // Check overlap
+          return newStart.isBefore(existingEnd) && existingStart.isBefore(newEnd);
         });
 
         if (isConflict) {
@@ -684,15 +693,25 @@ export const editAppointment = async (req, res, next) => {
       const endTime = endTimeMoment.format('HH:mm');
 
       const allAppointments = await getAppointmentbySalonId(salonId);
-      const otherAppointments = allAppointments?.appointmentList?.filter(app =>
-        app.barberId === barberId &&
-        app.appointmentDate === appointmentDate &&
-        app._id !== appointmentId // exclude the current appointment
-      );
+
+      const newAppDateFormatted = moment(appointmentDate).format('YYYY-MM-DD');
+
+      const otherAppointments = allAppointments?.appointmentList?.filter(app => {
+        if (app.barberId !== barberId) return false;
+
+        const appDateFormatted = moment(app.appointmentDate).format('YYYY-MM-DD');
+        if (appDateFormatted !== newAppDateFormatted) return false;
+
+        if (app._id === appointmentId) return false; // exclude the current appointment
+
+        return true;
+      });
 
       const hasOverlap = otherAppointments?.some(app => {
-        const existingStart = moment(`${app.appointmentDate} ${app.startTime}`, 'YYYY-MM-DD HH:mm');
-        const existingEnd = moment(`${app.appointmentDate} ${app.endTime}`, 'YYYY-MM-DD HH:mm');
+        const appDateFormatted = moment(app.appointmentDate).format('YYYY-MM-DD');
+        const existingStart = moment(`${appDateFormatted} ${app.startTime}`, 'YYYY-MM-DD HH:mm');
+        const existingEnd = moment(`${appDateFormatted} ${app.endTime}`, 'YYYY-MM-DD HH:mm');
+
         return startTimeMoment.isBefore(existingEnd) && existingStart.isBefore(endTimeMoment);
       });
 
