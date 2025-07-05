@@ -24,26 +24,22 @@ import { getBarberReservations } from "../../services/web/barberReservations/bar
 import { getAppointmentsByCustomerEmail } from "../../services/mobile/appointmentHistoryService.js"
 import { CUSTOMER_APPOINTMENT_RETRIEVE_SUCCESS } from "../../constants/web/AppointmentsConstants.js";
 import { io } from "../../utils/socket/socket.js";
-import { acquireLock, releaseLock } from "../../utils/redis.js";
+
+let isLocked = false; // lock flag in memory
 
 //Creating Appointment
 export const createAppointment = async (req, res, next) => {
-      const { salonId, barberId, serviceId, appointmentDate, appointmentNotes, startTime, customerEmail, customerName, customerType, methodUsed } = req.body;
-
-       // Build a unique lock key for this barber + date + startTime (you can choose granularity)
-  const lockKey = `lock:appointment:${salonId}:${barberId}:${appointmentDate}:${startTime}`;
-
-  // Try to acquire lock before proceeding
-  const locked = await acquireLock(lockKey, 10000); // 10 seconds lock TTL
-
-  if (!locked) {
-    return res.status(400).json({
+  const { salonId, barberId, serviceId, appointmentDate, appointmentNotes, startTime, customerEmail, customerName, customerType, methodUsed } = req.body;
+  if (isLocked) {
+    return res.status(429).json({
       success: false,
-      message: 'Another appointment is being processed for this time slot. Please try again shortly.',
+      message: "Please wait, another appointment is being processed. Try again shortly.",
     });
   }
   try {
-    
+
+    isLocked = true;
+
     // Check if salonId is missing
     if (!salonId) {
       return res.status(400).json({
@@ -599,8 +595,7 @@ export const createAppointment = async (req, res, next) => {
     next(error);
   }
   finally {
-    // Always release the lock after process finishes (success or error)
-    await releaseLock(lockKey);
+    isLocked = false; // always release the lock
   }
 };
 
@@ -931,6 +926,10 @@ export const editAppointment = async (req, res, next) => {
     }
   } catch (error) {
     next(error);
+  }
+  finally {
+    // Always release the lock after process finishes (success or error)
+    await releaseLock(lockKey);
   }
 };
 
