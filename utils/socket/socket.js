@@ -30,6 +30,11 @@ export const initializeSocket = (server) => {
         });
 
 
+        socket.on('dummyEvent', (data) => {
+            console.log('Received dummyEvent:', data);
+        });
+
+
         socket.on('disconnect', () => {
             console.log(`Client Disconnected: ${socket.id}`);
         });
