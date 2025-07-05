@@ -14,7 +14,9 @@ export const initializeSocket = (server) => {
     io.on('connection', (socket) => {
         console.log(`Client Connected: ${socket.id}`);
 
-        
+        socket.emit('dummyEvent', { message: 'This is a dummy event on connection' });
+
+
         // Handle joining a salon-specific room
         socket.on("joinSalon", (salonId) => {
             socket.join(`salon_${salonId}`);
@@ -26,6 +28,12 @@ export const initializeSocket = (server) => {
             socket.join(roomName);
             console.log(`Client ${socket.id} joined barber room: ${roomName}`);
         });
+
+
+        socket.on('dummyEvent', (data) => {
+            console.log('Received dummyEvent:', data);
+        });
+
 
         socket.on('disconnect', () => {
             console.log(`Client Disconnected: ${socket.id}`);
