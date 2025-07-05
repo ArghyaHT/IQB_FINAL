@@ -491,6 +491,11 @@ export const barberServedAppointment = async (req, res, next) => {
         // Remove the served appointment from the Appointment table
         await servedOrcancelAppointment(_id, barberId, appointmentDate, salonId);
 
+
+        const updatedAppointments = await getAppointmentbySalonId(salonId);
+
+        io.to(`salon_${salonId}`).emit('appointmentsUpdated', updatedAppointments?.appointmentList || []);
+
         return res.status(200).json({
             success: true,
             message: 'Appointment served successfully.',
@@ -521,6 +526,11 @@ export const customerCancelledAppointment = async (req, res, next) => {
 
         // Remove the served appointment from the Appointment table
         await servedOrcancelAppointment(_id, barberId, appointmentDate, salonId);
+
+        const updatedAppointments = await getAppointmentbySalonId(salonId);
+
+        io.to(`salon_${salonId}`).emit('appointmentsUpdated', updatedAppointments?.appointmentList || []);
+
 
         return res.status(200).json({
             success: true,
@@ -687,6 +697,11 @@ export const barberCancelAppointment = async (req, res, next) => {
                 // Handle error if email sending fails
             }
         }
+
+        const updatedAppointments = await getAppointmentbySalonId(salonId);
+
+        io.to(`salon_${salonId}`).emit('appointmentsUpdated', updatedAppointments?.appointmentList || []);
+
 
         // Success response
         return SuccessHandler(

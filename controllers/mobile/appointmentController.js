@@ -23,6 +23,7 @@ import { getBarberBreakTimes } from "../../services/web/barberBreakTimes/barberB
 import { getBarberReservations } from "../../services/web/barberReservations/barberReservationsService.js";
 import { getAppointmentsByCustomerEmail } from "../../services/mobile/appointmentHistoryService.js"
 import { CUSTOMER_APPOINTMENT_RETRIEVE_SUCCESS } from "../../constants/web/AppointmentsConstants.js";
+import { io } from "../../utils/socket/socket.js";
 
 //Creating Appointment
 export const createAppointment = async (req, res, next) => {
@@ -198,6 +199,27 @@ export const createAppointment = async (req, res, next) => {
       const endTime = endTimeMoment.format('HH:mm');
 
       const existingAppointmentList = await getAppointmentbySalonId(salonId);// make this call in appointmentService
+
+      const isOverlap = (start1, end1, start2, end2) => {
+        return moment(start1, 'HH:mm').isBefore(moment(end2, 'HH:mm')) &&
+          moment(start2, 'HH:mm').isBefore(moment(end1, 'HH:mm'));
+      };
+
+      if (existingAppointmentList && existingAppointmentList.appointmentList) {
+        const isConflict = existingAppointmentList.appointmentList.some(app => {
+          if (app.barberId.toString() !== barberId.toString()) return false;
+          if (app.appointmentDate !== appointmentDate) return false;
+          return isOverlap(startTime, endTime, app.startTime, app.endTime);
+        });
+
+        if (isConflict) {
+          return res.status(400).json({
+            success: false,
+            message: 'The timeslot is already booked. Please check other slots',
+          });
+        }
+      }
+
       const newAppointment = {
         barberId,
         services: serviceIds.map((id, index) => ({
@@ -661,7 +683,25 @@ export const editAppointment = async (req, res, next) => {
       const endTimeMoment = startTimeMoment.clone().add(hours, 'hours').add(minutes, 'minutes');
       const endTime = endTimeMoment.format('HH:mm');
 
+      const allAppointments = await getAppointmentbySalonId(salonId);
+      const otherAppointments = allAppointments?.appointmentList?.filter(app =>
+        app.barberId === barberId &&
+        app.appointmentDate === appointmentDate &&
+        app._id !== appointmentId // exclude the current appointment
+      );
 
+      const hasOverlap = otherAppointments?.some(app => {
+        const existingStart = moment(`${app.appointmentDate} ${app.startTime}`, 'YYYY-MM-DD HH:mm');
+        const existingEnd = moment(`${app.appointmentDate} ${app.endTime}`, 'YYYY-MM-DD HH:mm');
+        return startTimeMoment.isBefore(existingEnd) && existingStart.isBefore(endTimeMoment);
+      });
+
+      if (hasOverlap) {
+        return res.status(400).json({
+          success: false,
+          message: 'The timeslot is already booked. Please check other slots',
+        });
+      }
       const newData = {
         barberId,
         services: serviceIds.map((id, index) => ({
@@ -1002,7 +1042,7 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
         });
       }
     }
-   return res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Time slots retrieved and matched successfully",
       response: timeSlots
@@ -1207,6 +1247,9 @@ export const getallAppointmentsByCustomerEmail = async (req, res, next) => {
 
     // Sort by date ascending or descending (customize as needed)
     const sortedAppointments = allAppointments.sort((a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate));
+
+    io.to(`salon_${salonId}`).emit("appointmentsUpdated", sortedAppointments);
+
 
     return SuccessHandler(CUSTOMER_APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, {
       response: sortedAppointments
