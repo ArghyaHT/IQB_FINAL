@@ -4,6 +4,8 @@ import { VerifyAdminJwtToken } from "../../middlewares/kiosk/VerifyAdminJwtToken
 // import { verifyAuthToken } from "../../middlewares/VerifyAuthToken.js";
 // import { verifyBarberRefreshToken } from "../../middlewares/VerifyBarberRefreshToken.js";
 import { loggedIn } from "../../middlewares/kiosk/loggedInMiddlewares.js";
+import { getAllCategories } from "../../controllers/web/admin/salonController.js";
+import { getAllCategorySalonServices } from "../../controllers/mobile/salonController.js";
 
 const router = express.Router();
 //============ADMIN AND BARBER LOGIN FOR KIOSK================//
@@ -35,6 +37,10 @@ router.route("/changeSalonOnlineStatusKiosk").post(changeSalonOnlineStatus)
 router.route("/mobileBookingAvailabilityStatus").post(changeMobileBookingAvailabilityOfSalon)
 
 router.route("/kioskAvailabilityStatus").post(changeSalonKioskStatus)
+
+router.route("/getAllServiceCategories").get(getAllCategories)
+
+router.route("/getSalonServicesByCategory").get(getAllCategorySalonServices)
 
 
 //=================BARBER ROUTES KIOSK=================//
