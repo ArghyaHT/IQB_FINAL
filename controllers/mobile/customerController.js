@@ -157,7 +157,7 @@ export const signUp = async (req, res, next) => {
             //     next(error);
             // }
 
-        //      let salonData = null;
+            //      let salonData = null;
 
             return res.status(200).json({
                 success: true,
@@ -504,7 +504,10 @@ export const googleCustomerSignup = async (req, res, next) => {
             return res.status(200).json({
                 success: true,
                 message: 'Customer saved successfully',
-                reponse: savedCustomer
+                response: {
+                    ...savedCustomer._doc,
+                    customerMobileCountryCode: savedCustomer.mobileCountryCode
+                }
             });
         } else {
             return res.status(400).json({
@@ -545,7 +548,7 @@ export const googleCustomerLogin = async (req, res, next) => {
         //     maxAge: 1 * 24 * 60 * 60 * 1000 //cookie expiry: set to match rT
         // })
 
-          let salonData = null;
+        let salonData = null;
 
         if (foundUser.salonId != 0) {
             salonData = await getSalonBySalonId(foundUser.salonId);
