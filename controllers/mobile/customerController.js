@@ -617,20 +617,27 @@ export const forgetPassword = async (req, res, next) => {
             });
         }
 
-        // const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
+        const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
 
-        // user.verificationCode = verificationCode;
-        // await user.save();
+        user.verificationCode = verificationCode;
+        await user.save();
 
-        // try {
-        //     await sendForgetPasswordMail(email, user.name, verificationCode);
-        // } catch (error) {
-        //     next(error);
-        // }
+        const formattedNumber = `+${user.mobileCountryCode}${String(user.mobileNumber)}`;
+        console.log(formattedNumber)
+
+        try {
+            await sendForgetPasswordMail(email, user.name, verificationCode);
+            await sendMobileVerificationCode(formattedNumber, verificationCode);
+
+        } catch (error) {
+            next(error);
+        }
+
+        console.log(user)
         return res.status(200).json({
             success: true,
             message: `Please reset your password in the next page`,
-            response: user
+            response: user,
             // verificationCode: verificationCode
         });
     } catch (error) {
