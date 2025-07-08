@@ -157,10 +157,15 @@ export const signUp = async (req, res, next) => {
             //     next(error);
             // }
 
+        //      let salonData = null;
+
             return res.status(200).json({
                 success: true,
                 message: 'Customer saved successfully',
-                reponse: savedCustomer
+                response: {
+                    ...savedCustomer._doc,
+                    customerMobileCountryCode: savedCustomer.mobileCountryCode
+                }
             });
         } else {
             return res.status(400).json({
