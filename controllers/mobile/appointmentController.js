@@ -1084,6 +1084,9 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
         });
       }
     }
+
+    await io.to(`barber_${salonId}_${barberId}`).emit("timeslotsUpdated", timeSlots);
+
     return res.status(200).json({
       success: true,
       message: "Time slots retrieved and matched successfully",
@@ -1290,7 +1293,7 @@ export const getallAppointmentsByCustomerEmail = async (req, res, next) => {
     // Sort by date ascending or descending (customize as needed)
     const sortedAppointments = allAppointments.sort((a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate));
 
-    io.to(`salon_${salonId}`).emit("appointmentsUpdated", sortedAppointments);
+    await io.to(`salon_${salonId}`).emit("appointmentsUpdated", sortedAppointments);
 
 
     return SuccessHandler(CUSTOMER_APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, {
