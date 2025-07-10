@@ -29,6 +29,12 @@ export const initializeSocket = (server) => {
             console.log(`Client ${socket.id} joined barber room: ${roomName}`);
         });
 
+        socket.on("joinCustomer", ({ salonId, customerEmail }) => {
+            const roomName = `customer_${salonId}_${customerEmail}`;
+            socket.join(roomName);
+            console.log(`Client ${socket.id} joined customer room: ${roomName}`);
+        });
+
 
         socket.on('dummyEvent', (data) => {
             console.log('Received dummyEvent:', data);
