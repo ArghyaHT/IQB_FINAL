@@ -6,11 +6,11 @@ export const sendQueueNotification = async(Token, SalonName, Current, FirstLastN
 
     const deviceToken = `ExponentPushToken[${Token.trim()}]`;
 
-    let messageBody = `${SalonName} queue update!\n`;
+    let messageBody = "";
     if (Token) {
-        messageBody += `${FirstLastName}:${notificationMessage} ${Current}.`;
+        messageBody += `${notificationMessage} ${Current}.`;
     }
-    const title = "Queue Position Update";
+    const title = `${SalonName} Queue Booked Successfully!`;
     const additionalData = {
         DeviceType: DeviceType,
         QueuePosition: Current,
@@ -64,7 +64,7 @@ export const sendAppointmentNotification = async(Token, SalonName, FirstLastName
 
     let messageBody = "";
     if (Token) {
-        messageBody += `${FirstLastName}:${notificationMessage} on ${appointmentDate} at ${startTime}.`;
+        messageBody += `${notificationMessage} on ${appointmentDate} at ${startTime}.`;
     }
     const title = `${SalonName} ${appointmentTitle}!`;
     const additionalData = {
