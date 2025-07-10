@@ -338,8 +338,10 @@ export const createAppointment = async (req, res, next) => {
 
         const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
+        const appointmentTitle = "Appointment Booked"
+
         if (pushDevice && pushDevice.deviceToken) {
-          await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail, startTime, appointmentDate)
+          await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail, startTime, appointmentDate, appointmentTitle)
         }
 
 
@@ -844,8 +846,11 @@ export const editAppointment = async (req, res, next) => {
 
       const pushDevice = await getPushDevicesbyEmailId(appointment.customerEmail)
 
+              const appointmentTitle = "Appointment Edited"
+
+
       if (pushDevice && pushDevice.deviceToken) {
-        await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointment.customerName, pushDevice.deviceType, EDIT_APPOINTMENT, appointment.customerEmail, startTime, appointmentDate)
+        await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointment.customerName, pushDevice.deviceType, EDIT_APPOINTMENT, appointment.customerEmail, startTime, appointmentDate, appointmentTitle)
       }
 
       // Send email to the barber about the rescheduled appointment

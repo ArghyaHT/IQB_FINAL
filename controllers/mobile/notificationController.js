@@ -1,12 +1,13 @@
 import { changeSeenStatus, findNotificationUserByEmail } from "../../services/mobile/notificationService.js";
 import { findCustomerByEmail } from "../../services/mobile/customerService.js";
 import { findSalonBySalonId } from "../../services/mobile/salonServices.js";
+import { io } from "../../utils/socket/socket.js";
 
 //DESC: GET ALL NOTIFICATION BY EMAIL
 export const getAllNotificationsByCustomerEmail = async (req, res, next) => {
   let { email } = req.body;
 
-  email = customerEmail.trim().toLowerCase();
+  email = email.trim().toLowerCase();
 
   try {
 
@@ -37,6 +38,7 @@ export const getAllNotificationsByCustomerEmail = async (req, res, next) => {
       ...notification.toObject(),  // Convert Mongoose document to plain object
       salonLogo: customerSalon.salonLogo  // Attach customer details
     }));
+
 
     await io.to(`customer_${getcustomer.salonId}_${email}`).emit("receiveNotifications", latestnotifications);
 
