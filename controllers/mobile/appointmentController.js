@@ -952,6 +952,10 @@ export const deleteAppointment = async (req, res, next) => {
     }, 0);
 
 
+    const serviceNames = appointmentToDelete.services.map(service => service.serviceName);
+    console.log('Service Names:', serviceNames);
+
+
     // Find and remove the appointment by its ID
     const deletedAppointment = await deleteAppointmentById(salonId, appointmentId)
 
