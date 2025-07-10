@@ -32,7 +32,6 @@ export const getAllNotificationsByCustomerEmail = async (req, res, next) => {
       });
     }
 
-    // Reverse the order of notifications
     // Reverse the order of notifications and attach customer profile to each
     const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
       ...notification.toObject(),  // Convert Mongoose document to plain object

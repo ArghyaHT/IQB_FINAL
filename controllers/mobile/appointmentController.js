@@ -24,6 +24,7 @@ import { getBarberReservations } from "../../services/web/barberReservations/bar
 import { getAppointmentsByCustomerEmail } from "../../services/mobile/appointmentHistoryService.js"
 import { CUSTOMER_APPOINTMENT_RETRIEVE_SUCCESS } from "../../constants/web/AppointmentsConstants.js";
 import { io } from "../../utils/socket/socket.js";
+import { findNotificationUserByEmail } from "../../services/mobile/notificationService.js";
 
 let isLocked = false; // lock flag in memory
 
@@ -344,6 +345,19 @@ export const createAppointment = async (req, res, next) => {
           await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail, startTime, appointmentDate, appointmentTitle)
         }
 
+        const notifications = await findNotificationUserByEmail(email);
+
+        // Reverse the order of notifications and attach customer profile to each
+        const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
+          ...notification.toObject(),  // Convert Mongoose document to plain object
+          salonLogo: customerSalon.salonLogo  // Attach customer details
+        }));
+
+
+        await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
+
+
+
 
         const emailSubjectForBarber = 'New Appointment Created';
         const emailBodyForBarber = `
@@ -506,6 +520,19 @@ export const createAppointment = async (req, res, next) => {
         if (pushDevice && pushDevice.deviceToken) {
           await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail, startTime, appointmentDate)
         }
+
+        const notifications = await findNotificationUserByEmail(email);
+
+        // Reverse the order of notifications and attach customer profile to each
+        const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
+          ...notification.toObject(),  // Convert Mongoose document to plain object
+          salonLogo: customerSalon.salonLogo  // Attach customer details
+        }));
+
+
+        await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
+
+
 
         const emailSubjectForBarber = 'New Appointment Created';
         const emailBodyForBarber = `
@@ -852,6 +879,20 @@ export const editAppointment = async (req, res, next) => {
         await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointment.customerName, pushDevice.deviceType, EDIT_APPOINTMENT, appointment.customerEmail, startTime, appointmentDate, appointmentTitle)
       }
 
+
+      const notifications = await findNotificationUserByEmail(email);
+
+      // Reverse the order of notifications and attach customer profile to each
+      const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
+        ...notification.toObject(),  // Convert Mongoose document to plain object
+        salonLogo: customerSalon.salonLogo  // Attach customer details
+      }));
+
+
+      await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
+
+
+
       // Send email to the barber about the rescheduled appointment
       const emailSubjectForBarber = 'Rescheduled Appointment Details';
       const emailBodyForBarber = `
@@ -975,11 +1016,24 @@ export const deleteAppointment = async (req, res, next) => {
 
     const pushDevice = await getPushDevicesbyEmailId(appointmentToDelete.customerEmail)
 
-      const appointmentTitle = "Appointment Deleted Successfully"
+    const appointmentTitle = "Appointment Deleted Successfully"
 
     if (pushDevice && pushDevice.deviceToken) {
       await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointmentToDelete.customerName, pushDevice.deviceType, DELETE_APPOINTMENT, appointmentToDelete.customerEmail, appointmentToDelete.startTime, appointmentToDelete.appointmentDate, appointmentTitle)
     }
+
+    const notifications = await findNotificationUserByEmail(email);
+
+    // Reverse the order of notifications and attach customer profile to each
+    const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
+      ...notification.toObject(),  // Convert Mongoose document to plain object
+      salonLogo: customerSalon.salonLogo  // Attach customer details
+    }));
+
+
+    await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
+
+
 
     const barber = await getBarberByBarberId(appointmentToDelete.barberId)
 

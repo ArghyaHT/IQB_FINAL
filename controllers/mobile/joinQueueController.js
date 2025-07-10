@@ -16,6 +16,7 @@ import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 import { QUEUE_POSITION_CHANGE, QUEUE_POSITION_JOINED } from "../../constants/mobile/NotificationConstants.js";
 import { getPushDevicesbyEmailId } from "../../services/mobile/pushDeviceTokensService.js";
 import { sendQueueNotification } from "../../utils/pushNotifications/pushNotifications.js";
+import { findNotificationUserByEmail } from "../../services/mobile/notificationService.js";
 
 //DESC:SINGLE JOIN QUEUE ================
 export const singleJoinQueue = async (req, res, next) => {
@@ -114,6 +115,18 @@ export const singleJoinQueue = async (req, res, next) => {
 
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
+            const notifications = await findNotificationUserByEmail(email);
+
+            // Reverse the order of notifications and attach customer profile to each
+            const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
+                ...notification.toObject(),  // Convert Mongoose document to plain object
+                salonLogo: customerSalon.salonLogo  // Attach customer details
+            }));
+
+
+            await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
+
 
 
             // const pushDevice = await getPushDevicesbyEmailId(customerEmail)
@@ -257,6 +270,19 @@ export const singleJoinQueue = async (req, res, next) => {
 
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
+                    const notifications = await findNotificationUserByEmail(email);
+
+            // Reverse the order of notifications and attach customer profile to each
+            const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
+                ...notification.toObject(),  // Convert Mongoose document to plain object
+                salonLogo: customerSalon.salonLogo  // Attach customer details
+            }));
+
+
+            await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
+
+
 
             // const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
@@ -467,6 +493,19 @@ export const groupJoinQueue = async (req, res, next) => {
 
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
+                    const notifications = await findNotificationUserByEmail(email);
+
+            // Reverse the order of notifications and attach customer profile to each
+            const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
+                ...notification.toObject(),  // Convert Mongoose document to plain object
+                salonLogo: customerSalon.salonLogo  // Attach customer details
+            }));
+
+
+            await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
+
+
 
             // const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
