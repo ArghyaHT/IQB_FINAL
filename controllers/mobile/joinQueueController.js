@@ -116,13 +116,12 @@ export const singleJoinQueue = async (req, res, next) => {
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
 
-            // const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+            const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-            // if (pushDevice.deviceToken) {
-            //     await sendQueueNotification("GB0gbCHjDFiO_WK_jHpEM8", salon.salonName, newQueue.qposition, name, "android", QUEUE_POSITION_JOINED, customerEmail)
-            // }
+            if (pushDevice.deviceToken) {
+                await sendQueueNotification(pushDevice.deviceToken, salon.salonName, newQueue.qposition, name, pushDevice.deviceType, QUEUE_POSITION_JOINED, customerEmail)
+            }
 
-            await sendQueueNotification("GB0gbCHjDFiO_WK_jHpEM8", salon.salonName, newQueue.qposition, name, "android", QUEUE_POSITION_JOINED, customerEmail)
 
             const emailSubject = 'Your Queue Information';
             const emailBody = `
@@ -259,8 +258,11 @@ export const singleJoinQueue = async (req, res, next) => {
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
-            await sendQueueNotification("GB0gbCHjDFiO_WK_jHpEM8", salon.salonName, newQueue.qposition, name, "android", QUEUE_POSITION_JOINED, customerEmail)
+            const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
+            if (pushDevice.deviceToken) {
+                await sendQueueNotification(pushDevice.deviceToken, salon.salonName, newQueue.qposition, name, pushDevice.deviceType, QUEUE_POSITION_JOINED, customerEmail)
+            }
 
             const emailSubject = 'Your Queue Information';
             const emailBody = `
