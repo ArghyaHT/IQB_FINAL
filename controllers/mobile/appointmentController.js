@@ -339,7 +339,7 @@ export const createAppointment = async (req, res, next) => {
         const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
         if (pushDevice && pushDevice.deviceToken) {
-          await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail)
+          await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail, startTime, appointmentDate)
         }
 
 
@@ -502,7 +502,7 @@ export const createAppointment = async (req, res, next) => {
         const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
         if (pushDevice && pushDevice.deviceToken) {
-          await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail)
+          await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail, startTime, appointmentDate)
         }
 
         const emailSubjectForBarber = 'New Appointment Created';
@@ -845,7 +845,7 @@ export const editAppointment = async (req, res, next) => {
       const pushDevice = await getPushDevicesbyEmailId(appointment.customerEmail)
 
       if (pushDevice && pushDevice.deviceToken) {
-        await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointment.customerName, pushDevice.deviceType, EDIT_APPOINTMENT, appointment.customerEmail)
+        await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointment.customerName, pushDevice.deviceType, EDIT_APPOINTMENT, appointment.customerEmail, startTime, appointmentDate)
       }
 
       // Send email to the barber about the rescheduled appointment
@@ -972,7 +972,7 @@ export const deleteAppointment = async (req, res, next) => {
     const pushDevice = await getPushDevicesbyEmailId(appointmentToDelete.customerEmail)
 
     if (pushDevice && pushDevice.deviceToken) {
-      await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointmentToDelete.customerName, pushDevice.deviceType, DELETE_APPOINTMENT, appointmentToDelete.customerEmail)
+      await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointmentToDelete.customerName, pushDevice.deviceType, DELETE_APPOINTMENT, appointmentToDelete.customerEmail, appointmentToDelete.startTime, appointmentToDelete.appointmentDate)
     }
 
     const barber = await getBarberByBarberId(appointmentToDelete.barberId)

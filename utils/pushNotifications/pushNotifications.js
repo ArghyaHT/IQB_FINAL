@@ -59,12 +59,12 @@ export const sendQueueNotification = async(Token, SalonName, Current, FirstLastN
     }
 }
 
-export const sendAppointmentNotification = async(Token, SalonName, FirstLastName, DeviceType, notificationMessage, customerEmail) => {
+export const sendAppointmentNotification = async(Token, SalonName, FirstLastName, DeviceType, notificationMessage, customerEmail, startTime, appointmentDate) => {
     const deviceToken = `ExponentPushToken[${Token.trim()}]`;
 
     let messageBody = `${SalonName} Appointment update!\n`;
     if (Token) {
-        messageBody += `${FirstLastName}:${notificationMessage}.`;
+        messageBody += `${FirstLastName}:${notificationMessage} on ${appointmentDate} at ${startTime}.`;
     }
     const title = "Appointment Update";
     const additionalData = {
