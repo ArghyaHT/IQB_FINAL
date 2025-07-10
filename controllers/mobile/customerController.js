@@ -208,7 +208,6 @@ export const verificationCodeApi = async (req, res, next) => {
         const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
 
         const formattedNumber = `+${mobileCountryCode}${String(mobileNumber)}`;
-        console.log(formattedNumber)
 
         if (verificationCode) {
             try {
@@ -623,8 +622,6 @@ export const forgetPassword = async (req, res, next) => {
         await user.save();
 
         const formattedNumber = `+${user.mobileCountryCode}${String(user.mobileNumber)}`;
-        console.log(formattedNumber)
-
         try {
             await sendForgetPasswordMail(email, user.name, verificationCode);
             await sendMobileVerificationCode(formattedNumber, verificationCode);
@@ -633,7 +630,6 @@ export const forgetPassword = async (req, res, next) => {
             next(error);
         }
 
-        console.log(user)
         return res.status(200).json({
             success: true,
             message: `Please reset your password in the next page`,
@@ -1061,8 +1057,6 @@ export const uploadCustomerprofilePic = async (req, res, next) => {
     try {
         let profiles = req.files.profile;
         let email = req.body.email;
-
-        console.log(profiles)
 
         // Convert email to lowercase
         email = email.toLowerCase();

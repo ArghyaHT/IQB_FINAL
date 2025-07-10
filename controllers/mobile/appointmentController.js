@@ -354,10 +354,7 @@ export const createAppointment = async (req, res, next) => {
         }));
 
 
-        await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
-
-
-
+        await io.to(`customer_${salonId}_${email}`).emit("receiveNotifications", latestnotifications);
 
         const emailSubjectForBarber = 'New Appointment Created';
         const emailBodyForBarber = `
@@ -530,7 +527,7 @@ export const createAppointment = async (req, res, next) => {
         }));
 
 
-        await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
+        await io.to(`customer_${salonId}_${email}`).emit("receiveNotifications", latestnotifications);
 
 
 
@@ -880,7 +877,7 @@ export const editAppointment = async (req, res, next) => {
       }
 
 
-      const notifications = await findNotificationUserByEmail(email);
+      const notifications = await findNotificationUserByEmail(appointment.customerEmail);
 
       // Reverse the order of notifications and attach customer profile to each
       const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
@@ -1022,7 +1019,7 @@ export const deleteAppointment = async (req, res, next) => {
       await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointmentToDelete.customerName, pushDevice.deviceType, DELETE_APPOINTMENT, appointmentToDelete.customerEmail, appointmentToDelete.startTime, appointmentToDelete.appointmentDate, appointmentTitle)
     }
 
-    const notifications = await findNotificationUserByEmail(email);
+    const notifications = await findNotificationUserByEmail(appointmentToDelete.customerEmail);
 
     // Reverse the order of notifications and attach customer profile to each
     const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
