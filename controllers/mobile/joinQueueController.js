@@ -121,7 +121,7 @@ export const singleJoinQueue = async (req, res, next) => {
             // Reverse the order of notifications and attach customer profile to each
             const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
                 ...notification.toObject(),  // Convert Mongoose document to plain object
-                salonLogo: customerSalon.salonLogo  // Attach customer details
+                salonLogo: salon.salonLogo  // Attach customer details
             }));
 
 
@@ -276,7 +276,7 @@ export const singleJoinQueue = async (req, res, next) => {
             // Reverse the order of notifications and attach customer profile to each
             const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
                 ...notification.toObject(),  // Convert Mongoose document to plain object
-                salonLogo: customerSalon.salonLogo  // Attach customer details
+                salonLogo: salon.salonLogo  // Attach customer details
             }));
 
 
@@ -499,7 +499,7 @@ export const groupJoinQueue = async (req, res, next) => {
             // Reverse the order of notifications and attach customer profile to each
             const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
                 ...notification.toObject(),  // Convert Mongoose document to plain object
-                salonLogo: customerSalon.salonLogo  // Attach customer details
+                salonLogo: salon.salonLogo  // Attach customer details
             }));
 
 

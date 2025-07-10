@@ -350,7 +350,7 @@ export const createAppointment = async (req, res, next) => {
         // Reverse the order of notifications and attach customer profile to each
         const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
           ...notification.toObject(),  // Convert Mongoose document to plain object
-          salonLogo: customerSalon.salonLogo  // Attach customer details
+          salonLogo: salon.salonLogo  // Attach customer details
         }));
 
 
@@ -523,7 +523,7 @@ export const createAppointment = async (req, res, next) => {
         // Reverse the order of notifications and attach customer profile to each
         const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
           ...notification.toObject(),  // Convert Mongoose document to plain object
-          salonLogo: customerSalon.salonLogo  // Attach customer details
+          salonLogo: salon.salonLogo  // Attach customer details
         }));
 
 
@@ -882,7 +882,7 @@ export const editAppointment = async (req, res, next) => {
       // Reverse the order of notifications and attach customer profile to each
       const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
         ...notification.toObject(),  // Convert Mongoose document to plain object
-        salonLogo: customerSalon.salonLogo  // Attach customer details
+        salonLogo: salon.salonLogo  // Attach customer details
       }));
 
 
@@ -1024,7 +1024,7 @@ export const deleteAppointment = async (req, res, next) => {
     // Reverse the order of notifications and attach customer profile to each
     const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
       ...notification.toObject(),  // Convert Mongoose document to plain object
-      salonLogo: customerSalon.salonLogo  // Attach customer details
+      salonLogo: salon.salonLogo  // Attach customer details
     }));
 
 
