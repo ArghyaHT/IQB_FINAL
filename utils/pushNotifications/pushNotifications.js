@@ -126,6 +126,8 @@ export const sendExpoPushNotification = async(deviceToken, title, body, addition
     try {
         const response = await axios.post(url, message, {
             headers: {
+                Accept: 'application/json',
+                'Accept-encoding': 'gzip, deflate',
                 "Content-Type": "application/json",
             },
         });

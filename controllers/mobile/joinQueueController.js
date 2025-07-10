@@ -13,6 +13,9 @@ import { getAllSalonBarbersForTV } from "../../services/kiosk/barber/barberServi
 import { RETRIVE_QUEUELIST_SUCCESS } from "../../constants/web/QueueConstants.js";
 import { SUCCESS_STATUS_CODE } from "../../constants/web/Common/StatusCodeConstant.js";
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
+import { QUEUE_POSITION_CHANGE, QUEUE_POSITION_JOINED } from "../../constants/mobile/NotificationConstants.js";
+import { getPushDevicesbyEmailId } from "../../services/mobile/pushDeviceTokensService.js";
+import { sendQueueNotification } from "../../utils/pushNotifications/pushNotifications.js";
 
 //DESC:SINGLE JOIN QUEUE ================
 export const singleJoinQueue = async (req, res, next) => {
@@ -112,6 +115,14 @@ export const singleJoinQueue = async (req, res, next) => {
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
+
+            // const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+
+            // if (pushDevice.deviceToken) {
+            //     await sendQueueNotification("GB0gbCHjDFiO_WK_jHpEM8", salon.salonName, newQueue.qposition, name, "android", QUEUE_POSITION_JOINED, customerEmail)
+            // }
+
+            await sendQueueNotification("GB0gbCHjDFiO_WK_jHpEM8", salon.salonName, newQueue.qposition, name, "android", QUEUE_POSITION_JOINED, customerEmail)
 
             const emailSubject = 'Your Queue Information';
             const emailBody = `
@@ -248,6 +259,9 @@ export const singleJoinQueue = async (req, res, next) => {
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
+            await sendQueueNotification("GB0gbCHjDFiO_WK_jHpEM8", salon.salonName, newQueue.qposition, name, "android", QUEUE_POSITION_JOINED, customerEmail)
+
+
             const emailSubject = 'Your Queue Information';
             const emailBody = `
     <!DOCTYPE html>
@@ -326,7 +340,7 @@ export const singleJoinQueue = async (req, res, next) => {
             }
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "Joined Queue successfully ",
             response: existingQueue,
