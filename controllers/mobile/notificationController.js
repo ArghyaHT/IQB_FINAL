@@ -4,7 +4,10 @@ import { findSalonBySalonId } from "../../services/mobile/salonServices.js";
 
 //DESC: GET ALL NOTIFICATION BY EMAIL
 export const getAllNotificationsByCustomerEmail = async (req, res, next) => {
-  const { email } = req.body;
+  let { email } = req.body;
+
+  email = customerEmail.trim().toLowerCase();
+
   try {
 
     if (!email) {

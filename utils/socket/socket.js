@@ -30,7 +30,8 @@ export const initializeSocket = (server) => {
         });
 
         socket.on("joinCustomer", ({ salonId, customerEmail }) => {
-            const roomName = `customer_${salonId}_${customerEmail}`;
+                const normalizedEmail = customerEmail.trim().toLowerCase();
+            const roomName = `customer_${salonId}_${normalizedEmail}`;
             socket.join(roomName);
             console.log(`Client ${socket.id} joined customer room: ${roomName}`);
         });
