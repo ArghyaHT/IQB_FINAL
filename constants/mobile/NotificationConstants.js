@@ -6,4 +6,6 @@ export const QUEUE_POSITION_JOINED = "Your queue position is"
 
 export const CREATE_APPOINTMENT = "Your appointment has been created successfully"
 export const EDIT_APPOINTMENT = "Your appointment has been edited successfully"
+export const DELETE_APPOINTMENT = "Your appointment has been edited successfully"
+
 

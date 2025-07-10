@@ -1,6 +1,6 @@
 import { validateEmail } from "../../middlewares/validator.js";
-import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppointmentsBySalonId, allAppointmentsBySalonIdAndDate, createNewAppointment, deleteAppointmentById, getAppointmentbyId, getAppointmentsByAppointmentId, getAppointmentsByDateAndBarberId, getCustomerAppointments, updateAppointment } from "../../services/mobile/appointmentService.js";
-import { getBarberbyId } from "../../services/mobile/barberService.js";
+import { allAppointmentsByBarberId, allAppointmentsByBarberIdAndDate, allAppointmentsBySalonId, allAppointmentsBySalonIdAndDate, createNewAppointment, deleteAppointmentById, getAppointmentbyId, getAppointmentsByAppointmentId, getAppointmentsByDateAndBarberId, getCustomerAppointments, getDeletedAPpointmentById, updateAppointment } from "../../services/mobile/appointmentService.js";
+import { getBarberByBarberId, getBarberbyId } from "../../services/mobile/barberService.js";
 import { getSalonSettings } from "../../services/mobile/salonSettingsService.js";
 import { generateTimeSlots } from "../../utils/timeSlots.js";
 import { getSalonBySalonId } from "../../services/web/admin/salonService.js"
@@ -18,7 +18,7 @@ import { getBarberDayOffs } from "../../services/web/barberDayOff/barberDayOffSe
 import { sendQueuePositionEmail } from "../../utils/emailSender/emailSender.js";
 import { sendAppointmentNotification } from "../../utils/pushNotifications/pushNotifications.js";
 import { getPushDevicesbyEmailId } from "../../services/mobile/pushDeviceTokensService.js";
-import { CREATE_APPOINTMENT, EDIT_APPOINTMENT } from "../../constants/mobile/NotificationConstants.js"
+import { CREATE_APPOINTMENT, DELETE_APPOINTMENT, EDIT_APPOINTMENT } from "../../constants/mobile/NotificationConstants.js"
 import { getBarberBreakTimes } from "../../services/web/barberBreakTimes/barberBreakTimesService.js";
 import { getBarberReservations } from "../../services/web/barberReservations/barberReservationsService.js";
 import { getAppointmentsByCustomerEmail } from "../../services/mobile/appointmentHistoryService.js"
@@ -499,11 +499,11 @@ export const createAppointment = async (req, res, next) => {
           // Handle error if email sending fails
         }
 
-        // const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+        const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-        // if (pushDevice && pushDevice.deviceToken) {
-        //   await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail)
-        // }
+        if (pushDevice && pushDevice.deviceToken) {
+          await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail)
+        }
 
         const emailSubjectForBarber = 'New Appointment Created';
         const emailBodyForBarber = `
@@ -844,9 +844,9 @@ export const editAppointment = async (req, res, next) => {
 
       const pushDevice = await getPushDevicesbyEmailId(appointment.customerEmail)
 
-      // if (pushDevice.deviceToken) {
-      //   await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointment.customerName, pushDevice.deviceType, EDIT_APPOINTMENT, appointment.customerEmail)
-      // }
+      if (pushDevice && pushDevice.deviceToken) {
+        await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointment.customerName, pushDevice.deviceType, EDIT_APPOINTMENT, appointment.customerEmail)
+      }
 
       // Send email to the barber about the rescheduled appointment
       const emailSubjectForBarber = 'Rescheduled Appointment Details';
@@ -945,8 +945,16 @@ export const deleteAppointment = async (req, res, next) => {
   try {
     const { salonId, appointmentId } = req.body; // Assuming appointmentId is passed as a parameter
 
+    const appointmentToDelete = await getDeletedAPpointmentById(salonId, appointmentId)
+
+    const totalEWT = appointmentToDelete.services.reduce((sum, service) => {
+      return sum + (service.barberServiceEWT || 0);
+    }, 0);
+
+
     // Find and remove the appointment by its ID
     const deletedAppointment = await deleteAppointmentById(salonId, appointmentId)
+
 
     if (!deletedAppointment) {
       return res.status(400).json({
@@ -955,7 +963,90 @@ export const deleteAppointment = async (req, res, next) => {
       });
     }
 
-    res.status(200).json({
+    const salon = await getSalonBySalonId(salonId)
+
+    const pushDevice = await getPushDevicesbyEmailId(appointmentToDelete.customerEmail)
+
+    if (pushDevice && pushDevice.deviceToken) {
+      await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointmentToDelete.customerName, pushDevice.deviceType, DELETE_APPOINTMENT, appointmentToDelete.customerEmail)
+    }
+
+    const barber = await getBarberByBarberId(appointmentToDelete.barberId)
+
+    // Send email to the barber about the rescheduled appointment
+    const emailSubjectForBarber = 'Deleted Appointment Details';
+    const emailBodyForBarber = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Appointment Deleted</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+                .logo {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                .logo img {
+                    max-width: 200px;
+                }
+                .email-content {
+                    background-color: #f8f8f8;
+                    padding: 20px;
+                    border-radius: 10px;
+                }
+                ul {
+                    padding-left: 20px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="email-content">
+                    <div class="logo">
+                        <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
+                    </div>
+                    <h1 style="text-align: center;">Rescheduled Appointment Details</h1>
+                    <p>Dear ${barber.name},</p>
+                    <p>You have a new rescheduled appointment. Below are the updated details:</p>
+                    <ul>
+                        <li><strong>Customer Name:</strong> ${appointmentToDelete.customerName}</li>
+                        <li><strong>Service(s):</strong> ${serviceNames.join(', ')}</li>
+                        <li><strong>Appointment Date:</strong> ${appointmentToDelete.appointmentDate}</li>
+                        <li><strong>New Appointment Time:</strong> ${appointmentToDelete.startTime} - ${appointmentToDelete.endTime}</li>
+                        <li><strong>Service Estimated Time:</strong> ${totalEWT} minutes</li>
+                    </ul>
+                    <p>Please make sure to be prepared for the appointment at the specified time.</p>
+                    <p>Best regards,</p>
+                    <p style="margin: 0; padding: 10px 0 5px;">
+                        ${salon.salonName}<br>
+                        Contact No.: ${salon.contactTel}<br>
+                        EmailId: ${salon.salonEmail}
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
+      `;
+    try {
+      await sendQueuePositionEmail(barber.email, emailSubjectForBarber, emailBodyForBarber);
+      console.log('Email sent to barber successfully.');
+    } catch (error) {
+      console.error('Error sending email to barber:', error);
+    }
+
+
+    return res.status(200).json({
       success: true,
       message: 'Appointment deleted successfully',
     });

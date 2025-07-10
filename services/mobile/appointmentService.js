@@ -14,27 +14,27 @@ export const getCustomerAppointments = async (salonId, customerEmail) => {
         return [];
     }
 
-const filteredAppointments = await Promise.all(
-    getCustomerBookingBySalonId.appointmentList
-        .filter(item => item.customerEmail === customerEmail)
-        .map(async(appointment) => {
-            const formatTo12Hour = (time) => moment(time, "HH:mm").format("h:mm A");
+    const filteredAppointments = await Promise.all(
+        getCustomerBookingBySalonId.appointmentList
+            .filter(item => item.customerEmail === customerEmail)
+            .map(async (appointment) => {
+                const formatTo12Hour = (time) => moment(time, "HH:mm").format("h:mm A");
 
-                 const barber = await Barber.findOne({ barberId: appointment.barberId });
+                const barber = await Barber.findOne({ barberId: appointment.barberId });
                 const barberProfile = barber?.profile || defaultImage;
 
-            return {
-                ...appointment.toObject(),
-                startTime: formatTo12Hour(appointment.startTime),
-                endTime: formatTo12Hour(appointment.endTime),
-                timeSlots: `${formatTo12Hour(appointment.startTime)} - ${formatTo12Hour(appointment.endTime)}`,
-                barberProfile: barberProfile,
-                barbername: barber.name
-            };
-        })
-);
+                return {
+                    ...appointment.toObject(),
+                    startTime: formatTo12Hour(appointment.startTime),
+                    endTime: formatTo12Hour(appointment.endTime),
+                    timeSlots: `${formatTo12Hour(appointment.startTime)} - ${formatTo12Hour(appointment.endTime)}`,
+                    barberProfile: barberProfile,
+                    barbername: barber.name
+                };
+            })
+    );
 
-return filteredAppointments; 
+    return filteredAppointments;
 }
 
 export const getAppointmentbyId = async (salonId) => {
@@ -95,6 +95,17 @@ export const deleteAppointmentById = async (salonId, appointmentId) => {
         { new: true }
     );
     return deleteAppointment;
+}
+
+export const getDeletedAPpointmentById = async (salonId, appointmentId) => {
+    // Step 1: Find the appointment to be deleted
+    const doc = await Appointment.findOne(
+        { salonId, 'appointmentList._id': appointmentId },
+        { 'appointmentList.$': 1 } // Use positional projection to return only the matched subdocument
+    );
+
+    const deletedAppointment = doc?.appointmentList?.[0]; // May be undefined if not found
+    return deletedAppointment;
 }
 
 
