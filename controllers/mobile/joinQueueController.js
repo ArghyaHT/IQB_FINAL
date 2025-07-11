@@ -33,18 +33,19 @@ export const singleJoinQueue = async (req, res, next) => {
             return res.status(400).json({ success: false, message: "Cant Join the queue from App at this moment" });
         }
 
-        // Parse the mobileNumber if it's provided
-        let parsedMobileNumber;
-        if (mobileNumber !== undefined && mobileNumber.trim() !== '') {
-            parsedMobileNumber = parseInt(mobileNumber);
-        } else {
-            parsedMobileNumber = null; // Store null for empty mobile number
-        }
+        // // Parse the mobileNumber if it's provided
+        // let parsedMobileNumber;
 
-        // Validate mobile number format if parsed successfully
-        if (parsedMobileNumber !== null) {
-            return res.status(400).json({ success: false, message: "Invalid mobile number format" });
-        }
+        // if (mobileNumber !== undefined && mobileNumber.trim() !== '') {
+        //     parsedMobileNumber = parseInt(mobileNumber);
+        // } else {
+        //     parsedMobileNumber = null; // Store null for empty mobile number
+        // }
+
+        // // Validate mobile number format if parsed successfully
+        // if (parsedMobileNumber !== null) {
+        //     return res.status(400).json({ success: false, message: "Invalid mobile number format" });
+        // }
 
 
         const isVipServiceRequested = services.some(service => service.vipService);
