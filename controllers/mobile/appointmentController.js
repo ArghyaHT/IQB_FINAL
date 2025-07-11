@@ -1019,30 +1019,30 @@ export const deleteAppointment = async (req, res, next) => {
       await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointmentToDelete.customerName, pushDevice.deviceType, DELETE_APPOINTMENT, appointmentToDelete.customerEmail, appointmentToDelete.startTime, appointmentToDelete.appointmentDate, appointmentTitle)
     }
 
-    const notifications = await findNotificationUserByEmail(appointmentToDelete.customerEmail);
+    // const notifications = await findNotificationUserByEmail(appointmentToDelete.customerEmail);
 
-    // Reverse the order of notifications and attach customer profile to each
-    const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
-      ...notification.toObject(),  // Convert Mongoose document to plain object
-      salonLogo: salon.salonLogo  // Attach customer details
-    }));
+    // // Reverse the order of notifications and attach customer profile to each
+    // const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
+    //   ...notification.toObject(),  // Convert Mongoose document to plain object
+    //   salonLogo: salon.salonLogo  // Attach customer details
+    // }));
 
 
-    await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
+    // await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
 
 
 
     const barber = await getBarberByBarberId(appointmentToDelete.barberId)
 
     // Send email to the barber about the rescheduled appointment
-    const emailSubjectForBarber = 'Deleted Appointment Details';
-    const emailBodyForBarber = `
+    const emailSubject = 'Cancelled Appointment Details';
+    const emailBody = `
         <!DOCTYPE html>
         <html lang="en">
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Appointment Deleted</title>
+            <title>Appointment Cancelled</title>
             <style>
                 body {
                     font-family: Arial, sans-serif;
@@ -1100,7 +1100,7 @@ export const deleteAppointment = async (req, res, next) => {
         </html>
       `;
     try {
-      await sendQueuePositionEmail(barber.email, emailSubjectForBarber, emailBodyForBarber);
+      await sendQueuePositionEmail(appointmentToDelete.customerEmail, emailSubject, emailBody);
       console.log('Email sent to barber successfully.');
     } catch (error) {
       console.error('Error sending email to barber:', error);

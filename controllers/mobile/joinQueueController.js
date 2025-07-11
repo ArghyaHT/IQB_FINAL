@@ -271,7 +271,7 @@ export const singleJoinQueue = async (req, res, next) => {
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
-                    const notifications = await findNotificationUserByEmail(customerEmail);
+            const notifications = await findNotificationUserByEmail(customerEmail);
 
             // Reverse the order of notifications and attach customer profile to each
             const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
@@ -494,7 +494,7 @@ export const groupJoinQueue = async (req, res, next) => {
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
-                    const notifications = await findNotificationUserByEmail(member.customerEmail);
+            const notifications = await findNotificationUserByEmail(member.customerEmail);
 
             // Reverse the order of notifications and attach customer profile to each
             const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
@@ -503,7 +503,7 @@ export const groupJoinQueue = async (req, res, next) => {
             }));
 
 
-            await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
+            await io.to(`customer_${salonId}_${member.customerEmail}`).emit("receiveNotifications", latestnotifications);
 
 
 
