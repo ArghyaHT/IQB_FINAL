@@ -26,12 +26,18 @@ import { CUSTOMER_APPOINTMENT_RETRIEVE_SUCCESS } from "../../constants/web/Appoi
 import { io } from "../../utils/socket/socket.js";
 import { findNotificationUserByEmail } from "../../services/mobile/notificationService.js";
 
-let isLocked = false; // lock flag in memory
+// let isLocked = false; // lock flag in memory
+
+const appointmentLocks = new Map(); // Keeps track of in-progress appointment creation
+
 
 //Creating Appointment
 export const createAppointment = async (req, res, next) => {
   const { salonId, barberId, serviceId, appointmentDate, appointmentNotes, startTime, customerEmail, customerName, customerType, methodUsed } = req.body;
-  if (isLocked) {
+
+  const lockKey = `${salonId}_${barberId}_${customerEmail}_${startTime}`;
+
+  if (appointmentLocks.get(lockKey)) {
     return res.status(400).json({
       success: false,
       message: "Please wait, another appointment is being processed. Try again shortly.",
@@ -39,7 +45,7 @@ export const createAppointment = async (req, res, next) => {
   }
   try {
 
-    isLocked = true;
+    appointmentLocks.set(lockKey, true);
 
     // Check if salonId is missing
     if (!salonId) {
@@ -621,7 +627,7 @@ export const createAppointment = async (req, res, next) => {
     next(error);
   }
   finally {
-    isLocked = false; // always release the lock
+    appointmentLocks.delete(lockKey)
   }
 };
 
@@ -629,7 +635,9 @@ export const createAppointment = async (req, res, next) => {
 export const editAppointment = async (req, res, next) => {
   const { appointmentId, salonId, barberId, serviceId, appointmentDate, appointmentNotes, startTime } = req.body; // Assuming appointmentId is passed as a parameter
 
-  if (isLocked) {
+    const lockKey = `${salonId}_${barberId}_${startTime}`;
+
+  if (appointmentLocks.get(lockKey)) {
     return res.status(400).json({
       success: false,
       message: "Please wait, another appointment is being processed. Try again shortly.",
@@ -637,7 +645,8 @@ export const editAppointment = async (req, res, next) => {
   }
   try {
 
-    isLocked = true;
+    appointmentLocks.set(lockKey, true);
+
     // Check if required fields are missing
     if (!barberId || !serviceId || !appointmentDate || !startTime) {
       return res.status(400).json({
@@ -978,7 +987,7 @@ export const editAppointment = async (req, res, next) => {
     next(error);
   }
   finally {
-    isLocked = false; // always release the lock
+    appointmentLocks.delete(lockKey); // always unlock!
   }
 };
 
