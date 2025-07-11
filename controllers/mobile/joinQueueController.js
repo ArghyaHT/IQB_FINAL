@@ -96,8 +96,8 @@ export const singleJoinQueue = async (req, res, next) => {
                 dateJoinedQ: new Date(),
                 timeJoinedQ: adjustedTime,
                 methodUsed: methodUsed,
-                mobileCountryCode,
-                mobileNumber: parsedMobileNumber,
+                // mobileCountryCode,
+                // mobileNumber: parsedMobileNumber,
                 barberName: availableBarber.name,
                 barberId: availableBarber.barberId,
                 services: services.map(service => ({
@@ -252,8 +252,8 @@ export const singleJoinQueue = async (req, res, next) => {
                 timeJoinedQ: adjustedTime,
                 methodUsed,
                 barberName,
-                mobileCountryCode,
-                mobileNumber: parsedMobileNumber,
+                // mobileCountryCode,
+                // mobileNumber: parsedMobileNumber,
                 barberId,
                 services: services.map(service => ({
                     serviceId: service.serviceId,
