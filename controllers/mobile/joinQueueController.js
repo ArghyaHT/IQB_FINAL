@@ -42,7 +42,7 @@ export const singleJoinQueue = async (req, res, next) => {
         }
 
         // Validate mobile number format if parsed successfully
-        if (parsedMobileNumber !== null && parsedMobileNumber.toString().length !== 10) {
+        if (parsedMobileNumber !== null) {
             return res.status(400).json({ success: false, message: "Invalid mobile number format" });
         }
 
