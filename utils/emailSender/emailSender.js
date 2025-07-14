@@ -48,14 +48,18 @@ export const emailWithNodeMail = async (email, name, CLIENT_URL, PASSWORD_ROUTE,
 }
 
 
-//DESC:SEND VERIFICATION CODE EMAIL ============================
+// DESC: SEND VERIFICATION CODE EMAIL ============================
 export const sendVerificationCode = (email, verificationCode) => {
   const mailOptions = {
     from: process.env.SENDER_EMAIL_ADDRESS,
     to: email,
-    subject: 'Verify your Email',
+    subject: 'Verify Your Account',
     html: `
-    <p>To verify your Email please note the verification code. Your verification code is ${verificationCode}</p>
+      <p>Dear User,</p>
+      <p>Your one-time password is <strong>${verificationCode}</strong>.</p>
+      <p>Please use this one-time password (OTP) within the next 10 minutes to proceed.</p>
+      <br />
+      <p>Thank you,<br />Team Iqbook</p>
     `
   };
 

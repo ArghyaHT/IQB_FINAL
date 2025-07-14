@@ -31,7 +31,7 @@ export const sendMobileVerificationCode = async (number, verificationCode, body)
     from: twilioPhoneNumber,
     to: number,
     // body: `<#> Your verification code is ${verificationCode} Don't share.`
-    body: `Use the code ${verificationCode} to verify your account. Do not share this code with anyone.`
+    body: `Your one-time password is ${verificationCode}.\nPlease use this one-time password (OTP) within the next 10 minutes to proceed.\n\nThank you,\nTeam Iqbook`
   }
   try {
     const message = await client.messages.create(msgOptions);
