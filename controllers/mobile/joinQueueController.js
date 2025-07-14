@@ -117,24 +117,26 @@ export const singleJoinQueue = async (req, res, next) => {
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
-            const notifications = await findNotificationUserByEmail(customerEmail);
+            // const notifications = await findNotificationUserByEmail(customerEmail);
 
-            // Reverse the order of notifications and attach customer profile to each
-            const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
-                ...notification.toObject(),  // Convert Mongoose document to plain object
-                salonLogo: salon.salonLogo  // Attach customer details
-            }));
-
-
-            await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
+            // // Reverse the order of notifications and attach customer profile to each
+            // const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
+            //     ...notification.toObject(),  // Convert Mongoose document to plain object
+            //     salonLogo: salon.salonLogo  // Attach customer details
+            // }));
 
 
+            // await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
 
-            const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-            if (pushDevice && pushDevice.deviceToken) {
-                await sendQueueNotification(pushDevice.deviceToken, salon.salonName, newQueue.qposition, name, pushDevice.deviceType, QUEUE_POSITION_JOINED, customerEmail)
-            }
+
+            // const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+
+            // const titleText = "Queue booked successfully"
+
+            // if (pushDevice && pushDevice.deviceToken) {
+            //     await sendQueueNotification(pushDevice.deviceToken, salon.salonName, newQueue.qposition, name, pushDevice.deviceType, QUEUE_POSITION_JOINED, customerEmail, titleText)
+            // }
 
 
             const emailSubject = 'Your Queue Information';
@@ -272,24 +274,27 @@ export const singleJoinQueue = async (req, res, next) => {
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
-            const notifications = await findNotificationUserByEmail(customerEmail);
+            // const notifications = await findNotificationUserByEmail(customerEmail);
 
-            // Reverse the order of notifications and attach customer profile to each
-            const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
-                ...notification.toObject(),  // Convert Mongoose document to plain object
-                salonLogo: salon.salonLogo  // Attach customer details
-            }));
-
-
-            await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
+            // // Reverse the order of notifications and attach customer profile to each
+            // const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
+            //     ...notification.toObject(),  // Convert Mongoose document to plain object
+            //     salonLogo: salon.salonLogo  // Attach customer details
+            // }));
 
 
+            // await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
 
-            const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-            if (pushDevice && pushDevice.deviceToken) {
-                await sendQueueNotification(pushDevice.deviceToken, salon.salonName, newQueue.qposition, name, pushDevice.deviceType, QUEUE_POSITION_JOINED, customerEmail)
-            }
+
+            // const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+
+            //             const titleText = "Queue booked successfully"
+
+
+            // if (pushDevice && pushDevice.deviceToken) {
+            //     await sendQueueNotification(pushDevice.deviceToken, salon.salonName, newQueue.qposition, name, pushDevice.deviceType, QUEUE_POSITION_JOINED, customerEmail, titleText)
+            // }
 
             const emailSubject = 'Your Queue Information';
             const emailBody = `
@@ -495,24 +500,27 @@ export const groupJoinQueue = async (req, res, next) => {
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
-            const notifications = await findNotificationUserByEmail(member.customerEmail);
+            // const notifications = await findNotificationUserByEmail(member.customerEmail);
 
-            // Reverse the order of notifications and attach customer profile to each
-            const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
-                ...notification.toObject(),  // Convert Mongoose document to plain object
-                salonLogo: salon.salonLogo  // Attach customer details
-            }));
-
-
-            await io.to(`customer_${salonId}_${member.customerEmail}`).emit("receiveNotifications", latestnotifications);
+            // // Reverse the order of notifications and attach customer profile to each
+            // const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
+            //     ...notification.toObject(),  // Convert Mongoose document to plain object
+            //     salonLogo: salon.salonLogo  // Attach customer details
+            // }));
 
 
+            // await io.to(`customer_${salonId}_${member.customerEmail}`).emit("receiveNotifications", latestnotifications);
 
-            const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-            if (pushDevice && pushDevice.deviceToken) {
-                await sendQueueNotification(pushDevice.deviceToken, salon.salonName, newQueue.qposition, name, pushDevice.deviceType, QUEUE_POSITION_JOINED, customerEmail)
-            }
+
+            // const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+
+            // const titleText = "Queue booked successfully"
+
+
+            // if (pushDevice && pushDevice.deviceToken) {
+            //     await sendQueueNotification(pushDevice.deviceToken, salon.salonName, newQueue.qposition, name, pushDevice.deviceType, QUEUE_POSITION_JOINED, customerEmail, titleText)
+            // }
 
             const emailSubject = 'Your Queue Information';
             const emailBody = `

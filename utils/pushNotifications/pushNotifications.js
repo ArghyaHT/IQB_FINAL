@@ -2,7 +2,7 @@ import axios from "axios";
 import admin from "firebase-admin"
 import { createNewUserNotification, findNotificationUserByEmail, pushNotificationExistingUser } from "../../services/mobile/notificationService.js";
 
-export const sendQueueNotification = async(Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage, customerEmail) => {
+export const sendQueueNotification = async(Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage, customerEmail, titleText) => {
 
     const deviceToken = `ExponentPushToken[${Token.trim()}]`;
 
@@ -10,7 +10,7 @@ export const sendQueueNotification = async(Token, SalonName, Current, FirstLastN
     if (Token) {
         messageBody += `${notificationMessage} ${Current}.`;
     }
-    const title = `${SalonName} Queue Booked Successfully!`;
+    const title = `${SalonName} ${titleText}!`;
     const additionalData = {
         DeviceType: DeviceType,
         QueuePosition: Current,
