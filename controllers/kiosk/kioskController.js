@@ -2641,6 +2641,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
 
                                     const totalServicePrice = services.reduce((total, service) => total + service.servicePrice, 0);
 
+
                                     const emailSubject = `${salon.salonName}-Queue Position Changed (${qPosition})`;
                                     const emailBody = `
                             <!DOCTYPE html>

@@ -20,7 +20,7 @@ import { BARBER_EXISTS_ERROR } from "../../../constants/web/BarberConstants.js";
 import SalonQueueList from "../../../models/salonQueueListModel.js";
 import { findBarberByEmailAndRole, getAllSalonBarbersForTV } from "../../../services/kiosk/barber/barberService.js";
 import { getPushDevicesbyEmailId } from "../../../services/mobile/pushDeviceTokensService.js";
-import { QUEUE_POSITION_CHANGE } from "../../../constants/mobile/NotificationConstants.js";
+import { NEW_QUEUE_ADD, NEW_QUEUE_UPDATED, QUEUE_POSITION_CHANGE } from "../../../constants/mobile/NotificationConstants.js";
 import { sendQueueNotification } from "../../../utils/pushNotifications/pushNotifications.js";
 import { io } from "../../../utils/socket/socket.js";
 
@@ -141,7 +141,6 @@ export const barberServedQueue = async (req, res, next) => {
                         }
                         // Update the status to "served" for the served queue in JoinedQueueHistory
                         await updateServed(salonId, element._id);
-
 
 
                         const salonDetails = await getSalonBySalonId(salonId);
@@ -292,6 +291,18 @@ export const barberServedQueue = async (req, res, next) => {
                                     const formattedDate = moment(dateJoinedQ, 'YYYY-MM-DD').format('DD-MM-YYYY');
 
                                     const totalServicePrice = services.reduce((total, service) => total + service.servicePrice, 0);
+
+                                    const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+                                    console.log('Push device:', pushDevice);
+
+                                    const titleText = "Queue position updated successfully"
+
+
+                                    if (pushDevice && pushDevice.deviceToken) {
+                                        await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, NEW_QUEUE_UPDATED, customerEmail, titleText)
+                                        console.log('Notification sent successfully from addCustomerToQueue');
+
+                                    }
 
                                     const emailSubject = `${salon.salonName}-Queue Position Changed (${qPosition})`;
                                     const emailBody = `
@@ -679,7 +690,7 @@ export const barberServedQueue = async (req, res, next) => {
 
                                     const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-                                    if (pushDevice.deviceToken) {
+                                    if (pushDevice && pushDevice.deviceToken) {
                                         await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail)
                                     }
                                 }
@@ -937,7 +948,7 @@ export const cancelQueue = async (req, res, next) => {
 
                         const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-                        if (pushDevice.deviceToken) {
+                        if (pushDevice && pushDevice.deviceToken) {
                             await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail)
                         }
                     }

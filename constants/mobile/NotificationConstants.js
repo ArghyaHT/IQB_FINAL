@@ -1,4 +1,5 @@
 export const NEW_QUEUE_ADD = "Your queue position is:"
+export const NEW_QUEUE_UPDATED = "Your queue position is updated to:"
 export const QUEUE_TITLE = "Queue Position Update"
 export const QUEUE_POSITION_CHANGE = "Your queue position has been updated to"
 export const QUEUE_POSITION_JOINED = "Your queue position is"
