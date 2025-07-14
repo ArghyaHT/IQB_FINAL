@@ -27,57 +27,98 @@ export const addCustomerToQueue = async (salonId, newQueue, barberId, customerEm
     const isVipServiceRequested = newQueue.services.some(service => service.vipService);
 
     if (isVipServiceRequested) {
-        // Handle VIP service case
-        let vipPosition = 1; // Initialize position for VIP service
-        let accumulatedEWT = 0; // Initialize accumulated waiting time
-        let firstVipQueue = null; // Store the first VIP service queue entry
-        existingQueue.queueList.forEach(queueEntry => {
-            if (queueEntry.barberId === newQueue.barberId && queueEntry.services.some(service => service.vipService)) {
-                vipPosition++; // Increment the position for existing VIP service requests
-                if (!firstVipQueue) {
-                    firstVipQueue = queueEntry; // Store the first VIP service queue entry
-                } else {
-                    accumulatedEWT += queueEntry.customerEWT; // Accumulate waiting time of previous VIP customers
-                }
-            }
-        });
 
-        // Add the VIP service customer to the appropriate position in the queue
-        newQueue.qPosition = vipPosition;
-        existingQueue.queueList.splice(vipPosition - 1, 0, newQueue); // Insert at the correct position
+        // // Handle VIP service case
+        // let vipPosition = 1; // Initialize position for VIP service
+        // let accumulatedEWT = 0; // Initialize accumulated waiting time
+        // let firstVipQueue = null; // Store the first VIP service queue entry
+        // existingQueue.queueList.forEach(queueEntry => {
+        //     if (queueEntry.barberId === newQueue.barberId && queueEntry.services.some(service => service.vipService)) {
+        //         vipPosition++; // Increment the position for existing VIP service requests
+        //         if (!firstVipQueue) {
+        //             firstVipQueue = queueEntry; // Store the first VIP service queue entry
+        //         } else {
+        //             accumulatedEWT += queueEntry.customerEWT; // Accumulate waiting time of previous VIP customers
+        //         }
+        //     }
+        // });
 
-        // Update customerEWT for the requested VIP service
-        if (firstVipQueue) {
-            newQueue.customerEWT = firstVipQueue.customerEWT + accumulatedEWT; // Set customerEWT to the waiting time of the first VIP service plus accumulatedEWT
+        // // Add the VIP service customer to the appropriate position in the queue
+        // newQueue.qPosition = vipPosition;
+        // existingQueue.queueList.splice(vipPosition - 1, 0, newQueue); // Insert at the correct position
+
+        // // Update customerEWT for the requested VIP service
+        // if (firstVipQueue) {
+        //     newQueue.customerEWT = firstVipQueue.customerEWT + accumulatedEWT; // Set customerEWT to the waiting time of the first VIP service plus accumulatedEWT
+        // }
+
+        // // Assuming 'response' contains the response object you provided
+        // let lastVipEntry = null;
+        // let beforeLastVipEntry = null;
+
+        // existingQueue.queueList.forEach(queueEntry => {
+        //     if (queueEntry.services.some(service => service.vipService)) {
+        //         beforeLastVipEntry = lastVipEntry;
+        //         lastVipEntry = queueEntry;
+        //     }
+        // });
+
+        // if (beforeLastVipEntry) {
+        //     // Add serviceEWT and customerEWT of before-last VIP entry to last VIP entry
+        //     lastVipEntry.customerEWT += beforeLastVipEntry.serviceEWT + beforeLastVipEntry.customerEWT;
+        //     // Calculate customerEWT and queue position for VIP service
+        //     customerEWT = lastVipEntry.customerEWT;
+        // }
+
+        // qPosition = newQueue.qPosition;
+
+        // // Adjust positions for existing non-VIP service requests
+        // existingQueue.queueList.forEach(queueEntry => {
+        //     if (queueEntry.barberId === newQueue.barberId && !queueEntry.services.some(service => service.vipService)) {
+        //         queueEntry.qPosition++; // Increment the queue position for non-VIP service requests
+        //         queueEntry.customerEWT += newQueue.serviceEWT; // Update waiting time for regular customers
+        //     }
+        // });
+
+            let vipCount = 0;
+    let accumulatedEWT = 0;
+    let insertIndex = 0;
+
+    // Step 1: Count VIPs and accumulate their EWT
+    for (let i = 0; i < existingQueue.queueList.length; i++) {
+        const entry = existingQueue.queueList[i];
+
+        const isSameBarber = entry.barberId === newQueue.barberId;
+        const isVIP = entry.services.some(service => service.vipService);
+
+        if (isSameBarber && isVIP) {
+            vipCount++;
+            accumulatedEWT += entry.serviceEWT;
+            insertIndex = i + 1; // position to insert after the last VIP
         }
+    }
 
-        // Assuming 'response' contains the response object you provided
-        let lastVipEntry = null;
-        let beforeLastVipEntry = null;
+    // Step 2: Set VIP position and EWT
+    newQueue.qPosition = vipCount + 1;
+    newQueue.customerEWT = accumulatedEWT;
 
-        existingQueue.queueList.forEach(queueEntry => {
-            if (queueEntry.services.some(service => service.vipService)) {
-                beforeLastVipEntry = lastVipEntry;
-                lastVipEntry = queueEntry;
-            }
-        });
+    // Step 3: Insert VIP in queue
+    existingQueue.queueList.splice(insertIndex, 0, newQueue);
 
-        if (beforeLastVipEntry) {
-            // Add serviceEWT and customerEWT of before-last VIP entry to last VIP entry
-            lastVipEntry.customerEWT += beforeLastVipEntry.serviceEWT + beforeLastVipEntry.customerEWT;
-            // Calculate customerEWT and queue position for VIP service
-            customerEWT = lastVipEntry.customerEWT;
+    // Step 4: Push regular customers behind the VIP
+    existingQueue.queueList.forEach(entry => {
+        const isSameBarber = entry.barberId === newQueue.barberId;
+        const isRegular = !entry.services.some(service => service.vipService);
+
+        if (isSameBarber && isRegular) {
+            entry.qPosition += 1;
+            entry.customerEWT += newQueue.serviceEWT;
         }
+    });
 
-        qPosition = newQueue.qPosition;
-
-        // Adjust positions for existing non-VIP service requests
-        existingQueue.queueList.forEach(queueEntry => {
-            if (queueEntry.barberId === newQueue.barberId && !queueEntry.services.some(service => service.vipService)) {
-                queueEntry.qPosition++; // Increment the queue position for non-VIP service requests
-                queueEntry.customerEWT += newQueue.serviceEWT; // Update waiting time for regular customers
-            }
-        });
+    // Update response variables
+    qPosition = newQueue.qPosition;
+    customerEWT = newQueue.customerEWT;
 
     } else {
         // Handle non-VIP service case

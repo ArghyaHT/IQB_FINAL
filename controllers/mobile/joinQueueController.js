@@ -33,14 +33,14 @@ export const singleJoinQueue = async (req, res, next) => {
             return res.status(400).json({ success: false, message: "Cant Join the queue from App at this moment" });
         }
 
-        // // Parse the mobileNumber if it's provided
-        // let parsedMobileNumber;
+        // Parse the mobileNumber if it's provided
+        let parsedMobileNumber;
 
-        // if (mobileNumber !== undefined && mobileNumber.trim() !== '') {
-        //     parsedMobileNumber = parseInt(mobileNumber);
-        // } else {
-        //     parsedMobileNumber = null; // Store null for empty mobile number
-        // }
+        if (mobileNumber !== undefined && mobileNumber.trim() !== '') {
+            parsedMobileNumber = parseInt(mobileNumber);
+        } else {
+            parsedMobileNumber = null; // Store null for empty mobile number
+        }
 
         // // Validate mobile number format if parsed successfully
         // if (parsedMobileNumber !== null) {
@@ -96,8 +96,8 @@ export const singleJoinQueue = async (req, res, next) => {
                 dateJoinedQ: new Date(),
                 timeJoinedQ: adjustedTime,
                 methodUsed: methodUsed,
-                // mobileCountryCode,
-                // mobileNumber: parsedMobileNumber,
+                mobileCountryCode,
+                mobileNumber: parsedMobileNumber,
                 barberName: availableBarber.name,
                 barberId: availableBarber.barberId,
                 services: services.map(service => ({
@@ -117,16 +117,16 @@ export const singleJoinQueue = async (req, res, next) => {
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
-            const notifications = await findNotificationUserByEmail(customerEmail);
+            // const notifications = await findNotificationUserByEmail(customerEmail);
 
-            // Reverse the order of notifications and attach customer profile to each
-            const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
-                ...notification.toObject(),  // Convert Mongoose document to plain object
-                salonLogo: salon.salonLogo  // Attach customer details
-            }));
+            // // Reverse the order of notifications and attach customer profile to each
+            // const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
+            //     ...notification.toObject(),  // Convert Mongoose document to plain object
+            //     salonLogo: salon.salonLogo  // Attach customer details
+            // }));
 
 
-            await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
+            // await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
 
 
 
@@ -252,8 +252,8 @@ export const singleJoinQueue = async (req, res, next) => {
                 timeJoinedQ: adjustedTime,
                 methodUsed,
                 barberName,
-                // mobileCountryCode,
-                // mobileNumber: parsedMobileNumber,
+                mobileCountryCode,
+                mobileNumber: parsedMobileNumber,
                 barberId,
                 services: services.map(service => ({
                     serviceId: service.serviceId,
@@ -272,16 +272,16 @@ export const singleJoinQueue = async (req, res, next) => {
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
-            const notifications = await findNotificationUserByEmail(customerEmail);
+            // const notifications = await findNotificationUserByEmail(customerEmail);
 
-            // Reverse the order of notifications and attach customer profile to each
-            const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
-                ...notification.toObject(),  // Convert Mongoose document to plain object
-                salonLogo: salon.salonLogo  // Attach customer details
-            }));
+            // // Reverse the order of notifications and attach customer profile to each
+            // const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
+            //     ...notification.toObject(),  // Convert Mongoose document to plain object
+            //     salonLogo: salon.salonLogo  // Attach customer details
+            // }));
 
 
-            await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
+            // await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
 
 
 
@@ -495,16 +495,16 @@ export const groupJoinQueue = async (req, res, next) => {
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
-            const notifications = await findNotificationUserByEmail(member.customerEmail);
+            // const notifications = await findNotificationUserByEmail(member.customerEmail);
 
-            // Reverse the order of notifications and attach customer profile to each
-            const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
-                ...notification.toObject(),  // Convert Mongoose document to plain object
-                salonLogo: salon.salonLogo  // Attach customer details
-            }));
+            // // Reverse the order of notifications and attach customer profile to each
+            // const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
+            //     ...notification.toObject(),  // Convert Mongoose document to plain object
+            //     salonLogo: salon.salonLogo  // Attach customer details
+            // }));
 
 
-            await io.to(`customer_${salonId}_${member.customerEmail}`).emit("receiveNotifications", latestnotifications);
+            // await io.to(`customer_${salonId}_${member.customerEmail}`).emit("receiveNotifications", latestnotifications);
 
 
 
