@@ -530,7 +530,7 @@ export const googleCustomerLogin = async (req, res, next) => {
         if (!foundUser) {
             return res.status(400).json({
                 success: false,
-                message: 'This email is not associated with a Google sign-in. Please use your original login method or sign up with Google first.'
+                message: 'Email not linked with Google. Use your original login or sign up with Google.'
             });
         }
 
