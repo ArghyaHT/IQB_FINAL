@@ -528,7 +528,10 @@ export const googleCustomerLogin = async (req, res, next) => {
 
         const foundUser = await googleCustomer(email)
         if (!foundUser) {
-            return res.status(400).json({ success: false, message: 'Unauthorized google customer' })
+            return res.status(400).json({
+                success: false,
+                message: 'This email is not associated with a Google sign-in. Please use your original login method or sign up with Google first.'
+            });
         }
 
         // const accessToken = jwt.sign(
