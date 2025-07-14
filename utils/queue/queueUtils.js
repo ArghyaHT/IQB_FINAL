@@ -80,45 +80,45 @@ export const addCustomerToQueue = async (salonId, newQueue, barberId, customerEm
         //     }
         // });
 
-            let vipCount = 0;
-    let accumulatedEWT = 0;
-    let insertIndex = 0;
+        let vipCount = 0;
+        let accumulatedEWT = 0;
+        let insertIndex = 0;
 
-    // Step 1: Count VIPs and accumulate their EWT
-    for (let i = 0; i < existingQueue.queueList.length; i++) {
-        const entry = existingQueue.queueList[i];
+        // Step 1: Count VIPs and accumulate their EWT
+        for (let i = 0; i < existingQueue.queueList.length; i++) {
+            const entry = existingQueue.queueList[i];
 
-        const isSameBarber = entry.barberId === newQueue.barberId;
-        const isVIP = entry.services.some(service => service.vipService);
+            const isSameBarber = entry.barberId === newQueue.barberId;
+            const isVIP = entry.services.some(service => service.vipService);
 
-        if (isSameBarber && isVIP) {
-            vipCount++;
-            accumulatedEWT += entry.serviceEWT;
-            insertIndex = i + 1; // position to insert after the last VIP
+            if (isSameBarber && isVIP) {
+                vipCount++;
+                accumulatedEWT += entry.serviceEWT;
+                insertIndex = i + 1; // position to insert after the last VIP
+            }
         }
-    }
 
-    // Step 2: Set VIP position and EWT
-    newQueue.qPosition = vipCount + 1;
-    newQueue.customerEWT = accumulatedEWT;
+        // Step 2: Set VIP position and EWT
+        newQueue.qPosition = vipCount + 1;
+        newQueue.customerEWT = accumulatedEWT;
 
-    // Step 3: Insert VIP in queue
-    existingQueue.queueList.splice(insertIndex, 0, newQueue);
+        // Step 3: Insert VIP in queue
+        existingQueue.queueList.splice(insertIndex, 0, newQueue);
 
-    // Step 4: Push regular customers behind the VIP
-    existingQueue.queueList.forEach(entry => {
-        const isSameBarber = entry.barberId === newQueue.barberId;
-        const isRegular = !entry.services.some(service => service.vipService);
+        // Step 4: Push regular customers behind the VIP
+        existingQueue.queueList.forEach(entry => {
+            const isSameBarber = entry.barberId === newQueue.barberId;
+            const isRegular = !entry.services.some(service => service.vipService);
 
-        if (isSameBarber && isRegular) {
-            entry.qPosition += 1;
-            entry.customerEWT += newQueue.serviceEWT;
-        }
-    });
+            if (isSameBarber && isRegular) {
+                entry.qPosition += 1;
+                entry.customerEWT += newQueue.serviceEWT;
+            }
+        });
 
-    // Update response variables
-    qPosition = newQueue.qPosition;
-    customerEWT = newQueue.customerEWT;
+        // Update response variables
+        qPosition = newQueue.qPosition;
+        customerEWT = newQueue.customerEWT;
 
     } else {
         // Handle non-VIP service case
@@ -157,12 +157,12 @@ export const addCustomerToQueue = async (salonId, newQueue, barberId, customerEm
     console.log('Push device:', pushDevice);
 
 
-    if(pushDevice && pushDevice.deviceToken){
-        await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType , NEW_QUEUE_ADD, customerEmail )
+    if (pushDevice && pushDevice.deviceToken) {
+        await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, NEW_QUEUE_ADD, customerEmail)
         console.log('Notification sent successfully from addCustomerToQueue');
 
     }
-    
+
     return {
         queue: existingQueue,
         customerEWT,
