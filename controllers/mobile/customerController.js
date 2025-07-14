@@ -211,7 +211,7 @@ export const verificationCodeApi = async (req, res, next) => {
 
         if (verificationCode) {
             try {
-                await sendVerificationCode(email, "abc", verificationCode)
+                await sendVerificationCode(email, verificationCode)
                 await sendMobileVerificationCode(formattedNumber, verificationCode);
             } catch (error) {
                 next(error);

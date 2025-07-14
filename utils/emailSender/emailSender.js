@@ -49,13 +49,12 @@ export const emailWithNodeMail = async (email, name, CLIENT_URL, PASSWORD_ROUTE,
 
 
 //DESC:SEND VERIFICATION CODE EMAIL ============================
-export const sendVerificationCode = (email, name, verificationCode) => {
+export const sendVerificationCode = (email, verificationCode) => {
   const mailOptions = {
     from: process.env.SENDER_EMAIL_ADDRESS,
     to: email,
     subject: 'Verify your Email',
     html: `
-    <h2>Hello ${name}!</h2>
     <p>To verify your Email please note the verification code. Your verification code is ${verificationCode}</p>
     `
   };

@@ -30,9 +30,8 @@ export const sendMobileVerificationCode = async (number, verificationCode, body)
   let msgOptions = {
     from: twilioPhoneNumber,
     to: number,
-    body: `<#> Your verification code is ${verificationCode} Don't share.
-    `
-
+    // body: `<#> Your verification code is ${verificationCode} Don't share.`
+    body: `Use the code ${verificationCode} to verify your account. Do not share this code with anyone.`
   }
   try {
     const message = await client.messages.create(msgOptions);
