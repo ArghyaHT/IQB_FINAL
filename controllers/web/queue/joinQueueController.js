@@ -21,7 +21,7 @@ import SalonQueueList from "../../../models/salonQueueListModel.js";
 import { findBarberByEmailAndRole, getAllSalonBarbersForTV } from "../../../services/kiosk/barber/barberService.js";
 import { getPushDevicesbyEmailId } from "../../../services/mobile/pushDeviceTokensService.js";
 import { NEW_QUEUE_ADD, NEW_QUEUE_UPDATED, QUEUE_POSITION_CHANGE } from "../../../constants/mobile/NotificationConstants.js";
-import { sendQueueNotification } from "../../../utils/pushNotifications/pushNotifications.js";
+import { sendQueueNotification, sendQueueUpdateNotification } from "../../../utils/pushNotifications/pushNotifications.js";
 import { io } from "../../../utils/socket/socket.js";
 
 
@@ -299,7 +299,7 @@ export const barberServedQueue = async (req, res, next) => {
 
 
                                     if (pushDevice && pushDevice.deviceToken) {
-                                        await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, NEW_QUEUE_UPDATED, customerEmail, titleText)
+                                        await sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, NEW_QUEUE_UPDATED, customerEmail, titleText)
                                         console.log('Notification sent successfully from addCustomerToQueue');
 
                                     }
@@ -691,7 +691,7 @@ export const barberServedQueue = async (req, res, next) => {
                                     const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
                                     if (pushDevice && pushDevice.deviceToken) {
-                                        await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail)
+                                        await sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail, dateJoinedQ)
                                     }
                                 }
                             }
@@ -949,7 +949,7 @@ export const cancelQueue = async (req, res, next) => {
                         const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
                         if (pushDevice && pushDevice.deviceToken) {
-                            await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail)
+                            await sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail)
                         }
                     }
                 }

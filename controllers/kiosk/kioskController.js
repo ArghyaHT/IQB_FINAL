@@ -28,7 +28,7 @@ import { ADVERT_IMAGES_SUCCESS, ADVERT_NOT_FOUND, ADVERT_NOT_PRESENT_ERROR } fro
 
 import SalonQueueListModel from "../../models/salonQueueListModel.js";
 import { getPushDevicesbyEmailId } from "../../services/mobile/pushDeviceTokensService.js";
-import { sendQueueNotification } from "../../utils/pushNotifications/pushNotifications.js";
+import { sendQueueNotification, sendQueueUpdateNotification } from "../../utils/pushNotifications/pushNotifications.js";
 import { QUEUE_POSITION_CHANGE } from "../../constants/mobile/NotificationConstants.js";
 import { io } from "../../utils/socket/socket.js";
 import { googleLoginAdmin } from "../../services/web/admin/adminService.js";
@@ -2727,7 +2727,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
                                     const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
                                     if (pushDevice && pushDevice.deviceToken) {
-                                        await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail)
+                                        await sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail)
                                     }
                                 }
                             }
@@ -3067,7 +3067,7 @@ export const cancelQueueTvApp = async (req, res, next) => {
                         const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
                         if (pushDevice && pushDevice.deviceToken) {
-                            await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail)
+                            await sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail)
                         }
                     }
                 }

@@ -160,7 +160,7 @@ export const addCustomerToQueue = async (salonId, newQueue, barberId, customerEm
 
 
     if (pushDevice && pushDevice.deviceToken) {
-        await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, NEW_QUEUE_ADD, customerEmail, titleText)
+        await sendQueueNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, NEW_QUEUE_ADD, customerEmail, titleText, newQueue.dateJoinedQ, newQueue.timeJoinedQ )
         console.log('Notification sent successfully from addCustomerToQueue');
 
     }
