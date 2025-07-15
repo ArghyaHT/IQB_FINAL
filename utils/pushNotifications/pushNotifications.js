@@ -7,10 +7,11 @@ import { getSalonBySalonId } from "../../services/mobile/salonServices.js";
 export const sendQueueNotification = async(Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage, customerEmail, titleText, dateJoinedQ, timeJoinedQ) => {
 
     const deviceToken = `ExponentPushToken[${Token.trim()}]`;
+    const formattedDate = new Date(dateJoinedQ).toISOString().split('T')[0];
 
     let messageBody = "";
     if (Token) {
-        messageBody += `${notificationMessage} ${Current}. You joined the queue on ${dateJoinedQ} at ${timeJoinedQ}.`;
+        messageBody += `${notificationMessage} ${Current}. You joined the queue on ${formattedDate} at ${timeJoinedQ}.`;
     }
     const title = `${SalonName} ${titleText}!`;
     const additionalData = {
@@ -125,9 +126,11 @@ export const sendQueueUpdateNotification = async(Token, SalonName, Current, Firs
 export const sendAppointmentNotification = async(Token, SalonName, FirstLastName, DeviceType, notificationMessage, customerEmail, startTime, appointmentDate, appointmentTitle) => {
     const deviceToken = `ExponentPushToken[${Token.trim()}]`;
 
+    const formattedDate = new Date(appointmentDate).toISOString().split('T')[0];
+
     let messageBody = "";
     if (Token) {
-        messageBody += `${notificationMessage} on ${appointmentDate} at ${startTime}.`;
+        messageBody += `${notificationMessage} on ${formattedDate} at ${startTime}.`;
     }
     const title = `${SalonName} ${appointmentTitle}!`;
     const additionalData = {
