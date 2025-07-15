@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
   //   user: 'arghyahimanstech@gmail.com',
   //   pass: 'srseljzsckyykpsg',
   // },
-  });
+});
 
 transporter.verify((err, success) => {
   if (err) console.error(err);
@@ -79,9 +79,12 @@ export const sendForgetPasswordMail = (email, name, verificationCode) => {
     to: email,
     subject: 'Reset Password Email',
     html: `
-  <h2>Hello ${name}!</h2>
-  <p>Your Password Reset Verification Code is ${verificationCode}</p>
-`
+      <p>Dear User,</p>
+      <p>Your one-time password is <strong>${verificationCode}</strong>.</p>
+      <p>Please use this one-time password (OTP) within the next 10 minutes to proceed.</p>
+      <br />
+      <p>Thank you,<br />Team Iqbook</p>
+    `
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
@@ -183,7 +186,7 @@ export const sendAppointmentsEmailCustomer = (customerEmail, customerName, start
 };
 
 //DESC:SEND MAIL TO CUSTOMER ============================
-export const sendCustomerMail = (email,subject, text) => {
+export const sendCustomerMail = (email, subject, text) => {
   const mailOptions = {
     from: process.env.SENDER_EMAIL_ADDRESS,
     to: `${email}`,
@@ -323,7 +326,7 @@ export const barberLeaveApproval = (email, emailSubject, emailBody) => {
 
 
 //DESC:SEND PAYMENT SUCCESS===========================
-export const sendPaymentSuccesEmail = async(email, emailSubject, emailBody, invoice, paymentData, products) => {
+export const sendPaymentSuccesEmail = async (email, emailSubject, emailBody, invoice, paymentData, products) => {
 
   const invoicePath = await generateInvoicePDF(invoice, paymentData, products);
 
