@@ -35,7 +35,8 @@ const appointmentLocks = new Map(); // Keeps track of in-progress appointment cr
 export const createAppointment = async (req, res, next) => {
   const { salonId, barberId, serviceId, appointmentDate, appointmentNotes, startTime, customerEmail, customerName, customerType, methodUsed } = req.body;
 
-  const lockKey = `${salonId}_${barberId}_${customerEmail}_${startTime}`;
+  const formattedDate = moment(appointmentDate).format('YYYY-MM-DD'); // normalize date
+  const lockKey = `${salonId}_${barberId}_${formattedDate}_${startTime}`;
 
   if (appointmentLocks.get(lockKey)) {
     return res.status(400).json({
@@ -271,6 +272,13 @@ export const createAppointment = async (req, res, next) => {
         existingAppointmentList.appointmentList.push(newAppointment);
         await existingAppointmentList.save();
 
+        const sortedAppointments = existingAppointmentList.appointmentList.sort(
+          (a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate)
+        );
+
+        await io.to(`salon_${salonId}_customer_${customerEmail}`).emit("appointmentsUpdated", sortedAppointments);
+
+
         const emailSubject = 'Appointment Created';
         const emailBody = `
             <!DOCTYPE html>
@@ -445,6 +453,14 @@ export const createAppointment = async (req, res, next) => {
       else {
         const newAppointmentData = await createNewAppointment(salonId, newAppointment)
         const savedAppointment = await newAppointmentData.save();
+
+
+        const sortedAppointments = savedAppointment.appointmentList.sort(
+          (a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate)
+        );
+
+        await io.to(`salon_${salonId}_customer_${customerEmail}`).emit("appointmentsUpdated", sortedAppointments);
+
 
         const emailSubject = 'Appointment Created';
         const emailBody = `
@@ -635,7 +651,9 @@ export const createAppointment = async (req, res, next) => {
 export const editAppointment = async (req, res, next) => {
   const { appointmentId, salonId, barberId, serviceId, appointmentDate, appointmentNotes, startTime } = req.body; // Assuming appointmentId is passed as a parameter
 
-    const lockKey = `${salonId}_${barberId}_${startTime}`;
+const formattedDate = moment(appointmentDate).format('YYYY-MM-DD');
+const lockKey = `${salonId}_${barberId}_${formattedDate}_${startTime}`;
+
 
   if (appointmentLocks.get(lockKey)) {
     return res.status(400).json({
@@ -802,6 +820,15 @@ export const editAppointment = async (req, res, next) => {
 
       const appointment = await getAppointmentsByAppointmentId(salonId, appointmentId)
 
+      const customerEmail = appointment.customerEmail; // ✅ Get customer's email
+
+      const allAppointmentsList = await getAppointmentbySalonId(salonId);
+      const sortedAppointments = allAppointmentsList?.appointmentList?.sort(
+        (a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate)
+      );
+
+      await io.to(`salon_${salonId}_customer_${customerEmail}`).emit("appointmentsUpdated", sortedAppointments);
+
       const salon = await getSalonBySalonId(salonId)
 
       // Send email to the customer about the rescheduled appointment
@@ -895,10 +922,6 @@ export const editAppointment = async (req, res, next) => {
       }));
 
 
-      await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
-
-
-
       // Send email to the barber about the rescheduled appointment
       const emailSubjectForBarber = 'Rescheduled Appointment Details';
       const emailBodyForBarber = `
@@ -987,7 +1010,7 @@ export const editAppointment = async (req, res, next) => {
     next(error);
   }
   finally {
-    appointmentLocks.delete(lockKey); // always unlock!
+    appointmentLocks.delete(lockKey);
   }
 };
 
@@ -997,6 +1020,7 @@ export const deleteAppointment = async (req, res, next) => {
     const { salonId, appointmentId } = req.body; // Assuming appointmentId is passed as a parameter
 
     const appointmentToDelete = await getDeletedAPpointmentById(salonId, appointmentId)
+
 
     const totalEWT = appointmentToDelete.services.reduce((sum, service) => {
       return sum + (service.barberServiceEWT || 0);
@@ -1017,6 +1041,14 @@ export const deleteAppointment = async (req, res, next) => {
         message: 'Appointment not found',
       });
     }
+
+    // ✅ Emit updated list to the customer
+    const customerEmail = appointmentToDelete.customerEmail;
+    const allAppointments = await getAppointmentbySalonId(salonId);
+    const sortedAppointments = allAppointments?.appointmentList?.sort(
+      (a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate)
+    );
+    await io.to(`salon_${salonId}_customer_${customerEmail}`).emit("appointmentsUpdated", sortedAppointments);
 
     const salon = await getSalonBySalonId(salonId)
 
@@ -1456,8 +1488,7 @@ export const getallAppointmentsByCustomerEmail = async (req, res, next) => {
     // Sort by date ascending or descending (customize as needed)
     const sortedAppointments = allAppointments.sort((a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate));
 
-    await io.to(`salon_${salonId}`).emit("appointmentsUpdated", sortedAppointments);
-
+    await io.to(`salon_${salonId}_customer_${customerEmail}`).emit("appointmentsUpdated", sortedAppointments);
 
     return SuccessHandler(CUSTOMER_APPOINTMENT_RETRIEVE_SUCCESS, SUCCESS_STATUS_CODE, res, {
       response: sortedAppointments

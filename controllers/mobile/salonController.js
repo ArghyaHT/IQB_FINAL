@@ -10,7 +10,10 @@ import { findAdminByEmailandRoleTest } from "../../services/web/admin/adminServi
 export const getAllSalons = async (req, res, next) => {
   try {
     const salons = await allSalons(); // Retrieve all salons from the database
-    res.status(200).json({
+
+        const categories = await getCategories(); // Get once to reuse
+
+    return res.status(200).json({
       success: true,
       response: salons
     });

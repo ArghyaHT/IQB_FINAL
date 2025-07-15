@@ -29,11 +29,11 @@ export const initializeSocket = (server) => {
             console.log(`Client ${socket.id} joined barber room: ${roomName}`);
         });
 
-        //  socket.on("customerAppointmentList", ({ salonId, customerEmail }) => {
-        //     const roomName = `salon_${salonId}_customer_${customerEmail}`;
-        //     socket.join(roomName);
-        //     console.log(`Client ${socket.id} joined customer room: ${roomName}`);
-        // });
+         socket.on("customerAppointmentList", ({ salonId, customerEmail }) => {
+            const roomName = `salon_${salonId}_customer_${customerEmail}`;
+            socket.join(roomName);
+            console.log(`Client ${socket.id} joined customer room: ${roomName}`);
+        });
 
         socket.on("joinCustomerforNotifications", ({ salonId, customerEmail }) => {
             const normalizedEmail = customerEmail.trim().toLowerCase();
