@@ -7,16 +7,16 @@ export const findNotificationUserByEmail = async(email) => {
 }
 
 //IF USER DONT EXIST IN DATABASE
-export const createNewUserNotification = async(email, title, body, time, type) => {
-    const user =  await Notification.create({ email: email, sentNotifications: [{ title, body, time, type }] });
+export const createNewUserNotification = async(email, title, body, time, type, salonLogo) => {
+    const user =  await Notification.create({ email: email, sentNotifications: [{ title, body, time, type, salonLogo: salonLogo  }] });
     return user;
 }
 
 //IF USER EXISTS PUSH NOTIFICATION TO USER
-export const pushNotificationExistingUser = async(email, title, body, time, type) => {
+export const pushNotificationExistingUser = async(email, title, body, time, type, salonLogo) => {
     const user =  await Notification.findOneAndUpdate(
         { email: email },
-        { $push: { sentNotifications: { title, body, time, type } } }
+        { $push: { sentNotifications: { title, body, time, type, salonLogo: salonLogo  } } }
       );
       return user;
     }

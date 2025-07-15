@@ -24,6 +24,19 @@ const notificationSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+     salonLogo: {
+        type: [{
+            public_id: {
+                type: String
+            },
+            url: {
+                type: String,
+                default: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1743597098/iqb_borderless_ivi965.jpg",
+            }
+        }],
+        default: [{}]
+    },
+
 
    }]
 },{ timestamps: true })

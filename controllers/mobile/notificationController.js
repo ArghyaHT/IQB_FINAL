@@ -32,10 +32,17 @@ export const getAllNotificationsByCustomerEmail = async (req, res, next) => {
       });
     }
 
+        // Define a default logo
+    const defaultSalonLogo = [{
+      url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1743597098/iqb_borderless_ivi965.jpg", // Replace with your actual default logo URL
+    }];
+
+    const salonLogo = customerSalon?.salonLogo || defaultSalonLogo;
+
     // Reverse the order of notifications and attach customer profile to each
     const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
       ...notification.toObject(),  // Convert Mongoose document to plain object
-      salonLogo: customerSalon.salonLogo  // Attach customer details
+      salonLogo: salonLogo  // Attach customer details
     }));
 
 
