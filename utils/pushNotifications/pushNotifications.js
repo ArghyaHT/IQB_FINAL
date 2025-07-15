@@ -4,7 +4,7 @@ import { createNewUserNotification, findNotificationUserByEmail, pushNotificatio
 import { findCustomerByEmail } from "../../services/mobile/customerService.js";
 import { getSalonBySalonId } from "../../services/mobile/salonServices.js";
 
-export const sendQueueNotification = async(Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage, customerEmail, titleText, dateJoinedQ, timeJoinedQ) => {
+export const sendQueueNotification = async (Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage, customerEmail, titleText, dateJoinedQ, timeJoinedQ) => {
 
     const deviceToken = `ExponentPushToken[${Token.trim()}]`;
     const formattedDate = new Date(dateJoinedQ).toISOString().split('T')[0];
@@ -33,10 +33,10 @@ export const sendQueueNotification = async(Token, SalonName, Current, FirstLastN
     if (existingUser) {
         // Email already exists, update the existing document
         await pushNotificationExistingUser(existingUser.email, title, messageBody, time, type, salon.salonLogo);
-      } else {
-      // Email doesn't exist, create a new document
-       await createNewUserNotification(customerEmail, title, messageBody, time, type, salon.salonLogo)
-      }
+    } else {
+        // Email doesn't exist, create a new document
+        await createNewUserNotification(customerEmail, title, messageBody, time, type, salon.salonLogo)
+    }
 
     // const responseFirebase = await sendFCMPushNotification(deviceToken, title, messageBody, additionalData);
 
@@ -53,7 +53,7 @@ export const sendQueueNotification = async(Token, SalonName, Current, FirstLastN
         console.log(response.data)
         return {
             StatusCode: 200,
-            Response: { NotificationID: response.data.id},
+            Response: { NotificationID: response.data.id },
             StatusMessage: "Notification sent successfully",
         };
     } else {
@@ -66,7 +66,7 @@ export const sendQueueNotification = async(Token, SalonName, Current, FirstLastN
 }
 
 
-export const sendQueueUpdateNotification = async(Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage, customerEmail, titleText) => {
+export const sendQueueUpdateNotification = async (Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage, customerEmail, titleText) => {
 
     const deviceToken = `ExponentPushToken[${Token.trim()}]`;
 
@@ -91,10 +91,10 @@ export const sendQueueUpdateNotification = async(Token, SalonName, Current, Firs
     if (existingUser) {
         // Email already exists, update the existing document
         await pushNotificationExistingUser(existingUser.email, title, messageBody, time, type);
-      } else {
-      // Email doesn't exist, create a new document
-       await createNewUserNotification(customerEmail, title, messageBody, time, type)
-      }
+    } else {
+        // Email doesn't exist, create a new document
+        await createNewUserNotification(customerEmail, title, messageBody, time, type)
+    }
 
     // const responseFirebase = await sendFCMPushNotification(deviceToken, title, messageBody, additionalData);
 
@@ -111,7 +111,7 @@ export const sendQueueUpdateNotification = async(Token, SalonName, Current, Firs
         console.log(response.data)
         return {
             StatusCode: 200,
-            Response: { NotificationID: response.data.id},
+            Response: { NotificationID: response.data.id },
             StatusMessage: "Notification sent successfully",
         };
     } else {
@@ -123,7 +123,7 @@ export const sendQueueUpdateNotification = async(Token, SalonName, Current, Firs
     }
 }
 
-export const sendAppointmentNotification = async(Token, SalonName, FirstLastName, DeviceType, notificationMessage, customerEmail, startTime, appointmentDate, appointmentTitle) => {
+export const sendAppointmentNotification = async (Token, SalonName, FirstLastName, DeviceType, notificationMessage, customerEmail, startTime, appointmentDate, appointmentTitle) => {
     const deviceToken = `ExponentPushToken[${Token.trim()}]`;
 
     const formattedDate = new Date(appointmentDate).toISOString().split('T')[0];
@@ -151,10 +151,10 @@ export const sendAppointmentNotification = async(Token, SalonName, FirstLastName
     if (existingUser) {
         // Email already exists, update the existing document
         await pushNotificationExistingUser(existingUser.email, title, messageBody, time, type);
-      } else {
-      // Email doesn't exist, create a new document
-       await createNewUserNotification(customerEmail, title, messageBody, time, type)
-      }
+    } else {
+        // Email doesn't exist, create a new document
+        await createNewUserNotification(customerEmail, title, messageBody, time, type)
+    }
 
     // Check the response from Expo
     // Return the response instead of using res.json()
@@ -174,12 +174,12 @@ export const sendAppointmentNotification = async(Token, SalonName, FirstLastName
 }
 
 // Function to send Expo push notifications
-export const sendExpoPushNotification = async(deviceToken, title, body, additionalData) =>  {
+export const sendExpoPushNotification = async (deviceToken, title, body, additionalData) => {
 
-    console.log("Expo notification data",deviceToken, title, body, additionalData)
+    console.log("Expo notification data", deviceToken, title, body, additionalData)
 
     const url = "https://exp.host/--/api/v2/push/send";
-    
+
     const message = {
         to: deviceToken,
         sound: "default",
@@ -243,18 +243,34 @@ export const sendFCMPushNotification = async (deviceToken, title, body, addition
     }
 };
 
-export const checkPushNotifications = async(req, res, next) => {
-    try{
-        const { Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage, customerEmail} = req.body;
+export const checkPushNotifications = async (req, res, next) => {
+    try {
+        const { Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage, customerEmail } = req.body;
 
-      const response = await sendQueueNotification(Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage, customerEmail)
+        const dateJoinedQ = "2025-07-15";
+        const timeJoinedQ = "13:36";
+        const titleText = "Queue Update";
 
-      if(response){
-        return res.status(200).json({
-            success:true,
-            message: "Notification Success"
-           })
-      }
+        const response = await sendQueueNotification(
+            Token,
+            SalonName,
+            Current,
+            FirstLastName,
+            DeviceType,
+            notificationMessage,
+            customerEmail,
+            titleText,
+            dateJoinedQ,
+            timeJoinedQ
+        );
+
+
+        if (response) {
+            return res.status(200).json({
+                success: true,
+                message: "Notification Success"
+            })
+        }
         // const deviceToken = `ExponentPushToken[${Token.trim()}]`;
 
         // let messageBody = `${SalonName} queue update!\n`;
@@ -266,7 +282,7 @@ export const checkPushNotifications = async(req, res, next) => {
         //     DeviceType: DeviceType,
         //     QueuePosition: Current,
         // };
-    
+
         // const response = await sendExpoPushNotification(deviceToken, title, messageBody, additionalData);
 
         // if (response.data && response.data.status === "ok") {

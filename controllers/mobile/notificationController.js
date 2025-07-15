@@ -2,6 +2,7 @@ import { changeSeenStatus, findNotificationUserByEmail } from "../../services/mo
 import { findCustomerByEmail } from "../../services/mobile/customerService.js";
 import { findSalonBySalonId } from "../../services/mobile/salonServices.js";
 import { io } from "../../utils/socket/socket.js";
+import Notification from "../../models/notificationModel.js";
 
 //DESC: GET ALL NOTIFICATION BY EMAIL
 export const getAllNotificationsByCustomerEmail = async (req, res, next) => {
@@ -76,3 +77,44 @@ export const changeNotificationSeenStatus = async (req, res, next) => {
     next(error);
   }
 }
+
+
+
+export const deleteNotifications = async (req, res, next) => {
+  try {
+    const { customerEmail, id } = req.body;
+
+    if (!customerEmail || !id) {
+      return res.status(400).json({
+        success: false,
+        message: "customerEmail and id are required",
+      });
+    }
+
+    const updatedNotification = await Notification.findOneAndUpdate(
+      { email: customerEmail },
+      {
+        $pull: {
+          sentNotifications: { _id: id }
+        }
+      },
+      { new: true }
+    );
+
+    if (!updatedNotification) {
+      return res.status(400).json({
+        success: false,
+        message: "Notification not found for this email",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Notification deleted successfully",
+      response: updatedNotification.sentNotifications? updatedNotification.sentNotifications : []
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};

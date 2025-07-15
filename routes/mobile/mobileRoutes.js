@@ -9,7 +9,7 @@ import { getAllAdvertisements } from "../../controllers/mobile/advertisementCont
 import { getAppointmentHistorybyCustomerEmail } from "../../controllers/web/appointments/appointmentHistoryController.js";
 import { pushDeviceTokens, pushFcmDeviceTokens } from "../../controllers/mobile/pushDevicesController.js";
 import { checkPushNotifications } from "../../utils/pushNotifications/pushNotifications.js";
-import { changeNotificationSeenStatus, getAllNotificationsByCustomerEmail } from "../../controllers/mobile/notificationController.js";
+import { changeNotificationSeenStatus, deleteNotifications, getAllNotificationsByCustomerEmail } from "../../controllers/mobile/notificationController.js";
 import { getBarberMissingAppointmentDates, getFullyBookedDatesBySalonIdBarberId } from "../../controllers/web/barberAppointmentDays/barberAppointmentController.js";
 import { getSalonBusinessDays } from "../../controllers/mobile/salonSettingsController.js";
 import { getAllCategories } from "../../controllers/web/admin/salonController.js";
@@ -123,6 +123,7 @@ router.route("/getSalonBusinessHours").post(getSalonBusinessDays)
 
 router.route("/getAllCustomerAppointments").post(getallAppointmentsByCustomerEmail)
 
+router.route("/deleteNotifications").post(deleteNotifications)
 
 
 export default router;
