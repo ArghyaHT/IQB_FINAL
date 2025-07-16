@@ -2726,8 +2726,10 @@ export const barberServedQueueTvApp = async (req, res, next) => {
 
                                     const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
+                                    const titleText = "Queue position updated successfully"
+
                                     if (pushDevice && pushDevice.deviceToken) {
-                                        await sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail)
+                                        await sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail, titleText)
                                     }
                                 }
                             }
@@ -3066,8 +3068,11 @@ export const cancelQueueTvApp = async (req, res, next) => {
 
                         const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
+
+                        const titleText = "Queue position updated successfully"
+
                         if (pushDevice && pushDevice.deviceToken) {
-                            await sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail)
+                            await sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail, titleText)
                         }
                     }
                 }
