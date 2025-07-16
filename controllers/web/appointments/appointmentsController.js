@@ -784,14 +784,8 @@ export const barberCancelAppointment = async (req, res, next) => {
                 console.error('Error sending email:', error);
                 // Handle error if email sending fails
             }
-        }
 
-        const updatedAppointments = await getAppointmentbySalonId(salonId);
-
-        await io.to(`salon_${salonId}`).emit('appointmentsUpdated', updatedAppointments?.appointmentList || []);
-
-
-        //customer appointments
+             //customer appointments
         const getUpcomingAppointments = await getCustomerAppointments(salonId, customerEmail)
 
         const upcomingAppointments = getUpcomingAppointments.map(appointment => ({
@@ -830,9 +824,12 @@ export const barberCancelAppointment = async (req, res, next) => {
         const sortedAppointments = allAppointments.sort((a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate));
 
 
-        await io.to(`salon_${salonId}_customer_${customerEmail}`).emit('appointmentsUpdated', sortedAppointments);
+        await io.to(`salon_${salonId}_customer_${appointment.customerEmail}`).emit('appointmentsUpdated', sortedAppointments);
+        }
 
+        const updatedAppointments = await getAppointmentbySalonId(salonId);
 
+        await io.to(`salon_${salonId}`).emit('appointmentsUpdated', updatedAppointments?.appointmentList || []);
 
         // Success response
         return SuccessHandler(
