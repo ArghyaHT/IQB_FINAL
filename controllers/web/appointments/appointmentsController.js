@@ -15,6 +15,8 @@ import { SALON_NOT_FOUND_ERROR } from "../../../constants/web/SalonConstants.js"
 import { getSalonBySalonId } from "../../../services/mobile/salonServices.js";
 import { getBarberBreakTimes } from "../../../services/web/barberBreakTimes/barberBreakTimesService.js";
 import { io } from "../../../utils/socket/socket.js";
+import { getCustomerAppointments } from "../../../services/mobile/appointmentService.js";
+import { getAppointmentsByCustomerEmail } from "../../../services/mobile/appointmentHistoryService.js";
 
 
 
@@ -478,6 +480,10 @@ export const barberServedAppointment = async (req, res, next) => {
         // Find the appointment to be served
         const appointment = await findAppointmentById(_id, barberId, appointmentDate, salonId);
 
+        // console.log(appointment)
+
+        const customerEmail = appointment.appointmentList[0].customerEmail;
+
         if (!appointment) {
             return res.status(400).json({
                 success: false,
@@ -494,9 +500,48 @@ export const barberServedAppointment = async (req, res, next) => {
 
         const updatedAppointments = await getAppointmentbySalonId(salonId);
 
-        io.to(`salon_${salonId}`).emit('appointmentsUpdated', updatedAppointments?.appointmentList || []);
+        //customer appointments
+        const getUpcomingAppointments = await getCustomerAppointments(salonId, customerEmail)
 
-        // await io.to(`salon_${salonId}_customer_${customerEmail}`).emit('appointmentsUpdated', updatedAppointments?.appointmentList || []);
+        const upcomingAppointments = getUpcomingAppointments.map(appointment => ({
+            ...appointment,
+            status: 'upcoming'
+        }));
+
+        const getCustomerHistoryAppointments = await getAppointmentsByCustomerEmail(salonId, customerEmail)
+
+        // Combine both arrays
+        let allAppointments = [...upcomingAppointments, ...getCustomerHistoryAppointments];
+
+        if (status && status.toLowerCase() !== 'all') {
+            allAppointments = allAppointments.filter(app => app.status === status);
+        }
+
+        const salon = await getSalonBySalonId(salonId);
+        const salonServices = salon?.services || [];
+
+        // 4. Enrich appointments with full service details
+        allAppointments = allAppointments.map(app => {
+            const enrichedServices = (app.services || []).map(serviceInApp => {
+                const matched = salonServices.find(
+                    salonService => salonService.serviceId == serviceInApp.serviceId // allow string/number match
+                );
+                return matched || serviceInApp; // fallback to original if no match
+            });
+
+            return {
+                ...app,
+                services: enrichedServices
+            };
+        });
+
+
+        // Sort by date ascending or descending (customize as needed)
+        const sortedAppointments = allAppointments.sort((a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate));
+
+        await io.to(`salon_${salonId}`).emit('appointmentsUpdated', updatedAppointments?.appointmentList || []);
+
+        await io.to(`salon_${salonId}_customer_${customerEmail}`).emit('appointmentsUpdated', sortedAppointments);
 
 
         return res.status(200).json({
@@ -517,6 +562,8 @@ export const customerCancelledAppointment = async (req, res, next) => {
         // Find the appointment to be served
         const appointment = await findAppointmentById(_id, barberId, appointmentDate, salonId);
 
+        const customerEmail = appointment.appointmentList[0].customerEmail;
+
         if (!appointment) {
             return res.status(400).json({
                 success: false,
@@ -532,8 +579,48 @@ export const customerCancelledAppointment = async (req, res, next) => {
 
         const updatedAppointments = await getAppointmentbySalonId(salonId);
 
-        io.to(`salon_${salonId}`).emit('appointmentsUpdated', updatedAppointments?.appointmentList || []);
-        // await io.to(`salon_${salonId}_customer_${customerEmail}`).emit('appointmentsUpdated', updatedAppointments?.appointmentList || []);
+        //customer appointments
+        const getUpcomingAppointments = await getCustomerAppointments(salonId, customerEmail)
+
+        const upcomingAppointments = getUpcomingAppointments.map(appointment => ({
+            ...appointment,
+            status: 'upcoming'
+        }));
+
+        const getCustomerHistoryAppointments = await getAppointmentsByCustomerEmail(salonId, customerEmail)
+
+        // Combine both arrays
+        let allAppointments = [...upcomingAppointments, ...getCustomerHistoryAppointments];
+
+        if (status && status.toLowerCase() !== 'all') {
+            allAppointments = allAppointments.filter(app => app.status === status);
+        }
+
+        const salon = await getSalonBySalonId(salonId);
+        const salonServices = salon?.services || [];
+
+        // 4. Enrich appointments with full service details
+        allAppointments = allAppointments.map(app => {
+            const enrichedServices = (app.services || []).map(serviceInApp => {
+                const matched = salonServices.find(
+                    salonService => salonService.serviceId == serviceInApp.serviceId // allow string/number match
+                );
+                return matched || serviceInApp; // fallback to original if no match
+            });
+
+            return {
+                ...app,
+                services: enrichedServices
+            };
+        });
+
+
+        // Sort by date ascending or descending (customize as needed)
+        const sortedAppointments = allAppointments.sort((a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate));
+
+        await io.to(`salon_${salonId}`).emit('appointmentsUpdated', updatedAppointments?.appointmentList || []);
+
+        await io.to(`salon_${salonId}_customer_${customerEmail}`).emit('appointmentsUpdated', sortedAppointments);
 
         return res.status(200).json({
             success: true,

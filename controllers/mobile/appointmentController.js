@@ -1450,8 +1450,6 @@ export const getallAppointmentsByCustomerEmail = async (req, res, next) => {
 
     const getUpcomingAppointments = await getCustomerAppointments(salonId, customerEmail)
 
-    console.log(getUpcomingAppointments)
-
     const upcomingAppointments = getUpcomingAppointments.map(appointment => ({
       ...appointment,
       status: 'upcoming'

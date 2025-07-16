@@ -176,7 +176,7 @@ export const sendAppointmentNotification = async (Token, SalonName, FirstLastNam
 // Function to send Expo push notifications
 export const sendExpoPushNotification = async (deviceToken, title, body, additionalData) => {
 
-    console.log("Expo notification data", deviceToken, title, body, additionalData)
+    // console.log("Expo notification data", deviceToken, title, body, additionalData)
 
     const url = "https://exp.host/--/api/v2/push/send";
 
@@ -187,7 +187,7 @@ export const sendExpoPushNotification = async (deviceToken, title, body, additio
         body: body,
         data: additionalData,
     };
-    console.log(message)
+    // console.log(message)
 
     try {
         const response = await axios.post(url, message, {

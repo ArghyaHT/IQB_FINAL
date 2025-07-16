@@ -12,7 +12,6 @@ export const recreateLoggerFile = () => {
         fs.writeFileSync(filePath, '');
     }
 };
-
 const createLoggerInstance = () => {
     recreateLoggerFile();
 
