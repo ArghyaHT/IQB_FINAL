@@ -719,7 +719,7 @@ export const barberServedQueue = async (req, res, next) => {
 
 
                                         if (pushDevice && pushDevice.deviceToken) {
-                                             sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail, titleText)
+                                            sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail, titleText)
                                         }
                                     }
                                 }
@@ -914,13 +914,16 @@ export const cancelQueue = async (req, res, next) => {
                 if (customer.queueList && Array.isArray(customer.queueList)) {
                     for (const queueItem of customer.queueList) {
 
-                        const salon = await getSalonBySalonId(salonId);
-                        const { customerEmail, qPosition, customerName, barberName, serviceEWT, customerEWT, services, dateJoinedQ } = queueItem;
-                        const formattedDate = moment(dateJoinedQ, 'YYYY-MM-DD').format('DD-MM-YYYY');
-                        const totalServicePrice = services.reduce((total, service) => total + service.servicePrice, 0);
+                        // ✅ Skip if their position wasn't changed
+                        if (queueItem.barberId === barberId && queueItem.qPosition > canceledQueue.qPosition) {
 
-                        const emailSubject = `${salon.salonName}-Queue Position Changed (${qPosition})`;
-                        const emailBody = `
+                            const salon = await getSalonBySalonId(salonId);
+                            const { customerEmail, qPosition, customerName, barberName, serviceEWT, customerEWT, services, dateJoinedQ } = queueItem;
+                            const formattedDate = moment(dateJoinedQ, 'YYYY-MM-DD').format('DD-MM-YYYY');
+                            const totalServicePrice = services.reduce((total, service) => total + service.servicePrice, 0);
+
+                            const emailSubject = `${salon.salonName}-Queue Position Changed (${qPosition})`;
+                            const emailBody = `
                             <!DOCTYPE html>
                             <html lang="en">
                             <head>
@@ -967,21 +970,22 @@ export const cancelQueue = async (req, res, next) => {
                             </html>
                         `;
 
-                        try {
-                            if (customerEmail) {
-                                await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                            try {
+                                if (customerEmail) {
+                                    await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                                }
+                            } catch (error) {
+                                console.error('Error sending email to the customer:', error);
                             }
-                        } catch (error) {
-                            console.error('Error sending email to the customer:', error);
-                        }
 
-                        const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+                            const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-                        const titleText = "Queue position updated successfully"
+                            const titleText = "Queue position updated successfully"
 
 
-                        if (pushDevice && pushDevice.deviceToken) {
-                             sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail, titleText)
+                            if (pushDevice && pushDevice.deviceToken) {
+                                sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail, titleText)
+                            }
                         }
                     }
                 }
