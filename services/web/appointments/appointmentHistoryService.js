@@ -69,6 +69,26 @@ export const addCancelAppointmentHistoryByBarber = async (salonId, appointments)
 };
 
 
+export const addCancelAppointmentHistoryByCustomer = async (salonId, appointment) => {
+    // Extract the first item from the appointmentList and add status
+    const appointmentToPush = {
+        ...appointment.toObject(),
+        status: "cancelled", // Add or override the status field
+    };
+
+    // Update the history entry in the database
+    const historyEntry = await AppointmentHistory.findOneAndUpdate(
+        { salonId },
+        {
+            $push: { appointmentList: appointmentToPush }, // Push the new appointment
+        },
+        { upsert: true, new: true } // Create a new document if it doesn't exist
+    );
+
+    return historyEntry;
+};
+
+
 //SALON SERVED REPORT
 export const getDailySalonAppointmentServedReport = async (salonId, days) => {
     const today = moment().utc();

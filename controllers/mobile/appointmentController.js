@@ -25,6 +25,7 @@ import { getAppointmentsByCustomerEmail } from "../../services/mobile/appointmen
 import { CUSTOMER_APPOINTMENT_RETRIEVE_SUCCESS } from "../../constants/web/AppointmentsConstants.js";
 import { io } from "../../utils/socket/socket.js";
 import { findNotificationUserByEmail } from "../../services/mobile/notificationService.js";
+import { addCancelAppointmentHistoryByCustomer } from "../../services/web/appointments/appointmentHistoryService.js";
 
 // let isLocked = false; // lock flag in memory
 
@@ -1034,6 +1035,9 @@ export const deleteAppointment = async (req, res, next) => {
     // Find and remove the appointment by its ID
     const deletedAppointment = await deleteAppointmentById(salonId, appointmentId)
 
+    // ✅ Then add to the history
+await addCancelAppointmentHistoryByCustomer(salonId, appointmentToDelete);
+
 
     if (!deletedAppointment) {
       return res.status(400).json({
@@ -1059,19 +1063,6 @@ export const deleteAppointment = async (req, res, next) => {
     if (pushDevice && pushDevice.deviceToken) {
       await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointmentToDelete.customerName, pushDevice.deviceType, DELETE_APPOINTMENT, appointmentToDelete.customerEmail, appointmentToDelete.startTime, appointmentToDelete.appointmentDate, appointmentTitle)
     }
-
-    // const notifications = await findNotificationUserByEmail(appointmentToDelete.customerEmail);
-
-    // // Reverse the order of notifications and attach customer profile to each
-    // const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
-    //   ...notification.toObject(),  // Convert Mongoose document to plain object
-    //   salonLogo: salon.salonLogo  // Attach customer details
-    // }));
-
-
-    // await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
-
-
 
     const barber = await getBarberByBarberId(appointmentToDelete.barberId)
 
