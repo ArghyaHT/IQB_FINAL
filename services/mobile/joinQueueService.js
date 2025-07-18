@@ -28,14 +28,30 @@ export const getSalonQlist = async (salonId, customerEmail) => {
         as: "customerData",
       },
     },
+       // Lookup barber data (assuming barberId is stored in queueList)
     {
+      $lookup: {
+        from: "barbers",
+        localField: "queueList.barberId", // Or use "queueList.barberName" with proper match
+        foreignField: "barberId", // Make sure this field exists in barbers collection
+        as: "barberData",
+      },
+    },
+   {
       $addFields: {
         "queueList.name": "$queueList.customerName", // Always use customerName
         "queueList.customerProfile": {
           $cond: {
-            if: { $gt: [{ $size: "$customerData" }, 0] }, // If customerData exists
-            then: { $arrayElemAt: ["$customerData.profile", 0] }, // Extract profile
-            else: defaultProfileImage, // Use default profile array
+            if: { $gt: [{ $size: "$customerData" }, 0] },
+            then: { $arrayElemAt: ["$customerData.profile", 0] },
+            else: defaultProfileImage,
+          },
+        },
+        "queueList.barberProfile": {
+          $cond: {
+            if: { $gt: [{ $size: "$barberData" }, 0] },
+            then: { $arrayElemAt: ["$barberData.profile", 0] },
+            else: defaultProfileImage,
           },
         },
       },
