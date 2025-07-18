@@ -652,8 +652,8 @@ export const createAppointment = async (req, res, next) => {
 export const editAppointment = async (req, res, next) => {
   const { appointmentId, salonId, barberId, serviceId, appointmentDate, appointmentNotes, startTime } = req.body; // Assuming appointmentId is passed as a parameter
 
-const formattedDate = moment(appointmentDate).format('YYYY-MM-DD');
-const lockKey = `${salonId}_${barberId}_${formattedDate}_${startTime}`;
+  const formattedDate = moment(appointmentDate).format('YYYY-MM-DD');
+  const lockKey = `${salonId}_${barberId}_${formattedDate}_${startTime}`;
 
 
   if (appointmentLocks.get(lockKey)) {
@@ -1036,7 +1036,7 @@ export const deleteAppointment = async (req, res, next) => {
     const deletedAppointment = await deleteAppointmentById(salonId, appointmentId)
 
     // ✅ Then add to the history
-await addCancelAppointmentHistoryByCustomer(salonId, appointmentToDelete);
+    await addCancelAppointmentHistoryByCustomer(salonId, appointmentToDelete);
 
 
     if (!deletedAppointment) {

@@ -5,7 +5,7 @@ import { getSalonSettings } from "../../../services/web/salonSettings/salonSetti
 import { sendAppointmentsEmailAdmin, sendAppointmentsEmailBarber, sendAppointmentsEmailCustomer, sendQueuePositionEmail } from "../../../utils/emailSender/emailSender.js";
 import moment from "moment";
 import { generateTimeSlots } from "../../../utils/timeSlots.js";
-import { addCancelAppointmentHistory, addCancelAppointmentHistoryByBarber, findOrCreateAppointmentHistory } from "../../../services/web/appointments/appointmentHistoryService.js";
+import { addCancelAppointmentHistory, addCancelAppointmentHistoryByBarber, addCancelAppointmentHistoryByCustomer, findOrCreateAppointmentHistory } from "../../../services/web/appointments/appointmentHistoryService.js";
 import { RETRIEVE_TIMESLOT_SUCCESS, SELECT_BARBER_ERROR, SELECT_DATE_ERROR } from "../../../constants/web/AppointmentsConstants.js";
 
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../../constants/web/Common/StatusCodeConstant.js";
@@ -15,8 +15,11 @@ import { SALON_NOT_FOUND_ERROR } from "../../../constants/web/SalonConstants.js"
 import { getSalonBySalonId } from "../../../services/mobile/salonServices.js";
 import { getBarberBreakTimes } from "../../../services/web/barberBreakTimes/barberBreakTimesService.js";
 import { io } from "../../../utils/socket/socket.js";
-import { getCustomerAppointments } from "../../../services/mobile/appointmentService.js";
+import { getCustomerAppointments, getDeletedAPpointmentById } from "../../../services/mobile/appointmentService.js";
 import { getAppointmentsByCustomerEmail } from "../../../services/mobile/appointmentHistoryService.js";
+import { getPushDevicesbyEmailId } from "../../../services/mobile/pushDeviceTokensService.js";
+import { getBarberByBarberId } from "../../../services/mobile/barberService.js";
+import { sendAppointmentNotification } from "../../../utils/pushNotifications/pushNotifications.js";
 
 
 
@@ -275,27 +278,159 @@ export const editAppointment = async (req, res, next) => {
 };
 
 //DESC:DELETE APPOINTMENT ====================
+// export const deleteAppointment = async (req, res, next) => {
+//     try {
+//         const { salonId, appointmentId } = req.body; // Assuming appointmentId is passed as a parameter
+
+//         // Find and remove the appointment by its ID
+//         const deletedAppointment = await deleteAppointmentById(salonId, appointmentId)
+
+//         if (!deletedAppointment) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: 'Appointment not found',
+//             });
+//         }
+
+//         res.status(200).json({
+//             success: true,
+//             message: 'Appointment deleted successfully',
+//         });
+//     } catch (error) {
+//         next(error);
+//     }
+// };
+
 export const deleteAppointment = async (req, res, next) => {
-    try {
-        const { salonId, appointmentId } = req.body; // Assuming appointmentId is passed as a parameter
+  try {
+    const { salonId, appointmentId } = req.body; // Assuming appointmentId is passed as a parameter
 
-        // Find and remove the appointment by its ID
-        const deletedAppointment = await deleteAppointmentById(salonId, appointmentId)
+    const appointmentToDelete = await getDeletedAPpointmentById(salonId, appointmentId)
 
-        if (!deletedAppointment) {
-            return res.status(400).json({
-                success: false,
-                message: 'Appointment not found',
-            });
-        }
 
-        res.status(200).json({
-            success: true,
-            message: 'Appointment deleted successfully',
-        });
-    } catch (error) {
-        next(error);
+    const totalEWT = appointmentToDelete.services.reduce((sum, service) => {
+      return sum + (service.barberServiceEWT || 0);
+    }, 0);
+
+
+    const serviceNames = appointmentToDelete.services.map(service => service.serviceName);
+    console.log('Service Names:', serviceNames);
+
+
+    // Find and remove the appointment by its ID
+    const deletedAppointment = await deleteAppointmentById(salonId, appointmentId)
+
+    // ✅ Then add to the history
+    await addCancelAppointmentHistoryByCustomer(salonId, appointmentToDelete);
+
+
+    if (!deletedAppointment) {
+      return res.status(400).json({
+        success: false,
+        message: 'Appointment not found',
+      });
     }
+
+    // ✅ Emit updated list to the customer
+    const customerEmail = appointmentToDelete.customerEmail;
+    const allAppointments = await getAppointmentbySalonId(salonId);
+    const sortedAppointments = allAppointments?.appointmentList?.sort(
+      (a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate)
+    );
+    await io.to(`salon_${salonId}_customer_${customerEmail}`).emit("appointmentsUpdated", sortedAppointments);
+
+    const salon = await getSalonBySalonId(salonId)
+
+    const pushDevice = await getPushDevicesbyEmailId(appointmentToDelete.customerEmail)
+
+    const appointmentTitle = "Appointment Deleted Successfully"
+
+    if (pushDevice && pushDevice.deviceToken) {
+       sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointmentToDelete.customerName, pushDevice.deviceType, DELETE_APPOINTMENT, appointmentToDelete.customerEmail, appointmentToDelete.startTime, appointmentToDelete.appointmentDate, appointmentTitle)
+    }
+
+    const barber = await getBarberByBarberId(appointmentToDelete.barberId)
+
+    // Send email to the barber about the rescheduled appointment
+    const emailSubject = 'Cancelled Appointment Details';
+    const emailBody = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Appointment Cancelled</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+                .logo {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                .logo img {
+                    max-width: 200px;
+                }
+                .email-content {
+                    background-color: #f8f8f8;
+                    padding: 20px;
+                    border-radius: 10px;
+                }
+                ul {
+                    padding-left: 20px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="email-content">
+                    <div class="logo">
+                        <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
+                    </div>
+                    <h1 style="text-align: center;">Rescheduled Appointment Details</h1>
+                    <p>Dear ${barber.name},</p>
+                    <p>You have a new rescheduled appointment. Below are the updated details:</p>
+                    <ul>
+                        <li><strong>Customer Name:</strong> ${appointmentToDelete.customerName}</li>
+                        <li><strong>Service(s):</strong> ${serviceNames.join(', ')}</li>
+                        <li><strong>Appointment Date:</strong> ${appointmentToDelete.appointmentDate}</li>
+                        <li><strong>New Appointment Time:</strong> ${appointmentToDelete.startTime} - ${appointmentToDelete.endTime}</li>
+                        <li><strong>Service Estimated Time:</strong> ${totalEWT} minutes</li>
+                    </ul>
+                    <p>Please make sure to be prepared for the appointment at the specified time.</p>
+                    <p>Best regards,</p>
+                    <p style="margin: 0; padding: 10px 0 5px;">
+                        ${salon.salonName}<br>
+                        Contact No.: ${salon.contactTel}<br>
+                        EmailId: ${salon.salonEmail}
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
+      `;
+    try {
+       sendQueuePositionEmail(appointmentToDelete.customerEmail, emailSubject, emailBody);
+      console.log('Email sent to barber successfully.');
+    } catch (error) {
+      console.error('Error sending email to barber:', error);
+    }
+
+
+    return res.status(200).json({
+      success: true,
+      message: 'Appointment deleted successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 //DESC:GET ENGAGE BARBER TIMESLOTS ====================
