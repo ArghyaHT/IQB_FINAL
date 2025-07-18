@@ -235,7 +235,7 @@ export const barberServedQueue = async (req, res, next) => {
                         // Send email to the customer who is getting served
                         try {
                             if (element.customerEmail) {
-                                await sendQueuePositionEmail(element.customerEmail, servedEmailSubject, servedEmailBody);
+                                 sendQueuePositionEmail(element.customerEmail, servedEmailSubject, servedEmailBody);
                             }
                         } catch (error) {
                             console.error('Error sending email to the served customer:', error);
@@ -972,7 +972,7 @@ export const cancelQueue = async (req, res, next) => {
 
                             try {
                                 if (customerEmail) {
-                                    await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                                     sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
                                 }
                             } catch (error) {
                                 console.error('Error sending email to the customer:', error);
