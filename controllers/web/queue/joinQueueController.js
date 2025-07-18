@@ -991,6 +991,7 @@ export const cancelQueue = async (req, res, next) => {
                 }
             }
         }
+        
 
         return SuccessHandler(QUEUE_CANCEL_SUCCESS, SUCCESS_STATUS_CODE, res, { updatedQueueList: updatedQueue.queueList })
 

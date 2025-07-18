@@ -717,90 +717,107 @@ export const cancelQueueByCustomer = async (req, res, next) => {
                 if (customer.queueList && Array.isArray(customer.queueList)) {
                     for (const queueItem of customer.queueList) {
 
-                        const salon = await getSalonBySalonId(salonId);
+                        // ✅ Send only if their queue position increased (i.e., moved forward)
+                        if (queueItem.barberId === barberId && queueItem.qPosition > canceledQueue.qPosition) {
 
-                        const { customerEmail, qPosition, customerName, barberName, serviceEWT, customerEWT, services, dateJoinedQ } = queueItem;
+                            const salon = await getSalonBySalonId(salonId);
 
-                        const formattedDate = moment(dateJoinedQ, 'YYYY-MM-DD').format('DD-MM-YYYY');
+                            const {
+                                customerEmail,
+                                qPosition,
+                                customerName,
+                                barberName,
+                                serviceEWT,
+                                customerEWT,
+                                services,
+                                dateJoinedQ
+                            } = queueItem;
 
-                        const emailSubject = `${salon.salonName}: ${formattedDate} Queue Position Changed (${qPosition})`;
-                        const emailBody = `
-                        <!DOCTYPE html>
-                        <html lang="en">
-                        <head>
-                            <meta charset="UTF-8">
-                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                            <title>Queue Position Changed</title>
-                            <style>
-                                body {
-                                    font-family: Arial, sans-serif;
-                                    margin: 0;
-                                    padding: 0;
-                                }
-                                .container {
-                                    max-width: 600px;
-                                    margin: 0 auto;
-                                    padding: 20px;
-                                }
-                                .logo {
-                                    text-align: center;
-                                    margin-bottom: 20px;
-                                }
-                                .logo img {
-                                    max-width: 200px;
-                                }
-                                .email-content {
-                                    background-color: #f8f8f8;
-                                    padding: 20px;
-                                    border-radius: 10px;
-                                }
-                                ul {
-                                    padding-left: 20px;
-                                }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="container">
-                                <div class="email-content">
-                                <div class="logo">
-                                <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
-                            </div>
-                                    <h1 style="text-align: center;">Queue Position Changed</h1>
-                                    <p>Dear ${customerName},</p>
-                                    <p>Your queue position has changed. Here are the updated details:</p>
-                                    <ul>
-                                        <li>Customer Name: ${customerName}</li>
-                                        <li>Service Name: ${services.map(service => service.serviceName).join(', ')}</li>
-                                        <li>Service Type: ${services.some(service => service.vipService) ? 'VIP' : 'Regular'}</li>
-                                        <li>Barber Name: ${barberName}</li>
-                                        <li>Service Estimated Waiting time: ${serviceEWT} mins</li>
-                                        <li>Your Estimated Waiting time: ${customerEWT} mins</li>
-                                        <li>New Queue Position: ${qPosition}</li>
-                                    </ul>
-                                    <p>Please feel free to contact us if you have any questions or need further assistance.</p>
-                                    <p>Best regards,</p>
-                                    <p style="margin: 0; padding: 10px 0 5px;">
-                                        ${salon.salonName}<br>
-                                        Contact No.: ${salon.contactTel}<br>
-                                        EmailId: ${salon.salonEmail}
-                                    </p>
-                                </div>
-                            </div>
-                        </body>
-                        </html>
-                    `;
+                            const formattedDate = moment(dateJoinedQ, 'YYYY-MM-DD').format('DD-MM-YYYY');
+                            const totalServicePrice = services.reduce((total, s) => total + s.servicePrice, 0);
 
-                        try {
-                            await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
-                            console.log('Email sent successfully.');
-                        } catch (error) {
-                            console.error('Error sending email:', error);
-                            // Handle error if email sending fails
+                            const emailSubject = `${salon.salonName}: ${formattedDate} Queue Position Changed (${qPosition})`;
+                            const emailBody = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Queue Position Changed</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .logo { text-align: center; margin-bottom: 20px; }
+        .logo img {
+            max-width: 200px;
+            border-radius: 50%;
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+        }
+        .email-content { background-color: #f8f8f8; padding: 20px; border-radius: 10px; }
+        ul { padding-left: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="email-content">
+            <div class="logo"><img src="${salon?.salonLogo[0]?.url}" alt="Salon Logo" /></div>
+            <h1 style="text-align: center;">Queue Position Changed</h1>
+            <p>Dear ${customerName},</p>
+            <p>Your queue position has changed. Here are the updated details:</p>
+            <ul>
+                <li>Customer Name: ${customerName}</li>
+                <li>Service Name: ${services.map(service => service.serviceName).join(', ')}</li>
+                <li>Service Type: ${services.some(service => service.vipService) ? 'VIP' : 'Regular'}</li>
+                <li>Barber Name: ${barberName}</li>
+                <li>Service Price: $${totalServicePrice}</li>
+                <li>Service Estimated Waiting time: ${serviceEWT} mins</li>
+                <li>Your Estimated Waiting time: ${customerEWT} mins</li>
+                <li>New Queue Position: ${qPosition}</li>
+            </ul>
+            <p>Please feel free to contact us if you have any questions or need further assistance.</p>
+            <p style="margin: 0; padding: 10px 0 5px;">
+                ${salon.salonName}<br>
+                Contact No.: ${salon.contactTel}<br>
+                EmailId: ${salon.salonEmail}
+            </p>
+        </div>
+    </div>
+</body>
+</html>`;
+
+                            try {
+                                if (customerEmail) {
+                                    await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                                    console.log('Email sent successfully to', customerEmail);
+                                }
+                            } catch (error) {
+                                console.error('Error sending email:', error);
+                            }
+
+                            // ✅ Push Notification
+                            const pushDevice = await getPushDevicesbyEmailId(customerEmail);
+                            const titleText = "Queue position updated successfully";
+
+                            if (pushDevice && pushDevice.deviceToken) {
+                                await sendQueueUpdateNotification(
+                                    pushDevice.deviceToken,
+                                    salon.salonName,
+                                    qPosition,
+                                    customerName,
+                                    pushDevice.deviceType,
+                                    QUEUE_POSITION_CHANGE,
+                                    customerEmail,
+                                    titleText
+                                );
+                            }
                         }
                     }
                 }
             }
         }
+
 
         return res.status(200).json({
             success: true,
