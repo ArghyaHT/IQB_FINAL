@@ -11,7 +11,7 @@ export const getAllSalons = async (req, res, next) => {
   try {
     const salons = await allSalons(); // Retrieve all salons from the database
 
-        const categories = await getCategories(); // Get once to reuse
+    const categories = await getCategories(); // Get once to reuse
 
     return res.status(200).json({
       success: true,
@@ -63,8 +63,6 @@ export const getSalonInfo = async (req, res, next) => {
 
     const getCustomer = await findCustomerByEmail(customerEmail)
 
-    console.log(getCustomer)
-
     // Determine isFavourite status
     let isFavourite = false;
     if (getCustomer?.favoriteSalons && Array.isArray(getCustomer.favoriteSalons)) {
@@ -88,6 +86,18 @@ export const getSalonInfo = async (req, res, next) => {
     const barbers = await getbarbersBySalonId(salonId)
 
     const salonServiceCategories = await getCategories()
+
+    // Get categorized salon services
+    const categorizedSalonServices = [];
+    for (const category of salonServiceCategories) {
+      const services = await allCategorySalonServices(salonId, category.serviceCategoryName);
+      if (services && services.length > 0) {
+        categorizedSalonServices.push({
+          serviceCategoryName: category.serviceCategoryName,
+          services: services
+        });
+      }
+    }
 
     // const salonRating = await getAverageSalonRating(salonId)
 
@@ -119,6 +129,8 @@ export const getSalonInfo = async (req, res, next) => {
         salonInfo: salonInfoWithFav,
         barbers: barbers,
         salonServiceCategories: salonServiceCategories,
+        categorizedSalonServices: categorizedSalonServices, 
+
         // salonRating: salonRating,
         // salonBusinessDays: businessDays
       },
