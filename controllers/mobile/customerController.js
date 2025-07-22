@@ -337,7 +337,7 @@ export const signIn = async (req, res, next) => {
         if (foundUser.AuthType == "google") {
             return res.status(400).json({
                 success: false,
-                message: 'Login via google'
+                message: 'Sign in with Google to proceed.'
             })
         }
 
