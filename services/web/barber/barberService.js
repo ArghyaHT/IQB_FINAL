@@ -9,10 +9,17 @@ export const findBarberByEmailAndRole = async (email) => {
 }
 
 //CREATE BARBERID
+// export const createBarberId = async () => {
+//    const barberId = await Barber.countDocuments() + 1;
+//    return barberId;
+// }
 export const createBarberId = async () => {
-   const barberId = await Barber.countDocuments() + 1;
-   return barberId;
-}
+  const lastBarber = await Barber.findOne().sort({ barberId: -1 }).lean();
+
+  const newBarberId = lastBarber?.barberId ? lastBarber.barberId + 1 : 1;
+
+  return newBarberId;
+};
 
 //SAVE BARBER
 export const createBarber = async (email, hashedPassword, barberId) => {
@@ -20,7 +27,7 @@ export const createBarber = async (email, hashedPassword, barberId) => {
       email,
       password: hashedPassword,
       barberId: barberId,
-      role: "Barber"
+      role: "Barber",
     })
     
    await user.save();
