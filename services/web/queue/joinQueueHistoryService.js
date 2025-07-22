@@ -2325,6 +2325,28 @@ export const totalbarberQueueCountsForLast7Days = async (salonId, barberId) => {
     return { totalCount: totalCount.length > 0 ? totalCount[0].totalCount : 0 };
 };
 
+export const totalbarberServeQueueCountsForLast7Days = async (salonId, barberId) => {
+    const today = new Date();
+    const last7Days = new Date();
+    last7Days.setDate(today.getDate() - 7);
+
+    // Count queue entries for the last 7 days
+    const totalCount = await JoinedQueueHistory.aggregate([
+        { $match: { salonId } },
+        { $unwind: "$queueList" },
+        { 
+            $match: { 
+                "queueList.dateJoinedQ": { $gte: last7Days }, 
+                "queueList.barberId": barberId,
+                "queueList.status": "served" 
+            } 
+        },         
+        { $count: "totalCount" }
+    ]);
+
+    return { totalCount: totalCount.length > 0 ? totalCount[0].totalCount : 0 };
+};
+
 export const getBarberLast7DaysQueueCount = async (salonId, barberId) => {
     const yesterday = moment().utc().startOf("day"); // Start of yesterday (00:00:00 UTC)
     const sevenDaysAgo = moment().utc().subtract(6, "days").startOf("day"); // Start of 7 days ago (00:00:00 UTC)

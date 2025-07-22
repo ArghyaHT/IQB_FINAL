@@ -45,6 +45,8 @@ import appointmentHistory from "./routes/web/appointments/appointmentHistoryRout
 
 import commonRoutes from "./routes/common/commonRoutes.js"
 
+import barberAppRoutes from "./routes/barberApp/barberAppRoutes.js"
+
 // import { setupCronJobs } from "./triggers/cronJobs.js";
 // import { storeCountries } from "./utils/countries.js";
 
@@ -682,6 +684,8 @@ app.use("/api/clientLeads", clientLeads)
 app.use("/api/appointmentHistory", appointmentHistory)
 
 app.use("/api/categories", commonRoutes)
+
+app.use("/api/barberApp", barberAppRoutes)
 
 app.use("/api", checkoutSession)
 

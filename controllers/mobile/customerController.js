@@ -334,6 +334,13 @@ export const signIn = async (req, res, next) => {
             })
         }
 
+        if (foundUser.AuthType == "google") {
+            return res.status(400).json({
+                success: false,
+                message: 'Login via google'
+            })
+        }
+
         const match = await bcrypt.compare(password, foundUser.password)
 
         if (!match) return res.status(400).json({

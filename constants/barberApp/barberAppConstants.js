@@ -1,0 +1,1 @@
+export const VERIFICATION_SMS_ERROR = "Verification could not be sent"
