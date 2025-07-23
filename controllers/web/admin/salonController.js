@@ -1576,3 +1576,44 @@ export const getAllCategories = async(req, res, next) => {
     next(error);
   }
 }
+
+
+export const getAllSalonCategories = async (req, res, next) => {
+  try {
+    const salonId = parseInt(req.body.salonId, 10);
+
+    if (!salonId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Salon Id is required',
+      });
+    }
+
+    // Get full category list
+    const allCategories = await getCategories();
+
+    // Get salon with services
+    const salon = await getSalonBySalonId(salonId);
+
+    // Get all service category names used by this salon
+    const usedCategoryNames = new Set(
+      salon.services.map(service => service.serviceCategoryName)
+    );
+
+    // Filter full category objects that match the used ones
+    const matchedCategories = allCategories.filter(cat =>
+      usedCategoryNames.has(cat.serviceCategoryName)
+    );
+
+    return SuccessHandler(
+      CATEGORY_RETRIEVED_SUCCESS,
+      SUCCESS_STATUS_CODE,
+      res,
+      { response: matchedCategories }
+    );
+
+  } catch (error) {
+    next(error);
+  }
+};
+

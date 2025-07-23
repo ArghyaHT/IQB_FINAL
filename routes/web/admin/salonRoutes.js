@@ -1,7 +1,7 @@
 import express from "express";
 
 // import {  handleBarberProtectedRoute, handleProtectedRoute } from "../../middlewares/middlewares.js";
-import { changeSalonOnlineStatus, createSalonByAdmin, deleteSalon, deleteSalonImages, deleteSalonLogo, getAllCategories, getAllSalonServices, getAllSalons, getSalonImages, getSalonInfo, getSalonLogo, getSalonPaymentsBySalonId, getSalonsByLocation, salonTrailPaidPeriod, salonTrailPeriod, searchSalonsByNameAndCity, updateSalonBySalonIdAndAdminEmail, updateSalonImages, updateSalonInfo, updateSalonLogo, uploadMoreSalonGalleryImages, uploadSalonGalleryImages, uploadSalonLogo } from "../../../controllers/web/admin/salonController.js";
+import { changeSalonOnlineStatus, createSalonByAdmin, deleteSalon, deleteSalonImages, deleteSalonLogo, getAllCategories, getAllSalonCategories, getAllSalonServices, getAllSalons, getSalonImages, getSalonInfo, getSalonLogo, getSalonPaymentsBySalonId, getSalonsByLocation, salonTrailPaidPeriod, salonTrailPeriod, searchSalonsByNameAndCity, updateSalonBySalonIdAndAdminEmail, updateSalonImages, updateSalonInfo, updateSalonLogo, uploadMoreSalonGalleryImages, uploadSalonGalleryImages, uploadSalonLogo } from "../../../controllers/web/admin/salonController.js";
 import { verifyRefreshTokenAdmin } from "../../../middlewares/web/VerifyRefreshTokenAdmin.js";
 import { getAllSalonsByAdmin } from "../../../controllers/web/admin/adminController.js";
 import { verifyRefreshTokenBarber } from "../../../middlewares/web/VerifyRefreshTokenBarber.js";
@@ -82,6 +82,8 @@ router.route("/salonTrailPaidPeriod").post(salonTrailPaidPeriod)
 
 
 router.route("/getAllCategories").get(getAllCategories)
+
+router.route("/getAllSalonCategories").post(getAllSalonCategories)
 
 
 export default router;

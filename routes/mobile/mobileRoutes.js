@@ -12,7 +12,7 @@ import { checkPushNotifications } from "../../utils/pushNotifications/pushNotifi
 import { changeNotificationSeenStatus, deleteNotifications, getAllNotificationsByCustomerEmail } from "../../controllers/mobile/notificationController.js";
 import { getBarberMissingAppointmentDates, getFullyBookedDatesBySalonIdBarberId } from "../../controllers/web/barberAppointmentDays/barberAppointmentController.js";
 import { getSalonBusinessDays } from "../../controllers/mobile/salonSettingsController.js";
-import { getAllCategories } from "../../controllers/web/admin/salonController.js";
+import { getAllCategories, getAllSalonCategories } from "../../controllers/web/admin/salonController.js";
 // import { getAllAdvertisements } from "../../controllers/dashboard/dashboardController.js";
 
 const router = express.Router();
@@ -127,6 +127,9 @@ router.route("/deleteNotifications").post(deleteNotifications)
 
 
 router.route("/getAllCategories").get(getAllCategories)
+
+router.route("/getAllSalonCategories").post(getAllSalonCategories)
+
 
 
 export default router;
