@@ -648,9 +648,9 @@ export const barberServedAppointment = async (req, res, next) => {
         // Combine both arrays
         let allAppointments = [...upcomingAppointments, ...getCustomerHistoryAppointments];
 
-        if (status && status.toLowerCase() !== 'all') {
-            allAppointments = allAppointments.filter(app => app.status === status);
-        }
+        // if (status && status.toLowerCase() !== 'all') {
+        //     allAppointments = allAppointments.filter(app => app.status === status);
+        // }
 
         const salon = await getSalonBySalonId(salonId);
         const salonServices = salon?.services || [];
@@ -921,21 +921,21 @@ export const barberCancelAppointment = async (req, res, next) => {
             }
 
              //customer appointments
-        const getUpcomingAppointments = await getCustomerAppointments(salonId, customerEmail)
+        const getUpcomingAppointments = await getCustomerAppointments(salonId, appointment.customerEmail)
 
         const upcomingAppointments = getUpcomingAppointments.map(appointment => ({
             ...appointment,
             status: 'upcoming'
         }));
 
-        const getCustomerHistoryAppointments = await getAppointmentsByCustomerEmail(salonId, customerEmail)
+        const getCustomerHistoryAppointments = await getAppointmentsByCustomerEmail(salonId, appointment.customerEmail)
 
         // Combine both arrays
         let allAppointments = [...upcomingAppointments, ...getCustomerHistoryAppointments];
 
-        if (status && status.toLowerCase() !== 'all') {
-            allAppointments = allAppointments.filter(app => app.status === status);
-        }
+        // if (status && status.toLowerCase() !== 'all') {
+        //     allAppointments = allAppointments.filter(app => app.status === status);
+        // }
 
         const salonServices = salon?.services || [];
 
