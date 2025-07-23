@@ -1013,6 +1013,8 @@ export const getQlistbyBarberId = async (req, res, next) => {
 
         const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
 
+        console.log(sortedQlist)
+
         const approvedBarber = await getBarberByBarberId(barberId);
 
         // await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {

@@ -11,11 +11,14 @@ import { getSalonBySalonId } from "../../services/mobile/salonServices.js";
 import { getBarberAppointmentCountForLastWeek, getBarberServedAppointmentCountLast7Days } from "../../services/web/appointments/appointmentHistoryService.js";
 import { createBarber, createBarberId, findBarberByEmailAndRole } from "../../services/web/barber/barberService.js";
 import { totalbarberQueueCountsForLast7Days, totalbarberServeQueueCountsForLast7Days } from "../../services/web/queue/joinQueueHistoryService.js";
+import { qListByBarberId } from "../../services/web/queue/joinQueueService.js";
 import { sendVerificationCode } from "../../utils/emailSender/emailSender.js";
 import { sendMobileVerificationCode } from "../../utils/mobileMessageSender/mobileMessageSender.js";
 import bcrypt from "bcrypt"
 
 import jwt from "jsonwebtoken"
+import { io } from "../../utils/socket/socket.js";
+import { NO_SALON_CONNECTED_ERROR, QUEUELIST_BARBER_ERROR, QUEUELIST_EMPTY_FOR_BARBER_SUCCESS } from "../../constants/web/QueueConstants.js";
 
 // export const barberRegister = async (req, res, next) => {
 //     try {
@@ -505,6 +508,45 @@ export const barberdashboardReports = async (req, res, next) => {
                 }
             }
         });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+export const getQueuelistbyBarberId = async (req, res, next) => {
+    try {
+        const { salonId, barberId } = req.body;
+
+        if (Number(salonId) === 0) {
+            return ErrorHandler(NO_SALON_CONNECTED_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+        const qListByBarber = await qListByBarberId(salonId, barberId)
+
+        const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
+
+        console.log(sortedQlist)
+
+        const approvedBarber = await getBarberByBarberId(barberId);
+
+        // await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
+        //     // salonId,
+        //     // barberId,
+        //     queueList: sortedQlist,
+        //     // barberName: approvedBarber.name,
+        // });
+
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+
+        if (approvedBarber.isApproved === false) {
+
+            return ErrorHandler(QUEUELIST_BARBER_ERROR, ERROR_STATUS_CODE, res,)
+
+        }
+
+        return SuccessHandler(QUEUELIST_EMPTY_FOR_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { response: sortedQlist })
+
     } catch (error) {
         next(error);
     }

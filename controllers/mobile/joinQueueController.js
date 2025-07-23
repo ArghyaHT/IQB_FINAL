@@ -117,6 +117,14 @@ export const singleJoinQueue = async (req, res, next) => {
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
+            const qListByBarber = await qListByBarberId(salonId, barberId)
+
+            const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
+
+            const approvedBarber = await getBarberByBarberId(barberId);
+
+            io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+
             // const notifications = await findNotificationUserByEmail(customerEmail);
 
             // // Reverse the order of notifications and attach customer profile to each
@@ -273,6 +281,14 @@ export const singleJoinQueue = async (req, res, next) => {
 
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
+            const qListByBarber = await qListByBarberId(salonId, barberId)
+
+            const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
+
+            const approvedBarber = await getBarberByBarberId(barberId);
+
+            io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
 
             // const notifications = await findNotificationUserByEmail(customerEmail);
 
@@ -499,6 +515,14 @@ export const groupJoinQueue = async (req, res, next) => {
 
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
+            const qListByBarber = await qListByBarberId(salonId, member.barberId)
+
+            const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
+
+            const approvedBarber = await getBarberByBarberId(member.barberId);
+
+            io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
 
             // const notifications = await findNotificationUserByEmail(member.customerEmail);
 
@@ -817,6 +841,14 @@ export const cancelQueueByCustomer = async (req, res, next) => {
                 }
             }
         }
+
+        const qListByBarber = await qListByBarberId(salonId, barberId)
+
+        const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
+
+        const approvedBarber = await getBarberByBarberId(barberId);
+
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
 
 
         return res.status(200).json({

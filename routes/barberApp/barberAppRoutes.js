@@ -1,9 +1,15 @@
 import express from "express"
-import { barberDashboardApi, barberdashboardReports, barberLoginController, barberRegister, matchVerificationCode } from "../../controllers/barberApp/barberAppController.js";
+import { barberDashboardApi, barberdashboardReports, barberLoginController, barberRegister, getQueuelistbyBarberId, matchVerificationCode } from "../../controllers/barberApp/barberAppController.js";
 import { connectBarberToSalon, getAllSalonServicesForBarber, loginController, updateBarberInfo } from "../../controllers/web/barber/barberController.js";
 import { getSalonsByLocation, getSalonsByNameAndCity } from "../../controllers/mobile/salonController.js";
 import { newBarberdashboardReports } from "../../controllers/web/reports/reportsController.js";
-import { barberCancelAppointment, barberServedAppointment } from "../../controllers/web/appointments/appointmentsController.js";
+import { barberCancelAppointment, barberServedAppointment, getAllAppointmentsByBarberIdAndDate } from "../../controllers/web/appointments/appointmentsController.js";
+import { getBarberQueueHitory } from "../../controllers/web/queue/joinQueueHistoryController.js";
+import { barberServedQueue, cancelQueue } from "../../controllers/web/queue/joinQueueController.js";
+import { getAttendenceByBarberIdKiosk } from "../../controllers/kiosk/kioskController.js";
+import { addBarberDayOff, getBarberOffDays } from "../../controllers/web/barberDayOff/barberDayOffController.js";
+import { addBarberAppointmentDays, getBarberAppointmentDays } from "../../controllers/web/barberAppointmentDays/barberAppointmentController.js";
+import { getAppointmentHistoryByBarberIdSalonId } from "../../controllers/web/appointments/appointmentHistoryController.js";
 const router = express.Router();
 
 router.route("/check-email-phonenumber").post(barberRegister)
@@ -33,6 +39,24 @@ router.route("/getbarberdashboardReports").post(barberdashboardReports)
 router.route("/barberServedAppointment").post(barberServedAppointment)
 
 router.route("/barberCancelAppointment").post(barberCancelAppointment)
+
+router.route("/getQlistByBarberId").post(getQueuelistbyBarberId)
+
+router.route("/getQueueHistoryBySalonIdBarberId").post(getBarberQueueHitory)
+
+router.route("/barberServedQueue").post(barberServedQueue)
+
+router.route("/getAttendenceByBarberId").post(getAttendenceByBarberIdKiosk)
+
+router.route("/addBarberDayOff").post(addBarberDayOff)
+
+router.route("/getBarberDayOffs").post(getBarberOffDays)
+
+router.route("/addBarberAppointmentDays").post(addBarberAppointmentDays)
+
+router.route("/getAllAppointmentsByBarberId").post(getAllAppointmentsByBarberIdAndDate)
+
+router.route("/getAppointmentHistoryByBarberIdSalonId").post(getAppointmentHistoryByBarberIdSalonId)
 
 
 export default router;
