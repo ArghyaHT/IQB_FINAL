@@ -57,12 +57,6 @@ export const addCategory = async (req, res, next) => {
             if (err) console.error(IMAGE_FAILED_DELETE, err);
         });
 
-        // Save category logic goes here (optional)
-        // const newCategory = await saveCategoryToDB(categoryName, {
-        //   public_id: result.public_id,
-        //   url: result.secure_url
-        // });
-
         const newCategory = await uploadCategory(categoryName, result)
 
         return SuccessHandler(IMAGE_UPLOAD_SUCCESS, SUCCESS_STATUS_CODE, res, {

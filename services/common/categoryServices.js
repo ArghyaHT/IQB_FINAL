@@ -1,10 +1,20 @@
 import Categoty from "../../models/serviceCategoryRegisterModel.js";
 
 export const uploadCategory = async (categoryName, result) => {
-   const category = await Categoty.findOneAndUpdate({ serviceCategoryName: categoryName }, { serviceCategoryImage: result }, { new: true, upsert: true });
+    const categoryImage = {
+        public_id: result.public_id,
+        url: result.secure_url, 
+    };
 
-   return category;
-}
+    const category = await Categoty.findOneAndUpdate(
+        { serviceCategoryName: categoryName },
+        { serviceCategoryImage: categoryImage },
+        { new: true, upsert: true }
+    );
+
+    return category;
+};
+
 
 
 export const getCategories = async() =>{
