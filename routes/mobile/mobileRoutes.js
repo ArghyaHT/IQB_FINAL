@@ -126,4 +126,7 @@ router.route("/getAllCustomerAppointments").post(getallAppointmentsByCustomerEma
 router.route("/deleteNotifications").post(deleteNotifications)
 
 
+router.route("/getAllCategories").get(getAllCategories)
+
+
 export default router;
