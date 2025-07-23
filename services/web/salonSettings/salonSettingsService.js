@@ -67,7 +67,7 @@ export const updateAdvertisement = async(id, image) => {
     { 
       $set: { 
         'advertisements.$.public_id': image.public_id,
-        'advertisements.$.url': image.url
+        'advertisements.$.url': image.secure_url
       } 
     }, 
     { new: true } 

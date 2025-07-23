@@ -1487,3 +1487,5 @@ export const getallAppointmentsByCustomerEmail = async (req, res, next) => {
     next(error);
   }
 }
+
+

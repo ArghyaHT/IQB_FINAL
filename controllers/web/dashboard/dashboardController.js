@@ -31,12 +31,6 @@ export const addAdvertisements = async (req, res, next) => {
 
     const allowedExtensions = ALLOWED_IMAGE_EXTENSIONS;
     const maxFileSize = MAX_FILE_SIZE;
-    
-    //  // Calculate total size
-    //       const totalSize = advertisements.reduce((acc, file) => acc + file.size, 0);
-    //       if (totalSize > 3 * 1024 * 1024) {
-    //         return ErrorHandler(TOTAL_IMAGE_SIZE_ERROR, ERROR_STATUS_CODE, res);
-    //       }
 
     // Validate each image
     for (const advertisement of advertisements) {
@@ -61,6 +55,8 @@ export const addAdvertisements = async (req, res, next) => {
         cloudinary.uploader.upload(advertisement.tempFilePath, {
           public_id: public_id,
           folder: folderPath, // Change the folder name as required
+          secure: true // ✅ Ensure it returns https
+
         })
           .then((image) => {
             resolve({
@@ -164,6 +160,8 @@ export const updateAdvertisements = async (req, res, next) => {
     cloudinary.uploader.upload(advertisements.tempFilePath, {
       public_id: public_id,
       folder: folderPath,
+        secure: true // ✅ ensures secure_url is HTTPS
+
     })
       .then(async (image) => {
 
