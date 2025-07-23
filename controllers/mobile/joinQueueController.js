@@ -125,6 +125,8 @@ export const singleJoinQueue = async (req, res, next) => {
 
             io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
 
+            console.log(sortedQlist)
+
             // const notifications = await findNotificationUserByEmail(customerEmail);
 
             // // Reverse the order of notifications and attach customer profile to each
@@ -289,6 +291,9 @@ export const singleJoinQueue = async (req, res, next) => {
             const approvedBarber = await getBarberByBarberId(barberId);
 
             io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+
+                        console.log(sortedQlist)
+
 
             // const notifications = await findNotificationUserByEmail(customerEmail);
 
