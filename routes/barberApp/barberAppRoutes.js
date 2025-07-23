@@ -1,6 +1,6 @@
 import express from "express"
-import { barberDashboardApi, barberdashboardReports, barberLoginController, barberRegister, getQueuelistbyBarberId, matchVerificationCode } from "../../controllers/barberApp/barberAppController.js";
-import { connectBarberToSalon, getAllSalonServicesForBarber, loginController, updateBarberInfo } from "../../controllers/web/barber/barberController.js";
+import { addOrupdateBarberServices, barberDashboardApi, barberdashboardReports, barberLoginController, barberRegister, getQueuelistbyBarberId, matchVerificationCode, updateBarberProfileDetails } from "../../controllers/barberApp/barberAppController.js";
+import { connectBarberToSalon, getAllSalonServicesForBarber, loginController, updateBarberInfo, uploadBarberprofilePic } from "../../controllers/web/barber/barberController.js";
 import { getSalonsByLocation, getSalonsByNameAndCity } from "../../controllers/mobile/salonController.js";
 import { newBarberdashboardReports } from "../../controllers/web/reports/reportsController.js";
 import { barberCancelAppointment, barberServedAppointment, getAllAppointmentsByBarberIdAndDate } from "../../controllers/web/appointments/appointmentsController.js";
@@ -58,5 +58,10 @@ router.route("/getAllAppointmentsByBarberId").post(getAllAppointmentsByBarberIdA
 
 router.route("/getAppointmentHistoryByBarberIdSalonId").post(getAppointmentHistoryByBarberIdSalonId)
 
+router.route("/addOrupdateBarberServices").post(addOrupdateBarberServices)
+
+router.route("/updateBarberProfileDetails").post(updateBarberProfileDetails)
+
+router.route("/uploadBarberProfilePicture").post(uploadBarberprofilePic)
 
 export default router;

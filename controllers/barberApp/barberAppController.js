@@ -1,6 +1,6 @@
-import { VERIFICATION_SMS_ERROR } from "../../constants/barberApp/barberAppConstants.js";
-import { EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, INVALID_EMAIL_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, VERIFICATION_EMAIL_ERROR } from "../../constants/web/adminConstants.js"
-import { BARBER_EXISTS_ERROR, SIGNIN_SUCCESS, } from "../../constants/web/BarberConstants.js";
+import { UPDATE_BARBER_SERVICE_SUCCESS, VERIFICATION_SMS_ERROR } from "../../constants/barberApp/barberAppConstants.js";
+import { EMAIL_AND_PASSWORD_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, INVALID_EMAIL_ERROR, NAME_LENGTH_ERROR, PASSWORD_LENGTH_ERROR, PASSWORD_NOT_PRESENT_ERROR, VERIFICATION_EMAIL_ERROR } from "../../constants/web/adminConstants.js"
+import { BARBER_EXISTS_ERROR, SELECT_SERVICE_ERROR, SIGNIN_SUCCESS, UPDATE_BARBER_SUCCESS, } from "../../constants/web/BarberConstants.js";
 import { ERROR_STATUS_CODE, SUCCESS_STATUS_CODE } from "../../constants/web/Common/StatusCodeConstant.js"
 import { ErrorHandler } from "../../middlewares/ErrorHandler.js";
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
@@ -9,7 +9,7 @@ import { createBarberByApp, findBarberByEmailIsVerifiedAndRole, findBarberByMobi
 import { getBarberByBarberId } from "../../services/mobile/barberService.js";
 import { getSalonBySalonId } from "../../services/mobile/salonServices.js";
 import { getBarberAppointmentCountForLastWeek, getBarberServedAppointmentCountLast7Days } from "../../services/web/appointments/appointmentHistoryService.js";
-import { createBarber, createBarberId, findBarberByEmailAndRole } from "../../services/web/barber/barberService.js";
+import { adminAddNewBarberService, barberCode, createBarber, createBarberId, findBarberByEmailAndRole, updateBarber, updateBarberServices } from "../../services/web/barber/barberService.js";
 import { totalbarberQueueCountsForLast7Days, totalbarberServeQueueCountsForLast7Days } from "../../services/web/queue/joinQueueHistoryService.js";
 import { qListByBarberId } from "../../services/web/queue/joinQueueService.js";
 import { sendVerificationCode } from "../../utils/emailSender/emailSender.js";
@@ -19,6 +19,8 @@ import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { io } from "../../utils/socket/socket.js";
 import { NO_SALON_CONNECTED_ERROR, QUEUELIST_BARBER_ERROR, QUEUELIST_EMPTY_FOR_BARBER_SUCCESS } from "../../constants/web/QueueConstants.js";
+
+import libphonenumber from "google-libphonenumber";
 
 // export const barberRegister = async (req, res, next) => {
 //     try {
@@ -551,3 +553,117 @@ export const getQueuelistbyBarberId = async (req, res, next) => {
         next(error);
     }
 };
+
+
+ export const addOrupdateBarberServices = async (req, res, next) => {
+    try {
+        const { email, barberServices } = req.body;
+
+        if (!barberServices || barberServices.length === 0) {
+            return ErrorHandler(SELECT_SERVICE_ERROR, ERROR_STATUS_CODE, res);
+        }
+
+        const barber = await findBarberByEmailAndRole(email);
+
+        for (const service of barberServices) {
+            const {
+                serviceId,
+                serviceName,
+                serviceIcon,
+                serviceCode,
+                servicePrice,
+                vipService,
+                barberServiceEWT,
+            } = service;
+
+            const updated = await updateBarberServices(
+                email,
+                barber.salonId,
+                serviceId,
+                serviceIcon,
+                serviceName,
+                serviceCode,
+                servicePrice,
+                vipService,
+                barberServiceEWT
+            );
+
+            if (!updated) {
+                const newService = {
+                    serviceId,
+                    serviceCode,
+                    serviceName,
+                    servicePrice,
+                    serviceIcon,
+                    vipService,
+                    barberServiceEWT,
+                };
+
+                await adminAddNewBarberService(email, barber.salonId, newService);
+            }
+        }
+
+        return SuccessHandler(UPDATE_BARBER_SERVICE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: barber });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+export const updateBarberProfileDetails = async (req, res, next) => {
+    try {
+        const {
+            name,
+            email,
+            nickName,
+            countryCode,
+            mobileNumber,
+            dateOfBirth,
+            gender
+        } = req.body;
+
+        // Validation
+        if (name && (name.length < 1 || name.length > 20)) {
+            return ErrorHandler(NAME_LENGTH_ERROR, ERROR_STATUS_CODE, res);
+        }
+
+        const phoneUtil = libphonenumber.PhoneNumberUtil.getInstance();
+        const mobileNumberStr = typeof mobileNumber === 'number' ? mobileNumber.toString() : mobileNumber;
+        const regionCode = phoneUtil.getRegionCodeForCountryCode(countryCode);
+        const phoneNumberProto = phoneUtil.parse(mobileNumberStr, regionCode);
+
+        if (!phoneUtil.isValidNumber(phoneNumberProto)) {
+            return ErrorHandler(MOBILE_NUMBER_ERROR, ERROR_STATUS_CODE, res);
+        }
+
+        const nationalNumber = phoneNumberProto.getNationalNumber();
+        const formattedNumberAsNumber = parseInt(nationalNumber);
+
+        const existingBarber = await findBarberByEmailAndRole(email);
+        if (mobileNumber && existingBarber.mobileNumber !== mobileNumber) {
+            existingBarber.mobileVerified = false;
+        }
+
+        const updatedBarber = await updateBarber(
+            email,
+            name,
+            nickName,
+            gender,
+            countryCode,
+            formattedNumberAsNumber,
+            dateOfBirth
+        );
+
+        const barberCodeValue = name.slice(0, 2).toUpperCase() + updatedBarber.barberId;
+        await barberCode(email, barberCodeValue);
+
+        return SuccessHandler(UPDATE_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, {
+            response: updatedBarber
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
