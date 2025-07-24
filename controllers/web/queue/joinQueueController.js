@@ -127,6 +127,8 @@ export const barberServedQueue = async (req, res, next) => {
                         currentServiceEWT = element.serviceEWT;
                         servedQPosition = element.qPosition; // 🆕 Save served position
 
+                        console.log("served q position after currentServiceEWT", servedQPosition)
+
                         const salon = await findSalonQueueListHistory(salonId);
 
                         if (!salon) {
@@ -235,7 +237,7 @@ export const barberServedQueue = async (req, res, next) => {
                         // Send email to the customer who is getting served
                         try {
                             if (element.customerEmail) {
-                                 sendQueuePositionEmail(element.customerEmail, servedEmailSubject, servedEmailBody);
+                                sendQueuePositionEmail(element.customerEmail, servedEmailSubject, servedEmailBody);
                             }
                         } catch (error) {
                             console.error('Error sending email to the served customer:', error);
@@ -293,9 +295,13 @@ export const barberServedQueue = async (req, res, next) => {
                     if (customers && customers.length > 0 && servedQPosition !== null) {
                         for (const customer of customers) {
                             if (customer.queueList && Array.isArray(customer.queueList)) {
+                                console.log("Customer Queue Item Position:", queueItem.qPosition);
+                                console.log("Served Position:", servedQPosition);
                                 for (const queueItem of customer.queueList) {
                                     // ✅ Only notify customers whose qPosition is affected (greater than served)
                                     if (queueItem.qPosition > servedQPosition) {
+                                        console.log("Current Queue Position:", queueItem.qPosition, "Served Position:", servedQPosition);
+
                                         const salon = await getSalonBySalonId(salonId);
                                         const { customerEmail, qPosition, customerName, barberName, serviceEWT, customerEWT, services, dateJoinedQ } = queueItem;
 
@@ -311,6 +317,8 @@ export const barberServedQueue = async (req, res, next) => {
 
                                         if (pushDevice && pushDevice.deviceToken) {
                                             await sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, NEW_QUEUE_UPDATED, customerEmail, titleText)
+                                            console.log('Notification sent');
+
                                             console.log('Notification sent successfully from barber Served Queue');
 
                                         }
@@ -390,6 +398,7 @@ export const barberServedQueue = async (req, res, next) => {
 
                                         try {
                                             if (customerEmail) {
+                                                console.log("Sending email to:", customerEmail);
                                                 await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
                                             }
                                         } catch (error) {
@@ -972,7 +981,7 @@ export const cancelQueue = async (req, res, next) => {
 
                             try {
                                 if (customerEmail) {
-                                     sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                                    sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
                                 }
                             } catch (error) {
                                 console.error('Error sending email to the customer:', error);
@@ -991,7 +1000,7 @@ export const cancelQueue = async (req, res, next) => {
                 }
             }
         }
-        
+
 
         return SuccessHandler(QUEUE_CANCEL_SUCCESS, SUCCESS_STATUS_CODE, res, { updatedQueueList: updatedQueue.queueList })
 
