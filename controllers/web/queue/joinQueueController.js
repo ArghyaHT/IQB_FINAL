@@ -271,6 +271,8 @@ export const barberServedQueue = async (req, res, next) => {
 
                     const customers = await findCustomersToMail(salonId, barberId)
 
+                    console.log("customerList", customers)
+
                     const updatedBarbers = await getAllSalonBarbersForTV(salonId); // ✅ fetch updated barbers
                     io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
@@ -294,6 +296,7 @@ export const barberServedQueue = async (req, res, next) => {
 
                     if (customers && customers.length > 0 && servedQPosition !== null) {
                         for (const customer of customers) {
+                            console.log("Customer list",customer)
                             if (customer.queueList && Array.isArray(customer.queueList)) {
                                 console.log("Customer Queue Item Position:", queueItem.qPosition);
                                 console.log("Served Position:", servedQPosition);
