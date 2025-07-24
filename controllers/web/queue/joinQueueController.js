@@ -271,8 +271,6 @@ export const barberServedQueue = async (req, res, next) => {
 
                     const customers = await findCustomersToMail(salonId, barberId)
 
-                    console.log("customerList", customers)
-
                     const updatedBarbers = await getAllSalonBarbersForTV(salonId); // ✅ fetch updated barbers
                     io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
@@ -284,23 +282,14 @@ export const barberServedQueue = async (req, res, next) => {
 
                     const approvedBarber = await getBarberByBarberId(barberId);
 
-                    // await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
-                    //     salonId,
-                    //     barberId,
-                    //     queueList: sortedQlist,
-                    //     barberName: approvedBarber.name,
-                    // });
-
                     await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
 
 
                     if (customers && customers.length > 0 && servedQPosition !== null) {
                         for (const customer of customers) {
-                            console.log("Customer list",customer)
                             if (customer.queueList && Array.isArray(customer.queueList)) {
-                                console.log("Customer Queue Item Position:", queueItem.qPosition);
-                                console.log("Served Position:", servedQPosition);
                                 for (const queueItem of customer.queueList) {
+                                    console.log("QueueItem",queueItem)
                                     // ✅ Only notify customers whose qPosition is affected (greater than served)
                                     if (queueItem.qPosition > servedQPosition) {
                                         console.log("Current Queue Position:", queueItem.qPosition, "Served Position:", servedQPosition);
