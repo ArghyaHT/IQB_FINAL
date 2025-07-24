@@ -139,12 +139,39 @@ export const getSalonQlist = async (salonId) => {
 }
 
 
-//Find customers to send Mail for Q position change
+// //Find customers to send Mail for Q position change
+// export const findCustomersToMail = async (salonId, barberId) => {
+//   const customers = await SalonQueueList.find({ salonId, "queueList.barberId": barberId })
+
+//   return customers;
+// }
+
 export const findCustomersToMail = async (salonId, barberId) => {
-  const customers = await SalonQueueList.find({ salonId, "queueList.barberId": barberId })
+  const customers = await SalonQueueList.aggregate([
+    {
+      $match: { salonId: salonId }
+    },
+    {
+      $project: {
+        queueList: {
+          $filter: {
+            input: "$queueList",
+            as: "item",
+            cond: { $eq: ["$$item.barberId", barberId] }
+          }
+        }
+      }
+    },
+    {
+      $match: {
+        "queueList.0": { $exists: true } // ensure there's at least one matching queue item
+      }
+    }
+  ]);
 
   return customers;
-}
+};
+
 
 
 //GET Q LIST BY BARBER ID
