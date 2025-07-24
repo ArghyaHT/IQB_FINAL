@@ -534,10 +534,18 @@ export const googleCustomerLogin = async (req, res, next) => {
         const { email } = req.body
 
         const foundUser = await googleCustomer(email)
+
         if (!foundUser) {
             return res.status(400).json({
                 success: false,
-                message: 'Email not linked with Google. Use your original login or sign up with Google.'
+                message: 'User does not exist. Please signup first'
+            });
+        }
+
+        if (foundUser.AuthType === "local") {
+            return res.status(400).json({
+                success: false,
+                message: 'Email not linked to Google. Please log in with email and password.'
             });
         }
 
@@ -621,7 +629,7 @@ export const forgetPassword = async (req, res, next) => {
 
         const user = await findCustomerByEmail(email)
 
-            if (!user) {
+        if (!user) {
             return res.status(400).json({
                 success: false,
                 message: "User with this email does not exist. Please register first",
