@@ -106,6 +106,9 @@ export const barberServedQueue = async (req, res, next) => {
 
             const queue = await findSalonQueueList(salonId);
 
+            const oldQueue = JSON.parse(JSON.stringify(queue.queueList)); // Deep clone
+
+
             let currentServiceEWT = 0;
             let updatedQueueList = [];
             let servedQPosition = null; //  Track the qPosition of the served customer
@@ -126,8 +129,6 @@ export const barberServedQueue = async (req, res, next) => {
                     ) {
                         currentServiceEWT = element.serviceEWT;
                         servedQPosition = element.qPosition; // 🆕 Save served position
-
-                        console.log("served q position after currentServiceEWT", servedQPosition)
 
                         const salon = await findSalonQueueListHistory(salonId);
 
@@ -289,9 +290,17 @@ export const barberServedQueue = async (req, res, next) => {
                         for (const customer of customers) {
                             if (customer.queueList && Array.isArray(customer.queueList)) {
                                 for (const queueItem of customer.queueList) {
-                                    console.log("QueueItem",queueItem)
+
+                                    // ⏪ Find old position from oldQueue snapshot
+                                    const oldItem = oldQueue.find(item =>
+                                        item._id.toString() === queueItem._id.toString()
+                                    );
+
+                                    const oldPosition = oldItem?.qPosition;
+                                    const newPosition = queueItem.qPosition;
+
                                     // ✅ Only notify customers whose qPosition is affected (greater than served)
-                                    if (queueItem.qPosition > servedQPosition) {
+                                    if (oldPosition !== undefined && oldPosition !== newPosition && queueItem._id.toString() !== _id.toString()) {
                                         console.log("Current Queue Position:", queueItem.qPosition, "Served Position:", servedQPosition);
 
                                         const salon = await getSalonBySalonId(salonId);
@@ -423,6 +432,9 @@ export const barberServedQueue = async (req, res, next) => {
             const servedByBarberEmail = servedByEmail
 
             const queue = await findSalonQueueList(salonId);
+
+            const oldQueue = JSON.parse(JSON.stringify(queue.queueList)); // Deep clone
+
             let currentServiceEWT = 0;
             let updatedQueueList = [];
             let servedQPosition = null; //  Track the qPosition of the served customer
@@ -623,8 +635,17 @@ export const barberServedQueue = async (req, res, next) => {
                         for (const customer of customers) {
                             if (customer.queueList && Array.isArray(customer.queueList)) {
                                 for (const queueItem of customer.queueList) {
-                                    // ✅ Only notify customers whose qPosition is affected (greater than served)
-                                    if (queueItem.qPosition > servedQPosition) {
+
+
+                                    // ⏪ Find old position from oldQueue snapshot
+                                    const oldItem = oldQueue.find(item =>
+                                        item._id.toString() === queueItem._id.toString()
+                                    );
+
+                                    const oldPosition = oldItem?.qPosition;
+                                    const newPosition = queueItem.qPosition;
+
+                                    if (oldPosition !== undefined && oldPosition !== newPosition && queueItem._id.toString() !== _id.toString()) {
                                         const salon = await getSalonBySalonId(salonId);
                                         const { customerEmail, qPosition, customerName, barberName, serviceEWT, customerEWT, services, dateJoinedQ } = queueItem;
 
