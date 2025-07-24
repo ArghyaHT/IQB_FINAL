@@ -158,7 +158,7 @@ export const updateSalonImage = async (id, image) => {
     {
       $set: {
         'gallery.$.public_id': image.public_id,
-        'gallery.$.url': image.url
+        'gallery.$.url': image.secure_url
       }
     },
     { new: true }
