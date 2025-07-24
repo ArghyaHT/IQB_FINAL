@@ -803,6 +803,9 @@ export const cancelQueue = async (req, res, next) => {
 
         const updatedQueue = await findSalonQueueList(salonId);
 
+        const oldQueueList = JSON.parse(JSON.stringify(updatedQueue.queueList)); // Deep clone BEFORE modifications
+
+
         if (!updatedQueue) {
             return ErrorHandler(QUEUE_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
         }
@@ -936,8 +939,13 @@ export const cancelQueue = async (req, res, next) => {
                 if (customer.queueList && Array.isArray(customer.queueList)) {
                     for (const queueItem of customer.queueList) {
 
+                        const oldItem = oldQueueList.find(item => item._id.toString() === queueItem._id.toString());
+
+
                         // ✅ Skip if their position wasn't changed
-                        if (queueItem.barberId === barberId && queueItem.qPosition > canceledQueue.qPosition) {
+                        if (queueItem.barberId === barberId && oldItem &&
+                oldItem.qPosition !== queueItem.qPosition
+            ) {
 
                             const salon = await getSalonBySalonId(salonId);
                             const { customerEmail, qPosition, customerName, barberName, serviceEWT, customerEWT, services, dateJoinedQ } = queueItem;
