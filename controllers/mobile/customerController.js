@@ -620,12 +620,21 @@ export const forgetPassword = async (req, res, next) => {
         email = email.toLowerCase();
 
         const user = await findCustomerByEmail(email)
-        if (!user) {
+
+            if (!user) {
             return res.status(400).json({
                 success: false,
                 message: "User with this email does not exist. Please register first",
             });
         }
+
+        if (user.AuthType === "google") {
+            return res.status(400).json({
+                success: false,
+                message: "Please log in using Google.",
+            });
+        }
+
 
         const verificationCode = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
 
