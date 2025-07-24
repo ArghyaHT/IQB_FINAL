@@ -251,16 +251,35 @@ const salonsSchema = new mongoose.Schema({
     //     type: String,
     //     default: ""
     // },
-    gallery: [
-        {
-            public_id: {
-                type: String
-            },
-            url: {
-                type: String,
-            }
-        }
-    ],
+   
+   gallery: {
+  type: [
+    {
+      public_id: {
+        type: String,
+      },
+      url: {
+        type: String,
+      }
+    }
+  ],
+  default: [
+    {
+      public_id: "WhatsApp_Image_2025-07-24_at_13.25.42_whjjxl",
+      url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1753344157/WhatsApp_Image_2025-07-24_at_13.25.42_whjjxl.jpg"
+    }
+  ]
+},
+    // gallery: [
+    //     {
+    //         public_id: {
+    //             type: String
+    //         },
+    //         url: {
+    //             type: String,
+    //         }
+    //     }
+    // ],
 
     subscriptions: {
         type: [{

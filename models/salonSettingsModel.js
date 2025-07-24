@@ -17,16 +17,34 @@ const salonSettingsSchema  = new mongoose.Schema({
             "Sunday",
         ],
     },
-    advertisements: [
-        {
-            public_id: {
-                type: String
-            },
-            url: {
-                type: String,
-            }
-        }
-    ],
+    // advertisements: [
+    //     {
+    //         public_id: {
+    //             type: String
+    //         },
+    //         url: {
+    //             type: String,
+    //         }
+    //     }
+    // ],
+    advertisements: {
+  type: [
+    {
+      public_id: {
+        type: String,
+      },
+      url: {
+        type: String,
+      }
+    }
+  ],
+  default: [
+    {
+      public_id: "defaultadvertisement_bgdn9h",
+      url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1753343834/defaultadvertisement_bgdn9h.png"
+    }
+  ]
+},
     appointmentSettings:{
         appointmentStartTime:{
             type:String,
