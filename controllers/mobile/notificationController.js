@@ -41,10 +41,13 @@ export const getAllNotificationsByCustomerEmail = async (req, res, next) => {
     const salonLogo = customerSalon?.salonLogo || defaultSalonLogo;
 
     // Reverse the order of notifications and attach customer profile to each
-    const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
-      ...notification.toObject(),  // Convert Mongoose document to plain object
-      salonLogo: salonLogo  // Attach customer details
-    }));
+    // const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
+    //   ...notification.toObject(),  // Convert Mongoose document to plain object
+    //   salonLogo: salonLogo  // Attach customer details
+    // }));
+
+    const latestnotifications = notifications.sentNotifications.reverse().map(notification => notification.toObject());
+
 
 
     await io.to(`customer_${getcustomer.salonId}_${email}`).emit("receiveNotifications", latestnotifications);
