@@ -11,7 +11,7 @@ export const sendQueueNotification = async (Token, SalonName, Current, FirstLast
 
     let messageBody = "";
     if (Token) {
-        messageBody += `${notificationMessage} ${Current}. You joined the queue on ${formattedDate} at ${timeJoinedQ}.`;
+        messageBody += `${notificationMessage} #${Current}. You joined the queue on ${formattedDate} at ${timeJoinedQ}.`;
     }
     const title = `${titleText}`;
     const additionalData = {
@@ -72,7 +72,7 @@ export const sendQueueUpdateNotification = async (Token, SalonName, Current, Fir
 
     let messageBody = "";
     if (Token) {
-        messageBody += `${notificationMessage} ${Current}.`;
+        messageBody += `${notificationMessage} #${Current}.`;
     }
     const title = `${titleText}`;
     const additionalData = {
