@@ -15,7 +15,7 @@ import { SUCCESS_STATUS_CODE } from "../../constants/web/Common/StatusCodeConsta
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 import { QUEUE_POSITION_CHANGE, QUEUE_POSITION_JOINED } from "../../constants/mobile/NotificationConstants.js";
 import { getPushDevicesbyEmailId } from "../../services/mobile/pushDeviceTokensService.js";
-import { sendQueueNotification } from "../../utils/pushNotifications/pushNotifications.js";
+import { sendQueueNotification, sendQueueUpdateNotification } from "../../utils/pushNotifications/pushNotifications.js";
 import { findNotificationUserByEmail } from "../../services/mobile/notificationService.js";
 
 //DESC:SINGLE JOIN QUEUE ================
@@ -673,12 +673,12 @@ export const cancelQueueByCustomer = async (req, res, next) => {
             })
         }
 
-        if (foundUser.cancellationCount >= 1 && moment(foundUser.updatedAt).isSame(moment(), 'day')) {
-            return res.status(400).json({
-                success: false,
-                message: 'Cant cancel queue anymore for today'
-            })
-        }
+        // if (foundUser.cancellationCount >= 1 && moment(foundUser.updatedAt).isSame(moment(), 'day')) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Cant cancel queue anymore for today'
+        //     })
+        // }
 
         const updatedQueue = await findSalonQueueList(salonId)
 
