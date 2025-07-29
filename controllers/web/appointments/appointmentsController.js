@@ -343,7 +343,7 @@ export const deleteAppointment = async (req, res, next) => {
 
     const pushDevice = await getPushDevicesbyEmailId(appointmentToDelete.customerEmail)
 
-    const appointmentTitle = "Appointment Deleted Successfully"
+    const appointmentTitle = "Appointment Deleted"
 
     if (pushDevice && pushDevice.deviceToken) {
        sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointmentToDelete.customerName, pushDevice.deviceType, DELETE_APPOINTMENT, appointmentToDelete.customerEmail, appointmentToDelete.startTime, appointmentToDelete.appointmentDate, appointmentTitle)

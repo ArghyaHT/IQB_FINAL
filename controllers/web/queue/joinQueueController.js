@@ -313,7 +313,7 @@ export const barberServedQueue = async (req, res, next) => {
                                         const pushDevice = await getPushDevicesbyEmailId(customerEmail)
                                         console.log('Push device:', pushDevice);
 
-                                        const titleText = "Queue position updated successfully"
+                                        const titleText = "Your queue position has been updated"
 
 
                                         if (pushDevice && pushDevice.deviceToken) {
@@ -737,7 +737,7 @@ export const barberServedQueue = async (req, res, next) => {
 
                                         const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-                                        const titleText = "Queue position updated successfully"
+                                        const titleText = "Your queue position has been updated"
 
 
                                         if (pushDevice && pushDevice.deviceToken) {
@@ -1010,7 +1010,7 @@ export const cancelQueue = async (req, res, next) => {
 
                             const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-                            const titleText = "Queue position updated successfully"
+                            const titleText = "Your queue position has been updated"
 
 
                             if (pushDevice && pushDevice.deviceToken) {

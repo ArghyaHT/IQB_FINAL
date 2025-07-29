@@ -827,7 +827,7 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
                             // ✅ Push Notification
                             const pushDevice = await getPushDevicesbyEmailId(customerEmail);
-                            const titleText = "Queue position updated successfully";
+                            const titleText = "Your queue position has been updated";
 
                             if (pushDevice && pushDevice.deviceToken) {
                                 await sendQueueUpdateNotification(

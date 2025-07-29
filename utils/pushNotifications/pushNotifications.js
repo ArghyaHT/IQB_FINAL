@@ -7,13 +7,13 @@ import { getSalonBySalonId } from "../../services/mobile/salonServices.js";
 export const sendQueueNotification = async (Token, SalonName, Current, FirstLastName, DeviceType, notificationMessage, customerEmail, titleText, dateJoinedQ, timeJoinedQ) => {
 
     const deviceToken = `ExponentPushToken[${Token.trim()}]`;
-    const formattedDate = new Date(dateJoinedQ).toISOString().split('T')[0];
+    const formattedDate = new Date(dateJoinedQ).toLocaleDateString("en-GB"); // dd-mm-yyyy
 
     let messageBody = "";
     if (Token) {
         messageBody += `${notificationMessage} ${Current}. You joined the queue on ${formattedDate} at ${timeJoinedQ}.`;
     }
-    const title = `${SalonName} ${titleText}!`;
+    const title = `${titleText}`;
     const additionalData = {
         DeviceType: DeviceType,
         QueuePosition: Current,
@@ -74,7 +74,7 @@ export const sendQueueUpdateNotification = async (Token, SalonName, Current, Fir
     if (Token) {
         messageBody += `${notificationMessage} ${Current}.`;
     }
-    const title = `${SalonName} ${titleText}!`;
+    const title = `${titleText}`;
     const additionalData = {
         DeviceType: DeviceType,
         QueuePosition: Current,
@@ -126,13 +126,13 @@ export const sendQueueUpdateNotification = async (Token, SalonName, Current, Fir
 export const sendAppointmentNotification = async (Token, SalonName, FirstLastName, DeviceType, notificationMessage, customerEmail, startTime, appointmentDate, appointmentTitle) => {
     const deviceToken = `ExponentPushToken[${Token.trim()}]`;
 
-    const formattedDate = new Date(appointmentDate).toISOString().split('T')[0];
+    const formattedDate = new Date(appointmentDate).toLocaleDateString("en-GB"); // dd-mm-yyyy
 
     let messageBody = "";
     if (Token) {
         messageBody += `${notificationMessage} on ${formattedDate} at ${startTime}.`;
     }
-    const title = `${SalonName} ${appointmentTitle}!`;
+    const title = `${appointmentTitle}!`;
     const additionalData = {
         DeviceType: DeviceType,
     };

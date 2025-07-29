@@ -1583,7 +1583,7 @@ export const barberServedQueueKiosk = async (req, res, next) => {
                                     const pushDevice = await getPushDevicesbyEmailId(customerEmail)
                                     console.log('Push device:', pushDevice);
 
-                                    const titleText = "Queue position updated successfully"
+                                    const titleText = "Your queue position has been updated"
 
 
                                     if (pushDevice && pushDevice.deviceToken) {
@@ -1988,7 +1988,7 @@ export const cancelQueueKiosk = async (req, res, next) => {
 
                             const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-                            const titleText = "Queue position updated successfully"
+                            const titleText = "Your queue position has been updated"
 
 
                             if (pushDevice && pushDevice.deviceToken) {
@@ -2797,7 +2797,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
 
                                     const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-                                    const titleText = "Queue position updated successfully"
+                                    const titleText = "Your queue position has been updated"
 
                                     if (pushDevice && pushDevice.deviceToken) {
                                         await sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail, titleText)
@@ -3153,7 +3153,7 @@ export const cancelQueueTvApp = async (req, res, next) => {
                             const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
 
-                            const titleText = "Queue position updated successfully"
+                            const titleText = "Your queue position has been updated"
 
                             if (pushDevice && pushDevice.deviceToken) {
                                 await sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail, titleText)

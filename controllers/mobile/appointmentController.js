@@ -354,7 +354,7 @@ export const createAppointment = async (req, res, next) => {
 
         const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-        const appointmentTitle = "Appointment Booked Successfully"
+        const appointmentTitle = "Appointment Confirmed"
 
         if (pushDevice && pushDevice.deviceToken) {
           await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, customerName, pushDevice.deviceType, CREATE_APPOINTMENT, customerEmail, startTime, appointmentDate, appointmentTitle)
@@ -907,7 +907,7 @@ export const editAppointment = async (req, res, next) => {
 
       const pushDevice = await getPushDevicesbyEmailId(appointment.customerEmail)
 
-      const appointmentTitle = "Appointment Edited Successfully"
+      const appointmentTitle = "Appointment Updated"
 
       if (pushDevice && pushDevice.deviceToken) {
         await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointment.customerName, pushDevice.deviceType, EDIT_APPOINTMENT, appointment.customerEmail, startTime, appointmentDate, appointmentTitle)
@@ -1058,7 +1058,7 @@ export const deleteAppointment = async (req, res, next) => {
 
     const pushDevice = await getPushDevicesbyEmailId(appointmentToDelete.customerEmail)
 
-    const appointmentTitle = "Appointment Deleted Successfully"
+    const appointmentTitle = "Appointment Deleted"
 
     if (pushDevice && pushDevice.deviceToken) {
       await sendAppointmentNotification(pushDevice.deviceToken, salon.salonName, appointmentToDelete.customerName, pushDevice.deviceType, DELETE_APPOINTMENT, appointmentToDelete.customerEmail, appointmentToDelete.startTime, appointmentToDelete.appointmentDate, appointmentTitle)
