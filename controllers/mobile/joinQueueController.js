@@ -833,7 +833,7 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         const enrichedQueueList = await getSalonQlist(salonId);
 
-        if (enrichedQueueList.length > 0) {
+        if (enrichedQueueList.length > 0 &&  Array.isArray(enrichedQueueList[0].queueList)) {
             const queueList = enrichedQueueList[0].queueList || [];
 
             if (queueList.length > 1) {
