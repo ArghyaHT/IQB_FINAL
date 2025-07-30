@@ -793,9 +793,10 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         if (enrichedQueueList) {
             // Sort the queue list in ascending order based on qPosition
             enrichedQueueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+            const isJoinedQueue = await findCustomerByEmail(canceledQueue.customerEmail)
 
             // Emit the updated queue list to the salon
-            await io.to(`salon_${salonId}`).emit("queueUpdated", enrichedQueueList);
+            await io.to(`salon_${salonId}`).emit("queueUpdated",{ enrichedQueueList,isJoinedQueue});
         }
 
 
