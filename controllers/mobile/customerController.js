@@ -1762,32 +1762,35 @@ export const changeCustomerEmailVerifiedStatus = async (req, res, next) => {
 }
 
 
-export const showHideJoinQueueButton = async(req, res, next) => {
-    try{
-        const {customerEmail} = req.body;
+export const showHideJoinQueueButton = async (req, res, next) => {
+    try {
+        const { customerEmail } = req.body;
 
         const customer = await findCustomerByEmail(customerEmail)
 
-  if (!customer) {
-      return res.status(404).json({
-        success: false,
-        message: "Customer not found",
-      });
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: "Customer not found",
+            });
+        }
+
+        const response = {
+            salonId: customer.salonId,
+            email: customer.email,
+            isJoinedQueue: customer.isJoinedQueue || false,
+        };
+
+        io.to(`salon_${salonId}_customer_${customerEmail}`).emit("queueButtonToggle", response);
+
+
+        return res.status(200).json({
+            success: true,
+            message: "Customer queue button toggle",
+            response: response,
+        });
+
     }
-
-      const response = {
-        salonId: customer.salonId,
-       email: customer.email,
-      isJoinedQueue: customer.isJoinedQueue || false,  
-    };
-
-       return res.status(200).json({
-      success: true,
-      message: "Customer queue button toggle",
-      response: response,
-    });
-
-}
     catch (error) {
         next(error);
     }
