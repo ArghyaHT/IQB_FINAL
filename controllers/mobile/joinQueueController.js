@@ -831,7 +831,11 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         //     barberName: approvedBarber.name,
         // });
 
-        const queueList = updatedQueue.queueList || [];
+        const enrichedQueueList = await getSalonQlist(salonId)
+
+        console.log(enrichedQueueList)
+
+        const queueList = enrichedQueueList[0].queueList || [];
         if (queueList.length > 1) {
             queueList.sort((a, b) => a.qPosition - b.qPosition);
         }
