@@ -35,6 +35,12 @@ export const initializeSocket = (server) => {
             console.log(`Client ${socket.id} joined customer room: ${roomName}`);
         });
 
+         socket.on("customerJoinQueueButton", ({ salonId, customerEmail }) => {
+            const roomName = `salon_${salonId}_customer_${customerEmail}`;
+            socket.join(roomName);
+            console.log(`Client ${socket.id} joined customer room: ${roomName}`);
+        });
+
         socket.on("joinCustomerforNotifications", ({ salonId, customerEmail }) => {
             const normalizedEmail = customerEmail.trim().toLowerCase();
             const roomName = `customer_${salonId}_${normalizedEmail}`;
