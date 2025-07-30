@@ -1782,7 +1782,7 @@ export const showHideJoinQueueButton = async (req, res, next) => {
             isJoinedQueue: customer.isJoinedQueue || false,
         };
 
-        io.to(`salon_${salonId}_customer_${customerEmail}`).emit("queueButtonToggle", response);
+        io.to(`salon_${customer.salonId}_customer_${customerEmail}`).emit("queueButtonToggle", response);
 
 
         return res.status(200).json({
