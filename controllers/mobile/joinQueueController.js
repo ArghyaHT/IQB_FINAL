@@ -789,10 +789,10 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         const enrichedQueueList = await getSalonQlist(salonId);
 
-        console.log(enrichedQueueList)
+        console.log("queuelist",enrichedQueueList)
 
 
-        if (enrichedQueueList.queueList.length > 0) {
+        if (enrichedQueueList[0].queueList.length > 0) {
             const queueList = enrichedQueueList[0].queueList || [];
 
             // Sort the queueList by qPosition
