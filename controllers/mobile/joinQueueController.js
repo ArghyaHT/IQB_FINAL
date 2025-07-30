@@ -113,6 +113,7 @@ export const singleJoinQueue = async (req, res, next) => {
 
 
             existingQueue = await addCustomerToQueue(salonId, newQueue, barberId, customerEmail, name);
+            
 
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);

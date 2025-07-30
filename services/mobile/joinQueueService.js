@@ -74,9 +74,6 @@ export const getSalonQlist = async (salonId, customerEmail) => {
   return Qlist;
 };
 
-
-
-
 // Find existing SalonQueueList
 export const findSalonQueueList = async (salonId) => {
   const queueList = await SalonQueueList.findOne({ salonId: salonId });
@@ -158,5 +155,27 @@ export const qListByBarberId = async (salonId, barberId) => {
 
   return qList;
 }
+
+
+export const getCustomerQueueList = async (salonId, customerEmail) => {
+  // Call your existing aggregation to get full salon queue list
+  const fullQueueList = await getSalonQlist(salonId, customerEmail);
+
+  if (!Array.isArray(fullQueueList) || fullQueueList.length === 0) {
+    return []; // no queues found
+  }
+
+  // Extract queueList array from the first result object (adjust if multiple)
+  const allQueues = fullQueueList[0].queueList || [];
+
+  // Filter queueList by customerEmail (case-insensitive)
+  const customerQueues = allQueues.filter(
+    (queueItem) =>
+      queueItem.customerEmail &&
+      queueItem.customerEmail.toLowerCase() === customerEmail.toLowerCase()
+  );
+
+  return customerQueues;
+};
 
 

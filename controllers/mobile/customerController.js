@@ -14,7 +14,7 @@ import { OAuth2Client } from "google-auth-library";
 import { validateEmail } from "../../middlewares/validator.js";
 import { getCustomerAppointments } from "../../services/mobile/appointmentService.js";
 import { findBarbersBySalonIdforCustomerDashboard } from "../../services/mobile/barberService.js";
-import { getSalonQlist } from "../../services/mobile/joinQueueService.js";
+import { getCustomerQueueList, getSalonQlist } from "../../services/mobile/joinQueueService.js";
 import { sendMobileVerificationCode } from "../../utils/mobileMessageSender/mobileMessageSender.js";
 import { CUSTOMER_NOT_EXIST_ERROR, EMAIL_EXISTS_ERROR } from "../../constants/mobile/CustomerConstants.js";
 import { EMAIL_NOT_FOUND_ERROR, EMAIL_NOT_PRESENT_ERROR, EMAIL_VERIFIED_SUCCESS, EMAIL_VERIFY_CODE_ERROR, INVALID_EMAIL_ERROR, MOBILE_VERIFIED_SUCCESS, MOBILE_VERIFY_CODE_ERROR, SEND_VERIFICATION_EMAIL_SUCCESS, SEND_VERIFICATION_MOBILE_SUCCESS, VERIFICATION_EMAIL_ERROR } from "../../constants/web/adminConstants.js";
@@ -411,6 +411,13 @@ export const signIn = async (req, res, next) => {
 
         delete customer.mobileCountryCode;
 
+        // const customerQueueList = (queueList || []).filter(queueItem =>
+        //     queueItem.customerEmail === email
+        // );
+
+        // console.log(customerQueueList)
+
+
         // Send accessToken containing username and roles 
         return res.status(200).json({
             success: true,
@@ -419,15 +426,8 @@ export const signIn = async (req, res, next) => {
             response: {
                 ...customer, // or foundUser.toObject() depending on Mongoose
                 customerMobileCountryCode: foundUser.mobileCountryCode,
-                ...(customer.salonId !== 0 && salonData?._doc ? salonData._doc : {})
-                // ...(salonData && {
-                //     salonName: salonData.salonName,         // or any field you want to add
-                //     salonlogo: salonData.salonLogo,  // change this to actual field name
-                //     currency: salonData.currency,
-                //     isoCurrencyCode: salonData.isoCurrencyCode,
-                //     location: salonData.location,
-                //     tiktokLink: salon
-                // })
+                ...(customer.salonId !== 0 && salonData?._doc ? salonData._doc : {}),
+                
             }
         })
     }
@@ -1432,7 +1432,7 @@ export const getAllAppointmentsByCustomer = async (req, res, next) => {
 
 //DESC: CUSTOMER DASHBOARD API ================
 export const customerDashboard = async (req, res, next) => {
-    const { salonId } = req.body;
+    const { salonId, customerEmail } = req.body;
     try {
         // Find salon information by salonId
         const salonInfo = await findSalonBySalonId(salonId);
@@ -1477,12 +1477,16 @@ export const customerDashboard = async (req, res, next) => {
             totalQueueCount += queue.queueList.length;
         });
 
-        res.status(200).json({
+        const customerQueueList = await getCustomerQueueList(salonId, customerEmail)
+        console.log(customerQueueList)
+
+        return res.status(200).json({
             success: true,
             message: 'Salon and barbers found successfully.',
             response: {
                 salonInfo: salonInfo,
                 barbers: barbers,
+                isJoinedData: customerQueueList,
                 barberOnDuty: barberCount,
                 totalQueueCount: totalQueueCount,
                 leastQueueCount: minQueueCountAsInteger
@@ -1748,5 +1752,7 @@ export const changeCustomerEmailVerifiedStatus = async (req, res, next) => {
         next(error);
     }
 }
+
+
 
 
