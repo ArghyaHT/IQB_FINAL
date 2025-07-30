@@ -787,19 +787,24 @@ export const cancelQueueByCustomer = async (req, res, next) => {
             }
         }
 
-        const enrichedQueueList = await getSalonQlist(salonId);
+        const salonData = await getSalonQlist(salonId);
 
         // Check if the queueList exists or if it's empty
-        if (enrichedQueueList) {
+        if (salonData && salonData.queueList) {
             // Sort the queue list in ascending order based on qPosition
-            enrichedQueueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+            const enrichedQueueList = await salonData.queueList; // your function to populate extra fields
+
+            enrichedQueueList.sort((a, b) => a.qPosition - b.qPosition);
+
+            console.log(enrichedQueueList)
+
             // Emit the updated queue list to the salon
             await io.to(`salon_${salonId}`).emit("queueUpdated", enrichedQueueList);
         }
 
         const customer = await findCustomerByEmail(canceledQueue.customerEmail)
 
-             const response = {
+        const response = {
             salonId: customer.salonId,
             email: customer.email,
             isJoinedQueue: customer.isJoinedQueue || false,
@@ -952,7 +957,7 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         return res.status(200).json({
             success: true,
             message: 'Queue canceled successfully',
-            updatedQueueList: updatedQueue.queueList,
+            response: updatedQueue.queueList,
         });
 
     } catch (error) {
