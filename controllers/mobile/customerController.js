@@ -427,7 +427,7 @@ export const signIn = async (req, res, next) => {
                 ...customer, // or foundUser.toObject() depending on Mongoose
                 customerMobileCountryCode: foundUser.mobileCountryCode,
                 ...(customer.salonId !== 0 && salonData?._doc ? salonData._doc : {}),
-                
+
             }
         })
     }
@@ -1478,6 +1478,15 @@ export const customerDashboard = async (req, res, next) => {
         });
 
         const customerQueueList = await getCustomerQueueList(salonId, customerEmail)
+
+        // Sort by timeJoinedQ (format: "HH:mm:ss")
+        customerQueueList.sort((a, b) => {
+            const timeA = a.timeJoinedQ.split(':').map(Number);
+            const timeB = b.timeJoinedQ.split(':').map(Number);
+            const secondsA = timeA[0] * 3600 + timeA[1] * 60 + timeA[2];
+            const secondsB = timeB[0] * 3600 + timeB[1] * 60 + timeB[2];
+            return secondsA - secondsB;
+        });
 
         return res.status(200).json({
             success: true,
