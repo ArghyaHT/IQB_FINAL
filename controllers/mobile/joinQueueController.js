@@ -787,26 +787,26 @@ export const cancelQueueByCustomer = async (req, res, next) => {
             }
         }
 
-        // const enrichedQueueList = await getSalonQlist(salonId);
+        const enrichedQueueList = await getSalonQlist(salonId);
 
-        // // Check if the queueList exists or if it's empty
-        // if (enrichedQueueList) {
-        //     // Sort the queue list in ascending order based on qPosition
-        //     enrichedQueueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+        // Check if the queueList exists or if it's empty
+        if (enrichedQueueList) {
+            // Sort the queue list in ascending order based on qPosition
+            enrichedQueueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
 
-        //     // Emit the updated queue list to the salon
-        //     await io.to(`salon_${salonId}`).emit("queueUpdated", enrichedQueueList);
-        // }
+            // Emit the updated queue list to the salon
+            await io.to(`salon_${salonId}`).emit("queueUpdated", enrichedQueueList);
+        }
 
-        const customer = await findCustomerByEmail(canceledQueue.customerEmail)
+        // const customer = await findCustomerByEmail(canceledQueue.customerEmail)
 
-        const response = {
-            salonId: customer.salonId,
-            email: customer.email,
-            isJoinedQueue: customer.isJoinedQueue || false,
-        };
+        // const response = {
+        //     salonId: customer.salonId,
+        //     email: customer.email,
+        //     isJoinedQueue: customer.isJoinedQueue || false,
+        // };
 
-        io.to(`salon_${canceledQueue.salonId}_customer_${canceledQueue.customerEmail}`).emit("queueButtonToggle", response);
+        // io.to(`salon_${canceledQueue.salonId}_customer_${canceledQueue.customerEmail}`).emit("queueButtonToggle", response);
 
 
         const updatedBarbers = await getAllSalonBarbersForTV(salonId); // ✅ fetch updated barbers
