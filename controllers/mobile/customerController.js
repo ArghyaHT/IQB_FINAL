@@ -1783,7 +1783,7 @@ export const showHideJoinQueueButton = async(req, res, next) => {
 
        return res.status(200).json({
       success: true,
-      message: "Customer queue status fetched successfully",
+      message: "Customer queue button toggle",
       response: response,
     });
 
