@@ -23,6 +23,7 @@ import { getPushDevicesbyEmailId } from "../../../services/mobile/pushDeviceToke
 import { NEW_QUEUE_ADD, NEW_QUEUE_UPDATED, QUEUE_POSITION_CHANGE } from "../../../constants/mobile/NotificationConstants.js";
 import { sendQueueNotification, sendQueueUpdateNotification } from "../../../utils/pushNotifications/pushNotifications.js";
 import { io } from "../../../utils/socket/socket.js";
+import { findCustomerByEmail } from "../../../services/mobile/customerService.js";
 
 
 //DESC:GET SALON QUEUELIST ================
@@ -148,6 +149,23 @@ export const barberServedQueue = async (req, res, next) => {
                         // Update the status to "served" for the served queue in JoinedQueueHistory
                         await updateServed(salonId, element._id);
 
+                        if (element.joinedQType === "Group-Join") {
+                            const remainingGroup = queue.queueList.filter(q => q.qgCode === element.qgCode);
+
+                            if (remainingGroup.length === 0) {
+                                const customer = await findCustomerByEmail(element.customerEmail);
+                                if (customer) {
+                                    customer.isJoinedQueue = false;
+                                    await customer.save();
+                                }
+                            }
+                        } else {
+                            const customer = await findCustomerByEmail(element.customerEmail);
+                            if (customer) {
+                                customer.isJoinedQueue = false;
+                                await customer.save();
+                            }
+                        }
 
                         const salonDetails = await getSalonBySalonId(salonId);
                         // Construct email subject and body for the customer being served
@@ -474,6 +492,24 @@ export const barberServedQueue = async (req, res, next) => {
                         }
                         // Update the status to "served" for the served queue in JoinedQueueHistory
                         await updateServed(salonId, element._id);
+
+                        if (element.joinedQType === "Group-Join") {
+                            const remainingGroup = queue.queueList.filter(q => q.qgCode === element.qgCode);
+
+                            if (remainingGroup.length === 0) {
+                                const customer = await findCustomerByEmail(element.customerEmail);
+                                if (customer) {
+                                    customer.isJoinedQueue = false;
+                                    await customer.save();
+                                }
+                            }
+                        } else {
+                            const customer = await findCustomerByEmail(element.customerEmail);
+                            if (customer) {
+                                customer.isJoinedQueue = false;
+                                await customer.save();
+                            }
+                        }
 
                         const salonDetails = await getSalonBySalonId(salonId);
                         // Construct email subject and body for the customer being served
@@ -843,6 +879,29 @@ export const cancelQueue = async (req, res, next) => {
 
         await statusCancelQ(salonId, _id);
 
+        const isGroupJoin = canceledQueue.joinedQType === "Group-Join";
+
+        if (!isGroupJoin) {
+            const customer = await findCustomerByEmail(canceledQueue.customerEmail);
+            if (customer) {
+                customer.isJoinedQueue = false;
+                await customer.save();
+            }
+        }
+        else {
+            const qgCode = canceledQueue.qgCode;
+            const queueList = updatedQueue.queueList.filter(queue => queue.qgCode === qgCode);
+
+            if (queueList.length === 0) {
+                const customer = await findCustomerByEmail(canceledQueue.customerEmail);
+                if (customer) {
+                    customer.isJoinedQueue = false;
+                    await customer.save();
+                }
+            }
+        }
+
+
         const enrichedQueueList = await getSalonQlist(salonId);
 
         // Check if the queueList exists or if it's empty
@@ -944,8 +1003,8 @@ export const cancelQueue = async (req, res, next) => {
 
                         // ✅ Skip if their position wasn't changed
                         if (queueItem.barberId === barberId && oldItem &&
-                oldItem.qPosition !== queueItem.qPosition
-            ) {
+                            oldItem.qPosition !== queueItem.qPosition
+                        ) {
 
                             const salon = await getSalonBySalonId(salonId);
                             const { customerEmail, qPosition, customerName, barberName, serviceEWT, customerEWT, services, dateJoinedQ } = queueItem;

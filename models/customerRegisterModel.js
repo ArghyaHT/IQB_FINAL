@@ -83,6 +83,10 @@ const customerSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+      isJoinedQueue: {
+        type: Boolean,
+        default: false
+    },
     fcmToken: {
         type: String
     },

@@ -4,7 +4,7 @@ import { allSalonServices, getSalonBySalonId } from "../../services/mobile/salon
 import { sendQueuePositionEmail } from "../../utils/emailSender/emailSender.js";
 import moment from "moment";
 import { addCustomerToQueue } from "../../utils/queue/queueUtils.js";
-import { findCustomerByCustomerEmailAndSalonId } from "../../services/mobile/customerService.js";
+import { findCustomerByCustomerEmailAndSalonId, findCustomerByEmail } from "../../services/mobile/customerService.js";
 import { addQueueHistoryWhenCanceled, findSalonQueueListHistory, statusCancelQ } from "../../services/mobile/queueHistoryService.js";
 import { validateEmail } from "../../middlewares/validator.js";
 import { findCustomersToMail } from "../../services/web/queue/joinQueueService.js";
@@ -116,6 +116,13 @@ export const singleJoinQueue = async (req, res, next) => {
 
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
+            const customer = await findCustomerByEmail(customerEmail);
+
+            if (customer) {
+                customer.isJoinedQueue = true;
+                await customer.save();
+            }
 
             // const qListByBarber = await qListByBarberId(salonId, barberId)
 
@@ -283,6 +290,13 @@ export const singleJoinQueue = async (req, res, next) => {
 
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
+            const customer = await findCustomerByEmail(customerEmail);
+
+            if (customer) {
+                customer.isJoinedQueue = true;
+                await customer.save();
+            }
 
             // const qListByBarber = await qListByBarberId(salonId, barberId)
 
@@ -521,6 +535,13 @@ export const groupJoinQueue = async (req, res, next) => {
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
+            const customer = await findCustomerByEmail(member.customerEmail);
+
+            if (customer) {
+                customer.isJoinedQueue = true;
+                await customer.save();
+            }
+
             // const qListByBarber = await qListByBarberId(salonId, member.barberId)
 
             // const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
@@ -682,6 +703,9 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         const updatedQueue = await findSalonQueueList(salonId)
 
+        const oldQueueList = JSON.parse(JSON.stringify(updatedQueue.queueList)); // Deep clone BEFORE modifications
+
+
         if (!updatedQueue) {
             return res.status(400).json({
                 success: false,
@@ -694,7 +718,7 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         if (canceledQueueIndex === -1) {
             return res.status(400).json({
                 success: false,
-                message: 'Queue not found with the given _id',
+                message: 'Queue not found or already cancelled/served.'
             });
         }
 
@@ -703,9 +727,10 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         // Remove the canceled queue from the queue list
         const canceledQueue = updatedQueue.queueList.splice(canceledQueueIndex, 1)[0];
 
+
         // Decrement qPosition for subsequent queues and adjust customerEWT
         updatedQueue.queueList.forEach(queue => {
-            if (queue.qPosition > canceledQueue.qPosition) {
+            if (queue.barberId === barberId && queue.qPosition > canceledQueue.qPosition) {
                 queue.qPosition -= 1;
                 queue.customerEWT -= canceledServiceEWT;
             }
@@ -739,6 +764,60 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         // Update the status to "cancelled" for the canceled queue in JoinedQueueHistory
         salon = await statusCancelQ(salonId, _id)
 
+        const isGroupJoin = canceledQueue.joinedQType === "Group-Join";
+
+        if (!isGroupJoin) {
+            const customer = await findCustomerByEmail(canceledQueue.customerEmail);
+            if (customer) {
+                customer.isJoinedQueue = false;
+                await customer.save();
+            }
+        }
+        else {
+            const qgCode = canceledQueue.qgCode;
+            const queueList = updatedQueue.queueList.filter(queue => queue.qgCode === qgCode);
+
+            if (queueList.length === 0) {
+                const customer = await findCustomerByEmail(canceledQueue.customerEmail);
+                if (customer) {
+                    customer.isJoinedQueue = false;
+                    await customer.save();
+                }
+            }
+        }
+
+        const enrichedQueueList = await getSalonQlist(salonId);
+
+        // Check if the queueList exists or if it's empty
+        if (enrichedQueueList) {
+            // Sort the queue list in ascending order based on qPosition
+            enrichedQueueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+
+            // Emit the updated queue list to the salon
+            await io.to(`salon_${salonId}`).emit("queueUpdated", enrichedQueueList);
+        }
+
+
+        const updatedBarbers = await getAllSalonBarbersForTV(salonId); // ✅ fetch updated barbers
+        io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
+        //Live data render for barber served queue
+        const qListByBarber = await qListByBarberId(salonId, barberId)
+
+        const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
+
+        const approvedBarber = await getBarberByBarberId(barberId);
+
+        // await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
+        //     salonId,
+        //     barberId,
+        //     queueList: sortedQlist,
+        //     barberName: approvedBarber.name,
+        // });
+
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+
+
         const customers = await findCustomersToMail(salonId, barberId)
 
         if (customers && customers.length > 0) {
@@ -746,9 +825,13 @@ export const cancelQueueByCustomer = async (req, res, next) => {
                 if (customer.queueList && Array.isArray(customer.queueList)) {
                     for (const queueItem of customer.queueList) {
 
-                        // ✅ Send only if their queue position increased (i.e., moved forward)
-                        if (queueItem.barberId === barberId && queueItem.qPosition > canceledQueue.qPosition) {
+                        const oldItem = oldQueueList.find(item => item._id.toString() === queueItem._id.toString());
 
+
+                        // ✅ Skip if their position wasn't changed
+                        if (queueItem.barberId === barberId && oldItem &&
+                            oldItem.qPosition !== queueItem.qPosition
+                        ) {
                             const salon = await getSalonBySalonId(salonId);
 
                             const {

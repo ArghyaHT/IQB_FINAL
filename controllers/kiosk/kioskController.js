@@ -35,6 +35,7 @@ import { googleLoginAdmin } from "../../services/web/admin/adminService.js";
 import { googleLoginBarber } from "../../services/web/barber/barberService.js";
 import { qListByBarberId } from "../../services/web/queue/joinQueueService.js";
 import { findSalonBySalonIdAndAdmin } from "../../services/web/admin/salonService.js";
+import { findCustomerByEmail } from "../../services/mobile/customerService.js";
 
 //DESC:LOGIN AN ADMIN =========================
 export const loginKiosk = async (req, res, next) => {
@@ -2506,11 +2507,11 @@ export const barberServedQueueTvApp = async (req, res, next) => {
             const servedByBarber = await findBarberByEmailAndRole(servedByEmail)
 
             const queue = await findSalonQueueList(salonId);
-                        const oldQueue = JSON.parse(JSON.stringify(queue.queueList)); // Deep clone
+            const oldQueue = JSON.parse(JSON.stringify(queue.queueList)); // Deep clone
 
             let currentServiceEWT = 0;
             let updatedQueueList = [];
-                        let servedQPosition = null; //  Track the qPosition of the served customer
+            let servedQPosition = null; //  Track the qPosition of the served customer
 
 
             if (queue && queue.queueList && queue.queueList.length > 0) {
@@ -2528,7 +2529,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
                         element._id.toString() === _id
                     ) {
                         currentServiceEWT = element.serviceEWT;
-                                                servedQPosition = element.qPosition; // 🆕 Save served position
+                        servedQPosition = element.qPosition; // 🆕 Save served position
 
                         const salon = await findSalonQueueListHistory(salonId);
 
@@ -2547,6 +2548,24 @@ export const barberServedQueueTvApp = async (req, res, next) => {
                         }
                         // Update the status to "served" for the served queue in JoinedQueueHistory
                         await updateServed(salonId, element._id);
+
+                        if (element.joinedQType === "Group-Join") {
+                            const remainingGroup = queue.queueList.filter(q => q.qgCode === element.qgCode);
+
+                            if (remainingGroup.length === 0) {
+                                const customer = await findCustomerByEmail(element.customerEmail);
+                                if (customer) {
+                                    customer.isJoinedQueue = false;
+                                    await customer.save();
+                                }
+                            }
+                        } else {
+                            const customer = await findCustomerByEmail(element.customerEmail);
+                            if (customer) {
+                                customer.isJoinedQueue = false;
+                                await customer.save();
+                            }
+                        }
 
                         const salonDetails = await getSalonBySalonId(salonId);
                         // Construct email subject and body for the customer being served
@@ -2646,14 +2665,14 @@ export const barberServedQueueTvApp = async (req, res, next) => {
                         }
 
 
-                    } else if (element.barberId === barberId && 
+                    } else if (element.barberId === barberId &&
                         element._id.toString() !== _id &&
-                           servedQPosition !== null &&
+                        servedQPosition !== null &&
                         element.qPosition > servedQPosition
-                ) {
+                    ) {
                         updatedQueueList.push({
                             ...element.toObject(),
-                                qPosition: element.qPosition - 1,
+                            qPosition: element.qPosition - 1,
                             customerEWT: element.customerEWT - currentServiceEWT,
                             // qPosition: element.qPosition > 1 ? element.qPosition - 1 : element.qPosition,
                             // customerEWT: element.qPosition > 1 ? element.customerEWT - currentServiceEWT : element.customerEWT,
@@ -2694,7 +2713,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
                             if (customer.queueList && Array.isArray(customer.queueList)) {
                                 for (const queueItem of customer.queueList) {
 
-                                                                        // ⏪ Find old position from oldQueue snapshot
+                                    // ⏪ Find old position from oldQueue snapshot
                                     const oldItem = oldQueue.find(item =>
                                         item._id.toString() === queueItem._id.toString()
                                     );
@@ -2702,19 +2721,19 @@ export const barberServedQueueTvApp = async (req, res, next) => {
                                     const oldPosition = oldItem?.qPosition;
                                     const newPosition = queueItem.qPosition;
 
-                                                                        if (oldPosition !== undefined && oldPosition !== newPosition && queueItem._id.toString() !== _id.toString()) {
+                                    if (oldPosition !== undefined && oldPosition !== newPosition && queueItem._id.toString() !== _id.toString()) {
 
 
-                                    const salon = await getSalonBySalonId(salonId);
-                                    const { customerEmail, qPosition, customerName, barberName, serviceEWT, customerEWT, services, dateJoinedQ } = queueItem;
+                                        const salon = await getSalonBySalonId(salonId);
+                                        const { customerEmail, qPosition, customerName, barberName, serviceEWT, customerEWT, services, dateJoinedQ } = queueItem;
 
-                                    const formattedDate = moment(dateJoinedQ, 'YYYY-MM-DD').format('DD-MM-YYYY');
+                                        const formattedDate = moment(dateJoinedQ, 'YYYY-MM-DD').format('DD-MM-YYYY');
 
-                                    const totalServicePrice = services.reduce((total, service) => total + service.servicePrice, 0);
+                                        const totalServicePrice = services.reduce((total, service) => total + service.servicePrice, 0);
 
 
-                                    const emailSubject = `${salon.salonName}-Queue Position Changed (${qPosition})`;
-                                    const emailBody = `
+                                        const emailSubject = `${salon.salonName}-Queue Position Changed (${qPosition})`;
+                                        const emailBody = `
                             <!DOCTYPE html>
                             <html lang="en">
                             <head>
@@ -2786,37 +2805,37 @@ export const barberServedQueueTvApp = async (req, res, next) => {
                             </html>
                         `;
 
-                                    try {
-                                        if (customerEmail) {
-                                            await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                                        try {
+                                            if (customerEmail) {
+                                                await sendQueuePositionEmail(customerEmail, emailSubject, emailBody);
+                                            }
+                                        } catch (error) {
+                                            console.error('Error sending email:', error);
+                                            // Handle error if email sending fails
                                         }
-                                    } catch (error) {
-                                        console.error('Error sending email:', error);
-                                        // Handle error if email sending fails
-                                    }
 
-                                    const pushDevice = await getPushDevicesbyEmailId(customerEmail)
+                                        const pushDevice = await getPushDevicesbyEmailId(customerEmail)
 
-                                    const titleText = "Your queue position has been updated"
+                                        const titleText = "Your queue position has been updated"
 
-                                    if (pushDevice && pushDevice.deviceToken) {
-                                        await sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail, titleText)
+                                        if (pushDevice && pushDevice.deviceToken) {
+                                            await sendQueueUpdateNotification(pushDevice.deviceToken, salon.salonName, qPosition, customerName, pushDevice.deviceType, QUEUE_POSITION_CHANGE, customerEmail, titleText)
+                                        }
                                     }
                                 }
                             }
                         }
+
+                        // return res.status(200).json({
+                        //     success: true,
+                        //     message: 'Customer served from the queue successfully.',
+                        // });
+
+                        return SuccessHandler(QUEUE_SERVE_SUCCESS, SUCCESS_STATUS_CODE, res)
+
                     }
 
-                    // return res.status(200).json({
-                    //     success: true,
-                    //     message: 'Customer served from the queue successfully.',
-                    // });
-
-                    return SuccessHandler(QUEUE_SERVE_SUCCESS, SUCCESS_STATUS_CODE, res)
-
                 }
-
-            }
             }
             // return res.status(404).json({
             //     success: false,
@@ -2930,6 +2949,28 @@ export const cancelQueueTvApp = async (req, res, next) => {
         // Update the status to "cancelled" for the canceled queue in JoinedQueueHistory
         await statusCancelQ(salonId, _id);
 
+
+        const isGroupJoin = canceledQueue.joinedQType === "Group-Join";
+        
+                if (!isGroupJoin) {
+                    const customer = await findCustomerByEmail(canceledQueue.customerEmail);
+                    if (customer) {
+                        customer.isJoinedQueue = false;
+                        await customer.save();
+                    }
+                }
+                else {
+                    const qgCode = canceledQueue.qgCode;
+                    const queueList = updatedQueue.queueList.filter(queue => queue.qgCode === qgCode);
+        
+                    if (queueList.length === 0) {
+                        const customer = await findCustomerByEmail(canceledQueue.customerEmail);
+                        if (customer) {
+                            customer.isJoinedQueue = false;
+                            await customer.save();
+                        }
+                    }
+                }
 
         //Live data render for barber served queue
         const qListByBarber = await qListByBarberId(salonId, barberId)
