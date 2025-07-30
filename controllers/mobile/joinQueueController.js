@@ -831,15 +831,15 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         //     barberName: approvedBarber.name,
         // });
 
-        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
-
-           const queueList = updatedQueue.queueList;
-
-            // Sort the queueList by qPosition
+        const queueList = updatedQueue.queueList || [];
+        if (queueList.length > 1) {
             queueList.sort((a, b) => a.qPosition - b.qPosition);
+        }
+        io.to(`salon_${salonId}`).emit("queueUpdated", queueList);
+        console.log(`Socket emitted to salon_${salonId}`, queueList);
 
-            // Emit only the queueList
-            io.to(`salon_${salonId}`).emit("queueUpdated", queueList);
+
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
 
 
         const customers = await findCustomersToMail(salonId, barberId)
