@@ -113,7 +113,7 @@ export const singleJoinQueue = async (req, res, next) => {
 
 
             existingQueue = await addCustomerToQueue(salonId, newQueue, barberId, customerEmail, name);
-            
+
 
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
@@ -968,6 +968,9 @@ export const getQueueListBySalonId = async (req, res, next) => {
             const sortedQueueList = getSalon[0].queueList;
 
 
+            const customer = await findCustomerByEmail(customerEmail)
+
+
             io.to(`salon_${salonId}`).emit("queueUpdated", sortedQueueList);
 
             // io.to(`salon_${salonId}`).emit('dummyEvent', { message: `Hello salon ${salonId}! This is a test.` });
@@ -975,12 +978,16 @@ export const getQueueListBySalonId = async (req, res, next) => {
             return res.status(200).json({
                 success: true,
                 message: "Queue list of the salon retrieved successfully.",
+                isJoinedQueue: customer.isJoinedQueue,
                 response: sortedQueueList,
             });
         } else {
+            const customer = await findCustomerByEmail(customerEmail)
+
             return res.status(200).json({
                 success: true,
                 message: "No queuelist found",
+                isJoinedQueue: customer.isJoinedQueue,
                 response: []
             });
         }
@@ -1153,15 +1160,5 @@ export const getQlistbyBarberId = async (req, res, next) => {
     }
 };
 
-
-// export const getQueueHistoryByCustomerEmail = async(req, res, next) =>{
-//     try{
-
-
-
-//     }catch (error) {
-//         next(error);
-//     }
-// }
 
 

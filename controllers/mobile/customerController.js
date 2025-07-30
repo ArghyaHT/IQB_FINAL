@@ -1478,7 +1478,6 @@ export const customerDashboard = async (req, res, next) => {
         });
 
         const customerQueueList = await getCustomerQueueList(salonId, customerEmail)
-        console.log(customerQueueList)
 
         return res.status(200).json({
             success: true,
