@@ -792,29 +792,29 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         console.log(enrichedQueueList)
 
 
+        if (enrichedQueueList.queueList.length > 0) {
+            const queueList = enrichedQueueList[0].queueList || [];
+
+            // Sort the queueList by qPosition
+            queueList.sort((a, b) => a.qPosition - b.qPosition);
+
+            // Emit only the queueList
+            io.to(`salon_${salonId}`).emit("queueUpdated", queueList);
+        }
+
         // if (enrichedQueueList.length > 0) {
         //     const queueList = enrichedQueueList[0].queueList || [];
 
-        //     // Sort the queueList by qPosition
-        //     queueList.sort((a, b) => a.qPosition - b.qPosition);
+        //     console.log("Queuelist Cancel Data")
 
-        //     // Emit only the queueList
+        //     // if (queueList.length > 1) {
+        //     //     // Sort only if more than one item
+        //     //     queueList.sort((a, b) => a.qPosition - b.qPosition);
+        //     // }
+
+        //     // Emit only the queueList (sorted or not)
         //     io.to(`salon_${salonId}`).emit("queueUpdated", queueList);
         // }
-
-        if (enrichedQueueList.length > 0) {
-            const queueList = enrichedQueueList[0].queueList || [];
-
-            console.log("Queuelist Cancel Data")
-
-            // if (queueList.length > 1) {
-            //     // Sort only if more than one item
-            //     queueList.sort((a, b) => a.qPosition - b.qPosition);
-            // }
-
-            // Emit only the queueList (sorted or not)
-            io.to(`salon_${salonId}`).emit("queueUpdated", queueList);
-        }
 
 
         // const customer = await findCustomerByEmail(canceledQueue.customerEmail)
