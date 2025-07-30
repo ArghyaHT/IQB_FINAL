@@ -789,14 +789,18 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         const enrichedQueueList = await getSalonQlist(salonId);
 
-        // Check if the queueList exists or if it's empty
-        if (enrichedQueueList) {
-            // Sort the queue list in ascending order based on qPosition
-            enrichedQueueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+        console.log(enrichedQueueList)
 
-            // Emit the updated queue list to the salon
-            await io.to(`salon_${salonId}`).emit("queueUpdated", enrichedQueueList);
-        }
+    
+if (enrichedQueueList && enrichedQueueList.length > 0) {
+  const queueList = enrichedQueueList[0].queueList || [];
+
+  // Sort the queueList by qPosition
+  queueList.sort((a, b) => a.qPosition - b.qPosition);
+
+  // Emit only the queueList
+  io.to(`salon_${salonId}`).emit("queueUpdated", queueList);
+}
 
         // const customer = await findCustomerByEmail(canceledQueue.customerEmail)
 
