@@ -835,12 +835,12 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         console.log(enrichedQueueList)
 
-        const queueList = enrichedQueueList[0].queueList || [];
-        if (queueList.length > 1) {
-            queueList.sort((a, b) => a.qPosition - b.qPosition);
-        }
-        io.to(`salon_${salonId}`).emit("queueUpdated", queueList);
-        console.log(`Socket emitted to salon_${salonId}`, queueList);
+        // // const queueList = enrichedQueueList[0].queueList || [];
+        // if (queueList.length > 1) {
+        //     queueList.sort((a, b) => a.qPosition - b.qPosition);
+        // }
+        // io.to(`salon_${salonId}`).emit("queueUpdated", queueList);
+        // console.log(`Socket emitted to salon_${salonId}`, queueList);
 
 
         await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
