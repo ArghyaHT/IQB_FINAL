@@ -24,6 +24,7 @@ import { SUCCESS_STATUS_CODE } from "../../constants/web/Common/StatusCodeConsta
 import { SuccessHandler } from "../../middlewares/SuccessHandler.js";
 import { getSalonSettings } from "../../services/mobile/salonSettingsService.js";
 import { ERROR_STATUS_CODE } from "../../constants/kiosk/StatusCodeConstants.js";
+import { io } from "../../utils/socket/socket.js";
 
 
 //DESC:CHECK WEATHER THE EMAIL ALREADY EXISTS IN THE DATABASE =======
