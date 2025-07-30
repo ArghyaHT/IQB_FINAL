@@ -787,20 +787,6 @@ export const cancelQueueByCustomer = async (req, res, next) => {
             }
         }
 
-        const enrichedQueueList = await getSalonQlist(salonId);
-
-        console.log("queuelist",enrichedQueueList)
-
-
-        if (enrichedQueueList[0].queueList.length > 0) {
-            const queueList = enrichedQueueList[0].queueList || [];
-
-            // Sort the queueList by qPosition
-            queueList.sort((a, b) => a.qPosition - b.qPosition);
-
-            // Emit only the queueList
-            io.to(`salon_${salonId}`).emit("queueUpdated", queueList);
-        }
 
         // if (enrichedQueueList.length > 0) {
         //     const queueList = enrichedQueueList[0].queueList || [];
@@ -846,6 +832,14 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         // });
 
         await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+
+           const queueList = updatedQueue.queueList;
+
+            // Sort the queueList by qPosition
+            queueList.sort((a, b) => a.qPosition - b.qPosition);
+
+            // Emit only the queueList
+            io.to(`salon_${salonId}`).emit("queueUpdated", queueList);
 
 
         const customers = await findCustomersToMail(salonId, barberId)
@@ -995,7 +989,6 @@ export const getQueueListBySalonId = async (req, res, next) => {
         if (getSalon.length > 0) {
             // Access the sorted queueList array from the result
             const sortedQueueList = getSalon[0].queueList;
-
 
             const customer = await findCustomerByEmail(customerEmail)
 
