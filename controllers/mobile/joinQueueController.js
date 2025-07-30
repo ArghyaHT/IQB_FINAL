@@ -797,10 +797,15 @@ export const cancelQueueByCustomer = async (req, res, next) => {
             await io.to(`salon_${salonId}`).emit("queueUpdated", enrichedQueueList);
         }
 
-        const isJoinedQueue = await findCustomerByEmail(canceledQueue.customerEmail)
+        const customer = await findCustomerByEmail(canceledQueue.customerEmail)
 
-        await io.to(`salon_${canceledQueue.salonId}_customer_${canceledQueue.customerEmail}`).emit("queueButtonUpdateForCustomer", isJoinedQueue );
+             const response = {
+            salonId: customer.salonId,
+            email: customer.email,
+            isJoinedQueue: customer.isJoinedQueue || false,
+        };
 
+        io.to(`salon_${canceledQueue.salonId}_customer_${canceledQueue.customerEmail}`).emit("queueButtonToggle", response);
 
 
         const updatedBarbers = await getAllSalonBarbersForTV(salonId); // ✅ fetch updated barbers

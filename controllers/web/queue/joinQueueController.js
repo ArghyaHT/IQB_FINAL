@@ -263,6 +263,17 @@ export const barberServedQueue = async (req, res, next) => {
                             // Handle error if email sending fails
                         }
 
+                        const customer = await findCustomerByEmail(element.customerEmail)
+
+                        const response = {
+                            salonId: customer.salonId,
+                            email: customer.email,
+                            isJoinedQueue: customer.isJoinedQueue || false,
+                        };
+
+                        io.to(`salon_${salonId}_customer_${element.customerEmail}`).emit("queueButtonToggle", response);
+
+
 
                     } else if (
                         element.barberId === barberId &&
@@ -608,6 +619,18 @@ export const barberServedQueue = async (req, res, next) => {
                             // Handle error if email sending fails
                         }
 
+                        const customer = await findCustomerByEmail(element.customerEmail)
+
+                        const response = {
+                            salonId: customer.salonId,
+                            email: customer.email,
+                            isJoinedQueue: customer.isJoinedQueue || false,
+                        };
+
+                        io.to(`salon_${salonId}_customer_${element.customerEmail}`).emit("queueButtonToggle", response);
+
+
+
 
                     } else if (
                         element.barberId === barberId &&
@@ -912,6 +935,17 @@ export const cancelQueue = async (req, res, next) => {
             // Emit the updated queue list to the salon
             await io.to(`salon_${salonId}`).emit("queueUpdated", enrichedQueueList);
         }
+
+
+        const customer = await findCustomerByEmail(canceledQueue.customerEmail)
+
+        const response = {
+            salonId: customer.salonId,
+            email: customer.email,
+            isJoinedQueue: customer.isJoinedQueue || false,
+        };
+
+        io.to(`salon_${salonId}_customer_${canceledQueue.customerEmail}`).emit("queueButtonToggle", response);
 
 
         const updatedBarbers = await getAllSalonBarbersForTV(salonId); // ✅ fetch updated barbers

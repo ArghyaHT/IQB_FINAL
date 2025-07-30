@@ -1539,6 +1539,15 @@ export const barberServedQueueKiosk = async (req, res, next) => {
                         // Handle error if email sending fails
                     }
 
+                    const customer = await findCustomerByEmail(element.customerEmail)
+
+                    const response = {
+                        salonId: customer.salonId,
+                        email: customer.email,
+                        isJoinedQueue: customer.isJoinedQueue || false,
+                    };
+
+                    io.to(`salon_${salonId}_customer_${element.customerEmail}`).emit("queueButtonToggle", response);
 
                 } else if (
                     element.barberId === barberId &&
@@ -1563,8 +1572,6 @@ export const barberServedQueueKiosk = async (req, res, next) => {
                 await queue.save();
 
                 const updatedBarber = await decreaseBarberEWT(salonId, barberId, currentServiceEWT)
-
-
 
                 const customers = await findCustomersToMail(salonId, barberId)
 
@@ -1791,6 +1798,18 @@ export const cancelQueueKiosk = async (req, res, next) => {
             // Emit the updated queue list to the salon
             await io.to(`salon_${salonId}`).emit("queueUpdated", enrichedQueueList);
         }
+
+
+                const customer = await findCustomerByEmail(canceledQueue.customerEmail)
+        
+                const response = {
+                    salonId: customer.salonId,
+                    email: customer.email,
+                    isJoinedQueue: customer.isJoinedQueue || false,
+                };
+        
+                io.to(`salon_${salonId}_customer_${canceledQueue.customerEmail}`).emit("queueButtonToggle", response);
+        
 
         const salonDetails = await getSalonTimeZone(salonId);
 
@@ -2951,26 +2970,26 @@ export const cancelQueueTvApp = async (req, res, next) => {
 
 
         const isGroupJoin = canceledQueue.joinedQType === "Group-Join";
-        
-                if (!isGroupJoin) {
-                    const customer = await findCustomerByEmail(canceledQueue.customerEmail);
-                    if (customer) {
-                        customer.isJoinedQueue = false;
-                        await customer.save();
-                    }
+
+        if (!isGroupJoin) {
+            const customer = await findCustomerByEmail(canceledQueue.customerEmail);
+            if (customer) {
+                customer.isJoinedQueue = false;
+                await customer.save();
+            }
+        }
+        else {
+            const qgCode = canceledQueue.qgCode;
+            const queueList = updatedQueue.queueList.filter(queue => queue.qgCode === qgCode);
+
+            if (queueList.length === 0) {
+                const customer = await findCustomerByEmail(canceledQueue.customerEmail);
+                if (customer) {
+                    customer.isJoinedQueue = false;
+                    await customer.save();
                 }
-                else {
-                    const qgCode = canceledQueue.qgCode;
-                    const queueList = updatedQueue.queueList.filter(queue => queue.qgCode === qgCode);
-        
-                    if (queueList.length === 0) {
-                        const customer = await findCustomerByEmail(canceledQueue.customerEmail);
-                        if (customer) {
-                            customer.isJoinedQueue = false;
-                            await customer.save();
-                        }
-                    }
-                }
+            }
+        }
 
         //Live data render for barber served queue
         const qListByBarber = await qListByBarberId(salonId, barberId)
