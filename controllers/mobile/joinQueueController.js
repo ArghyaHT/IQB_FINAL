@@ -805,10 +805,12 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         if (enrichedQueueList.length > 0) {
             const queueList = enrichedQueueList[0].queueList || [];
 
-            if (queueList.length > 1) {
-                // Sort only if more than one item
-                queueList.sort((a, b) => a.qPosition - b.qPosition);
-            }
+            console.log("Queuelist Cancel Data")
+
+            // if (queueList.length > 1) {
+            //     // Sort only if more than one item
+            //     queueList.sort((a, b) => a.qPosition - b.qPosition);
+            // }
 
             // Emit only the queueList (sorted or not)
             io.to(`salon_${salonId}`).emit("queueUpdated", queueList);
