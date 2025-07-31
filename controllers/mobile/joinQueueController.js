@@ -743,9 +743,9 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         const updatedBarber = decreaseBarberEWTWhenQCancel(salonId, barberId, canceledServiceEWT);
 
         // Increment the cancellation count
-        foundUser.cancellationCount += 1;
+        // foundUser.cancellationCount += 1;
 
-        foundUser.save();
+        // foundUser.save();
 
         //Adding the cancelled queue to the joinqueuehistory with status cancelled
         let salon = await findSalonQueueListHistory(salonId);
@@ -772,6 +772,10 @@ export const cancelQueueByCustomer = async (req, res, next) => {
             if (customer) {
                 customer.isJoinedQueue = false;
                 await customer.save();
+
+                foundUser.cancellationCount += 1;
+
+                foundUser.save();
             }
         }
         else {
@@ -783,6 +787,10 @@ export const cancelQueueByCustomer = async (req, res, next) => {
                 if (customer) {
                     customer.isJoinedQueue = false;
                     await customer.save();
+                    
+                    foundUser.cancellationCount += 1;
+
+                    foundUser.save();
                 }
             }
         }

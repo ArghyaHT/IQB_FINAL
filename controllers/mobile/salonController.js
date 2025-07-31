@@ -129,7 +129,7 @@ export const getSalonInfo = async (req, res, next) => {
         salonInfo: salonInfoWithFav,
         barbers: barbers,
         salonServiceCategories: salonServiceCategories,
-        categorizedSalonServices: categorizedSalonServices, 
+        categorizedSalonServices: categorizedSalonServices,
 
         // salonRating: salonRating,
         // salonBusinessDays: businessDays
@@ -195,13 +195,22 @@ export const getSalonsByLocation = async (req, res, next) => {
     let salons = [];
     salons = await searchSalonsByLocation(longitude, latitude)
 
+    const getsalonServiceCategories = await getCategories()
+
+    // Attach same category array to every salon
+    const salonsWithCategory = salons.map((salon) => ({
+      ...salon,
+      serviceCategories: getsalonServiceCategories,
+    }));
+
+
     // Populate salonRatings field
     await getSalonRating(salons);
 
     return res.status(200).json({
       success: true,
       message: "Salons retrieved successfully",
-      response: salons
+      response: salonsWithCategory
     });
   }
   catch (error) {

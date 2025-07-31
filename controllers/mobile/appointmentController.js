@@ -1029,7 +1029,6 @@ export const deleteAppointment = async (req, res, next) => {
 
 
     const serviceNames = appointmentToDelete.services.map(service => service.serviceName);
-    console.log('Service Names:', serviceNames);
 
 
     // Find and remove the appointment by its ID
@@ -1109,9 +1108,9 @@ export const deleteAppointment = async (req, res, next) => {
                     <div class="logo">
                         <img src=${salon?.salonLogo[0]?.url} alt="Salon Logo">
                     </div>
-                    <h1 style="text-align: center;">Rescheduled Appointment Details</h1>
+                    <h1 style="text-align: center;">Cancelled Appointment Details</h1>
                     <p>Dear ${barber.name},</p>
-                    <p>You have a new rescheduled appointment. Below are the updated details:</p>
+                    <p>Your appointment is cancelled. Please note the details below. </p>
                     <ul>
                         <li><strong>Customer Name:</strong> ${appointmentToDelete.customerName}</li>
                         <li><strong>Service(s):</strong> ${serviceNames.join(', ')}</li>
@@ -1119,7 +1118,7 @@ export const deleteAppointment = async (req, res, next) => {
                         <li><strong>New Appointment Time:</strong> ${appointmentToDelete.startTime} - ${appointmentToDelete.endTime}</li>
                         <li><strong>Service Estimated Time:</strong> ${totalEWT} minutes</li>
                     </ul>
-                    <p>Please make sure to be prepared for the appointment at the specified time.</p>
+                    <p>Please visit again.</p>
                     <p>Best regards,</p>
                     <p style="margin: 0; padding: 10px 0 5px;">
                         ${salon.salonName}<br>
@@ -1133,7 +1132,7 @@ export const deleteAppointment = async (req, res, next) => {
       `;
     try {
       await sendQueuePositionEmail(appointmentToDelete.customerEmail, emailSubject, emailBody);
-      console.log('Email sent to barber successfully.');
+      console.log('Email sent to customer successfully.');
     } catch (error) {
       console.error('Error sending email to barber:', error);
     }
