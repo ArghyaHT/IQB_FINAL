@@ -4,7 +4,7 @@ import { VerifyAdminJwtToken } from "../../middlewares/kiosk/VerifyAdminJwtToken
 // import { verifyAuthToken } from "../../middlewares/VerifyAuthToken.js";
 // import { verifyBarberRefreshToken } from "../../middlewares/VerifyBarberRefreshToken.js";
 import { loggedIn } from "../../middlewares/kiosk/loggedInMiddlewares.js";
-import { getAllCategories } from "../../controllers/web/admin/salonController.js";
+import { getAllCategories, getAllSalonCategories } from "../../controllers/web/admin/salonController.js";
 import { getAllCategorySalonServices } from "../../controllers/mobile/salonController.js";
 
 const router = express.Router();
@@ -82,5 +82,8 @@ router.route("/salonAccountLogin").post(salonAccountLogin)
 router.route("/googleSalonAccountLogin").post(googleSalonAccountLogin)
 
 router.route("/getAllBarbersBySalonId").get(getAllBarberbySalonId)
+
+router.route("/getAllSalonCategories").post(getAllSalonCategories)
+
 
 export default router;

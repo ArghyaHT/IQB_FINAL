@@ -787,7 +787,7 @@ export const cancelQueueByCustomer = async (req, res, next) => {
                 if (customer) {
                     customer.isJoinedQueue = false;
                     await customer.save();
-                    
+
                     foundUser.cancellationCount += 1;
 
                     foundUser.save();
