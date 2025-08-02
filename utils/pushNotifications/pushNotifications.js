@@ -87,8 +87,9 @@ export const sendQueueUpdateNotification = async (Token, SalonName, Current, Fir
 
     const existingUser = await findNotificationUserByEmail(customerEmail)
 
-        const salon = await getSalonBySalonId(existingUser.salonId)
+        const customer = await findCustomerByEmail(customerEmail)
 
+        const salon = await getSalonBySalonId(customer.salonId)
 
 
     if (existingUser) {
