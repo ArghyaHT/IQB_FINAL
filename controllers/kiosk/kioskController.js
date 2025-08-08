@@ -2290,15 +2290,17 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
             minQueueCountAsInteger = Math.floor(minQueueCount);
         }
 
-        // // Find queues associated with the salonId
-        // const salonQueues = await getSalonQlist(salonId);
+        // Find queues associated with the salonId
+        const salonQueues = await getSalonQlist(salonId);
 
-        // let totalQueueCount = 0;
+        let totalQueueCount = 0;
 
-        // // Calculate total queue count for the salon
-        // salonQueues.forEach(queue => {
-        //     totalQueueCount += queue.queueList.length;
-        // });
+        // Calculate total queue count for the salon
+       salonQueues.forEach(queue => {
+    if (Array.isArray(queue.queueList)) {
+        totalQueueCount += queue.queueList.length;
+    }
+});
 
         // const customerQueueList = await getCustomerQueueList(salonId, customerEmail)
 
@@ -2317,7 +2319,7 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
 
                io.to(`salon_${salonId}`).emit("liveSalonData", {
                 response: {
-                    salonInfo: salonInfo,
+                    salonInfo: updatedSalon,
                     barbers: barbers,
                     barberOnDuty: barberCount,
                     totalQueueCount: totalQueueCount,
@@ -2336,7 +2338,7 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
 
             io.to(`salon_${salonId}`).emit("liveSalonData", {
                 response: {
-                    salonInfo: salonInfo,
+                    salonInfo: updatedSalon,
                     barbers: barbers,
                     barberOnDuty: barberCount,
                     totalQueueCount: totalQueueCount,
