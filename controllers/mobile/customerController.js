@@ -1490,11 +1490,12 @@ export const customerDashboard = async (req, res, next) => {
         });
 
         io.to(`salon_${salonId}`).emit("liveSalonData", {
-            salonInfo,
-            barbers,
-            barberOnDuty: barberCount,
-            totalQueueCount,
-            leastQueueCount: minQueueCountAsInteger,
+            // salonInfo,
+            // barbers,
+            // barberOnDuty: barberCount,
+            // totalQueueCount,
+            // leastQueueCount: minQueueCountAsInteger,
+    message: "This is dummy live salon data",
         });
 
 
@@ -1546,7 +1547,8 @@ export const customerLiveQueue = async(req, res, next) => {
             success: true,
             message: 'Customer queue list found successfully.',
             response: {
-                isJoinedData: customerQueueList}
+                isJoinedData: customerQueueList
+            }
         });
     }catch (error) {
         //console.log(error);
