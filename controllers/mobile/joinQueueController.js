@@ -410,6 +410,13 @@ export const singleJoinQueue = async (req, res, next) => {
             }
         }
 
+        const salonQueueList = await getSalonQlist(salonId)
+
+        salonQueueList.sort((a, b) => a.qPosition - b.qPosition);
+
+
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", { response: salonQueueList });
+
         return res.status(200).json({
             success: true,
             message: "Joined Queue successfully ",
@@ -536,6 +543,13 @@ export const groupJoinQueue = async (req, res, next) => {
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
+            const salonQueueList = await getSalonQlist(salonId)
+
+            salonQueueList.sort((a, b) => a.qPosition - b.qPosition);
+
+            await io.to(`barber_${salonId}_${member.barberId}`).emit("barberQueueUpdated", { response: salonQueueList });
+
+
             const customer = await findCustomerByEmail(member.customerEmail);
 
             if (customer) {
@@ -651,7 +665,7 @@ export const groupJoinQueue = async (req, res, next) => {
             }
         }
 
-        res.status(200).json({
+       return res.status(200).json({
             success: true,
             message: "Group Joined Queue",
             response: existingQueue,
