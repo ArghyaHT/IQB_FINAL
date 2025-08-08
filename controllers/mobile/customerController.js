@@ -1489,10 +1489,9 @@ export const customerDashboard = async (req, res, next) => {
             return secondsA - secondsB;
         });
 
-        io.to(`joinSalon${salonId}`).emit("liveSalonData", {
+        io.to(`salon_${salonId}`).emit("liveSalonData", {
             salonInfo,
             barbers,
-            // isJoinedData: customerQueueList,
             barberOnDuty: barberCount,
             totalQueueCount,
             leastQueueCount: minQueueCountAsInteger,

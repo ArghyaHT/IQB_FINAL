@@ -36,6 +36,7 @@ import { googleLoginBarber } from "../../services/web/barber/barberService.js";
 import { qListByBarberId } from "../../services/web/queue/joinQueueService.js";
 import { findSalonBySalonIdAndAdmin } from "../../services/web/admin/salonService.js";
 import { findCustomerByEmail } from "../../services/mobile/customerService.js";
+import { findBarbersBySalonIdforCustomerDashboard } from "../../services/mobile/barberService.js";
 
 //DESC:LOGIN AN ADMIN =========================
 export const loginKiosk = async (req, res, next) => {
@@ -1802,16 +1803,16 @@ export const cancelQueueKiosk = async (req, res, next) => {
         }
 
 
-                const customer = await findCustomerByEmail(canceledQueue.customerEmail)
-        
-                const response = {
-                    salonId: customer.salonId,
-                    email: customer.email,
-                    isJoinedQueue: customer.isJoinedQueue || false,
-                };
-        
-                io.to(`salon_${salonId}_customer_${canceledQueue.customerEmail}`).emit("queueButtonToggle", response);
-        
+        const customer = await findCustomerByEmail(canceledQueue.customerEmail)
+
+        const response = {
+            salonId: customer.salonId,
+            email: customer.email,
+            isJoinedQueue: customer.isJoinedQueue || false,
+        };
+
+        io.to(`salon_${salonId}_customer_${canceledQueue.customerEmail}`).emit("queueButtonToggle", response);
+
 
         const salonDetails = await getSalonTimeZone(salonId);
 
@@ -2265,13 +2266,61 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
             return ErrorHandler(MOBILE_BOOKING_AVAILABILITY_ERROR, ERROR_STATUS_CODE_404, res)
         }
 
-        // ✅ Emit the updated mobile booking availability over socket
-        // await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
-        //     salonId: salonId,
-        //     mobileBookingAvailability: mobileBookingAvailability
-        // });
+        // Find associated barbers using salonId
+        const barbers = await findBarbersBySalonIdforCustomerDashboard(salonId);
+        const barberCount = barbers.length;
+
+        let barberWithLeastQueues = null;
+        let minQueueCount = Infinity; // Initialize to Infinity
+        let minQueueCountAsInteger;
+
+        barbers.forEach(barber => {
+            if (barber.queueCount < minQueueCount) {
+                minQueueCount = barber.queueCount;
+                barberWithLeastQueues = barber._id;
+            }
+        });
+
+
+        // Check if minQueueCount is still Infinity (meaning no barber found)
+        if (minQueueCount === Infinity) {
+            minQueueCountAsInteger = 0; // or any default value you want
+        } else {
+            minQueueCountAsInteger = Math.floor(minQueueCount);
+        }
+
+        // Find queues associated with the salonId
+        const salonQueues = await getSalonQlist(salonId);
+
+        let totalQueueCount = 0;
+
+        // Calculate total queue count for the salon
+        salonQueues.forEach(queue => {
+            totalQueueCount += queue.queueList.length;
+        });
+
+        const customerQueueList = await getCustomerQueueList(salonId, customerEmail)
+
+        // Sort by timeJoinedQ (format: "HH:mm:ss")
+        customerQueueList.sort((a, b) => {
+            const timeA = a.timeJoinedQ.split(':').map(Number);
+            const timeB = b.timeJoinedQ.split(':').map(Number);
+            const secondsA = timeA[0] * 3600 + timeA[1] * 60 + timeA[2];
+            const secondsB = timeB[0] * 3600 + timeB[1] * 60 + timeB[2];
+            return secondsA - secondsB;
+        });
+
+
 
         if (mobileBookingAvailability === true) {
+
+            io.to(`salon_${salonId}`).emit("liveSalonData", {
+                salonInfo: updatedSalon,
+                barbers,
+                barberOnDuty: barberCount,
+                totalQueueCount,
+                leastQueueCount: minQueueCountAsInteger,
+            });
 
             await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
                 response: updatedSalon,
@@ -2281,6 +2330,14 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
 
         }
         else {
+
+            io.to(`salon_${salonId}`).emit("liveSalonData", {
+                salonInfo: updatedSalon,
+                barbers,
+                barberOnDuty: barberCount,
+                totalQueueCount,
+                leastQueueCount: minQueueCountAsInteger,
+            });
 
             await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
                 response: updatedSalon,
