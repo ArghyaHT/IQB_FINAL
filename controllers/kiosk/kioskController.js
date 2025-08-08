@@ -37,6 +37,7 @@ import { qListByBarberId } from "../../services/web/queue/joinQueueService.js";
 import { findSalonBySalonIdAndAdmin } from "../../services/web/admin/salonService.js";
 import { findCustomerByEmail } from "../../services/mobile/customerService.js";
 import { findBarbersBySalonIdforCustomerDashboard } from "../../services/mobile/barberService.js";
+import { getCustomerQueueList } from "../../services/mobile/joinQueueService.js";
 
 //DESC:LOGIN AN ADMIN =========================
 export const loginKiosk = async (req, res, next) => {
@@ -2294,21 +2295,21 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
 
         let totalQueueCount = 0;
 
-        // Calculate total queue count for the salon
-        salonQueues.forEach(queue => {
-            totalQueueCount += queue.queueList.length;
-        });
+        // // Calculate total queue count for the salon
+        // salonQueues.forEach(queue => {
+        //     totalQueueCount += queue.queueList.length;
+        // });
 
-        const customerQueueList = await getCustomerQueueList(salonId, customerEmail)
+        // const customerQueueList = await getCustomerQueueList(salonId, customerEmail)
 
-        // Sort by timeJoinedQ (format: "HH:mm:ss")
-        customerQueueList.sort((a, b) => {
-            const timeA = a.timeJoinedQ.split(':').map(Number);
-            const timeB = b.timeJoinedQ.split(':').map(Number);
-            const secondsA = timeA[0] * 3600 + timeA[1] * 60 + timeA[2];
-            const secondsB = timeB[0] * 3600 + timeB[1] * 60 + timeB[2];
-            return secondsA - secondsB;
-        });
+        // // Sort by timeJoinedQ (format: "HH:mm:ss")
+        // customerQueueList.sort((a, b) => {
+        //     const timeA = a.timeJoinedQ.split(':').map(Number);
+        //     const timeB = b.timeJoinedQ.split(':').map(Number);
+        //     const secondsA = timeA[0] * 3600 + timeA[1] * 60 + timeA[2];
+        //     const secondsB = timeB[0] * 3600 + timeB[1] * 60 + timeB[2];
+        //     return secondsA - secondsB;
+        // });
 
 
 

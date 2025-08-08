@@ -1495,7 +1495,7 @@ export const customerDashboard = async (req, res, next) => {
             // barberOnDuty: barberCount,
             // totalQueueCount,
             // leastQueueCount: minQueueCountAsInteger,
-    message: "This is dummy live salon data",
+         message: "This is dummy live salon data",
         });
 
 
