@@ -1147,7 +1147,7 @@ export const getQlistbyBarberId = async (req, res, next) => {
         //     // barberName: approvedBarber.name,
         // });
 
-        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {queueList:sortedQlist});
 
         if (approvedBarber.isApproved === false) {
 
