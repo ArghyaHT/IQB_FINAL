@@ -1489,15 +1489,13 @@ export const customerDashboard = async (req, res, next) => {
             return secondsA - secondsB;
         });
 
-        io.to(`customer_${salonId}_${customerEmail}`).emit("liveSalonData", {
-            // salonInfo,
-            // barbers,
+        io.to(`joinSalon${salonId}`).emit("liveSalonData", {
+            salonInfo,
+            barbers,
             // isJoinedData: customerQueueList,
-            // barberOnDuty: barberCount,
-            // totalQueueCount,
-            // leastQueueCount: minQueueCountAsInteger,
-                message: "This is dummy live salon data",
-
+            barberOnDuty: barberCount,
+            totalQueueCount,
+            leastQueueCount: minQueueCountAsInteger,
         });
 
 
@@ -1518,6 +1516,45 @@ export const customerDashboard = async (req, res, next) => {
         next(error);
     }
 }
+
+//DESC: ADD CUSTOMER LIVE DATA SALON ================
+export const customerLiveQueue = async(req, res, next) => {
+    try{
+            const { salonId, customerEmail } = req.body;
+
+            // Find queues associated with the salonId
+        const salonQueues = await getSalonQlist(salonId);
+
+        let totalQueueCount = 0;
+
+        // Calculate total queue count for the salon
+        salonQueues.forEach(queue => {
+            totalQueueCount += queue.queueList.length;
+        });
+
+        const customerQueueList = await getCustomerQueueList(salonId, customerEmail)
+
+        // Sort by timeJoinedQ (format: "HH:mm:ss")
+        customerQueueList.sort((a, b) => {
+            const timeA = a.timeJoinedQ.split(':').map(Number);
+            const timeB = b.timeJoinedQ.split(':').map(Number);
+            const secondsA = timeA[0] * 3600 + timeA[1] * 60 + timeA[2];
+            const secondsB = timeB[0] * 3600 + timeB[1] * 60 + timeB[2];
+            return secondsA - secondsB;
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: 'Customer queue list found successfully.',
+            response: {
+                isJoinedData: customerQueueList}
+        });
+    }catch (error) {
+        //console.log(error);
+        next(error);
+    }
+}
+
 
 //DESC: ADD CUSTOMER FAVORITE SALON ================
 export const customerFavoriteSalon = async (req, res, next) => {

@@ -1,5 +1,5 @@
 import express from "express";
-import { changeCustomerEmailVerifiedStatus, changeCustomerMobileVerifiedStatus, changeDefaultSalonIdOfCustomer, checkEmail, customerConnectSalon, customerDashboard, customerDisconnectSalon, customerFavoriteSalon, deleteCustomerFavoriteSalon, deleteCustomerProfilePicture, deleteSingleCustomer, forgetPassword, getAllAppointmentsByCustomer, getAllCustomerFavoriteSalons, getAllCustomers, getAllSalonsByCustomer, getCustomerDetails, googleCustomerLogin, googleCustomerSignup, matchVerificationCode, resetPassword, sendBulkEmailToCustomers, sendCustomerSupportEmail, sendMailToCustomer, sendVerificationCodeForCustomerEmail, sendVerificationCodeForCustomerMobile, showHideJoinQueueButton, signIn, signUp, updateCustomer, updateCustomerProfilePic, uploadCustomerprofilePic, verificationCodeApi, verifyPasswordResetCode } from "../../controllers/mobile/customerController.js";
+import { changeCustomerEmailVerifiedStatus, changeCustomerMobileVerifiedStatus, changeDefaultSalonIdOfCustomer, checkEmail, customerConnectSalon, customerDashboard, customerDisconnectSalon, customerFavoriteSalon, customerLiveQueue, deleteCustomerFavoriteSalon, deleteCustomerProfilePicture, deleteSingleCustomer, forgetPassword, getAllAppointmentsByCustomer, getAllCustomerFavoriteSalons, getAllCustomers, getAllSalonsByCustomer, getCustomerDetails, googleCustomerLogin, googleCustomerSignup, matchVerificationCode, resetPassword, sendBulkEmailToCustomers, sendCustomerSupportEmail, sendMailToCustomer, sendVerificationCodeForCustomerEmail, sendVerificationCodeForCustomerMobile, showHideJoinQueueButton, signIn, signUp, updateCustomer, updateCustomerProfilePic, uploadCustomerprofilePic, verificationCodeApi, verifyPasswordResetCode } from "../../controllers/mobile/customerController.js";
 // import { CustomerLoggedIn } from "../middlewares/loggedInMiddlewares.js";
 // import { verifyRefreshCustomerToken } from "../middlewares/VerifyRefreshCustomerToken.js";
 
@@ -119,6 +119,9 @@ router.route("/deleteCustomerFavouriteSalon").post(deleteCustomerFavoriteSalon)
 router.route("/sendSupportMailCustomer").post(sendCustomerSupportEmail)
 
 router.route("/showHideJoinQueueButton").post(showHideJoinQueueButton)
+
+router.route("/customerLiveQueue").post(customerLiveQueue)
+
 
 
 export default router;
