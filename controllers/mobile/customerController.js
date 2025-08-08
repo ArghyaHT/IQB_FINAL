@@ -1490,12 +1490,13 @@ export const customerDashboard = async (req, res, next) => {
         });
 
         io.to(`salon_${salonId}`).emit("liveSalonData", {
-            // salonInfo,
-            // barbers,
-            // barberOnDuty: barberCount,
-            // totalQueueCount,
-            // leastQueueCount: minQueueCountAsInteger,
-         message: "This is dummy live salon data",
+            response: {
+                salonInfo: salonInfo,
+                barbers: barbers,
+                barberOnDuty: barberCount,
+                totalQueueCount: totalQueueCount,
+                leastQueueCount: minQueueCountAsInteger
+            }
         });
 
 
@@ -1518,11 +1519,11 @@ export const customerDashboard = async (req, res, next) => {
 }
 
 //DESC: ADD CUSTOMER LIVE DATA SALON ================
-export const customerLiveQueue = async(req, res, next) => {
-    try{
-            const { salonId, customerEmail } = req.body;
+export const customerLiveQueue = async (req, res, next) => {
+    try {
+        const { salonId, customerEmail } = req.body;
 
-            // Find queues associated with the salonId
+        // Find queues associated with the salonId
         const salonQueues = await getSalonQlist(salonId);
 
         let totalQueueCount = 0;
@@ -1550,7 +1551,7 @@ export const customerLiveQueue = async(req, res, next) => {
                 isJoinedData: customerQueueList
             }
         });
-    }catch (error) {
+    } catch (error) {
         //console.log(error);
         next(error);
     }

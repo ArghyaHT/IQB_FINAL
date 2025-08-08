@@ -2315,14 +2315,14 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
 
         if (mobileBookingAvailability === true) {
 
-            io.to(`salon_${salonId}`).emit("liveSalonData", {
-                // salonInfo: updatedSalon,
-                // barbers,
-                // barberOnDuty: barberCount,
-                // totalQueueCount,
-                // leastQueueCount: minQueueCountAsInteger,
-                 message: `mobile booking change to value${mobileBookingAvailability}`,
-
+               io.to(`salon_${salonId}`).emit("liveSalonData", {
+                response: {
+                    salonInfo: salonInfo,
+                    barbers: barbers,
+                    barberOnDuty: barberCount,
+                    totalQueueCount: totalQueueCount,
+                    leastQueueCount: minQueueCountAsInteger
+                }
             });
 
             await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
@@ -2335,13 +2335,13 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
         else {
 
             io.to(`salon_${salonId}`).emit("liveSalonData", {
-                // salonInfo: updatedSalon,
-                // barbers,
-                // barberOnDuty: barberCount,
-                // totalQueueCount,
-                // leastQueueCount: minQueueCountAsInteger,
-                 message: `mobile booking change to value${mobileBookingAvailability}`,
-
+                response: {
+                    salonInfo: salonInfo,
+                    barbers: barbers,
+                    barberOnDuty: barberCount,
+                    totalQueueCount: totalQueueCount,
+                    leastQueueCount: minQueueCountAsInteger
+                }
             });
 
             await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
