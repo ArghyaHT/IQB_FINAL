@@ -346,22 +346,28 @@ export const getDefaultSalon = async (req, res, next) => {
 
                 leastQueueBarbers = barbers.sort((a, b) => a.queueCount - b.queueCount);
 
-                // // Find the minimum queue count first
-                // barbers.forEach(barber => {
-                //     if (barber.queueCount < minQueueCount) {
-                //         minQueueCount = barber.queueCount;
-                //     }
-                // });
-
-                // Collect all barbers who have this minimum queue count
-                // leastQueueBarbers = barbers.filter(barber => barber.queueCount === minQueueCount);
-
                 // Find queues associated with the salonId
                 const salonQueues = await getSalonQlist(admin.salonId);
 
                 let totalQueueCount = 0;
 
-                totalQueueCount = salonQueues.length
+                totalQueueCount = salonQueues?.length
+
+                const salonRoom = `salon_${admin?.salonId}`;
+
+                io.to(salonRoom).emit("liveDefaultSalonData", {
+                    ...defaultSalon.toObject(),
+                    barbersOnDuty: barberCount,
+                    totalQueueCount: totalQueueCount,
+                    leastQueueBarbers: leastQueueBarbers.map(barber => ({
+                        barberId: barber._id,
+                        name: barber.name,
+                        profile: barber.profile,
+                        queueCount: barber.queueCount,
+                        barberEWT: barber.barberEWT,
+                    }))
+                });
+
 
 
                 return SuccessHandler(DEFAULT_SALON_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, {
@@ -414,6 +420,21 @@ export const getDefaultSalon = async (req, res, next) => {
                 let totalQueueCount = 0;
 
                 totalQueueCount = salonQueues.length
+
+                const salonRoom = `salon_${barber?.salonId}`;
+
+                io.to(salonRoom).emit("liveDefaultSalonData", {
+                    ...defaultSalon.toObject(),
+                    barbersOnDuty: barberCount,
+                    totalQueueCount: totalQueueCount,
+                    leastQueueBarbers: leastQueueBarbers.map(barber => ({
+                        barberId: barber._id,
+                        name: barber.name,
+                        profile: barber.profile,
+                        queueCount: barber.queueCount,
+                        barberEWT: barber.barberEWT,
+                    }))
+                });
 
                 return SuccessHandler(DEFAULT_SALON_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, {
                     response: {
@@ -707,6 +728,42 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
                     await io.to(`barber_${salonId}_${barberId}`).emit("barberOnlineStatusUpdate",
                         isOnline
                     );
+
+                     const salonInfo = await getSalonBySalonId(salonId)
+                    
+                            // Find associated barbers using salonId
+                            const barbers = await findBarbersBySalonId(salonId);
+                            const barberCount = barbers.length;
+                    
+                            // Initialize least queue count tracking
+                            let minQueueCount = Infinity;
+                            let leastQueueBarbers = [];
+                    
+                    
+                    
+                            leastQueueBarbers = barbers.sort((a, b) => a.queueCount - b.queueCount);
+                    
+                            // Find queues associated with the salonId
+                            const salonQueues = await getSalonQlist(salonId);
+                    
+                            let totalQueueCount = 0;
+                    
+                            totalQueueCount = salonQueues?.length
+                    
+                            const salonRoom = `salon_${salonId}`;
+                    
+                            io.to(salonRoom).emit("liveDefaultSalonData", {
+                                ...salonInfo.toObject(),
+                                barbersOnDuty: barberCount,
+                                totalQueueCount: totalQueueCount,
+                                leastQueueBarbers: leastQueueBarbers.map(barber => ({
+                                    barberId: barber._id,
+                                    name: barber.name,
+                                    profile: barber.profile,
+                                    queueCount: barber.queueCount,
+                                    barberEWT: barber.barberEWT,
+                                }))
+                            });
                     // Send accessToken containing username and roles 
                     return SuccessHandler(BARBER_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
                 }
@@ -714,6 +771,43 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
                     await io.to(`barber_${salonId}_${barberId}`).emit("barberOnlineStatusUpdate",
                         isOnline
                     );
+
+                     const salonInfo = await getSalonBySalonId(salonId)
+                    
+                            // Find associated barbers using salonId
+                            const barbers = await findBarbersBySalonId(salonId);
+                            const barberCount = barbers.length;
+                    
+                            // Initialize least queue count tracking
+                            let minQueueCount = Infinity;
+                            let leastQueueBarbers = [];
+                    
+                    
+                    
+                            leastQueueBarbers = barbers.sort((a, b) => a.queueCount - b.queueCount);
+                    
+                            // Find queues associated with the salonId
+                            const salonQueues = await getSalonQlist(salonId);
+                    
+                            let totalQueueCount = 0;
+                    
+                            totalQueueCount = salonQueues?.length
+                    
+                            const salonRoom = `salon_${salonId}`;
+                    
+                            io.to(salonRoom).emit("liveDefaultSalonData", {
+                                ...salonInfo.toObject(),
+                                barbersOnDuty: barberCount,
+                                totalQueueCount: totalQueueCount,
+                                leastQueueBarbers: leastQueueBarbers.map(barber => ({
+                                    barberId: barber._id,
+                                    name: barber.name,
+                                    profile: barber.profile,
+                                    queueCount: barber.queueCount,
+                                    barberEWT: barber.barberEWT,
+                                }))
+                            });
+                            
                     return SuccessHandler(BARBER_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
 
                 }
@@ -822,6 +916,43 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
+
+            const salonInfo = await getSalonBySalonId(salonId)
+
+                // Find associated barbers using salonId
+                const barbers = await findBarbersBySalonId(salonId);
+                const barberCount = barbers.length;
+
+                // Initialize least queue count tracking
+                let minQueueCount = Infinity;
+                let leastQueueBarbers = [];
+
+
+
+                leastQueueBarbers = barbers.sort((a, b) => a.queueCount - b.queueCount);
+
+                // Find queues associated with the salonId
+                const salonQueues = await getSalonQlist(salonId);
+
+                let totalQueueCount = 0;
+
+                totalQueueCount = salonQueues?.length
+
+                const salonRoom = `salon_${salonId}`;
+
+                io.to(salonRoom).emit("liveDefaultSalonData", {
+                    ...salonInfo.toObject(),
+                    barbersOnDuty: barberCount,
+                    totalQueueCount: totalQueueCount,
+                    leastQueueBarbers: leastQueueBarbers.map(barber => ({
+                        barberId: barber._id,
+                        name: barber.name,
+                        profile: barber.profile,
+                        queueCount: barber.queueCount,
+                        barberEWT: barber.barberEWT,
+                    }))
+                });
 
             // Extract customer's waiting time and queue position from the result
             const { queue, customerEWT, qPosition } = existingQueue;
@@ -983,6 +1114,42 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
+             const salonInfo = await getSalonBySalonId(salonId)
+
+                // Find associated barbers using salonId
+                const barbers = await findBarbersBySalonId(salonId);
+                const barberCount = barbers.length;
+
+                // Initialize least queue count tracking
+                let minQueueCount = Infinity;
+                let leastQueueBarbers = [];
+
+
+
+                leastQueueBarbers = barbers.sort((a, b) => a.queueCount - b.queueCount);
+
+                // Find queues associated with the salonId
+                const salonQueues = await getSalonQlist(salonId);
+
+                let totalQueueCount = 0;
+
+                totalQueueCount = salonQueues?.length
+
+                const salonRoom = `salon_${salonId}`;
+
+                io.to(salonRoom).emit("liveDefaultSalonData", {
+                    ...salonInfo.toObject(),
+                    barbersOnDuty: barberCount,
+                    totalQueueCount: totalQueueCount,
+                    leastQueueBarbers: leastQueueBarbers.map(barber => ({
+                        barberId: barber._id,
+                        name: barber.name,
+                        profile: barber.profile,
+                        queueCount: barber.queueCount,
+                        barberEWT: barber.barberEWT,
+                    }))
+                });
 
             // Extract customer's waiting time and queue position from the result
             const { queue, customerEWT, qPosition } = existingQueue;
@@ -2296,28 +2463,14 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
         let totalQueueCount = 0;
 
         // Calculate total queue count for the salon
-       salonQueues.forEach(queue => {
-    if (Array.isArray(queue.queueList)) {
-        totalQueueCount += queue.queueList.length;
-    }
-});
-
-        // const customerQueueList = await getCustomerQueueList(salonId, customerEmail)
-
-        // // Sort by timeJoinedQ (format: "HH:mm:ss")
-        // customerQueueList.sort((a, b) => {
-        //     const timeA = a.timeJoinedQ.split(':').map(Number);
-        //     const timeB = b.timeJoinedQ.split(':').map(Number);
-        //     const secondsA = timeA[0] * 3600 + timeA[1] * 60 + timeA[2];
-        //     const secondsB = timeB[0] * 3600 + timeB[1] * 60 + timeB[2];
-        //     return secondsA - secondsB;
-        // });
-
-
-
+        salonQueues.forEach(queue => {
+            if (Array.isArray(queue.queueList)) {
+                totalQueueCount += queue.queueList.length;
+            }
+        });
         if (mobileBookingAvailability === true) {
 
-               io.to(`salon_${salonId}`).emit("liveSalonData", {
+            io.to(`salon_${salonId}`).emit("liveSalonData", {
                 response: {
                     salonInfo: updatedSalon,
                     barbers: barbers,

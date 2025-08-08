@@ -27,7 +27,7 @@ import { SuccessHandler } from "../../../middlewares/SuccessHandler.js";
 import { ALLOWED_IMAGE_EXTENSIONS, BARBER_IMAGE_EMPTY_ERROR, IMAGE_FAILED_DELETE, MAX_FILE_SIZE } from "../../../constants/web/Common/ImageConstant.js";
 import { SALON_EXISTS_ERROR, SALON_NOT_CREATED_ERROR, SALON_NOT_FOUND_ERROR, SALON_SERVICES_RETRIEVED_SUCESS } from "../../../constants/web/SalonConstants.js";
 import { NO_SALON_CONNECTED_ERROR } from "../../../constants/web/QueueConstants.js";
-import { getAllSalonBarbersForTV } from "../../../services/kiosk/barber/barberService.js";
+import { findBarbersBySalonId, getAllSalonBarbersForTV } from "../../../services/kiosk/barber/barberService.js";
 
 
 // Desc: Register
@@ -1401,6 +1401,42 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
         await io.to(`barber_${salonId}_${barberId}`).emit("barberOnlineStatusUpdate",
             isOnline
         );
+
+        const salonInfo = await getSalonBySalonId(salonId)
+
+        // Find associated barbers using salonId
+        const barbers = await findBarbersBySalonId(salonId);
+        const barberCount = barbers.length;
+
+        // Initialize least queue count tracking
+        let minQueueCount = Infinity;
+        let leastQueueBarbers = [];
+
+
+
+        leastQueueBarbers = barbers.sort((a, b) => a.queueCount - b.queueCount);
+
+        // Find queues associated with the salonId
+        const salonQueues = await getSalonQlist(salonId);
+
+        let totalQueueCount = 0;
+
+        totalQueueCount = salonQueues?.length
+
+        const salonRoom = `salon_${salonId}`;
+
+        io.to(salonRoom).emit("liveDefaultSalonData", {
+            ...salonInfo.toObject(),
+            barbersOnDuty: barberCount,
+            totalQueueCount: totalQueueCount,
+            leastQueueBarbers: leastQueueBarbers.map(barber => ({
+                barberId: barber._id,
+                name: barber.name,
+                profile: barber.profile,
+                queueCount: barber.queueCount,
+                barberEWT: barber.barberEWT,
+            }))
+        });
 
 
 
