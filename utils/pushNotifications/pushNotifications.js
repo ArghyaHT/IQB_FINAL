@@ -87,9 +87,9 @@ export const sendQueueUpdateNotification = async (Token, SalonName, Current, Fir
 
     const existingUser = await findNotificationUserByEmail(customerEmail)
 
-        const customer = await findCustomerByEmail(customerEmail)
+    const customer = await findCustomerByEmail(customerEmail)
 
-        const salon = await getSalonBySalonId(customer.salonId)
+    const salon = await getSalonBySalonId(customer.salonId)
 
 
     if (existingUser) {
@@ -152,7 +152,7 @@ export const sendAppointmentNotification = async (Token, SalonName, FirstLastNam
 
     console.log("expo notification fired", response)
 
- const salon = await getSalonBySalonId(existingUser.salonId)
+    const salon = await getSalonBySalonId(existingUser.salonId)
 
     if (existingUser) {
         // Email already exists, update the existing document
