@@ -168,7 +168,6 @@ const salonsSchema = new mongoose.Schema({
             type: String,
         },
     }],
-
     isLicensed: {
         type: Boolean,
         default: false

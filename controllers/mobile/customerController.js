@@ -1489,6 +1489,16 @@ export const customerDashboard = async (req, res, next) => {
             return secondsA - secondsB;
         });
 
+        io.to(`customer_${salonId}_${customerEmail}`).emit("liveSalonData", {
+            salonInfo,
+            barbers,
+            isJoinedData: customerQueueList,
+            barberOnDuty: barberCount,
+            totalQueueCount,
+            leastQueueCount: minQueueCountAsInteger,
+        });
+
+
         return res.status(200).json({
             success: true,
             message: 'Salon and barbers found successfully.',
