@@ -168,6 +168,7 @@ export const getSalonsByNameAndCity = async (req, res, next) => {
     }
 
     const getAllSalons = await searchSalonsByNameAndCity(query, sortOptions, limit);
+    
     const getsalonServiceCategories = await getCategories()
 
     // Attach same category array to every salon
@@ -176,6 +177,7 @@ export const getSalonsByNameAndCity = async (req, res, next) => {
       serviceCategories: getsalonServiceCategories,
     }));
 
+    
     return res.status(200).json({
       success: true,
       message: "Salons retrieved successsfully",

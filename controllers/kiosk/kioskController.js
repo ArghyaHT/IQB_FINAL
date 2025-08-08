@@ -280,7 +280,9 @@ export const getAllSalonsByAdmin = async (req, res, next) => {
         // Fetch all salons associated with the admin from registeredSalons array
         const salons = await allSalonsByAdmin(admin.registeredSalons)
 
-        return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { salons: salons })
+        const activeQueueSalons = salons.filter(salon => salon.isQueuing === true);
+
+        return SuccessHandler(SALONS_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, { salons: activeQueueSalons })
 
     } catch (error) {
         next(error);

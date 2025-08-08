@@ -1490,12 +1490,14 @@ export const customerDashboard = async (req, res, next) => {
         });
 
         io.to(`customer_${salonId}_${customerEmail}`).emit("liveSalonData", {
-            salonInfo,
-            barbers,
-            isJoinedData: customerQueueList,
-            barberOnDuty: barberCount,
-            totalQueueCount,
-            leastQueueCount: minQueueCountAsInteger,
+            // salonInfo,
+            // barbers,
+            // isJoinedData: customerQueueList,
+            // barberOnDuty: barberCount,
+            // totalQueueCount,
+            // leastQueueCount: minQueueCountAsInteger,
+                message: "This is dummy live salon data",
+
         });
 
 
