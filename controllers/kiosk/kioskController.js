@@ -2321,7 +2321,7 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
                 // barberOnDuty: barberCount,
                 // totalQueueCount,
                 // leastQueueCount: minQueueCountAsInteger,
-                 message: `mobile booking change to value`,
+                 message: `mobile booking change to value${mobileBookingAvailability}`,
 
             });
 
@@ -2340,7 +2340,7 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
                 // barberOnDuty: barberCount,
                 // totalQueueCount,
                 // leastQueueCount: minQueueCountAsInteger,
-                 message: `mobile booking change to value`,
+                 message: `mobile booking change to value${mobileBookingAvailability}`,
 
             });
 
