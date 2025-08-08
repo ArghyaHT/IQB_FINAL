@@ -2290,10 +2290,10 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
             minQueueCountAsInteger = Math.floor(minQueueCount);
         }
 
-        // Find queues associated with the salonId
-        const salonQueues = await getSalonQlist(salonId);
+        // // Find queues associated with the salonId
+        // const salonQueues = await getSalonQlist(salonId);
 
-        let totalQueueCount = 0;
+        // let totalQueueCount = 0;
 
         // // Calculate total queue count for the salon
         // salonQueues.forEach(queue => {
@@ -2316,12 +2316,12 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
         if (mobileBookingAvailability === true) {
 
             io.to(`salon_${salonId}`).emit("liveSalonData", {
-                // salonInfo: updatedSalon,
-                // barbers,
-                // barberOnDuty: barberCount,
-                // totalQueueCount,
-                // leastQueueCount: minQueueCountAsInteger,
-                 message: `mobile booking change to value${updatedSalon}`,
+                salonInfo: updatedSalon,
+                barbers,
+                barberOnDuty: barberCount,
+                totalQueueCount,
+                leastQueueCount: minQueueCountAsInteger,
+                //  message: `mobile booking change to value${updatedSalon}`,
 
             });
 
@@ -2335,12 +2335,12 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
         else {
 
             io.to(`salon_${salonId}`).emit("liveSalonData", {
-                // salonInfo: updatedSalon,
-                // barbers,
-                // barberOnDuty: barberCount,
-                // totalQueueCount,
-                // leastQueueCount: minQueueCountAsInteger,
-                 message: `mobile booking change to value${updatedSalon}`,
+                salonInfo: updatedSalon,
+                barbers,
+                barberOnDuty: barberCount,
+                totalQueueCount,
+                leastQueueCount: minQueueCountAsInteger,
+                //  message: `mobile booking change to value${updatedSalon}`,
 
             });
 
