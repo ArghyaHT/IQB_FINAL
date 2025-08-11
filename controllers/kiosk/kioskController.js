@@ -2703,7 +2703,7 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
 
             await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
                 response: updatedSalon,
-                MOBILE_BOOKING_ONLINE_SUCCESS,
+                MOBILE_BOOKING_OFFLINE_SUCCESS,
             })
 
 
