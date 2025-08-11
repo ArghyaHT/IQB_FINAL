@@ -104,6 +104,13 @@ export const loginAdmin = async (req, res, next) => {
 
         const foundUser = await findAdminByEmailandRole(email)
 
+         if (foundUser.AuthType == "google") {
+            return res.status(400).json({
+                success: false,
+                message: 'Use Google login for this email.'
+            })
+        }
+
         if (!foundUser) {
             return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
         }
@@ -359,6 +366,13 @@ export const googleAdminLogin = async (req, res, next) => {
 
         if (!foundUser) {
             return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
+        }
+
+         if (foundUser.AuthType === "local") {
+            return res.status(400).json({
+                success: false,
+                message: 'Email not linked to Google. Please log in with email and password.'
+            });
         }
 
         const accessToken = jwt.sign(

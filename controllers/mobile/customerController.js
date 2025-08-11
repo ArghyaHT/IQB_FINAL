@@ -341,7 +341,7 @@ export const signIn = async (req, res, next) => {
                 message: 'Use Google login for this email.'
             })
         }
-
+        
         const match = await bcrypt.compare(password, foundUser.password)
 
         if (!match) return res.status(400).json({
