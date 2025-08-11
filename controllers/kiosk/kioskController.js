@@ -2665,6 +2665,13 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
         });
         if (mobileBookingAvailability === true) {
 
+            console.log(updatedSalon)
+
+              await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
+                response: updatedSalon,
+                MOBILE_BOOKING_ONLINE_SUCCESS,
+            })
+
             io.to(`salon_${salonId}`).emit("liveSalonData", {
                 response: {
                     salonInfo: updatedSalon,
@@ -2675,15 +2682,22 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
                 }
             });
 
-            await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
-                response: updatedSalon,
-                MOBILE_BOOKING_ONLINE_SUCCESS,
-            })
+
             return SuccessHandler(MOBILE_BOOKING_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
 
         }
         else {
 
+                        console.log(updatedSalon)
+
+
+              await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
+                response: updatedSalon,
+                MOBILE_BOOKING_ONLINE_SUCCESS,
+            })
+
+
+
             io.to(`salon_${salonId}`).emit("liveSalonData", {
                 response: {
                     salonInfo: updatedSalon,
@@ -2694,10 +2708,6 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
                 }
             });
 
-            await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
-                response: updatedSalon,
-                MOBILE_BOOKING_OFFLINE_SUCCESS,
-            })
             return SuccessHandler(MOBILE_BOOKING_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
         }
 
