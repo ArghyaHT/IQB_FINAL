@@ -138,7 +138,8 @@ export const singleJoinQueue = async (req, res, next) => {
 
             let totalQueueCount = 0;
 
-            totalQueueCount = salonQueues?.length
+            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
+
 
             const salonRoom = `salon_${salonId}`;
 
@@ -348,9 +349,13 @@ export const singleJoinQueue = async (req, res, next) => {
             // Find queues associated with the salonId
             const salonQueues = await getSalonQlist(salonId);
 
+            console.log(salonQueues)
+
             let totalQueueCount = 0;
 
-            totalQueueCount = salonQueues?.length
+            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
+
+            console.log(totalQueueCount)
 
             const salonRoom = `salon_${salonId}`;
 
@@ -638,7 +643,7 @@ export const groupJoinQueue = async (req, res, next) => {
 
             let totalQueueCount = 0;
 
-            totalQueueCount = salonQueues?.length
+            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
 
             const salonRoom = `salon_${salonId}`;
 
@@ -971,7 +976,7 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         let totalQueueCount = 0;
 
-        totalQueueCount = salonQueues?.length
+            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
 
         const salonRoom = `salon_${salonId}`;
 

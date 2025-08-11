@@ -1438,7 +1438,7 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
 
         let totalQueueCount = 0;
 
-        totalQueueCount = salonQueues?.length
+            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
 
         const salonRoom = `salon_${salonId}`;
 

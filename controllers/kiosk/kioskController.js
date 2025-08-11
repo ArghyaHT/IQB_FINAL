@@ -351,9 +351,7 @@ export const getDefaultSalon = async (req, res, next) => {
 
                 let totalQueueCount = 0;
 
-                totalQueueCount = salonQueues?.length
-
-                console.log(totalQueueCount)
+            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
 
                 const salonRoom = `salon_${admin?.salonId}`;
 
@@ -421,7 +419,7 @@ export const getDefaultSalon = async (req, res, next) => {
 
                 let totalQueueCount = 0;
 
-                totalQueueCount = salonQueues.length
+            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
 
                 const salonRoom = `salon_${barber?.salonId}`;
 
@@ -750,7 +748,7 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
 
                     let totalQueueCount = 0;
 
-                    totalQueueCount = salonQueues?.length
+            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
 
                     const salonRoom = `salon_${salonId}`;
 
@@ -841,7 +839,7 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
 
                     let totalQueueCount = 0;
 
-                    totalQueueCount = salonQueues?.length
+            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
 
                     const salonRoom = `salon_${salonId}`;
 
@@ -1035,7 +1033,7 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             let totalQueueCount = 0;
 
-            totalQueueCount = salonQueues?.length
+            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
 
             const salonRoom = `salon_${salonId}`;
 
@@ -1280,7 +1278,7 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             let totalQueueCount = 0;
 
-            totalQueueCount = salonQueues?.length
+            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
 
             const salonRoom = `salon_${salonId}`;
 

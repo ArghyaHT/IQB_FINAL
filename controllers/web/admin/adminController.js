@@ -364,6 +364,7 @@ export const googleAdminLogin = async (req, res, next) => {
 
         const foundUser = await googleLoginAdmin(email)
 
+
          if (foundUser.AuthType === "local") {
             return res.status(400).json({
                 success: false,
