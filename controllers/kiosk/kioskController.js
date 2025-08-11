@@ -2667,7 +2667,7 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
 
             console.log(updatedSalon)
 
-              await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
+            await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
                 response: updatedSalon,
                 MOBILE_BOOKING_ONLINE_SUCCESS,
             })
@@ -2688,10 +2688,10 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
         }
         else {
 
-                        console.log(updatedSalon)
+            console.log(updatedSalon)
 
 
-              await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
+            await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
                 response: updatedSalon,
                 MOBILE_BOOKING_ONLINE_SUCCESS,
             })

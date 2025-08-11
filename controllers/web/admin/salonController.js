@@ -30,6 +30,7 @@ import { io } from "../../../utils/socket/socket.js";
 import { getAllSalonBarbersForTV } from "../../../services/kiosk/barber/barberService.js";
 import { getCategories } from "../../../services/common/categoryServices.js";
 import { CATEGORY_RETRIEVED_SUCCESS } from "../../../constants/common/commonConstants.js";
+import { KIOSK_ONLINE_SUCCESS, MOBILE_BOOKING_ONLINE_SUCCESS } from "../../../constants/kiosk/KioskConstants.js";
 
 
 //DESC:CREATE SALON BY ADMIN============================
@@ -219,7 +220,7 @@ export const createSalonByAdmin = async (req, res, next) => {
         servicePrice: s.servicePrice,
         serviceEWT: s.serviceEWT,
         vipService: s.vipService,
-        serviceCategoryName: s.serviceCategoryName? s.serviceCategoryName: ""
+        serviceCategoryName: s.serviceCategoryName ? s.serviceCategoryName : ""
       };
     });
 
@@ -391,7 +392,7 @@ export const updateSalonBySalonIdAndAdminEmail = async (req, res, next) => {
             servicePrice: matchingService.servicePrice,
             serviceEWT: matchingService.serviceEWT,
             vipService: matchingService.vipService,
-            serviceCategoryName: matchingService.serviceCategoryName? matchingService.serviceCategoryName: ""
+            serviceCategoryName: matchingService.serviceCategoryName ? matchingService.serviceCategoryName : ""
 
           };
         }
@@ -958,6 +959,16 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
         response: salon,
         SALON_OFFLINE_SUCCESS,
       })
+
+      await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
+        response: salon,
+        MOBILE_BOOKING_ONLINE_SUCCESS,
+      })
+
+      await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
+        response: salon,
+        KIOSK_ONLINE_SUCCESS,
+      });
 
 
       // return res.status(200).json({ success: true, message: "The salon is currently offline.", response: updatedSalon });
@@ -1562,14 +1573,14 @@ export const salonTrailPaidPeriod = async (req, res, next) => {
 };
 
 
-export const getAllCategories = async(req, res, next) => {
-  try{
+export const getAllCategories = async (req, res, next) => {
+  try {
 
     const categories = await getCategories();
 
-       return SuccessHandler(CATEGORY_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, {
-                response: categories
-            });
+    return SuccessHandler(CATEGORY_RETRIEVED_SUCCESS, SUCCESS_STATUS_CODE, res, {
+      response: categories
+    });
 
   }
   catch (error) {
