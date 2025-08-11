@@ -28,6 +28,8 @@ import { ALLOWED_IMAGE_EXTENSIONS, BARBER_IMAGE_EMPTY_ERROR, IMAGE_FAILED_DELETE
 import { SALON_EXISTS_ERROR, SALON_NOT_CREATED_ERROR, SALON_NOT_FOUND_ERROR, SALON_SERVICES_RETRIEVED_SUCESS } from "../../../constants/web/SalonConstants.js";
 import { NO_SALON_CONNECTED_ERROR } from "../../../constants/web/QueueConstants.js";
 import { findBarbersBySalonId, getAllSalonBarbersForTV } from "../../../services/kiosk/barber/barberService.js";
+import { getSalonQlist } from "../../../services/mobile/joinQueueService.js";
+import { findBarbersBySalonIdforCustomerDashboard } from "../../../services/mobile/barberService.js";
 
 
 // Desc: Register
@@ -1438,6 +1440,53 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
             }))
         });
 
+        const salonInfoForDashboard = await getSalonBySalonId(salonId)
+
+        // Find associated barbers using salonId
+        const barbersForDashboard = await findBarbersBySalonIdforCustomerDashboard(salonId);
+        const barberCountForDashboard = barbersForDashboard.length;
+
+        let barberWithLeastQueues = null;
+        let minQueueCountForDashboard = Infinity; // Initialize to Infinity
+        let minQueueCountAsInteger;
+
+        barbersForDashboard.forEach(barber => {
+            if (barber.queueCount < minQueueCount) {
+                minQueueCount = barber.queueCount;
+                barberWithLeastQueues = barber._id;
+            }
+        });
+
+
+        // Check if minQueueCount is still Infinity (meaning no barber found)
+        if (minQueueCountForDashboard === Infinity) {
+            minQueueCountAsInteger = 0; // or any default value you want
+        } else {
+            minQueueCountAsInteger = Math.floor(minQueueCount);
+        }
+
+        // Find queues associated with the salonId
+        const salonQueuesForDashboard = await getSalonQlist(salonId);
+
+        let totalQueueCountForDashboard = 0;
+
+        // Calculate total queue count for the salon
+        salonQueuesForDashboard.forEach(queue => {
+            if (Array.isArray(queue.queueList)) {
+                totalQueueCountForDashboard += queue.queueList.length;
+            }
+        });
+
+
+        io.to(`salon_${salonId}`).emit("liveSalonData", {
+            response: {
+                salonInfo: salonInfoForDashboard,
+                barbers: barbersForDashboard,
+                barberOnDuty: barberCountForDashboard,
+                totalQueueCount: totalQueueCountForDashboard,
+                leastQueueCount: minQueueCountAsInteger
+            }
+        });
 
 
         return SuccessHandler(CHANGE_BARBER_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
