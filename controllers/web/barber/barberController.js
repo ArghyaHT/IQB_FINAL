@@ -1571,7 +1571,7 @@ export const sendVerificationCodeForBarberEmail = async (req, res, next) => {
         await user.save();
 
         try {
-            await sendVerificationCode(email, user.name, verificationCode);
+            await sendVerificationCode(email, verificationCode);
         } catch (error) {
             return ErrorHandler(VERIFICATION_EMAIL_ERROR, ERROR_STATUS_CODE, res)
         }
