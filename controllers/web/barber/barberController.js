@@ -383,15 +383,15 @@ export const googleBarberLogin = async (req, res, next) => {
 
         const foundUser = await googleLoginBarber(email)
 
-        if (!foundUser) {
-            return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
-        }
-
          if (foundUser.AuthType === "local") {
             return res.status(400).json({
                 success: false,
                 message: 'Email not linked to Google. Please log in with email and password.'
             });
+        }
+
+              if (!foundUser) {
+            return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
         const accessToken = jwt.sign(

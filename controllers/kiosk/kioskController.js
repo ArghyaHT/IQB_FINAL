@@ -353,6 +353,8 @@ export const getDefaultSalon = async (req, res, next) => {
 
                 totalQueueCount = salonQueues?.length
 
+                console.log(totalQueueCount)
+
                 const salonRoom = `salon_${admin?.salonId}`;
 
                 io.to(salonRoom).emit("liveDefaultSalonData", {
