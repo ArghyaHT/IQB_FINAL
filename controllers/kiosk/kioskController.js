@@ -2665,7 +2665,7 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
         });
         if (mobileBookingAvailability === true) {
 
-            console.log(updatedSalon)
+            console.log("mobile update live",updatedSalon)
 
             await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
                 response: updatedSalon,
@@ -2688,7 +2688,7 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
         }
         else {
 
-            console.log(updatedSalon)
+            console.log("mobile update live",updatedSalon)
 
 
             await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
