@@ -30,6 +30,7 @@ import { NO_SALON_CONNECTED_ERROR } from "../../../constants/web/QueueConstants.
 import { findBarbersBySalonId, getAllSalonBarbersForTV } from "../../../services/kiosk/barber/barberService.js";
 import { getSalonQlist } from "../../../services/mobile/joinQueueService.js";
 import { findBarbersBySalonIdforCustomerDashboard } from "../../../services/mobile/barberService.js";
+import { io } from "../../../utils/socket/socket.js";
 
 
 // Desc: Register
@@ -110,7 +111,7 @@ export const loginController = async (req, res, next) => {
         const foundUser = await findBarberByEmailAndRole(email);
 
 
-         if (foundUser.AuthType == "google") {
+        if (foundUser.AuthType == "google") {
             return res.status(400).json({
                 success: false,
                 message: 'Use Google login for this email.'
@@ -383,14 +384,14 @@ export const googleBarberLogin = async (req, res, next) => {
 
         const foundUser = await googleLoginBarber(email)
 
-         if (foundUser.AuthType === "local") {
+        if (foundUser.AuthType === "local") {
             return res.status(400).json({
                 success: false,
                 message: 'Email not linked to Google. Please log in with email and password.'
             });
         }
 
-              if (!foundUser) {
+        if (!foundUser) {
             return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
         }
 
@@ -1425,11 +1426,11 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
         const barbers = await findBarbersBySalonId(salonId);
         const barberCount = barbers.length;
 
+        console.log(barberCount)
+
         // Initialize least queue count tracking
         let minQueueCount = Infinity;
         let leastQueueBarbers = [];
-
-
 
         leastQueueBarbers = barbers.sort((a, b) => a.queueCount - b.queueCount);
 
@@ -1438,7 +1439,7 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
 
         let totalQueueCount = 0;
 
-            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
+        totalQueueCount = salonQueues[0]?.queueList?.length || 0;
 
         const salonRoom = `salon_${salonId}`;
 
