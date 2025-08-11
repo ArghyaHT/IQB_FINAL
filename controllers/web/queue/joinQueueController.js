@@ -18,7 +18,7 @@ import { ADMIN_NOT_EXIST_ERROR, INVALID_EMAIL_ERROR } from "../../../constants/w
 import { NO_SALON_CONNECTED_ERROR, QUEUE_CANCEL_SUCCESS, QUEUE_NOT_FOUND_BY_ID_ERROR, QUEUE_NOT_FOUND_ERROR, QUEUE_POSITION_ERROR, QUEUE_SERVE_SUCCESS, QUEUELIST_BARBER_ERROR, QUEUELIST_EMPTY_FOR_BARBER_SUCCESS, RETRIVE_EMPTY_QUEUELIST_SUCCESS, RETRIVE_QUEUELIST_SUCCESS } from "../../../constants/web/QueueConstants.js";
 import { BARBER_EXISTS_ERROR } from "../../../constants/web/BarberConstants.js";
 import SalonQueueList from "../../../models/salonQueueListModel.js";
-import { findBarberByEmailAndRole, getAllSalonBarbersForTV } from "../../../services/kiosk/barber/barberService.js";
+import { findBarberByEmailAndRole, findBarbersBySalonId, getAllSalonBarbersForTV } from "../../../services/kiosk/barber/barberService.js";
 import { getPushDevicesbyEmailId } from "../../../services/mobile/pushDeviceTokensService.js";
 import { NEW_QUEUE_ADD, NEW_QUEUE_UPDATED, QUEUE_POSITION_CHANGE } from "../../../constants/mobile/NotificationConstants.js";
 import { sendQueueNotification, sendQueueUpdateNotification } from "../../../utils/pushNotifications/pushNotifications.js";
@@ -361,6 +361,35 @@ export const barberServedQueue = async (req, res, next) => {
                             totalQueueCount: totalQueueCount,
                             leastQueueCount: minQueueCountAsInteger
                         }
+                    });
+
+
+                    // Find associated barbers using salonId
+                    const barbersKiosk = await findBarbersBySalonId(salonId);
+                    const barberCountKiosk = barbersKiosk.length;
+
+                    // Initialize least queue count tracking
+                    let leastQueueBarbers = [];
+
+
+
+                    leastQueueBarbers = barbersKiosk.sort((a, b) => a.queueCount - b.queueCount);
+
+                    // totalQueueCount = salonQueues[0]?.queueList?.length || 0;
+
+                    const salonRoom = `salon_${salonId}`;
+
+                    io.to(salonRoom).emit("liveDefaultSalonData", {
+                        ...salonInfo.toObject(),
+                        barbersOnDuty: barberCountKiosk,
+                        totalQueueCount: totalQueueCount,
+                        leastQueueBarbers: leastQueueBarbers.map(barber => ({
+                            barberId: barber._id,
+                            name: barber.name,
+                            profile: barber.profile,
+                            queueCount: barber.queueCount,
+                            barberEWT: barber.barberEWT,
+                        }))
                     });
 
                     if (customers && customers.length > 0 && servedQPosition !== null) {
@@ -784,6 +813,34 @@ export const barberServedQueue = async (req, res, next) => {
                         }
                     });
 
+                    // Find associated barbers using salonId
+                    const barbersKiosk = await findBarbersBySalonId(salonId);
+                    const barberCountKiosk = barbersKiosk.length;
+
+                    // Initialize least queue count tracking
+                    let leastQueueBarbers = [];
+
+
+
+                    leastQueueBarbers = barbersKiosk.sort((a, b) => a.queueCount - b.queueCount);
+
+                    // totalQueueCount = salonQueues[0]?.queueList?.length || 0;
+
+                    const salonRoom = `salon_${salonId}`;
+
+                    io.to(salonRoom).emit("liveDefaultSalonData", {
+                        ...salonInfo.toObject(),
+                        barbersOnDuty: barberCountKiosk,
+                        totalQueueCount: totalQueueCount,
+                        leastQueueBarbers: leastQueueBarbers.map(barber => ({
+                            barberId: barber._id,
+                            name: barber.name,
+                            profile: barber.profile,
+                            queueCount: barber.queueCount,
+                            barberEWT: barber.barberEWT,
+                        }))
+                    });
+
 
                     const customers = await findCustomersToMail(salonId, barberId)
 
@@ -1110,6 +1167,34 @@ export const cancelQueue = async (req, res, next) => {
                 totalQueueCount: totalQueueCount,
                 leastQueueCount: minQueueCountAsInteger
             }
+        });
+
+        // Find associated barbers using salonId
+        const barbersKiosk = await findBarbersBySalonId(salonId);
+        const barberCountKiosk = barbersKiosk.length;
+
+        // Initialize least queue count tracking
+        let leastQueueBarbers = [];
+
+
+
+        leastQueueBarbers = barbersKiosk.sort((a, b) => a.queueCount - b.queueCount);
+
+        // totalQueueCount = salonQueues[0]?.queueList?.length || 0;
+
+        const salonRoom = `salon_${salonId}`;
+
+        io.to(salonRoom).emit("liveDefaultSalonData", {
+            ...salonInfo.toObject(),
+            barbersOnDuty: barberCountKiosk,
+            totalQueueCount: totalQueueCount,
+            leastQueueBarbers: leastQueueBarbers.map(barber => ({
+                barberId: barber._id,
+                name: barber.name,
+                profile: barber.profile,
+                queueCount: barber.queueCount,
+                barberEWT: barber.barberEWT,
+            }))
         });
 
 
