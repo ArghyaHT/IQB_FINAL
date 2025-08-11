@@ -47,7 +47,7 @@ export const resetPassword = async (resetPasswordToken) => {
 }
 
 export const googleLoginAdmin = async (email) => {
-   const user = await Admin.findOne({ email , role: 'Admin', AuthType: "google" });
+   const user = await Admin.findOne({ email , role: 'Admin' });
    return user;
 }
 

@@ -61,7 +61,7 @@ export const resetBarberPassword = async (resetPasswordToken) => {
 
 //GOOGLE LOGIN BARBER
 export const googleLoginBarber = async (email) => {
-   const user = await Barber.findOne({ email: email, AuthType: "google", isDeleted:false });
+   const user = await Barber.findOne({ email: email, isDeleted:false });
    return user;
 }
 
