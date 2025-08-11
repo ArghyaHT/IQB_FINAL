@@ -351,7 +351,9 @@ export const getDefaultSalon = async (req, res, next) => {
 
                 let totalQueueCount = 0;
 
-            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
+            totalQueueCount = salonQueues.length
+
+            console.log(totalQueueCount)
 
                 const salonRoom = `salon_${admin?.salonId}`;
 
@@ -419,7 +421,7 @@ export const getDefaultSalon = async (req, res, next) => {
 
                 let totalQueueCount = 0;
 
-            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
+            totalQueueCount = salonQueues.length;
 
                 const salonRoom = `salon_${barber?.salonId}`;
 
