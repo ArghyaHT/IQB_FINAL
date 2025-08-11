@@ -54,8 +54,7 @@ export const initializeSocket = (server) => {
             console.log(`Client ${socket.id} joined customer room: ${roomName}`);
         });
         
-
-
+        
         socket.on('dummyEvent', (data) => {
             console.log('Received dummyEvent:', data);
         });

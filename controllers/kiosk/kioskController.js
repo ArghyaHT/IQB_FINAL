@@ -495,6 +495,16 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
                 SALON_ONLINE_SUCCESS,
             })
 
+              await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
+                response: salon,
+                KIOSK_OFFLINE_SUCCESS,
+            });
+
+            await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
+                response: salon,
+                MOBILE_BOOKING_OFFLINE_SUCCESS,
+            })
+
             return SuccessHandler(SALON_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
         }
         else {
@@ -517,22 +527,22 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
             await changeBarberStatusAtSalonOffline(salonId);
 
-            await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
-                response: updatedSalon,
-                KIOSK_OFFLINE_SUCCESS,
-            });
-
-            await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
-                response: updatedSalon,
-                MOBILE_BOOKING_OFFLINE_SUCCESS,
-            })
-
-
+    
             const salon = await findSalonBySalonIdAndAdmin(updatedSalon.salonId, updatedSalon.adminEmail)
 
             await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
                 response: salon,
                 SALON_OFFLINE_SUCCESS,
+            })
+
+             await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
+                response: salon,
+                KIOSK_OFFLINE_SUCCESS,
+            });
+
+            await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
+                response: salon,
+                MOBILE_BOOKING_OFFLINE_SUCCESS,
             })
 
             return SuccessHandler(SALON_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
