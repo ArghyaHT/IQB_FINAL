@@ -148,11 +148,15 @@ export const sendAppointmentNotification = async (Token, SalonName, FirstLastNam
 
     const existingUser = await findNotificationUserByEmail(customerEmail)
 
-    console.log(existingUser)
-
     console.log("expo notification fired", response)
 
-    const salon = await getSalonBySalonId(existingUser.salonId)
+
+    const customer = await findCustomerByEmail(customerEmail)
+
+    const salon = await getSalonBySalonId(customer.salonId)
+
+
+    console.log(salon.salonLogo)
 
     if (existingUser) {
         // Email already exists, update the existing document
