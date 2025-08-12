@@ -2581,6 +2581,90 @@ export const changeBarberClockInStatus = async (req, res, next) => {
                         isClockedIn
                     );
 
+                                        const salonInfo = await getSalonBySalonId(salonId)
+
+                    // Find associated barbers using salonId
+                    const barbers = await findBarbersBySalonId(salonId);
+                    const barberCount = barbers.length;
+
+                    // Initialize least queue count tracking
+                    let minQueueCount = Infinity;
+                    let leastQueueBarbers = [];
+
+
+
+                    leastQueueBarbers = barbers.sort((a, b) => a.queueCount - b.queueCount);
+
+                    // Find queues associated with the salonId
+                    const salonQueues = await getSalonQlist(salonId);
+
+                    let totalQueueCount = 0;
+
+                    totalQueueCount = salonQueues[0]?.queueList?.length || 0;
+
+                    const salonRoom = `salon_${salonId}`;
+
+                    io.to(salonRoom).emit("liveDefaultSalonData", {
+                        ...salonInfo.toObject(),
+                        barbersOnDuty: barberCount,
+                        totalQueueCount: totalQueueCount,
+                        leastQueueBarbers: leastQueueBarbers.map(barber => ({
+                            barberId: barber._id,
+                            name: barber.name,
+                            profile: barber.profile,
+                            queueCount: barber.queueCount,
+                            barberEWT: barber.barberEWT,
+                        }))
+                    });
+
+                    const salonInfoForDashboard = await getSalonBySalonId(salonId)
+
+                    // Find associated barbers using salonId
+                    const barbersForDashboard = await findBarbersBySalonIdforCustomerDashboard(salonId);
+                    const barberCountForDashboard = barbersForDashboard.length;
+
+                    let barberWithLeastQueues = null;
+                    let minQueueCountForDashboard = Infinity; // Initialize to Infinity
+                    let minQueueCountAsInteger;
+
+                    barbersForDashboard.forEach(barber => {
+                        if (barber.queueCount < minQueueCount) {
+                            minQueueCount = barber.queueCount;
+                            barberWithLeastQueues = barber._id;
+                        }
+                    });
+
+
+                    // Check if minQueueCount is still Infinity (meaning no barber found)
+                    if (minQueueCountForDashboard === Infinity) {
+                        minQueueCountAsInteger = 0; // or any default value you want
+                    } else {
+                        minQueueCountAsInteger = Math.floor(minQueueCount);
+                    }
+
+                    // Find queues associated with the salonId
+                    const salonQueuesForDashboard = await getSalonQlist(salonId);
+
+                    let totalQueueCountForDashboard = 0;
+
+                    // Calculate total queue count for the salon
+                    salonQueuesForDashboard.forEach(queue => {
+                        if (Array.isArray(queue.queueList)) {
+                            totalQueueCountForDashboard += queue.queueList.length;
+                        }
+                    });
+
+
+                    io.to(`salon_${salonId}`).emit("liveSalonData", {
+                        response: {
+                            salonInfo: salonInfoForDashboard,
+                            barbers: barbersForDashboard,
+                            barberOnDuty: barberCountForDashboard,
+                            totalQueueCount: totalQueueCountForDashboard,
+                            leastQueueCount: minQueueCountAsInteger
+                        }
+                    });
+
                     return SuccessHandler(BARBER_CLOCKIN_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
 
                 }
@@ -2602,6 +2686,90 @@ export const changeBarberClockInStatus = async (req, res, next) => {
                         await io.to(`barber_${salonId}_${barberId}`).emit("barberClockInStatusUpdate",
                             isClockedIn
                         );
+
+                                            const salonInfo = await getSalonBySalonId(salonId)
+
+                    // Find associated barbers using salonId
+                    const barbers = await findBarbersBySalonId(salonId);
+                    const barberCount = barbers.length;
+
+                    // Initialize least queue count tracking
+                    let minQueueCount = Infinity;
+                    let leastQueueBarbers = [];
+
+
+
+                    leastQueueBarbers = barbers.sort((a, b) => a.queueCount - b.queueCount);
+
+                    // Find queues associated with the salonId
+                    const salonQueues = await getSalonQlist(salonId);
+
+                    let totalQueueCount = 0;
+
+                    totalQueueCount = salonQueues[0]?.queueList?.length || 0;
+
+                    const salonRoom = `salon_${salonId}`;
+
+                    io.to(salonRoom).emit("liveDefaultSalonData", {
+                        ...salonInfo.toObject(),
+                        barbersOnDuty: barberCount,
+                        totalQueueCount: totalQueueCount,
+                        leastQueueBarbers: leastQueueBarbers.map(barber => ({
+                            barberId: barber._id,
+                            name: barber.name,
+                            profile: barber.profile,
+                            queueCount: barber.queueCount,
+                            barberEWT: barber.barberEWT,
+                        }))
+                    });
+
+                    const salonInfoForDashboard = await getSalonBySalonId(salonId)
+
+                    // Find associated barbers using salonId
+                    const barbersForDashboard = await findBarbersBySalonIdforCustomerDashboard(salonId);
+                    const barberCountForDashboard = barbersForDashboard.length;
+
+                    let barberWithLeastQueues = null;
+                    let minQueueCountForDashboard = Infinity; // Initialize to Infinity
+                    let minQueueCountAsInteger;
+
+                    barbersForDashboard.forEach(barber => {
+                        if (barber.queueCount < minQueueCount) {
+                            minQueueCount = barber.queueCount;
+                            barberWithLeastQueues = barber._id;
+                        }
+                    });
+
+
+                    // Check if minQueueCount is still Infinity (meaning no barber found)
+                    if (minQueueCountForDashboard === Infinity) {
+                        minQueueCountAsInteger = 0; // or any default value you want
+                    } else {
+                        minQueueCountAsInteger = Math.floor(minQueueCount);
+                    }
+
+                    // Find queues associated with the salonId
+                    const salonQueuesForDashboard = await getSalonQlist(salonId);
+
+                    let totalQueueCountForDashboard = 0;
+
+                    // Calculate total queue count for the salon
+                    salonQueuesForDashboard.forEach(queue => {
+                        if (Array.isArray(queue.queueList)) {
+                            totalQueueCountForDashboard += queue.queueList.length;
+                        }
+                    });
+
+
+                    io.to(`salon_${salonId}`).emit("liveSalonData", {
+                        response: {
+                            salonInfo: salonInfoForDashboard,
+                            barbers: barbersForDashboard,
+                            barberOnDuty: barberCountForDashboard,
+                            totalQueueCount: totalQueueCountForDashboard,
+                            leastQueueCount: minQueueCountAsInteger
+                        }
+                    });
 
                         return SuccessHandler(BARBER_CLOCKOUT_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
                     }
