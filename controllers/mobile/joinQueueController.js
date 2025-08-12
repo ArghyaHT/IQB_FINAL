@@ -118,6 +118,19 @@ export const singleJoinQueue = async (req, res, next) => {
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
+            //To find the queueList according to salonId and sort it according to qposition
+            const getSalon = await getSalonQlist(salonId)
+
+
+            if (getSalon) {
+                getSalon.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+            }
+
+            const sortedQlist = getSalon;
+
+            io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
+
+
 
             const salonInfo = await getSalonBySalonId(salonId)
 
@@ -173,28 +186,6 @@ export const singleJoinQueue = async (req, res, next) => {
             // io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
 
             // console.log(sortedQlist)
-
-            // const notifications = await findNotificationUserByEmail(customerEmail);
-
-            // // Reverse the order of notifications and attach customer profile to each
-            // const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
-            //     ...notification.toObject(),  // Convert Mongoose document to plain object
-            //     salonLogo: salon.salonLogo  // Attach customer details
-            // }));
-
-
-            // await io.to(`customer_${salonId}_${customerEmail}`).emit("receiveNotifications", latestnotifications);
-
-
-
-            // const pushDevice = await getPushDevicesbyEmailId(customerEmail)
-
-            // const titleText = "Queue booked successfully"
-
-            // if (pushDevice && pushDevice.deviceToken) {
-            //     await sendQueueNotification(pushDevice.deviceToken, salon.salonName, newQueue.qposition, name, pushDevice.deviceType, QUEUE_POSITION_JOINED, customerEmail, titleText)
-            // }
-
 
             const emailSubject = 'Your Queue Information';
             const emailBody = `
@@ -330,6 +321,19 @@ export const singleJoinQueue = async (req, res, next) => {
 
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
+            //To find the queueList according to salonId and sort it according to qposition
+            const getSalon = await getSalonQlist(salonId)
+
+
+            if (getSalon) {
+                getSalon.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+            }
+
+            const sortedQlist = getSalon;
+
+            io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
+
 
 
             const salonInfo = await getSalonBySalonId(salonId)
@@ -623,6 +627,19 @@ export const groupJoinQueue = async (req, res, next) => {
             const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
+            //To find the queueList according to salonId and sort it according to qposition
+            const getSalon = await getSalonQlist(salonId)
+
+
+            if (getSalon) {
+                getSalon.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+            }
+
+            const sortedQlist = getSalon;
+
+            io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
+
+
 
             const salonInfo = await getSalonBySalonId(salonId)
 
@@ -682,27 +699,6 @@ export const groupJoinQueue = async (req, res, next) => {
 
             // io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
 
-            // const notifications = await findNotificationUserByEmail(member.customerEmail);
-
-            // // Reverse the order of notifications and attach customer profile to each
-            // const latestnotifications = notifications.sentNotifications.reverse().map(notification => ({
-            //     ...notification.toObject(),  // Convert Mongoose document to plain object
-            //     salonLogo: salon.salonLogo  // Attach customer details
-            // }));
-
-
-            // await io.to(`customer_${salonId}_${member.customerEmail}`).emit("receiveNotifications", latestnotifications);
-
-
-
-            // const pushDevice = await getPushDevicesbyEmailId(customerEmail)
-
-            // const titleText = "Queue booked successfully"
-
-
-            // if (pushDevice && pushDevice.deviceToken) {
-            //     await sendQueueNotification(pushDevice.deviceToken, salon.salonName, newQueue.qposition, name, pushDevice.deviceType, QUEUE_POSITION_JOINED, customerEmail, titleText)
-            // }
 
             const emailSubject = 'Your Queue Information';
             const emailBody = `
@@ -957,6 +953,19 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
 
+        //To find the queueList according to salonId and sort it according to qposition
+        const getSalon = await getSalonQlist(salonId)
+
+
+        if (getSalon) {
+            getSalon.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+        }
+
+        const sortedQueuelist = getSalon;
+
+        io.to(`salon_${salonId}`).emit("queueUpdated", sortedQueuelist);
+
+
         const salonInfo = await getSalonBySalonId(salonId)
 
         // Find associated barbers using salonId
@@ -976,7 +985,7 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         let totalQueueCount = 0;
 
-            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
+        totalQueueCount = salonQueues[0]?.queueList?.length || 0;
 
         const salonRoom = `salon_${salonId}`;
 

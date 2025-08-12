@@ -2,8 +2,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken"
 
 
-import { connectAdminKiosk, findAdminByEmailandRole, findAdminByEmailandSalonId, findGoogleAdminByEmailandSalonId } from "../../services/kiosk/admin/adminServices.js";
-import { availableBarberAutoJoin, barberClockInStatus, barberOnlineStatus, changeBarberStatusAtSalonOffline, decreaseBarberEWT, decreaseBarberEWTWhenQCancel, fetchedBarbers, findBaberByBarberId, findBarberByBarberEmailAndSalonId, findBarberByEmailAndRole, findBarberByEmailAndSalonId, findBarbersBySalonId, findGoogleBarberByEmailAndSalonId, getAllSalonBarbers, getAllSalonBarbersForTV, getBarberByBarberId, getBarbersForQ, getBarbersWithMulServices, updateBarberEWT } from "../../services/kiosk/barber/barberService.js";
+import { connectAdminKiosk, findAdminByEmailandRole, findAdminByEmailandSalonId, findGoogleAdminByEmail } from "../../services/kiosk/admin/adminServices.js";
+import { availableBarberAutoJoin, barberClockInStatus, barberOnlineStatus, changeBarberStatusAtSalonOffline, decreaseBarberEWT, decreaseBarberEWTWhenQCancel, fetchedBarbers, findBaberByBarberId, findBarberByBarberEmailAndSalonId, findBarberByEmailAndRole, findBarberByEmailAndSalonId, findBarbersBySalonId, findGoogleBarberByEmail, getAllSalonBarbers, getAllSalonBarbersForTV, getBarberByBarberId, getBarbersForQ, getBarbersWithMulServices, updateBarberEWT } from "../../services/kiosk/barber/barberService.js";
 import { allSalonsByAdmin, allSalonServices, checkSalonExists, getDefaultSalonDetailsEmail, getSalonBySalonId, getSalonTimeZone, kioskAvailabilityStatus, mobileBookingAvailabilityStatus, salonOnlineStatus } from "../../services/kiosk/salon/salonServices.js";
 import { findCustomersToMail, findSalonQueueList, getSalonQlist, queueListByBarberId } from "../../services/kiosk/queue/queueService.js";
 import { addCustomerToQueue } from "../../utils/queue/queueUtils.js";
@@ -495,7 +495,7 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
                 SALON_ONLINE_SUCCESS,
             })
 
-              await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
+            await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
                 response: salon,
                 KIOSK_OFFLINE_SUCCESS,
             });
@@ -527,7 +527,7 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
             await changeBarberStatusAtSalonOffline(salonId);
 
-    
+
             const salon = await findSalonBySalonIdAndAdmin(updatedSalon.salonId, updatedSalon.adminEmail)
 
             await io.to(`salon_${salonId}`).emit("salonStatusUpdate", {
@@ -535,7 +535,7 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
                 SALON_OFFLINE_SUCCESS,
             })
 
-             await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
+            await io.to(`salon_${salonId}`).emit("kioskAvailabilityUpdate", {
                 response: salon,
                 KIOSK_OFFLINE_SUCCESS,
             });
@@ -2675,7 +2675,7 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
         });
         if (mobileBookingAvailability === true) {
 
-            console.log("mobile update live",updatedSalon)
+            console.log("mobile update live", updatedSalon)
 
             await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
                 response: updatedSalon,
@@ -2698,7 +2698,7 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
         }
         else {
 
-            console.log("mobile update live",updatedSalon)
+            console.log("mobile update live", updatedSalon)
 
 
             await io.to(`salon_${salonId}`).emit("mobileBookingAvailabilityUpdate", {
@@ -2808,7 +2808,7 @@ export const salonAccountLogin = async (req, res, next) => {
 
         if (role === "Admin") {
 
-            const foundUser = await findAdminByEmailandSalonId(email, salonId)
+            const foundUser = await findAdminByEmailandRole(email)
 
             if (!foundUser) {
                 return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
@@ -2821,14 +2821,19 @@ export const salonAccountLogin = async (req, res, next) => {
                 return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
 
             }
+
+            const salonDetails = await getSalonBySalonId(salonId)
 
             // Send accessToken containing username and roles 
             return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
-                foundUser
+                ...foundUser.toObject(),
+                isSalonOnline: salonDetails.isOnline,
+                mobileBookingAvailability: salonDetails.mobileBookingAvailability,
+                kioskAvailability: salonDetails.kioskAvailability
             })
         }
         else {
-            const foundUser = await findBarberByEmailAndSalonId(email, salonId)
+            const foundUser = await findBarberByEmailAndRole(email)
 
             if (!foundUser) {
                 return ErrorHandler(EMAIL_OR_PASSWORD_DONOT_MATCH_ERROR, ERROR_STATUS_CODE, res)
@@ -2842,9 +2847,14 @@ export const salonAccountLogin = async (req, res, next) => {
 
             }
 
+            const salonDetails = await getSalonBySalonId(salonId)
+
             // Send accessToken containing username and roles 
             return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
-                foundUser
+                ...foundUser.toObject(),
+                isSalonOnline: salonDetails.isOnline,
+                mobileBookingAvailability: salonDetails.mobileBookingAvailability,
+                kioskAvailability: salonDetails.kioskAvailability
             })
         }
 
@@ -2859,27 +2869,38 @@ export const googleSalonAccountLogin = async (req, res, next) => {
         let { email, salonId, role } = req.body
 
         if (role === "Admin") {
-            const foundUser = await findGoogleAdminByEmailandSalonId(email, salonId)
+            const foundUser = await findGoogleAdminByEmail(email, salonId)
 
             if (!foundUser) {
                 return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
             }
 
+            const salonDetails = await getSalonBySalonId(salonId)
+
+
             // Send accessToken containing username and roles 
             return SuccessHandler(SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
-                foundUser
+                ...foundUser.toObject(),
+                isSalonOnline: salonDetails.isOnline,
+                mobileBookingAvailability: salonDetails.mobileBookingAvailability,
+                kioskAvailability: salonDetails.kioskAvailability
             })
         }
         else {
-            const foundUser = await findGoogleBarberByEmailAndSalonId(email, salonId)
+            const foundUser = await findGoogleBarberByEmail(email, salonId)
 
             if (!foundUser) {
                 return ErrorHandler(BARBER_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
             }
 
+            const salonDetails = await getSalonBySalonId(salonId)
+
             // Send accessToken containing username and roles 
             return SuccessHandler(BARBER_SIGNIN_SUCCESS, SUCCESS_STATUS_CODE, res, {
-                foundUser
+                ...foundUser.toObject(),
+                isSalonOnline: salonDetails.isOnline,
+                mobileBookingAvailability: salonDetails.mobileBookingAvailability,
+                kioskAvailability: salonDetails.kioskAvailability
             })
         }
 

@@ -19,7 +19,7 @@ export const connectAdminKiosk = async(email, salonId) => {
 }
 
 
-export const findGoogleAdminByEmailandSalonId = async(email, salonId) => {
-  const admin = await Admin.findOne({ email, salonId: salonId, AuthType: "google" }).exec()
+export const findGoogleAdminByEmail = async(email) => {
+  const admin = await Admin.findOne({ email, AuthType: "google" }).exec()
   return admin;
 }
