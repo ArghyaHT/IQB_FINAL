@@ -807,12 +807,14 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
 
                     let totalQueueCountForDashboard = 0;
 
-                    // Calculate total queue count for the salon
-                    salonQueuesForDashboard.forEach(queue => {
-                        if (Array.isArray(queue.queueList)) {
-                            totalQueueCountForDashboard += queue.queueList.length;
-                        }
-                    });
+                    totalQueueCountForDashboard = salonQueuesForDashboard.length
+
+                    // // Calculate total queue count for the salon
+                    // salonQueuesForDashboard.forEach(queue => {
+                    //     if (Array.isArray(queue.queueList)) {
+                    //         totalQueueCountForDashboard += queue.queueList.length;
+                    //     }
+                    // });
 
 
                     io.to(`salon_${salonId}`).emit("liveSalonData", {
@@ -898,13 +900,14 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
 
                     let totalQueueCountForDashboard = 0;
 
-                    // Calculate total queue count for the salon
-                    salonQueuesForDashboard.forEach(queue => {
-                        if (Array.isArray(queue.queueList)) {
-                            totalQueueCountForDashboard += queue.queueList.length;
-                        }
-                    });
+                    // // Calculate total queue count for the salon
+                    // salonQueuesForDashboard.forEach(queue => {
+                    //     if (Array.isArray(queue.queueList)) {
+                    //         totalQueueCountForDashboard += queue.queueList.length;
+                    //     }
+                    // });
 
+                    totalQueueCountForDashboard = salonQueuesForDashboard.length
 
                     io.to(`salon_${salonId}`).emit("liveSalonData", {
                         response: {
@@ -1094,14 +1097,14 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             let totalQueueCountForDashboard = 0;
 
-            // Calculate total queue count for the salon
-            salonQueuesForDashboard.forEach(queue => {
-                if (Array.isArray(queue.queueList)) {
-                    totalQueueCountForDashboard += queue.queueList.length;
-                }
-            });
+            // // Calculate total queue count for the salon
+            // salonQueuesForDashboard.forEach(queue => {
+            //     if (Array.isArray(queue.queueList)) {
+            //         totalQueueCountForDashboard += queue.queueList.length;
+            //     }
+            // });
 
-            console.log("total queue count for dashboard", totalQueueCountForDashboard)
+            totalQueueCountForDashboard = salonQueuesForDashboard.length
 
 
             io.to(`salon_${salonId}`).emit("liveSalonData", {
@@ -1345,7 +1348,7 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             totalQueueCountForDashboard = salonQueuesForDashboard.length;
 
-            console.log("salon total live queue",totalQueueCountForDashboard)
+            console.log("salon total live queue", totalQueueCountForDashboard)
 
 
             io.to(`salon_${salonId}`).emit("liveSalonData", {
@@ -2649,12 +2652,15 @@ export const changeBarberClockInStatus = async (req, res, next) => {
 
                     let totalQueueCountForDashboard = 0;
 
+
+                    totalQueueCountForDashboard = salonQueuesForDashboard.length
+
                     // Calculate total queue count for the salon
-                    salonQueuesForDashboard.forEach(queue => {
-                        if (Array.isArray(queue.queueList)) {
-                            totalQueueCountForDashboard += queue.queueList.length;
-                        }
-                    });
+                    // salonQueuesForDashboard.forEach(queue => {
+                    //     if (Array.isArray(queue.queueList)) {
+                    //         totalQueueCountForDashboard += queue.queueList.length;
+                    //     }
+                    // });
 
 
                     io.to(`salon_${salonId}`).emit("liveSalonData", {
@@ -2755,12 +2761,14 @@ export const changeBarberClockInStatus = async (req, res, next) => {
 
                         let totalQueueCountForDashboard = 0;
 
-                        // Calculate total queue count for the salon
-                        salonQueuesForDashboard.forEach(queue => {
-                            if (Array.isArray(queue.queueList)) {
-                                totalQueueCountForDashboard += queue.queueList.length;
-                            }
-                        });
+                        totalQueueCountForDashboard = salonQueuesForDashboard.length
+
+                        // // Calculate total queue count for the salon
+                        // salonQueuesForDashboard.forEach(queue => {
+                        //     if (Array.isArray(queue.queueList)) {
+                        //         totalQueueCountForDashboard += queue.queueList.length;
+                        //     }
+                        // });
 
 
                         io.to(`salon_${salonId}`).emit("liveSalonData", {
@@ -2846,10 +2854,10 @@ export const changeMobileBookingAvailabilityOfSalon = async (req, res, next) => 
         //     }
         // });
 
-         totalQueueCount = salonQueues.length;
+        totalQueueCount = salonQueues.length;
 
 
-        console.log("total queue count",totalQueueCount)
+        console.log("total queue count", totalQueueCount)
 
         if (mobileBookingAvailability === true) {
 
@@ -3738,13 +3746,14 @@ export const cancelQueueTvApp = async (req, res, next) => {
 
         let totalQueueCountForDashboard = 0;
 
-        // Calculate total queue count for the salon
-        salonQueuesForDashboard.forEach(queue => {
-            if (Array.isArray(queue.queueList)) {
-                totalQueueCountForDashboard += queue.queueList.length;
-            }
-        });
+        // // Calculate total queue count for the salon
+        // salonQueuesForDashboard.forEach(queue => {
+        //     if (Array.isArray(queue.queueList)) {
+        //         totalQueueCountForDashboard += queue.queueList.length;
+        //     }
+        // });
 
+        totalQueueCountForDashboard = salonQueuesForDashboard.length
 
         io.to(`salon_${salonId}`).emit("liveSalonData", {
             response: {
@@ -4121,11 +4130,13 @@ export const changeBarberOnlineStatusTV = async (req, res, next) => {
             let totalQueueCountForDashboard = 0;
 
             // Calculate total queue count for the salon
-            salonQueuesForDashboard.forEach(queue => {
-                if (Array.isArray(queue.queueList)) {
-                    totalQueueCountForDashboard += queue.queueList.length;
-                }
-            });
+            // salonQueuesForDashboard.forEach(queue => {
+            //     if (Array.isArray(queue.queueList)) {
+            //         totalQueueCountForDashboard += queue.queueList.length;
+            //     }
+            // });
+
+            totalQueueCountForDashboard = salonQueuesForDashboard.length
 
 
             io.to(`salon_${salonId}`).emit("liveSalonData", {
@@ -4197,12 +4208,14 @@ export const changeBarberOnlineStatusTV = async (req, res, next) => {
 
             let totalQueueCountForDashboard = 0;
 
-            // Calculate total queue count for the salon
-            salonQueuesForDashboard.forEach(queue => {
-                if (Array.isArray(queue.queueList)) {
-                    totalQueueCountForDashboard += queue.queueList.length;
-                }
-            });
+            totalQueueCountForDashboard = salonQueuesForDashboard.length
+
+            // // Calculate total queue count for the salon
+            // salonQueuesForDashboard.forEach(queue => {
+            //     if (Array.isArray(queue.queueList)) {
+            //         totalQueueCountForDashboard += queue.queueList.length;
+            //     }
+            // });
 
 
             io.to(`salon_${salonId}`).emit("liveSalonData", {
