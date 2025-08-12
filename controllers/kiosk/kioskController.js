@@ -1343,7 +1343,9 @@ export const joinQueueKiosk = async (req, res, next) => {
 
             let totalQueueCountForDashboard = 0;
 
-             totalQueueCountForDashboard = salonQueuesForDashboard.length;
+            totalQueueCountForDashboard = salonQueuesForDashboard.length;
+
+            console.log("salon total live queue",totalQueueCountForDashboard)
 
 
             io.to(`salon_${salonId}`).emit("liveSalonData", {
