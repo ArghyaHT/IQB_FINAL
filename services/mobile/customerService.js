@@ -158,7 +158,7 @@ export const deleteCustomerProPic = async (img_id) => {
 
 //GET CUSTOMER BY CUSTOMER EMAIL AND SALON ID
 export const findCustomerByCustomerEmailAndSalonId = async (customerEmail, salonId) => {
-   const customer = await Customer.findOne({ salonId: salonId, email: customerEmail }).exec();
+   const customer = await Customer.findOne({ email: customerEmail }).exec();
 
    return customer;
 }
