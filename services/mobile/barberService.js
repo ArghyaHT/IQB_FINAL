@@ -2,7 +2,7 @@ import Barber from "../../models/barberRegisterModel.js";
 
 //FIND BARBERS BY SALONID
 export const findBarbersBySalonIdforCustomerDashboard = async (salonId) => {
-    const barbers = await Barber.find({ salonId, isOnline: true });
+    const barbers = await Barber.find({ salonId, isClockedIn: true });
     return barbers;
  }
 

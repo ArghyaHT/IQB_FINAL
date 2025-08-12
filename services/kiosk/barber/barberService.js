@@ -196,6 +196,6 @@ export const getAllSalonBarbersForTV = async (salonId ) => {
 
 //FIND BARBERS BY SALONID
 export const findBarbersBySalonId = async (salonId) => {
-   const barbers = await Barber.find({ salonId, isOnline: true });
+   const barbers = await Barber.find({ salonId, isClockedIn: true });
    return barbers;
 }
