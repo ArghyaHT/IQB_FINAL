@@ -119,18 +119,6 @@ export const singleJoinQueue = async (req, res, next) => {
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
             //To find the queueList according to salonId and sort it according to qposition
-            const getSalon = await getSalonQlist(salonId)
-
-
-            if (getSalon) {
-                getSalon.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
-            }
-
-            const sortedQlist = getSalon;
-
-            io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
-
-
 
             const salonInfo = await getSalonBySalonId(salonId)
 
@@ -323,14 +311,16 @@ export const singleJoinQueue = async (req, res, next) => {
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
             //To find the queueList according to salonId and sort it according to qposition
-            const getSalon = await getSalonQlist(salonId)
+            const getSalonQueue = await getSalonQlist(salonId)
+
+            console.log(getSalonQueue)
 
 
-            if (getSalon) {
-                getSalon.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+            if (getSalonQueue) {
+                getSalonQueue.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
             }
 
-            const sortedQlist = getSalon;
+            const sortedQlist = getSalonQueue;
 
             io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
 
@@ -498,8 +488,22 @@ export const singleJoinQueue = async (req, res, next) => {
 
         salonQueueList.sort((a, b) => a.qPosition - b.qPosition);
 
-
         await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", { response: salonQueueList });
+
+
+        const enrichedQueueList = await getSalonQlist(salonId);
+
+        // Check if the queueList exists or if it's empty
+        if (enrichedQueueList) {
+            // Sort the queue list in ascending order based on qPosition
+            enrichedQueueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+
+            // Emit the updated queue list to the salon
+            await io.to(`salon_${salonId}`).emit("queueUpdated", enrichedQueueList);
+        }
+
+
+
 
         return res.status(200).json({
             success: true,
@@ -628,14 +632,14 @@ export const groupJoinQueue = async (req, res, next) => {
             io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
             //To find the queueList according to salonId and sort it according to qposition
-            const getSalon = await getSalonQlist(salonId)
+            const getSalonQueue = await getSalonQlist(salonId)
 
 
-            if (getSalon) {
-                getSalon.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+            if (getSalonQueue) {
+                getSalonQueue.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
             }
 
-            const sortedQlist = getSalon;
+            const sortedQlist = getSalonQueue;
 
             io.to(`salon_${salonId}`).emit("queueUpdated", sortedQlist);
 
@@ -952,20 +956,6 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         const updatedBarbers = await getAllSalonBarbersForTV(salonId); // ✅ fetch updated barbers
         io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
-
-        //To find the queueList according to salonId and sort it according to qposition
-        const getSalon = await getSalonQlist(salonId)
-
-
-        if (getSalon) {
-            getSalon.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
-        }
-
-        const sortedQueuelist = getSalon;
-
-        io.to(`salon_${salonId}`).emit("queueUpdated", sortedQueuelist);
-
-
         const salonInfo = await getSalonBySalonId(salonId)
 
         // Find associated barbers using salonId
@@ -1200,6 +1190,19 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         // const approvedBarber = await getBarberByBarberId(barberId);
 
         // await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+
+
+        const enrichedQueueList = await getSalonQlist(salonId);
+
+        // Check if the queueList exists or if it's empty
+        if (enrichedQueueList) {
+            // Sort the queue list in ascending order based on qPosition
+            enrichedQueueList.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
+
+            // Emit the updated queue list to the salon
+            await io.to(`salon_${salonId}`).emit("queueUpdated", enrichedQueueList);
+        }
+
 
 
         return res.status(200).json({
