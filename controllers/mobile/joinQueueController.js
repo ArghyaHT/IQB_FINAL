@@ -1,5 +1,5 @@
 import { availableBarberAutoJoin, decreaseBarberEWTWhenQCancel, findBarbersBySalonIdforCustomerDashboard, getBarberByBarberId, getBarbersForQ, getBarbersWithMulServices, updateBarberEWT } from "../../services/mobile/barberService.js";
-import { addGroupJoin, findSalonQueueList, getSalonQlist, qListByBarberId } from "../../services/mobile/joinQueueService.js";
+import { addGroupJoin, findSalonQueueList, qListByBarberId } from "../../services/mobile/joinQueueService.js";
 import { allSalonServices, getSalonBySalonId } from "../../services/mobile/salonServices.js";
 import { sendQueuePositionEmail } from "../../utils/emailSender/emailSender.js";
 import moment from "moment";
@@ -17,6 +17,7 @@ import { QUEUE_POSITION_CHANGE, QUEUE_POSITION_JOINED } from "../../constants/mo
 import { getPushDevicesbyEmailId } from "../../services/mobile/pushDeviceTokensService.js";
 import { sendQueueNotification, sendQueueUpdateNotification } from "../../utils/pushNotifications/pushNotifications.js";
 import { findNotificationUserByEmail } from "../../services/mobile/notificationService.js";
+import { getSalonQlist } from "../../services/kiosk/queue/queueService.js";
 
 //DESC:SINGLE JOIN QUEUE ================
 export const singleJoinQueue = async (req, res, next) => {
@@ -139,7 +140,7 @@ export const singleJoinQueue = async (req, res, next) => {
 
             let totalQueueCount = 0;
 
-            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
+            totalQueueCount = salonQueues.length;
 
 
             const salonRoom = `salon_${salonId}`;
@@ -313,9 +314,6 @@ export const singleJoinQueue = async (req, res, next) => {
             //To find the queueList according to salonId and sort it according to qposition
             const getSalonQueue = await getSalonQlist(salonId)
 
-            console.log(getSalonQueue)
-
-
             if (getSalonQueue) {
                 getSalonQueue.sort((a, b) => a.qPosition - b.qPosition); // Ascending order
             }
@@ -343,11 +341,9 @@ export const singleJoinQueue = async (req, res, next) => {
             // Find queues associated with the salonId
             const salonQueues = await getSalonQlist(salonId);
 
-            console.log(salonQueues)
-
             let totalQueueCount = 0;
 
-            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
+            totalQueueCount = salonQueues.length
 
             console.log(totalQueueCount)
 
@@ -492,6 +488,7 @@ export const singleJoinQueue = async (req, res, next) => {
 
 
         const enrichedQueueList = await getSalonQlist(salonId);
+
 
         // Check if the queueList exists or if it's empty
         if (enrichedQueueList) {
@@ -664,7 +661,7 @@ export const groupJoinQueue = async (req, res, next) => {
 
             let totalQueueCount = 0;
 
-            totalQueueCount = salonQueues[0]?.queueList?.length || 0;
+            totalQueueCount = salonQueues.length;
 
             const salonRoom = `salon_${salonId}`;
 
@@ -975,7 +972,7 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         let totalQueueCount = 0;
 
-        totalQueueCount = salonQueues[0]?.queueList?.length || 0;
+        totalQueueCount = salonQueues.length
 
         const salonRoom = `salon_${salonId}`;
 
@@ -1023,12 +1020,14 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         let totalQueueCountForDashboard = 0;
 
-        // Calculate total queue count for the salon
-        salonQueuesForDashboard.forEach(queue => {
-            if (Array.isArray(queue.queueList)) {
-                totalQueueCountForDashboard += queue.queueList.length;
-            }
-        });
+        totalQueueCountForDashboard = salonQueuesForDashboard.length
+
+        // // Calculate total queue count for the salon
+        // salonQueuesForDashboard.forEach(queue => {
+        //     if (Array.isArray(queue.queueList)) {
+        //         totalQueueCountForDashboard += queue.queueList.length;
+        //     }
+        // });
 
 
         io.to(`salon_${salonId}`).emit("liveSalonData", {
@@ -1230,7 +1229,7 @@ export const getQueueListBySalonId = async (req, res, next) => {
 
         if (getSalon.length > 0) {
             // Access the sorted queueList array from the result
-            const sortedQueueList = getSalon[0].queueList;
+            const sortedQueueList = getSalon;
 
             const customer = await findCustomerByEmail(customerEmail)
 
