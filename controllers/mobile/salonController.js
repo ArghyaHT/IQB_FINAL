@@ -2,7 +2,7 @@ import { getCategories } from "../../services/common/categoryServices.js";
 import { getbarbersBySalonId } from "../../services/mobile/barberService.js";
 import { findCustomerByCustomerEmailAndSalonId, findCustomerByEmail } from "../../services/mobile/customerService.js";
 import { getAverageSalonRating } from "../../services/mobile/salonRatingService.js";
-import { allCategorySalonServices, allSalonServices, allSalons, getAllSalonsByCountry, getSalonRating, salonInfoDetails, searchSalonsByLocation, searchSalonsByNameAndCity } from "../../services/mobile/salonServices.js";
+import { allCategorySalonServices, allSalonServices, allSalons, getAllSalonsByCountry, getSalonBySalonId, getSalonRating, salonInfoDetails, searchSalonsByLocation, searchSalonsByNameAndCity } from "../../services/mobile/salonServices.js";
 import { getSalonSettings } from "../../services/mobile/salonSettingsService.js";
 import { findAdminByEmailandRoleTest } from "../../services/web/admin/adminService.js";
 
@@ -311,5 +311,32 @@ export const getAllCategorySalonServices = async (req, res, next) => {
     next(error);
   }
 }
+
+
+export const getSalonFeatures = async (req, res, next) => {
+  try {
+    const { salonId } = req.body;
+
+    const getSalonDetails = await getSalonBySalonId(salonId);
+
+    if (!getSalonDetails) {
+      return res.status(404).json({
+        success: false,
+        message: "Salon not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Salon features fetched successfully",
+      response: {
+        isQueuing: getSalonDetails.isQueuing,
+        isAppointments: getSalonDetails.isAppointments
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 

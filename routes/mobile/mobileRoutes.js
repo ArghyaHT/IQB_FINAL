@@ -1,5 +1,5 @@
 import express from "express";
-import { getAdminDetailsByAdminEmailTest, getAllCategorySalonServices, getAllSalonServices, getAllSalons, getSalonCities, getSalonInfo, getSalonsByLocation, getSalonsByNameAndCity, getallSalonsTest } from "../../controllers/mobile/salonController.js";
+import { getAdminDetailsByAdminEmailTest, getAllCategorySalonServices, getAllSalonServices, getAllSalons, getSalonCities, getSalonFeatures, getSalonInfo, getSalonsByLocation, getSalonsByNameAndCity, getallSalonsTest } from "../../controllers/mobile/salonController.js";
 
 import { bookAppointmentBarbers, createAppointment, deleteAppointment, editAppointment, getAllAppointmentsByBarberId, getAllAppointmentsByBarberIdAndDate, getallAppointmentsByCustomerEmail, getAllAppointmentsBySalonId, getAllAppointmentsBySalonIdAndDate, getEngageBarberTimeSlots } from "../../controllers/mobile/appointmentController.js";
 // import { verifyRefreshCustomerToken } from "../middlewares/VerifyRefreshCustomerToken.js";
@@ -130,6 +130,7 @@ router.route("/getAllCategories").get(getAllCategories)
 
 router.route("/getAllSalonCategories").post(getAllSalonCategories)
 
+router.route("/getSalonFeatures").post(getSalonFeatures)
 
 
 export default router;
