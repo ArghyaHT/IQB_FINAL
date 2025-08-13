@@ -1022,14 +1022,6 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         totalQueueCountForDashboard = salonQueuesForDashboard.length
 
-        // // Calculate total queue count for the salon
-        // salonQueuesForDashboard.forEach(queue => {
-        //     if (Array.isArray(queue.queueList)) {
-        //         totalQueueCountForDashboard += queue.queueList.length;
-        //     }
-        // });
-
-
         io.to(`salon_${salonId}`).emit("liveSalonData", {
             response: {
                 salonInfo: salonInfoForDashboard,
