@@ -266,15 +266,15 @@ export const barberServedQueue = async (req, res, next) => {
 
                         const customer = await findCustomerByEmail(element.customerEmail)
 
-                        const response = {
-                            salonId: customer.salonId,
-                            email: customer.email,
-                            isJoinedQueue: customer.isJoinedQueue || false,
-                        };
+                        if (customer) {
+                            const response = {
+                                salonId: customer.salonId,
+                                email: customer.email,
+                                isJoinedQueue: customer.isJoinedQueue || false,
+                            };
 
-                        io.to(`salon_${salonId}_customer_${element.customerEmail}`).emit("queueButtonToggle", response);
-
-
+                            io.to(`salon_${salonId}_customer_${element.customerEmail}`).emit("queueButtonToggle", response);
+                        }
 
                     } else if (
                         element.barberId === barberId &&
@@ -698,14 +698,15 @@ export const barberServedQueue = async (req, res, next) => {
 
                         const customer = await findCustomerByEmail(element.customerEmail)
 
-                        const response = {
-                            salonId: customer.salonId,
-                            email: customer.email,
-                            isJoinedQueue: customer.isJoinedQueue || false,
-                        };
+                        if (customer) {
+                            const response = {
+                                salonId: customer.salonId,
+                                email: customer.email,
+                                isJoinedQueue: customer.isJoinedQueue || false,
+                            };
 
-                        io.to(`salon_${salonId}_customer_${element.customerEmail}`).emit("queueButtonToggle", response);
-
+                            io.to(`salon_${salonId}_customer_${element.customerEmail}`).emit("queueButtonToggle", response);
+                        }
 
 
 
