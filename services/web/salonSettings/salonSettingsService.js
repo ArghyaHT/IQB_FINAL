@@ -150,3 +150,28 @@ export const getSalonOffDaysBySalonId = async (salonId) => {
   return salon.salonOffDays || []; // Ensure it always returns an array
 };
 
+
+
+export const saveDefaultSalonSettings = async (
+  salonId,
+  startTime,
+  endTime,
+  intervalInMinutes,
+  salonOffDays,
+  appointmentAdvanceDays 
+) => {
+  const newSettings = new SalonSettings({
+    salonId,
+    appointmentSettings: {
+      appointmentStartTime: startTime,
+      appointmentEndTime: endTime,
+      intervalInMinutes,
+    },
+    salonOffDays,
+    appointmentAdvanceDays,
+  });
+
+  return await newSettings.save();
+};
+
+

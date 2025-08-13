@@ -17,9 +17,9 @@ export const getSalonBusinessDays = async (req, res, next) => {
         // Get off days from the salon settings
         const salonOffDays = salonSettings.salonOffDays || [];
 
-         // Get business hours from salon settings
-         const startTime = salonSettings.appointmentSettings.appointmentStartTime;
-         const endTime = salonSettings.appointmentSettings.appointmentEndTime;
+        // Get business hours from salon settings
+        const startTime = salonSettings.appointmentSettings.appointmentStartTime;
+        const endTime = salonSettings.appointmentSettings.appointmentEndTime;
 
         // Construct the response with timings
         const businessDays = allDays.map(day => {
@@ -29,7 +29,7 @@ export const getSalonBusinessDays = async (req, res, next) => {
             return { day, startTime, endTime };
         });
 
-        return res.status(200).json({ success: true,message: "Business days retrieved successfully", response: businessDays });
+        return res.status(200).json({ success: true, message: "Business days retrieved successfully", response: businessDays });
     } catch (error) {
         next(error);
     }
@@ -37,24 +37,24 @@ export const getSalonBusinessDays = async (req, res, next) => {
 
 
 
-export const getMaxAppointmentDays = async(req, res, next) => {
-    try{
-         const { salonId } = req.body;
+export const getMaxAppointmentDays = async (req, res, next) => {
+    try {
+        const { salonId } = req.body;
 
         // Fetch salon settings
         const salonSettings = await getSalonSettings(salonId);
 
-            const appointmentAdvanceDays = salonSettings?.appointmentAdvanceDays ?? 14;
+        const appointmentAdvanceDays = salonSettings?.appointmentAdvanceDays ?? 14;
 
 
-          return res.status(200).json({
-      success: true,
-      message: "Appointment advance days fetched successfully",
-      response: {
+        return res.status(200).json({
+            success: true,
+            message: "Appointment advance days fetched successfully",
+            response: {
                 appointmentAdvanceDays
 
-      }
-    });
+            }
+        });
 
     }
     catch (error) {

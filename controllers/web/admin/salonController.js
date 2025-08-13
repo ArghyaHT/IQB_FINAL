@@ -1,6 +1,6 @@
 import { findAdminByEmailandRole, findAdminByEmailAndSalonId } from "../../../services/web/admin/adminService.js";
 import { addMoreSalonImages, allSalonServices, allSalons, createSalonId, deleteSalonImage, findSalonBySalonIdAndAdmin, findSalonLogoById, findSalonProfileById, findSalonsByLocation, getSalonsByNameAndCity, salonInfoDetails, salonOnlineStatus, saveSalon, toDeleteSalon, updateSalon, updateSalonImage, uploadSalonImages, updatedSalonLogo, getSalonLogoBySalonId, deletedSalonLogo, uploadedSalonLogo, findSalonBySalonNameOrEmail, findSalonBySalonId, getSalonGallery, getSalonBySalonId, changeSalonService, getSalonPayments } from "../../../services/web/admin/salonService.js";
-import { createSalonSettings } from "../../../services/web/salonSettings/salonSettingsService.js";
+import { createSalonSettings, saveDefaultSalonSettings } from "../../../services/web/salonSettings/salonSettingsService.js";
 import { v4 as uuidv4 } from 'uuid';
 import libphonenumber from 'google-libphonenumber';
 import path from "path";
@@ -266,6 +266,16 @@ export const createSalonByAdmin = async (req, res, next) => {
     else {
       return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
     }
+
+
+await saveDefaultSalonSettings(
+  savedSalon.salonId,
+  "09:00",               
+  "18:00",               
+  30,                   
+  [],                   
+  14                    
+);
 
     return SuccessHandler(SALON_CREATE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: savedSalon })
 

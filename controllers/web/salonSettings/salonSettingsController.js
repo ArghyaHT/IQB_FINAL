@@ -49,11 +49,6 @@ export const updateSalonSettings = async (req, res, next) => {
         }
         
 
-        // if(!salonOffDays){
-        //     return ErrorHandler(SALON_DAYOFFS_ERROR, ERROR_STATUS_CODE, res)
-
-        // }
-
         if(!appointmentAdvanceDays){
             return ErrorHandler(APPOINTMENT_ADVANCE_DAYS_ERROR, ERROR_STATUS_CODE, res)
 
