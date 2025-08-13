@@ -3166,7 +3166,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
 
         if (adminEmail) {
 
-            const foundUser = await findAdminByEmailandSalonId(adminEmail, salonId);
+            const foundUser = await findAdminByEmailandRole(adminEmail);
 
             if (!foundUser) {
                 return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE, res)
@@ -3381,6 +3381,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
                     const barbersForDashboard = await findBarbersBySalonIdforCustomerDashboard(salonId);
                     const barberCountForDashboard = barbersForDashboard.length;
 
+                    let minQueueCount = Infinity; // Initialize to Infinity
                     let barberWithLeastQueues = null;
                     let minQueueCountForDashboard = Infinity; // Initialize to Infinity
                     let minQueueCountAsInteger;
@@ -3433,6 +3434,8 @@ export const barberServedQueueTvApp = async (req, res, next) => {
 
 
                     leastQueueBarbers = barbersKiosk.sort((a, b) => a.queueCount - b.queueCount);
+
+                    const salonInfo = await getSalonBySalonId(salonId)
 
                     // totalQueueCount = salonQueues[0]?.queueList?.length || 0;
 
@@ -3799,7 +3802,7 @@ export const cancelQueueTvApp = async (req, res, next) => {
         const salonRoom = `salon_${salonId}`;
 
         io.to(salonRoom).emit("liveDefaultSalonData", {
-            ...salonInfo.toObject(),
+            ...salonInfoForDashboard.toObject(),
             barbersOnDuty: barberCountKiosk,
             totalQueueCount: totalQueueCount,
             leastQueueBarbers: leastQueueBarbers.map(barber => ({
