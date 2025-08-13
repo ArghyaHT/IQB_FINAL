@@ -1588,6 +1588,9 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
             isOnline
         );
 
+        const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+        io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
         const salonInfo = await getSalonBySalonId(salonId)
 
         // Find associated barbers using salonId
