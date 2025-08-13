@@ -11,7 +11,7 @@ import { pushDeviceTokens, pushFcmDeviceTokens } from "../../controllers/mobile/
 import { checkPushNotifications } from "../../utils/pushNotifications/pushNotifications.js";
 import { changeNotificationSeenStatus, deleteNotifications, getAllNotificationsByCustomerEmail } from "../../controllers/mobile/notificationController.js";
 import { getBarberMissingAppointmentDates, getFullyBookedDatesBySalonIdBarberId } from "../../controllers/web/barberAppointmentDays/barberAppointmentController.js";
-import { getSalonBusinessDays } from "../../controllers/mobile/salonSettingsController.js";
+import { getMaxAppointmentDays, getSalonBusinessDays } from "../../controllers/mobile/salonSettingsController.js";
 import { getAllCategories, getAllSalonCategories } from "../../controllers/web/admin/salonController.js";
 // import { getAllAdvertisements } from "../../controllers/dashboard/dashboardController.js";
 
@@ -131,6 +131,8 @@ router.route("/getAllCategories").get(getAllCategories)
 router.route("/getAllSalonCategories").post(getAllSalonCategories)
 
 router.route("/getSalonFeatures").post(getSalonFeatures)
+
+router.route("/getMaxAppointmentDays").post(getMaxAppointmentDays)
 
 
 export default router;

@@ -34,3 +34,30 @@ export const getSalonBusinessDays = async (req, res, next) => {
         next(error);
     }
 };
+
+
+
+export const getMaxAppointmentDays = async(req, res, next) => {
+    try{
+         const { salonId } = req.body;
+
+        // Fetch salon settings
+        const salonSettings = await getSalonSettings(salonId);
+
+            const appointmentAdvanceDays = salonSettings?.appointmentAdvanceDays ?? 14;
+
+
+          return res.status(200).json({
+      success: true,
+      message: "Appointment advance days fetched successfully",
+      response: {
+                appointmentAdvanceDays
+
+      }
+    });
+
+    }
+    catch (error) {
+        next(error);
+    }
+}
