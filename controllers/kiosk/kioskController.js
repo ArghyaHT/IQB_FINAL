@@ -816,7 +816,6 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
                     //     }
                     // });
 
-
                     io.to(`salon_${salonId}`).emit("liveSalonData", {
                         response: {
                             salonInfo: salonInfoForDashboard,
@@ -826,6 +825,11 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
                             leastQueueCount: minQueueCountAsInteger
                         }
                     });
+
+
+                    const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+                    io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
                     // Send accessToken containing username and roles 
                     return SuccessHandler(BARBER_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
                 }
@@ -918,6 +922,11 @@ export const changeBarberOnlineStatus = async (req, res, next) => {
                             leastQueueCount: minQueueCountAsInteger
                         }
                     });
+
+
+                    const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+                    io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
 
                     return SuccessHandler(BARBER_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
 
@@ -2673,6 +2682,11 @@ export const changeBarberClockInStatus = async (req, res, next) => {
                         }
                     });
 
+
+                    const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+                    io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
+
+
                     return SuccessHandler(BARBER_CLOCKIN_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
 
                 }
@@ -2780,6 +2794,10 @@ export const changeBarberClockInStatus = async (req, res, next) => {
                                 leastQueueCount: minQueueCountAsInteger
                             }
                         });
+
+
+                        const updatedBarbers = await getAllSalonBarbersForTV(salonId); // Refresh latest barber list
+                        io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
 
                         return SuccessHandler(BARBER_CLOCKOUT_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedBarber })
                     }
