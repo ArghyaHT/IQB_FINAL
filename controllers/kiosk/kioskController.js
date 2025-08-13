@@ -305,12 +305,13 @@ export const adminConnectKiosk = async (req, res, next) => {
         // Find the admin based on the email
         const foundUser = await findAdminByEmailandRole(email)
 
+
         if (!foundUser) {
             return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE_404, res)
         }
 
         // Fetch all salons associated with the admin from registeredSalons array
-        const admin = await connectAdminKiosk(foundUser.email, salonId)
+        // const admin = await connectAdminKiosk(foundUser.email, salonId)
 
         const salon = await getSalonBySalonId(salonId)
 
@@ -324,18 +325,15 @@ export const adminConnectKiosk = async (req, res, next) => {
 //DESC:GET DEFAULT SALON BY ADMIN ============================
 export const getDefaultSalon = async (req, res, next) => {
     try {
-        const { email, role } = req.body;
+        const { email, role, salonId } = req.body;
 
         if (role === "Admin") {
             const admin = await findAdminByEmailandRole(email)
-            if (!admin) {
-                return ErrorHandler(ADMIN_NOT_EXIST_ERROR, ERROR_STATUS_CODE_404, res)
-            }
-            else {
-                const defaultSalon = await getDefaultSalonDetailsEmail(admin.salonId)
+
+                const defaultSalon = await getDefaultSalonDetailsEmail(salonId)
 
                 // Find associated barbers using salonId
-                const barbers = await findBarbersBySalonId(admin.salonId);
+                const barbers = await findBarbersBySalonId(salonId);
                 const barberCount = barbers.length;
 
                 // Initialize least queue count tracking
@@ -347,7 +345,7 @@ export const getDefaultSalon = async (req, res, next) => {
                 leastQueueBarbers = barbers.sort((a, b) => a.queueCount - b.queueCount);
 
                 // Find queues associated with the salonId
-                const salonQueues = await getSalonQlist(admin.salonId);
+                const salonQueues = await getSalonQlist(salonId);
 
                 let totalQueueCount = 0;
 
@@ -355,7 +353,7 @@ export const getDefaultSalon = async (req, res, next) => {
 
                 console.log(totalQueueCount)
 
-                const salonRoom = `salon_${admin?.salonId}`;
+                const salonRoom = `salon_${salonId}`;
 
                 io.to(salonRoom).emit("liveDefaultSalonData", {
                     ...defaultSalon.toObject(),
@@ -387,7 +385,6 @@ export const getDefaultSalon = async (req, res, next) => {
                         }))
                     }
                 });
-            }
         }
         else {
             const barber = await findBarberByEmailAndRole(email)
@@ -396,10 +393,10 @@ export const getDefaultSalon = async (req, res, next) => {
 
             }
             else {
-                const defaultSalon = await getDefaultSalonDetailsEmail(barber.salonId)
+                const defaultSalon = await getDefaultSalonDetailsEmail(salonId)
 
                 // Find associated barbers using salonId
-                const barbers = await findBarbersBySalonId(barber.salonId);
+                const barbers = await findBarbersBySalonId(salonId);
                 const barberCount = barbers.length;
 
                 // Initialize least queue count tracking
@@ -417,13 +414,13 @@ export const getDefaultSalon = async (req, res, next) => {
                 leastQueueBarbers = barbers.filter(barber => barber.queueCount === minQueueCount);
 
                 // Find queues associated with the salonId
-                const salonQueues = await getSalonQlist(barber.salonId);
+                const salonQueues = await getSalonQlist(salonId);
 
                 let totalQueueCount = 0;
 
                 totalQueueCount = salonQueues.length;
 
-                const salonRoom = `salon_${barber?.salonId}`;
+                const salonRoom = `salon_${salonId}`;
 
                 io.to(salonRoom).emit("liveDefaultSalonData", {
                     ...defaultSalon.toObject(),
