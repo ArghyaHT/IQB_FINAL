@@ -129,7 +129,9 @@ export const allAppointmentsBySalonId = async (salonId) => {
                 "appointmentList.customerEmail": 1,
                 "appointmentList.customerName": 1,
                 "appointmentList.timeSlots": 1,
-                "appointmentList.barberName": 1
+                "appointmentList.barberName": 1,
+                "appointmentList.barberId": 1
+
                 // Include other fields if needed
             }
         },
@@ -206,7 +208,7 @@ export const allAppointmentsBySalonIdAndDate = async (salonId, appointmentDate) 
                             {
                                 "url": "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg",
                             }
-                        ]                    
+                        ]
                     ]
                 },
                 // Map services to include service icons
@@ -443,14 +445,14 @@ export const allAppointmentsByBarberIdAndDate = async (salonId, barberId) => {
                     _id: 1,
                     background: 1
                 },
-                _id: 0          
-              }
+                _id: 0
+            }
         },
         {
             $sort: {
-              appointmentDate: 1
+                appointmentDate: 1
             }
-          }
+        }
     ]);
 
     return appointments;
@@ -705,7 +707,7 @@ export const allAppointmentsByMultipleBarberIdsAndDate = async (salonId, barberI
         {
             $match: {
                 "appointmentList.barberId": { $in: barberIds },
-                "appointmentList.appointmentDate": { 
+                "appointmentList.appointmentDate": {
                     $gte: new Date(`${appointmentDate}T00:00:00.000Z`),
                     $lt: new Date(`${appointmentDate}T23:59:59.999Z`)
                 }
@@ -842,10 +844,10 @@ export const todayAppointmentsByBarberId = async (salonId, barberId) => {
                     $ifNull: [
                         { $arrayElemAt: ["$customerInfo.profile", 0] },
                         [
-                        {
-                            url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg"
-                        }
-                    ]
+                            {
+                                url: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1720520065/default-avatar-icon-of-social-media-user-vector_wl5pm0.jpg"
+                            }
+                        ]
                     ]
                 },
                 "appointmentList.barberName": { $arrayElemAt: ["$barberInfo.name", 0] } // Extract barber name

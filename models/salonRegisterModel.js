@@ -32,7 +32,7 @@ const salonsSchema = new mongoose.Schema({
             },
             url: {
                 type: String,
-                default: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1743597098/iqb_borderless_ivi965.jpg",
+                default: "https://res.cloudinary.com/dpynxkjfq/image/upload/v1755153336/512x512_1_axqvso.png",
             }
         }],
         default: [{}]
@@ -41,6 +41,10 @@ const salonsSchema = new mongoose.Schema({
         type: String
     },
     salonDesc: {
+        type: String,
+        default: ""
+    },
+    salonAbout:{
         type: String,
         default: ""
     },

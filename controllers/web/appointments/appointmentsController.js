@@ -502,7 +502,7 @@ export const getEngageBarberTimeSlots = async (req, res, next) => {
 //DESC:GET ALL APPOINTMENTS BY SALON ID ====================
 export const getAllAppointmentsBySalonId = async (req, res, next) => {
     try {
-        const { salonId } = req.body;
+        const { salonId, barberId } = req.body;
 
         if (!salonId) {
             return ErrorHandler(SALON_NOT_FOUND_ERROR, ERROR_STATUS_CODE, res)
@@ -518,7 +518,12 @@ export const getAllAppointmentsBySalonId = async (req, res, next) => {
             });
         }
 
-        const fetchedAppointments = appointments.map(appointment => appointment.appointmentList)
+        let fetchedAppointments = appointments.map(a => a.appointmentList).flat();
+
+         // Apply optional filtering by barberId
+        if (barberId) {
+            fetchedAppointments = fetchedAppointments.filter(app => app.barberId === barberId);
+        }
 
         io.to(`salon_${salonId}`).emit("appointmentUpdated", fetchedAppointments);
 
