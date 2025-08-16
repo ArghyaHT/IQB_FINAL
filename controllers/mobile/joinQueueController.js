@@ -904,6 +904,14 @@ export const cancelQueueByCustomer = async (req, res, next) => {
                 foundUser.cancellationCount += 1;
 
                 foundUser.save();
+
+                const response = {
+                    salonId: salonId,
+                    email: canceledQueue.customerEmail,
+                    isJoinedQueue: false,
+                };
+
+                io.to(`salon_${customer.salonId}_customer_${canceledQueue.customerEmail}`).emit("queueButtonToggle", response);
             }
         }
         else {
@@ -919,6 +927,14 @@ export const cancelQueueByCustomer = async (req, res, next) => {
                     foundUser.cancellationCount += 1;
 
                     foundUser.save();
+
+                    const response = {
+                        salonId: salonId,
+                        email: canceledQueue.customerEmail,
+                        isJoinedQueue: false,
+                    };
+
+                    io.to(`salon_${customer.salonId}_customer_${canceledQueue.customerEmail}`).emit("queueButtonToggle", response);
                 }
             }
         }
@@ -1015,19 +1031,19 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", { queueList: sortedQlist });
 
-        const customer = await findCustomerByEmail(canceledQueue.customerEmail)
+        // const customer = await findCustomerByEmail(canceledQueue.customerEmail)
 
-        if(customer){
+        // if(customer){
 
-        const response = {
-            salonId: salonId,
-            email: canceledQueue.customerEmail,
-            isJoinedQueue: customer.isJoinedQueue || false,
-        };
+        // const response = {
+        //     salonId: salonId,
+        //     email: canceledQueue.customerEmail,
+        //     isJoinedQueue: customer.isJoinedQueue || false,
+        // };
 
-        io.to(`salon_${customer.salonId}_customer_${customerEmail}`).emit("queueButtonToggle", response);
+        // io.to(`salon_${customer.salonId}_customer_${customerEmail}`).emit("queueButtonToggle", response);
 
-        }
+        // }
 
         const customers = await findCustomersToMail(salonId, barberId)
 
