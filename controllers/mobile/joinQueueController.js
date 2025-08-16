@@ -1037,6 +1037,8 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
 
+        console.log(sortedQlist)
+
 
         await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", { queueList: sortedQlist });
 
