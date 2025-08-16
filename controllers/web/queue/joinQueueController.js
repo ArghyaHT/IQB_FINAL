@@ -158,6 +158,14 @@ export const barberServedQueue = async (req, res, next) => {
                                 if (customer) {
                                     customer.isJoinedQueue = false;
                                     await customer.save();
+
+                                    const response = {
+                                        salonId: customer.salonId,
+                                        email: customer.email,
+                                        isJoinedQueue: false,
+                                    };
+
+                                    io.to(`salon_${customer.salonId}_customer_${customer.email}`).emit("queueButtonToggle", response);
                                 }
                             }
                         } else {
@@ -165,6 +173,14 @@ export const barberServedQueue = async (req, res, next) => {
                             if (customer) {
                                 customer.isJoinedQueue = false;
                                 await customer.save();
+
+                                const response = {
+                                    salonId: customer.salonId,
+                                    email: customer.email,
+                                    isJoinedQueue: false,
+                                };
+
+                                io.to(`salon_${customer.salonId}_customer_${customer.email}`).emit("queueButtonToggle", response);
                             }
                         }
 
@@ -262,18 +278,6 @@ export const barberServedQueue = async (req, res, next) => {
                         } catch (error) {
                             console.error('Error sending email to the served customer:', error);
                             // Handle error if email sending fails
-                        }
-
-                        const customer = await findCustomerByEmail(element.customerEmail)
-
-                        if (customer) {
-                            const response = {
-                                salonId: customer.salonId,
-                                email: customer.email,
-                                isJoinedQueue: customer.isJoinedQueue || false,
-                            };
-
-                            io.to(`salon_${salonId}_customer_${element.customerEmail}`).emit("queueButtonToggle", response);
                         }
 
                     } else if (
@@ -589,6 +593,14 @@ export const barberServedQueue = async (req, res, next) => {
                                 if (customer) {
                                     customer.isJoinedQueue = false;
                                     await customer.save();
+
+                                    const response = {
+                                        salonId: customer.salonId,
+                                        email: customer.email,
+                                        isJoinedQueue: false,
+                                    };
+
+                                    io.to(`salon_${customer.salonId}_customer_${customer.email}`).emit("queueButtonToggle", response);
                                 }
                             }
                         } else {
@@ -596,6 +608,14 @@ export const barberServedQueue = async (req, res, next) => {
                             if (customer) {
                                 customer.isJoinedQueue = false;
                                 await customer.save();
+
+                                const response = {
+                                    salonId: customer.salonId,
+                                    email: customer.email,
+                                    isJoinedQueue: false,
+                                };
+
+                                io.to(`salon_${customer.salonId}_customer_${customer.email}`).emit("queueButtonToggle", response);
                             }
                         }
 
@@ -695,20 +715,6 @@ export const barberServedQueue = async (req, res, next) => {
                             console.error('Error sending email to the served customer:', error);
                             // Handle error if email sending fails
                         }
-
-                        const customer = await findCustomerByEmail(element.customerEmail)
-
-                        if (customer) {
-                            const response = {
-                                salonId: customer.salonId,
-                                email: customer.email,
-                                isJoinedQueue: customer.isJoinedQueue || false,
-                            };
-
-                            io.to(`salon_${salonId}_customer_${element.customerEmail}`).emit("queueButtonToggle", response);
-                        }
-
-
 
                     } else if (
                         element.barberId === barberId &&
@@ -1064,6 +1070,14 @@ export const cancelQueue = async (req, res, next) => {
             if (customer) {
                 customer.isJoinedQueue = false;
                 await customer.save();
+
+                const response = {
+                    salonId: salonId,
+                    email: canceledQueue.customerEmail,
+                    isJoinedQueue: false,
+                };
+
+                io.to(`salon_${customer.salonId}_customer_${canceledQueue.customerEmail}`).emit("queueButtonToggle", response);
             }
         }
         else {
@@ -1075,6 +1089,15 @@ export const cancelQueue = async (req, res, next) => {
                 if (customer) {
                     customer.isJoinedQueue = false;
                     await customer.save();
+
+
+                    const response = {
+                        salonId: salonId,
+                        email: canceledQueue.customerEmail,
+                        isJoinedQueue: false,
+                    };
+
+                    io.to(`salon_${customer.salonId}_customer_${canceledQueue.customerEmail}`).emit("queueButtonToggle", response);
                 }
             }
         }
