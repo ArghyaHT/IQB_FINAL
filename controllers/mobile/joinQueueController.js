@@ -484,7 +484,7 @@ export const singleJoinQueue = async (req, res, next) => {
 
         salonQueueList.sort((a, b) => a.qPosition - b.qPosition);
 
-        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", { response: salonQueueList });
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", { queueList: salonQueueList });
 
 
         const enrichedQueueList = await getSalonQlist(salonId);
@@ -682,7 +682,7 @@ export const groupJoinQueue = async (req, res, next) => {
 
             salonQueueList.sort((a, b) => a.qPosition - b.qPosition);
 
-            await io.to(`barber_${salonId}_${member.barberId}`).emit("barberQueueUpdated", { response: salonQueueList });
+            await io.to(`barber_${salonId}_${member.barberId}`).emit("barberQueueUpdated", { queueList: salonQueueList });
 
 
             const customer = await findCustomerByEmail(member.customerEmail);
@@ -1037,29 +1037,8 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
 
-        const approvedBarber = await getBarberByBarberId(barberId);
 
-        // await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", {
-        //     salonId,
-        //     barberId,
-        //     queueList: sortedQlist,
-        //     barberName: approvedBarber.name,
-        // });
-
-        // const enrichedQueueList = await getSalonQlist(salonId);
-
-        // if (enrichedQueueList.length > 0 &&  Array.isArray(enrichedQueueList[0].queueList)) {
-        //     const queueList = enrichedQueueList[0].queueList || [];
-
-        //     if (queueList.length > 1) {
-        //         queueList.sort((a, b) => a.qPosition - b.qPosition);
-        //     }
-
-        //     io.to(`salon_${salonId}`).emit("queueUpdated", queueList);
-        //     console.log(`Socket emitted to salon_${salonId}`, queueList);
-        // }
-
-        // await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", { queueList: sortedQlist });
 
 
         const customers = await findCustomersToMail(salonId, barberId)

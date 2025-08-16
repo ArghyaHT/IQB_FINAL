@@ -1585,7 +1585,7 @@ export const joinQueueKiosk = async (req, res, next) => {
         //     barberName: approvedBarber.name,
         // });
 
-        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", { queueList: sortedQlist });
 
 
 
@@ -3468,7 +3468,7 @@ export const barberServedQueueTvApp = async (req, res, next) => {
                     //     barberName: approvedBarber.name,
                     // });
 
-                    await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+                    await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", { queueList: sortedQlist });
 
                     const salonInfoForDashboard = await getSalonBySalonId(salonId)
 
@@ -3831,7 +3831,7 @@ export const cancelQueueTvApp = async (req, res, next) => {
         //     barberName: approvedBarber.name,
         // });
 
-        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", { queueList: sortedQlist });
 
 
         const salonInfoForDashboard = await getSalonBySalonId(salonId)

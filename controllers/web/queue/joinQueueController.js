@@ -1378,13 +1378,14 @@ export const getQlistbyBarberId = async (req, res, next) => {
         //     // barberName: approvedBarber.name,
         // });
 
-        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", { queueList: sortedQlist });
-
         if (approvedBarber.isApproved === false) {
 
             return ErrorHandler(QUEUELIST_BARBER_ERROR, ERROR_STATUS_CODE, res,)
 
         }
+
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", { queueList: sortedQlist });
+
 
         return SuccessHandler(QUEUELIST_EMPTY_FOR_BARBER_SUCCESS, SUCCESS_STATUS_CODE, res, { queueList: sortedQlist })
 
