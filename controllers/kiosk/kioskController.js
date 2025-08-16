@@ -330,61 +330,61 @@ export const getDefaultSalon = async (req, res, next) => {
         if (role === "Admin") {
             const admin = await findAdminByEmailandRole(email)
 
-                const defaultSalon = await getDefaultSalonDetailsEmail(salonId)
+            const defaultSalon = await getDefaultSalonDetailsEmail(salonId)
 
-                // Find associated barbers using salonId
-                const barbers = await findBarbersBySalonId(salonId);
-                const barberCount = barbers.length;
+            // Find associated barbers using salonId
+            const barbers = await findBarbersBySalonId(salonId);
+            const barberCount = barbers.length;
 
-                // Initialize least queue count tracking
-                let minQueueCount = Infinity;
-                let leastQueueBarbers = [];
+            // Initialize least queue count tracking
+            let minQueueCount = Infinity;
+            let leastQueueBarbers = [];
 
 
 
-                leastQueueBarbers = barbers.sort((a, b) => a.queueCount - b.queueCount);
+            leastQueueBarbers = barbers.sort((a, b) => a.queueCount - b.queueCount);
 
-                // Find queues associated with the salonId
-                const salonQueues = await getSalonQlist(salonId);
+            // Find queues associated with the salonId
+            const salonQueues = await getSalonQlist(salonId);
 
-                let totalQueueCount = 0;
+            let totalQueueCount = 0;
 
-                totalQueueCount = salonQueues.length
+            totalQueueCount = salonQueues.length
 
-                console.log(totalQueueCount)
+            console.log(totalQueueCount)
 
-                const salonRoom = `salon_${salonId}`;
+            const salonRoom = `salon_${salonId}`;
 
-                io.to(salonRoom).emit("liveDefaultSalonData", {
-                    ...defaultSalon.toObject(),
-                    barbersOnDuty: barberCount,
-                    totalQueueCount: totalQueueCount,
-                    leastQueueBarbers: leastQueueBarbers.map(barber => ({
+            io.to(salonRoom).emit("liveDefaultSalonData", {
+                ...defaultSalon.toObject(),
+                barbersOnDuty: barberCount,
+                totalQueueCount: totalQueueCount,
+                leastQueueBarbers: leastQueueBarbers.map(barber => ({
+                    barberId: barber._id,
+                    name: barber.name,
+                    profile: barber.profile,
+                    queueCount: barber.queueCount,
+                    barberEWT: barber.barberEWT,
+                }))
+            });
+
+
+
+            return SuccessHandler(DEFAULT_SALON_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, {
+                response: {
+                    ...defaultSalon.toObject(),  // Spread existing defaultSalon properties
+                    barbersOnDuty: barberCount,    // Add barbers on duty count inside defaultSalon
+                    totalQueueCount: totalQueueCount,  // Add total queue count inside defaultSalon
+                    // leastQueueCount: minQueueCountAsInteger   // Add least queue count inside defaultSalon
+                    leastQueueBarbers: leastQueueBarbers.map(barber => ({  // Add least queue barbers
                         barberId: barber._id,
                         name: barber.name,
                         profile: barber.profile,
                         queueCount: barber.queueCount,
-                        barberEWT: barber.barberEWT,
+                        barberEWT: barber.barberEWT
                     }))
-                });
-
-
-
-                return SuccessHandler(DEFAULT_SALON_RETRIEVED_SUCESS, SUCCESS_STATUS_CODE, res, {
-                    response: {
-                        ...defaultSalon.toObject(),  // Spread existing defaultSalon properties
-                        barbersOnDuty: barberCount,    // Add barbers on duty count inside defaultSalon
-                        totalQueueCount: totalQueueCount,  // Add total queue count inside defaultSalon
-                        // leastQueueCount: minQueueCountAsInteger   // Add least queue count inside defaultSalon
-                        leastQueueBarbers: leastQueueBarbers.map(barber => ({  // Add least queue barbers
-                            barberId: barber._id,
-                            name: barber.name,
-                            profile: barber.profile,
-                            queueCount: barber.queueCount,
-                            barberEWT: barber.barberEWT
-                        }))
-                    }
-                });
+                }
+            });
         }
         else {
             const barber = await findBarberByEmailAndRole(email)
@@ -502,54 +502,54 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
                 MOBILE_BOOKING_OFFLINE_SUCCESS,
             })
 
-                    const salonInfoForDashboard = await getSalonBySalonId(salonId)
+            const salonInfoForDashboard = await getSalonBySalonId(salonId)
 
-                    // Find associated barbers using salonId
-                    const barbersForDashboard = await findBarbersBySalonIdforCustomerDashboard(salonId);
-                    const barberCountForDashboard = barbersForDashboard.length;
+            // Find associated barbers using salonId
+            const barbersForDashboard = await findBarbersBySalonIdforCustomerDashboard(salonId);
+            const barberCountForDashboard = barbersForDashboard.length;
 
-                    let barberWithLeastQueues = null;
-                    let minQueueCountForDashboard = Infinity; // Initialize to Infinity
-                    let minQueueCountAsInteger;
+            let barberWithLeastQueues = null;
+            let minQueueCountForDashboard = Infinity; // Initialize to Infinity
+            let minQueueCountAsInteger;
 
-                    barbersForDashboard.forEach(barber => {
-                        if (barber.queueCount < minQueueCount) {
-                            minQueueCount = barber.queueCount;
-                            barberWithLeastQueues = barber._id;
-                        }
-                    });
+            barbersForDashboard.forEach(barber => {
+                if (barber.queueCount < minQueueCount) {
+                    minQueueCount = barber.queueCount;
+                    barberWithLeastQueues = barber._id;
+                }
+            });
 
 
-                    // Check if minQueueCount is still Infinity (meaning no barber found)
-                    if (minQueueCountForDashboard === Infinity) {
-                        minQueueCountAsInteger = 0; // or any default value you want
-                    } else {
-                        minQueueCountAsInteger = Math.floor(minQueueCount);
-                    }
+            // Check if minQueueCount is still Infinity (meaning no barber found)
+            if (minQueueCountForDashboard === Infinity) {
+                minQueueCountAsInteger = 0; // or any default value you want
+            } else {
+                minQueueCountAsInteger = Math.floor(minQueueCount);
+            }
 
-                    // Find queues associated with the salonId
-                    const salonQueuesForDashboard = await getSalonQlist(salonId);
+            // Find queues associated with the salonId
+            const salonQueuesForDashboard = await getSalonQlist(salonId);
 
-                    let totalQueueCountForDashboard = 0;
+            let totalQueueCountForDashboard = 0;
 
-                    totalQueueCountForDashboard = salonQueuesForDashboard.length
+            totalQueueCountForDashboard = salonQueuesForDashboard.length
 
-                    // // Calculate total queue count for the salon
-                    // salonQueuesForDashboard.forEach(queue => {
-                    //     if (Array.isArray(queue.queueList)) {
-                    //         totalQueueCountForDashboard += queue.queueList.length;
-                    //     }
-                    // });
+            // // Calculate total queue count for the salon
+            // salonQueuesForDashboard.forEach(queue => {
+            //     if (Array.isArray(queue.queueList)) {
+            //         totalQueueCountForDashboard += queue.queueList.length;
+            //     }
+            // });
 
-                    io.to(`salon_${salonId}`).emit("liveSalonData", {
-                        response: {
-                            salonInfo: salonInfoForDashboard,
-                            barbers: barbersForDashboard,
-                            barberOnDuty: barberCountForDashboard,
-                            totalQueueCount: totalQueueCountForDashboard,
-                            leastQueueCount: minQueueCountAsInteger
-                        }
-                    });
+            io.to(`salon_${salonId}`).emit("liveSalonData", {
+                response: {
+                    salonInfo: salonInfoForDashboard,
+                    barbers: barbersForDashboard,
+                    barberOnDuty: barberCountForDashboard,
+                    totalQueueCount: totalQueueCountForDashboard,
+                    leastQueueCount: minQueueCountAsInteger
+                }
+            });
 
             return SuccessHandler(SALON_ONLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
         }
@@ -593,52 +593,52 @@ export const changeSalonOnlineStatus = async (req, res, next) => {
 
             const salonInfoForDashboard = await getSalonBySalonId(salonId)
 
-                    // Find associated barbers using salonId
-                    const barbersForDashboard = await findBarbersBySalonIdforCustomerDashboard(salonId);
-                    const barberCountForDashboard = barbersForDashboard.length;
+            // Find associated barbers using salonId
+            const barbersForDashboard = await findBarbersBySalonIdforCustomerDashboard(salonId);
+            const barberCountForDashboard = barbersForDashboard.length;
 
-                    let barberWithLeastQueues = null;
-                    let minQueueCountForDashboard = Infinity; // Initialize to Infinity
-                    let minQueueCountAsInteger;
+            let barberWithLeastQueues = null;
+            let minQueueCountForDashboard = Infinity; // Initialize to Infinity
+            let minQueueCountAsInteger;
 
-                    barbersForDashboard.forEach(barber => {
-                        if (barber.queueCount < minQueueCount) {
-                            minQueueCount = barber.queueCount;
-                            barberWithLeastQueues = barber._id;
-                        }
-                    });
+            barbersForDashboard.forEach(barber => {
+                if (barber.queueCount < minQueueCount) {
+                    minQueueCount = barber.queueCount;
+                    barberWithLeastQueues = barber._id;
+                }
+            });
 
 
-                    // Check if minQueueCount is still Infinity (meaning no barber found)
-                    if (minQueueCountForDashboard === Infinity) {
-                        minQueueCountAsInteger = 0; // or any default value you want
-                    } else {
-                        minQueueCountAsInteger = Math.floor(minQueueCount);
-                    }
+            // Check if minQueueCount is still Infinity (meaning no barber found)
+            if (minQueueCountForDashboard === Infinity) {
+                minQueueCountAsInteger = 0; // or any default value you want
+            } else {
+                minQueueCountAsInteger = Math.floor(minQueueCount);
+            }
 
-                    // Find queues associated with the salonId
-                    const salonQueuesForDashboard = await getSalonQlist(salonId);
+            // Find queues associated with the salonId
+            const salonQueuesForDashboard = await getSalonQlist(salonId);
 
-                    let totalQueueCountForDashboard = 0;
+            let totalQueueCountForDashboard = 0;
 
-                    totalQueueCountForDashboard = salonQueuesForDashboard.length
+            totalQueueCountForDashboard = salonQueuesForDashboard.length
 
-                    // // Calculate total queue count for the salon
-                    // salonQueuesForDashboard.forEach(queue => {
-                    //     if (Array.isArray(queue.queueList)) {
-                    //         totalQueueCountForDashboard += queue.queueList.length;
-                    //     }
-                    // });
+            // // Calculate total queue count for the salon
+            // salonQueuesForDashboard.forEach(queue => {
+            //     if (Array.isArray(queue.queueList)) {
+            //         totalQueueCountForDashboard += queue.queueList.length;
+            //     }
+            // });
 
-                    io.to(`salon_${salonId}`).emit("liveSalonData", {
-                        response: {
-                            salonInfo: salonInfoForDashboard,
-                            barbers: barbersForDashboard,
-                            barberOnDuty: barberCountForDashboard,
-                            totalQueueCount: totalQueueCountForDashboard,
-                            leastQueueCount: minQueueCountAsInteger
-                        }
-                    });
+            io.to(`salon_${salonId}`).emit("liveSalonData", {
+                response: {
+                    salonInfo: salonInfoForDashboard,
+                    barbers: barbersForDashboard,
+                    barberOnDuty: barberCountForDashboard,
+                    totalQueueCount: totalQueueCountForDashboard,
+                    leastQueueCount: minQueueCountAsInteger
+                }
+            });
 
             return SuccessHandler(SALON_OFFLINE_SUCCESS, SUCCESS_STATUS_CODE, res, { response: updatedSalon })
         }
@@ -3323,6 +3323,14 @@ export const barberServedQueueTvApp = async (req, res, next) => {
                                 if (customer) {
                                     customer.isJoinedQueue = false;
                                     await customer.save();
+
+                                    const response = {
+                                        salonId: customer.salonId,
+                                        email: customer.email,
+                                        isJoinedQueue: false,
+                                    };
+
+                                    io.to(`salon_${customer.salonId}_customer_${customer.email}`).emit("queueButtonToggle", response);
                                 }
                             }
                         } else {
@@ -3330,6 +3338,14 @@ export const barberServedQueueTvApp = async (req, res, next) => {
                             if (customer) {
                                 customer.isJoinedQueue = false;
                                 await customer.save();
+
+                                const response = {
+                                    salonId: customer.salonId,
+                                    email: customer.email,
+                                    isJoinedQueue: false,
+                                };
+
+                                io.to(`salon_${customer.salonId}_customer_${customer.email}`).emit("queueButtonToggle", response);
                             }
                         }
 
@@ -3802,6 +3818,14 @@ export const cancelQueueTvApp = async (req, res, next) => {
             if (customer) {
                 customer.isJoinedQueue = false;
                 await customer.save();
+
+                const response = {
+                    salonId: salonId,
+                    email: canceledQueue.customerEmail,
+                    isJoinedQueue: false,
+                };
+
+                io.to(`salon_${customer.salonId}_customer_${canceledQueue.customerEmail}`).emit("queueButtonToggle", response);
             }
         }
         else {
@@ -3813,6 +3837,14 @@ export const cancelQueueTvApp = async (req, res, next) => {
                 if (customer) {
                     customer.isJoinedQueue = false;
                     await customer.save();
+
+                    const response = {
+                        salonId: salonId,
+                        email: canceledQueue.customerEmail,
+                        isJoinedQueue: false,
+                    };
+
+                    io.to(`salon_${customer.salonId}_customer_${canceledQueue.customerEmail}`).emit("queueButtonToggle", response);
                 }
             }
         }
