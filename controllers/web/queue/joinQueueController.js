@@ -150,12 +150,12 @@ export const barberServedQueue = async (req, res, next) => {
                         // Update the status to "served" for the served queue in JoinedQueueHistory
                         await updateServed(salonId, element._id);
 
-                        console.log(element)
+                        console.log("single element", element)
 
                         if (element.joinedQType === "Group-Join") {
                             const remainingGroup = queue.queueList.filter(q => q.qgCode === element.qgCode);
 
-                            console.log(remainingGroup)
+                            console.log("remaining group",remainingGroup)
 
                             if (remainingGroup.length === 0) {
                                 const customer = await findCustomerByEmail(element.customerEmail);
@@ -163,7 +163,7 @@ export const barberServedQueue = async (req, res, next) => {
                                     customer.isJoinedQueue = false;
                                     await customer.save();
 
-                                    console.log(customer)
+                                    console.log("customer isjoinedQueuue",customer.isJoinedQueue)
 
 
                                     const response = {
