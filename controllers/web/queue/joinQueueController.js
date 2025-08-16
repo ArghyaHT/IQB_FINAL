@@ -153,11 +153,16 @@ export const barberServedQueue = async (req, res, next) => {
                         if (element.joinedQType === "Group-Join") {
                             const remainingGroup = queue.queueList.filter(q => q.qgCode === element.qgCode);
 
+                            console.log(remainingGroup)
+
                             if (remainingGroup.length === 0) {
                                 const customer = await findCustomerByEmail(element.customerEmail);
                                 if (customer) {
                                     customer.isJoinedQueue = false;
                                     await customer.save();
+
+                                    console.log(customer)
+
 
                                     const response = {
                                         salonId: customer.salonId,
