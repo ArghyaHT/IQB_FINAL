@@ -924,31 +924,6 @@ export const cancelQueueByCustomer = async (req, res, next) => {
         }
 
 
-        // if (enrichedQueueList.length > 0) {
-        //     const queueList = enrichedQueueList[0].queueList || [];
-
-        //     console.log("Queuelist Cancel Data")
-
-        //     // if (queueList.length > 1) {
-        //     //     // Sort only if more than one item
-        //     //     queueList.sort((a, b) => a.qPosition - b.qPosition);
-        //     // }
-
-        //     // Emit only the queueList (sorted or not)
-        //     io.to(`salon_${salonId}`).emit("queueUpdated", queueList);
-        // }
-
-
-        // const customer = await findCustomerByEmail(canceledQueue.customerEmail)
-
-        // const response = {
-        //     salonId: customer.salonId,
-        //     email: customer.email,
-        //     isJoinedQueue: customer.isJoinedQueue || false,
-        // };
-
-        // io.to(`salon_${canceledQueue.salonId}_customer_${canceledQueue.customerEmail}`).emit("queueButtonToggle", response);
-
 
         const updatedBarbers = await getAllSalonBarbersForTV(salonId); // ✅ fetch updated barbers
         io.to(`salon_${salonId}`).emit("barberListUpdated", updatedBarbers);
@@ -1037,10 +1012,20 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         const sortedQlist = qListByBarber.sort((a, b) => a.qPosition - b.qPosition)
 
-        console.log(sortedQlist)
-
 
         await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", { queueList: sortedQlist });
+
+        const customer = await findCustomerByEmail(canceledQueue.customerEmail)
+
+
+        const response = {
+            salonId: salonId,
+            email: canceledQueue.customerEmail,
+            isJoinedQueue: customer.isJoinedQueue || false,
+        };
+
+        io.to(`salon_${customer.salonId}_customer_${customerEmail}`).emit("queueButtonToggle", response);
+
 
 
         const customers = await findCustomersToMail(salonId, barberId)
