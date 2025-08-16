@@ -1017,6 +1017,7 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         const customer = await findCustomerByEmail(canceledQueue.customerEmail)
 
+        if(customer){
 
         const response = {
             salonId: salonId,
@@ -1026,7 +1027,7 @@ export const cancelQueueByCustomer = async (req, res, next) => {
 
         io.to(`salon_${customer.salonId}_customer_${customerEmail}`).emit("queueButtonToggle", response);
 
-
+        }
 
         const customers = await findCustomersToMail(salonId, barberId)
 
