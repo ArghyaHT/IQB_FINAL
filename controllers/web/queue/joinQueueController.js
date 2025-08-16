@@ -763,7 +763,7 @@ export const barberServedQueue = async (req, res, next) => {
                     //     barberName: approvedBarber.name,
                     // });
 
-                    await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+                    await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", { queueList: sortedQlist });
 
 
                     const salonInfo = await getSalonBySalonId(salonId)
@@ -1120,7 +1120,7 @@ export const cancelQueue = async (req, res, next) => {
         //     barberName: approvedBarber.name,
         // });
 
-        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", sortedQlist);
+        await io.to(`barber_${salonId}_${barberId}`).emit("barberQueueUpdated", { queueList: sortedQlist });
 
         const salonInfo = await getSalonBySalonId(salonId)
 
