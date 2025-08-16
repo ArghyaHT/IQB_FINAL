@@ -150,6 +150,8 @@ export const barberServedQueue = async (req, res, next) => {
                         // Update the status to "served" for the served queue in JoinedQueueHistory
                         await updateServed(salonId, element._id);
 
+                        console.log(element)
+
                         if (element.joinedQType === "Group-Join") {
                             const remainingGroup = queue.queueList.filter(q => q.qgCode === element.qgCode);
 
