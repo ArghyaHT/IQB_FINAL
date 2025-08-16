@@ -1,5 +1,5 @@
 import { availableBarberAutoJoin, decreaseBarberEWTWhenQCancel, findBarbersBySalonIdforCustomerDashboard, getBarberByBarberId, getBarbersForQ, getBarbersWithMulServices, updateBarberEWT } from "../../services/mobile/barberService.js";
-import { addGroupJoin, findSalonQueueList, qListByBarberId } from "../../services/mobile/joinQueueService.js";
+import { addGroupJoin, findSalonQueueList } from "../../services/mobile/joinQueueService.js";
 import { allSalonServices, getSalonBySalonId } from "../../services/mobile/salonServices.js";
 import { sendQueuePositionEmail } from "../../utils/emailSender/emailSender.js";
 import moment from "moment";
@@ -7,7 +7,7 @@ import { addCustomerToQueue } from "../../utils/queue/queueUtils.js";
 import { findCustomerByCustomerEmailAndSalonId, findCustomerByEmail } from "../../services/mobile/customerService.js";
 import { addQueueHistoryWhenCanceled, findSalonQueueListHistory, statusCancelQ } from "../../services/mobile/queueHistoryService.js";
 import { validateEmail } from "../../middlewares/validator.js";
-import { findCustomersToMail } from "../../services/web/queue/joinQueueService.js";
+import { findCustomersToMail, qListByBarberId } from "../../services/web/queue/joinQueueService.js";
 import { io } from "../../utils/socket/socket.js";
 import { findBarbersBySalonId, getAllSalonBarbersForTV } from "../../services/kiosk/barber/barberService.js";
 import { RETRIVE_QUEUELIST_SUCCESS } from "../../constants/web/QueueConstants.js";
