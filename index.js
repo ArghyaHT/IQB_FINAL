@@ -116,7 +116,8 @@ const allowedOrigins = [
   "https://iqb-kiosk.netlify.app",
   "https://iqb-final.onrender.com",
   "https://iqb-final.netlify.app",
-  "https://iqb-web-design.netlify.app"
+  "https://iqb-web-design.netlify.app",
+  "https://kiosk.iqbook.io"
 ];
 
 // //Use Multiple Cors

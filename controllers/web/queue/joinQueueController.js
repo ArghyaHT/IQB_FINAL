@@ -1089,7 +1089,7 @@ export const cancelQueue = async (req, res, next) => {
                 if (customer) {
                     customer.isJoinedQueue = false;
                     await customer.save();
-
+                    console.log(customer)
 
                     const response = {
                         salonId: salonId,
